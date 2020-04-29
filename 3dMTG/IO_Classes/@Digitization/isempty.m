@@ -1,0 +1,6 @@
+%Fonction permettant de savoir si le casque est vide
+function bIsEmpty = isempty( oDig )
+    %Vide si Aucune position ou si une seule position nulle
+    bIsEmpty = ( ( numel(oDig.vProbes)==0 ) ...
+                 || (    ( numel(oDig.vProbes)==1 ) ...
+                      && ( isempty(find(oDig(1).vProbes.Coord)) ) ) );

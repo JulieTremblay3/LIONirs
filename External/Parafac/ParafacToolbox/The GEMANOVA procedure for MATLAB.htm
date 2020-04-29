@@ -1,0 +1,972 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0053)http://www.models.kvl.dk/source/gemanova/indexold.asp -->
+<HTML><HEAD><TITLE>The GEMANOVA procedure for MATLAB</TITLE>
+<META http-equiv=Content-Type content="text/html; charset=windows-1252"><LINK 
+href="The GEMANOVA procedure for MATLAB_files/style.css" type=text/css 
+rel=stylesheet>
+<META content="MSHTML 6.00.2719.2200" name=GENERATOR></HEAD>
+<BODY>
+<DIV align=center>
+<CENTER>
+<TABLE 
+style="BORDER-LEFT-COLOR: #111111; BORDER-BOTTOM-COLOR: #111111; BORDER-TOP-COLOR: #111111; BORDER-COLLAPSE: collapse; BORDER-RIGHT-COLOR: #111111" 
+cellSpacing=0 cellPadding=0 width="95%" border=0>
+  <TBODY>
+  <TR>
+    <TD width="95%" height=35>
+      <TABLE 
+      style="BORDER-LEFT-COLOR: #111111; BORDER-BOTTOM-COLOR: #111111; BORDER-TOP-COLOR: #111111; BORDER-COLLAPSE: collapse; BORDER-RIGHT-COLOR: #111111" 
+      cellSpacing=0 cellPadding=2 width="100%" border=0>
+        <TBODY>
+        <TR>
+          <TD width="12%">
+            <P align=center><A href="http://www.kvl.dk/"><IMG height=38 alt=KVL 
+            src="The GEMANOVA procedure for MATLAB_files/kvl-logo.gif" width=130 
+            align=left border=0></A></P></TD>
+          <TD width="88%">
+            <P style="MARGIN-TOP: 3pt; MARGIN-BOTTOM: 6pt" align=right><B><A 
+            class=topmenu href="http://www.models.kvl.dk/"><B>Food 
+            Technology</B></A><BR><A class=topmenu 
+            href="http://www.mli.kvl.dk/">Department of Dairy and Food 
+            Science</A></B></P></TD></TR>
+        <TR>
+          <TD class=red width="100%" bgColor=#800000 colSpan=2 height=20>
+            <TABLE 
+            style="BORDER-LEFT-COLOR: #111111; BORDER-BOTTOM-COLOR: #111111; BORDER-TOP-COLOR: #111111; BORDER-COLLAPSE: collapse; BORDER-RIGHT-COLOR: #111111" 
+            cellSpacing=0 cellPadding=0 width="100%" border=0>
+              <TBODY>
+              <TR>
+                <TD class=red>Latest news: <B>Industrial Chemometrics 
+                  </B>meeting... <A class=topmenu 
+                  href="http://www.models.kvl.dk/news/VICIM_IND_CHEMO_GALLERY">the 
+                  gallery</A> </TD>
+                <TD class=red 
+        align=right>&nbsp;</TD></TR></TBODY></TABLE></TD></TR></TBODY></TABLE></TD></TR></TBODY></TABLE></CENTER></DIV>
+<CENTER>
+<TABLE 
+style="BORDER-RIGHT: #111111 1px solid; BORDER-TOP: #111111 1px solid; BORDER-LEFT: #111111 1px solid; BORDER-BOTTOM: #111111 1px solid; BORDER-COLLAPSE: collapse" 
+cellSpacing=0 cellPadding=5 width="95%" border=0>
+  <TBODY>
+  <TR>
+    <TD vAlign=top width="12%">
+      <P style="MARGIN-TOP: 0pt; LINE-HEIGHT: 200%"><B><!-- <font face="Arial" color="#FFFFFF" size="2"> --><A 
+      class=menu href="http://www.models.kvl.dk/">Home</A><BR><!--     <a href="/news/" class="menu">News</a><br> --><A 
+      class=menu href="http://www.models.kvl.dk/staff/">Staff</A><BR><A 
+      class=menu 
+      href="http://www.models.kvl.dk/intranet/index.asp">Intranet</A><BR><A 
+      class=menu href="http://www.models.kvl.dk/research/">Research</A><BR><A 
+      class=menu href="http://www.models.kvl.dk/teaching/">Teaching</A><BR><A 
+      class=menu href="http://www.models.kvl.dk/about/">Address</A></B>
+      <P style="MARGIN-TOP: 8pt; LINE-HEIGHT: 150%"><IMG height=1 alt=spacer 
+      src="The GEMANOVA procedure for MATLAB_files/transp.gif" width=100 
+      border=0></P><BR><BR>
+      <DIV class=searchlogin>Search:</DIV>
+      <FORM style="MARGIN: 0pt" action=http://webtools.kvl.dk/cgi-bin/htsearch 
+      method=post><INPUT type=hidden value=models name=config> <INPUT 
+      style="BORDER-RIGHT: #ffffff 1px solid; BORDER-TOP: #ffffff 1px solid; FONT-SIZE: 80%; BORDER-LEFT: #ffffff 1px solid; WIDTH: 100px; BORDER-BOTTOM: #ffffff 1px solid; FONT-FAMILY: Verdana; BACKGROUND-COLOR: #e2e2e2" 
+      name=words> <INPUT type=hidden value=short name=format> <!-- short | long--><INPUT type=hidden value=score name=sort> <!-- Score | Time | Title | Reverse score | Reverse Time | Reverse Title --><INPUT 
+      type=hidden value=and name=method> <!-- and | or --></FORM><BR>
+      <TABLE 
+      style="BORDER-LEFT-COLOR: #111111; BORDER-BOTTOM-COLOR: #111111; BORDER-TOP-COLOR: #111111; BORDER-COLLAPSE: collapse; BORDER-RIGHT-COLOR: #111111" 
+      cellSpacing=0 cellPadding=0 width=100 border=0>
+        <TBODY>
+        <TR>
+          <TD class=searchlogin width=148>Login: 
+            <FORM style="MARGIN: 0pt" action=/intranet/userlogin_motor.asp? 
+            method=post><INPUT 
+            style="BORDER-RIGHT: #ffffff 1px solid; BORDER-TOP: #ffffff 1px solid; FONT-SIZE: 80%; BORDER-LEFT: #ffffff 1px solid; WIDTH: 100px; BORDER-BOTTOM: #ffffff 1px solid; FONT-FAMILY: Verdana; BACKGROUND-COLOR: #e2e2e2" 
+            size=25 name=EMail><BR><INPUT 
+            style="BORDER-RIGHT: #ffffff 1px solid; BORDER-TOP: #ffffff 1px solid; FONT-SIZE: 80%; BORDER-LEFT: #ffffff 1px solid; WIDTH: 100px; BORDER-BOTTOM: #ffffff 1px solid; FONT-FAMILY: Verdana; BACKGROUND-COLOR: #e2e2e2" 
+            type=password size=25 name=password> 
+            <CENTER><INPUT style="BORDER-RIGHT: black 1px solid; BORDER-TOP: black 1px solid; FONT-SIZE: 80%; MARGIN: 1pt; BORDER-LEFT: black 1px solid; BORDER-BOTTOM: black 1px solid; FONT-FAMILY: Verdana" type=submit value=" Login "> 
+            </CENTER></FORM></TD></TR></TBODY></TABLE></TD>
+    <TD vAlign=top width="84%" bgColor=#e2e2e2>
+      <TABLE cellSpacing=0 cellPadding=0 width="99%" border=0>
+        <TBODY>
+        <TR>
+          <TD width="5%" height=38></TD>
+          <TD width="3%" height=38></TD>
+          <TD vAlign=bottom width="70%" height=38><FONT face=Verdana 
+            size=4><B>GEMANOVA for complicated experimental design</B></FONT> 
+            <P><FONT face=Verdana size=1><I>Based on Bro, R, <A 
+            href="http://www.mli.kvl.dk/staff/foodtech/brothesis.pdf">Ph.D. 
+            thesis</A>, 1998</I></FONT></P>
+            <P>&nbsp;</P></TD></TR>
+        <TR>
+          <TD vAlign=top align=right width="15%" height=623>
+            <UL>
+              <LI>
+              <P align=left><A 
+              href="http://www.models.kvl.dk/source/gemanova/indexold.asp#Backgorund"><FONT 
+              size=1><B>Background</B></FONT></A> </P>
+              <LI>
+              <P align=left><A 
+              href="http://www.models.kvl.dk/source/gemanova/indexold.asp#problem"><FONT 
+              size=1><B>Problem</B></FONT></A> </P>
+              <LI>
+              <P align=left><A 
+              href="http://www.models.kvl.dk/source/gemanova/indexold.asp#data"><FONT 
+              size=1><B>Data</B></FONT></A> </P>
+              <LI>
+              <P align=left><A 
+              href="http://www.models.kvl.dk/source/gemanova/indexold.asp#Results"><FONT 
+              size=1><B>Results</B></FONT></A> </P>
+              <LI>
+              <P align=left><A 
+              href="http://www.models.kvl.dk/source/gemanova/indexold.asp#Reference List"><FONT 
+              size=1><B>References</B></FONT></A> </P></LI></UL></TD>
+          <TD width="3%" height=623></TD>
+          <TD vAlign=top width="70%" height=623>
+            <H2><FONT face=Verdana size=3><B>Back<A 
+            name=Backgorund></A>ground</B></FONT></H2>
+            <P><FONT size=2><SPAN lang=EN-US>The use of multiplicative models 
+            for analysis of variance (ANOVA) is little known.</SPAN> <SPAN 
+            lang=EN-US>However, as the responses of a factorial design with more 
+            than one factor give rise to data that have the structure of an 
+            array it is only natural to suppose that a decomposition model may 
+            in some cases be more appropriate for modeling the data than a 
+            traditional ANOVA model. Already Fisher </SPAN><SPAN 
+            lang=EN-US>[1923]</SPAN><SPAN lang=EN-US> proposed the use of a 
+            PCA-like method for obtaining more interpretable models of 
+            two-factor experiments, and several other authors have later 
+            proposed similar approaches </SPAN><SPAN lang=EN-US>[Gollob 1968, 
+            Hegemann &amp; Johnson 1976, Mandel 1969, Mandel 1971]</SPAN><SPAN 
+            lang=EN-US>. Kettenring </SPAN><SPAN lang=EN-US>[1983]</SPAN><SPAN 
+            lang=EN-US> has suggested the use of three-way PARAFAC for 
+            decomposing three-factor experiments. Here, a general multiplicative 
+            model is suggested partly in line with the above references, 
+            extending them to a higher level of generality. The model described 
+            was first described in Bro </SPAN><SPAN 
+            lang=EN-US>[1997]</SPAN><SPAN lang=EN-US> but also Heiser &amp; 
+            Kroonenberg </SPAN><SPAN lang=EN-US>[1997]</SPAN><SPAN lang=EN-US> 
+            have described a similar method. </SPAN></FONT></P>
+            <P class=MsoNormal><FONT size=2><SPAN lang=EN-US><![if !supportEmptyParas]>It is often stated that 
+            higher-order interactions are hard to interpret in ANOVA, and the 
+            reason is simple. Given a set of experimental data where two factors 
+            are varied on <I>I</I> and <I>J</I> levels respectively, the 
+            responses of one variable can be represented by an <I>I</I> x 
+            <I>J</I> matrix, the <I>ij</I>th element, <I>y</I><SUB>ij</SUB>, 
+            representing the response when the first factor is on the <I>i</I>th 
+            level and the second factor is on the <I>j</I>th level. If no 
+            interaction is present the standard ANOVA model for qualitative 
+            factors </SPAN><SPAN lang=EN-US>[Montgomery 1991]</SPAN><SPAN 
+            lang=EN-US> is</SPAN></FONT></P>
+            <P class=MsoNormal><FONT size=2><I><SPAN 
+            lang=EN-US>y</SPAN></I><SUB><SPAN lang=EN-US>ij</SPAN></SUB><SPAN 
+            lang=EN-US> = <I>&#956;</I> + <I>a</I><SUB>i</SUB> + <I>b</I><SUB>j</SUB> 
+            + <I>e</I><SUB>ij</SUB>.<SPAN 
+            style="mso-tab-count: 3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+            </SPAN>(<SPAN 
+            style="mso-field-code: 'SEQ equation \* ARABIC \r 1'">1</SPAN>)</SPAN></FONT></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2>Here <I>&#956;</I> is 
+            the grand level, <I>a</I><SUB>i</SUB> is the effect of the first 
+            factor at level <I>i</I>, <I>b</I><SUB>j</SUB> the effect of the 
+            second factor at level <I>j </I>and <I>e</I><SUB>ij</SUB> the 
+            residual. This model of the data is a simplification. Instead of 
+            <I>IJ</I> elements in the original data array, only 
+            1+<I>I</I>+<I>J</I> terms of which <I>I</I>+<I>J</I>-1 are 
+            independent has to be understood and interpreted. If 
+            interac&shy;tion between the two factors is present the model 
+            is</FONT></SPAN></P>
+            <P class=MsoNormal><FONT size=2><I><SPAN 
+            lang=EN-US>y</SPAN></I><SUB><SPAN lang=EN-US>ij</SPAN></SUB><SPAN 
+            lang=EN-US> = <I>&#956;</I> + <I>a</I><SUB>i</SUB> + <I>b</I><SUB>j</SUB> 
+            + (<I>ab</I>)<SUB>ij </SUB>+ <I>e</I><SUB>ij</SUB>.<SPAN 
+            style="mso-tab-count: 1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+            </SPAN>(<SPAN 
+            style="mso-field-code: 'SEQ equation \* ARABIC \n'">2</SPAN>)</SPAN></FONT></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2>This model consists 
+            of 1+<I>I</I>+<I>J</I>+<I>IJ</I> para&shy;meters, of which <I>IJ</I> 
+            are inde&shy;pendent. Clearly, no reduction in the complexity of the 
+            representation has been achieved, and therefore the inter&shy;action 
+            is hard to interpret. For third- and higher-order interactions the 
+            problem is even worse.</FONT> </SPAN></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2>Another model is 
+            normally used for experiments with quantitative or continuous 
+            factors. For quantitative factors a linear effect of the factor 
+            settings over all levels is estimated. Mathematically the 
+            corresponding model underlying this approach is</FONT></SPAN></P>
+            <P class=MsoNormal><FONT size=2><I><SPAN 
+            style="mso-ansi-language: DA">y</SPAN></I><SUB><SPAN 
+            style="mso-ansi-language: DA">ij</SPAN></SUB><SPAN 
+            style="mso-ansi-language: DA"> = <I>b</I><SUB>0</SUB> + 
+            <I>b</I><SUB>1</SUB><I>x</I><SUB>1i</SUB> + 
+            <I>b</I><SUB>2</SUB><I>x</I><SUB>2j</SUB> + 
+            <I>b</I><SUB>12</SUB><I>x</I><SUB>1i</SUB><I>x</I><SUB>2j</SUB> + 
+            <I>e</I><SUB>ij</SUB>.<SPAN 
+            style="mso-tab-count: 1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+            </SPAN>(</SPAN><SPAN style="mso-ansi-language: DA">3</SPAN><SPAN 
+            lang=EN-US>)</SPAN></FONT></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2>Here 
+            <I>x</I><SUB>1i</SUB> refer to the value of the first factor at the 
+            <I>i</I>th level etc. These values are fixed as they are determined 
+            by the experimental design, hence only the parameters <I>b</I> have 
+            to be estimated. For the first main effect only the scalar 
+            <I>b</I><SUB>1</SUB> must be estimated and so on.</FONT></SPAN></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2>For models 
+            involving both quantitative and qualitative factors the two models 
+            are easily merged. The qualitative ANOVA model is quite flexible, 
+            and thus quite prone to overfit, especially for interactions. The 
+            quantitative model on the other hand is very restricted in its model 
+            formulation. The drawback of both models is that, even though the 
+            models can theoretically handle interactions of any order and 
+            complexity, data that are mainly generated by interactions can be 
+            difficult to model adequately. The model proposed here can be seen 
+            as a complement of intermediate complexity.</FONT></SPAN></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2>The GEneral 
+            Multiplicative ANOVA (GEMANOVA) model is defined for a two-factor 
+            experiment as</FONT></SPAN></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2><SUB><!--[if gte vml 1]><V:SHAPETYPE id=_x0000_t75 
+            stroked="f" filled="f" path="m@4@5l@4@11@9@11@9@5xe" 
+            o:preferrelative="t" o:spt="75" coordsize="21600,21600"><V:STROKE 
+            joinstyle="miter" /><V:FORMULAS><V:F 
+            eqn="if lineDrawn pixelLineWidth 0" /><V:F eqn="sum @0 1 0" /><V:F 
+            eqn="sum 0 0 @1" /><V:F eqn="prod @2 1 2" /><V:F 
+            eqn="prod @3 21600 pixelWidth" /><V:F 
+            eqn="prod @3 21600 pixelHeight" /><V:F eqn="sum @0 0 1" /><V:F 
+            eqn="prod @6 1 2" /><V:F eqn="prod @7 21600 pixelWidth" /><V:F 
+            eqn="sum @8 21600 0" /><V:F eqn="prod @7 21600 pixelHeight" /><V:F 
+            eqn="sum @10 21600 0" /></V:FORMULAS><V:PATH o:connecttype="rect" 
+            gradientshapeok="t" o:extrusionok="f" /><O:LOCK aspectratio="t" 
+            v:ext="edit" /></V:SHAPETYPE><V:SHAPE id=_x0000_i1041 
+            style="WIDTH: 165pt; HEIGHT: 32.25pt" o:ole="" 
+            type="#_x0000_t75"><V:IMAGEDATA o:title="" 
+            src="gemanova-filer/image001.wmz" /></V:SHAPE><![endif]--><![if !vml]><![endif]></SUB><!--[if gte mso 9]><xml>
+ <o:OLEObject Type="Embed" ProgID="Equation.DSMT4" ShapeID="_x0000_i1041"
+  DrawAspect="Content" ObjectID="_1049735598">
+ </o:OLEObject>
+</xml><![endif]--><SPAN style="mso-tab-count: 1"><IMG height=43 
+            src="The GEMANOVA procedure for MATLAB_files/image002.gif" width=220 
+            border=0>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+            </SPAN>(<SPAN 
+            style="mso-field-code: 'SEQ equation \* ARABIC \n'">4</SPAN>)</FONT></SPAN></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2>For a three-factor 
+            experiment a full model would contain main effects, two-way 
+            interactions as well as three-way interactions. As for the standard 
+            ANOVA model only significant terms should be included in the model. 
+            It may be noted that the model contains the qualitative ANOVA model 
+            as a limiting case. If for example the following ANOVA model is 
+            found for a two-factor experiment</FONT></SPAN></P>
+            <P class=MsoNormal><FONT size=2><I><SPAN lang=DE 
+            style="mso-ansi-language: DE">y</SPAN></I><SUB><SPAN lang=DE 
+            style="mso-ansi-language: DE">ij</SPAN></SUB><SPAN lang=DE 
+            style="mso-ansi-language: DE"> = (<I>ab</I>)<SUB>ij<SPAN 
+            style="mso-tab-count: 4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+            </SPAN></SUB>(</SPAN><!--[if supportFields]><span
+lang=EN-US><span style='mso-element:field-begin'></span></span><span lang=DE
+style='mso-ansi-language:DE'>SEQ equation \* ARABIC \n</span><span lang=EN-US><span
+style='mso-element:field-separator'></span></span><![endif]--><SPAN 
+            lang=DE style="mso-ansi-language: DE">5</SPAN><!--[if supportFields]><span lang=EN-US><span
+style='mso-element:field-end'></span></span><![endif]--><SPAN 
+            lang=DE style="mso-ansi-language: DE">)<O:P></O:P></SPAN></FONT></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2>the exact same 
+            model can be fitted by a full rank bilinear model 
+            as</FONT></SPAN></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2><SUB><IMG height=43 
+            src="The GEMANOVA procedure for MATLAB_files/image004.gif" width=91 
+            border=0><!--[if gte vml 1]><V:SHAPE id=_x0000_i1042 
+            style="WIDTH: 68.25pt; HEIGHT: 32.25pt" o:ole="" type="#_x0000_t75"> 
+            <V:IMAGEDATA o:title="" src="gemanova-filer/image003.wmz" 
+            /></V:SHAPE><![endif]--><![if !vml]><![endif]></SUB><!--[if gte mso 9]><xml>
+ <o:OLEObject Type="Embed" ProgID="Equation.DSMT4" ShapeID="_x0000_i1042"
+  DrawAspect="Content" ObjectID="_1049735599">
+ </o:OLEObject>
+</xml><![endif]--><SPAN 
+            style="mso-tab-count: 4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+            </SPAN>(<SPAN 
+            style="mso-field-code: 'SEQ equation \* ARABIC \n'">6</SPAN>)</FONT></SPAN></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2>where <I>F</I> 
+            equals the rank of the matrix <B>Y</B>, with typical elements 
+            <I>y</I><SUB>ij</SUB>.<I> </I>The GEMANOVA model also contains more 
+            specialized models as the shifted multiplicative model (Cornelius et 
+            al. 1992, van Eeuwijk 1996) and thus theoretically gives a unifying 
+            algorithm for fitting these models. An important distinction between 
+            the GEMANOVA model and other suggested multiplicative models is that 
+            the GEMANOVA model is a least squares model. This cannot in general 
+            be guaranteed for earlier proposed multiplicative ANOVA models as 
+            evidenced in Kruskal (1977b). Any GEMANOVA model can be fitted with 
+            a PARAFAC algorithm with certain elements fixed to ones. This points 
+            to the other significant advanta&shy;ges of the GEMANOVA model. It 
+            generalizes to any number of factors, and due to its close relation 
+            to the PARAFAC model many GEMANOVA models are identified by the 
+            structural model alone.</FONT></SPAN></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2>Consider a 
+            three-factor experiment with response <I>y</I><SUB>ijk</SUB> for 
+            factor one at level <I>x</I><SUB>i</SUB>, factor two at level 
+            <I>x</I><SUB>j</SUB>,<I> </I>and factor three at level 
+            <I>x</I><SUB>k</SUB><I>. </I>A main effect for factor one will be 
+            modeled as</FONT></SPAN></P>
+            <TABLE 
+            style="MARGIN-LEFT: 6pt; BORDER-COLLAPSE: collapse; mso-padding-alt: 0in 6.0pt 0in 6.0pt" 
+            cellSpacing=0 cellPadding=0 border=0>
+              <TBODY>
+              <TR>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: white 0.75pt solid; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: white 0.75pt solid; WIDTH: 70.85pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid" 
+                vAlign=top width=94>
+                  <P class=MsoNormal><I><SPAN lang=EN-US><FONT 
+                  size=2>a</FONT></SPAN></I><SUB><SPAN lang=EN-US><FONT 
+                  size=2>i</FONT></SPAN></SUB></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: white 0.75pt solid; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 104.85pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt" 
+                vAlign=top width=140>
+                  <P class=MsoNormal><SPAN lang=EN-US><FONT 
+                  size=2>ANOVA</FONT></SPAN></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: white 0.75pt solid; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 277.85pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt" 
+                vAlign=top width=370>
+                  <P class=MsoNormal><SPAN lang=EN-US><FONT 
+                  size=2>qualitative</FONT></SPAN></P></TD></TR>
+              <TR>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: white 0.75pt solid; WIDTH: 70.85pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=94>
+                  <P class=MsoNormal><FONT size=2><SPAN lang=EN-US><![if !supportEmptyParas]></SPAN><I><SPAN 
+                  lang=EN-US>bx</SPAN></I><SUB><SPAN 
+                  lang=EN-US>i</SPAN></SUB></FONT></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 104.85pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=140>
+                  <P class=MsoNormal><SPAN lang=EN-US><FONT size=2><![if !supportEmptyParas]>&nbsp;ANOVA</FONT></SPAN></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 277.85pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=370>
+                  <P class=MsoNormal><SPAN lang=EN-US><FONT 
+                  size=2>quantitative</FONT></SPAN></P></TD></TR>
+              <TR>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: white 0.75pt solid; WIDTH: 70.85pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=94>
+                  <P class=MsoNormal><I><SPAN lang=EN-US><FONT 
+                  size=2>a</FONT></SPAN></I><SUB><SPAN lang=EN-US><FONT 
+                  size=2>i</FONT></SPAN></SUB></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 104.85pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=140>
+                  <P class=MsoNormal><SPAN lang=EN-US><FONT 
+                  size=2>GEMANOVA</FONT></SPAN></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 277.85pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=370>
+                  <P class=MsoNormal><FONT size=2><![endif]><SPAN 
+                  lang=EN-US><O:P></O:P></SPAN></FONT></P></TD></TR></TBODY></TABLE>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2><![if !supportEmptyParas]><![if !supportEmptyParas]>&nbsp;&nbsp;A 
+            three-way interaction will be modeled as</FONT></SPAN></P>
+            <TABLE 
+            style="MARGIN-LEFT: 6pt; BORDER-COLLAPSE: collapse; mso-padding-alt: 0in 6.0pt 0in 6.0pt" 
+            cellSpacing=0 cellPadding=0 border=0>
+              <TBODY>
+              <TR>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: white 0.75pt solid; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: white 0.75pt solid; WIDTH: 70.85pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid" 
+                vAlign=top width=94>
+                  <P class=MsoNormal><SPAN lang=EN-US><FONT 
+                  size=2>(<I>abc</I>)<SUB>ijk</SUB></FONT></SPAN></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: white 0.75pt solid; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 104.85pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt" 
+                vAlign=top width=140>
+                  <P class=MsoNormal><SPAN lang=EN-US><FONT 
+                  size=2>ANOVA</FONT></SPAN></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: white 0.75pt solid; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 277.85pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt" 
+                vAlign=top width=370>
+                  <P class=MsoNormal><SPAN lang=EN-US><FONT 
+                  size=2>qualitative</FONT></SPAN></P></TD></TR>
+              <TR>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: white 0.75pt solid; WIDTH: 70.85pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=94>
+                  <P class=MsoNormal><FONT size=2><SPAN lang=EN-US><![if !supportEmptyParas]>&nbsp;</SPAN><I><SPAN 
+                  lang=EN-US>bx</SPAN></I><SUB><SPAN 
+                  lang=EN-US>i</SPAN></SUB><I><SPAN 
+                  lang=EN-US>x</SPAN></I><SUB><SPAN 
+                  lang=EN-US>j</SPAN></SUB><I><SPAN 
+                  lang=EN-US>x</SPAN></I><SUB><SPAN 
+                  lang=EN-US>k</SPAN></SUB></FONT></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 104.85pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=140>
+                  <P class=MsoNormal><SPAN lang=EN-US><FONT size=2><![if !supportEmptyParas]>ANOVA</FONT></SPAN></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 277.85pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=370>
+                  <P class=MsoNormal><SPAN lang=EN-US><FONT size=2><![if !supportEmptyParas]>quantitative</FONT></SPAN></P></TD></TR>
+              <TR>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: white 0.75pt solid; WIDTH: 70.85pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=94>
+                  <P class=MsoNormal><FONT size=2><SPAN lang=EN-US><![if !supportEmptyParas]>&nbsp;</SPAN><I><SPAN 
+                  lang=EN-US>a</SPAN></I><SUB><SPAN 
+                  lang=EN-US>i</SPAN></SUB><I><SPAN 
+                  lang=EN-US>b</SPAN></I><SUB><SPAN 
+                  lang=EN-US>j</SPAN></SUB><I><SPAN 
+                  lang=EN-US>c</SPAN></I><SUB><SPAN 
+                  lang=EN-US>k</SPAN></SUB></FONT></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 104.85pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=140>
+                  <P class=MsoNormal><SPAN lang=EN-US><FONT 
+                  size=2>GEMANOVA</FONT></SPAN></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 277.85pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=370>
+                  <P class=MsoNormal><SPAN lang=EN-US><FONT 
+                  size=2>one-component</FONT></SPAN></P></TD></TR>
+              <TR>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: white 0.75pt solid; WIDTH: 70.85pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=94>
+                  <P class=MsoNormal><SPAN lang=EN-US><FONT size=2><![if !supportEmptyParas]>&nbsp;<SUB><IMG height=43 
+                  src="The GEMANOVA procedure for MATLAB_files/image006.gif" 
+                  width=68 border=0><!--[if gte vml 1]><V:SHAPE id=_x0000_i1043 
+                  style="WIDTH: 51pt; HEIGHT: 32.25pt" o:ole="" 
+                  type="#_x0000_t75"> <V:IMAGEDATA o:title="" 
+                  src="gemanova-filer/image005.wmz" /></V:SHAPE><![endif]--><![if !vml]><![endif]></SUB><!--[if gte mso 9]><xml>
+   <o:OLEObject Type="Embed" ProgID="Equation.DSMT4" ShapeID="_x0000_i1043"
+    DrawAspect="Content" ObjectID="_1049735600">
+   </o:OLEObject>
+  </xml><![endif]--></FONT></SPAN></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 104.85pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=140>
+                  <P class=MsoNormal><FONT size=2><SPAN 
+                  style="mso-ansi-language: DA">GEMANOVA<O:P></O:P></SPAN></FONT></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 277.85pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=370>
+                  <P class=MsoNormal><FONT size=2><I><SPAN 
+                  style="mso-ansi-language: DA">F</SPAN></I><SPAN 
+                  style="mso-ansi-language: DA">-component<O:P></O:P></SPAN></FONT></P></TD></TR></TBODY></TABLE>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2>The GEMANOVA model 
+            obviously has stronger similarity to the qualitative ANOVA model 
+            than the quantitative model being parametrically equivalent for main 
+            effects. However, for interactions, the GEMANOVA model fills a gap 
+            between the very flexible qualitative model B 
+            (<I>abc)</I><SUB>ijk</SUB><I> </I>using a total of <I>IJK</I> 
+            parameters B and the very restricted quantitative model B 
+            <I>bx</I><SUB>i</SUB><I>x</I><SUB>j</SUB><I>x</I><SUB>k</SUB><I> 
+            </I>using one parameter. A one-component three-way GEMANOVA effect 
+            is <I>a</I><SUB>i</SUB><I>b</I><SUB>j</SUB><I>c</I><SUB>k</SUB> 
+            using <I>I+J+K</I> parameters. When used to model experiments with 
+            qualitative factors the possible advantage is similar to the gain in 
+            insight and robustness obtained by using PCA for ex&shy;ploring 
+            two-way data. The qualitative ANOVA interaction terms can often be 
+            expected to overfit as no structure is imposed at all between levels 
+            and factors. For quantitative experiments the GEMANOVA model may 
+            also be advantageous especially if many experiments are performed. 
+            The GEMANOVA model is intrinsically more flexible than the 
+            quantitative ANOVA model, i.e., compare the main effect for both 
+            models. If the variation in response is primarily caused by simple 
+            main effects of quantitative factors the quantitative ANOVA model is 
+            most likely to provide adequate answers, but if several interactions 
+            or cross-products are present, it is quite possible that they can be 
+            better modeled by a multiplicative model.</FONT> </SPAN></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2>How then, to choose 
+            between the different possible modeling strategies? The most 
+            sensible way to start is to use the standard ANOVA model. <I>If</I> 
+            there are indications that the model is mainly governed by 
+            interactions or complicated cross-products or <I>a priori</I> 
+            knowledge suggests a multiplicative model would be more appropriate, 
+            it is possible that the GEMANOVA model can be a fruitful 
+            alternative.</FONT></SPAN></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2>Several 
+            possibilities exist for validating a GEMANOVA model, i.e., 
+            determining the complexity of the model. F-like tests, resampling 
+            techniques like bootstrap&shy;ping and cross-validation, or 
+            technological and methodological insight may be used. The details of 
+            these approaches will not be touched upon here. The only important 
+            point that should be made, is that degrees of freedom are not 
+            available for estimating variances in PARAFAC/GEMANOVA models. To 
+            circumvent this problem approximate estimated degrees of freedom can 
+            be obtained from Monte Carlo studies as described for a similar 
+            problem by Mandel (1969 &amp; 1971).</FONT></SPAN></P>
+            <DIV align=center>
+            <CENTER>
+            <TABLE width="85%" bgColor=#cccccc border=1>
+              <TBODY>
+              <TR>
+                <TD width="100%">
+                  <P class=MsoNormal><B><SPAN lang=EN-US 
+                  style="FONT-SIZE: 14pt">ASPECTS OF 
+                  GEMANOVA<O:P></O:P></SPAN></B></P>
+                  <P class=MsoNormal><FONT size=2><SPAN lang=EN-US><B>Fractional 
+                  factorial designs</B>. Fractional designs correspond to full 
+                  factorial designs with missing elements and are easily handled 
+                  as such.</SPAN></FONT></P>
+                  <P class=MsoNormal><FONT size=2><SPAN lang=EN-US><B>Multiple 
+                  responses</B>. Throughout it has been assumed that there is 
+                  only one response variable, but the model also holds for 
+                  multiple responses. If the responses are not correlated it is 
+                  of course possible to analyze the responses separately, but it 
+                  is likely that the model can be stabilized by decomposing 
+                  several responses simultaneously. This can be 
+                  accomplis&shy;hed by introducing an extra mode called the 
+                  response mode with its <I>m</I>th level being the <I>m</I>th 
+                  response. Appropriate scaling may be necessary for handling 
+                  differences in scale of different responses.</SPAN></FONT></P>
+                  <P class=MsoNormal><FONT size=2><SPAN 
+                  lang=EN-US><B>Heteroscedasticity</B>. If data are 
+                  heteroscedastic this may be dealt with by using scaling or a 
+                  weighted loss 
+            function.</SPAN></FONT></P></TD></TR></TBODY></TABLE></CENTER></DIV>
+            <P class=MsoNormal><SPAN lang=EN-US><![if !supportEmptyParas]><![endif]><O:P></O:P></SPAN></P>
+            <H1><FONT face=Verdana size=4><B>Appli<A name=application></A>cation 
+            of GEMANOVA to enzymatic activity</B></FONT></H1>
+            <H2><FONT face=Verdana size=3><B>Probl<A 
+            name=problem></A>em</B></FONT></H2>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2>A major contributor 
+            to undesirable browning effects in fruit and vegetables is the 
+            enzymatic browning caused by PPO, polyphenol oxidase (Martinez &amp; 
+            Whitaker 1995). Enzymatic browning can henceforth be expressed by 
+            the dioxygen consumption of PPO, as this is directly related to the 
+            activity of PPO. To avoid enzymatic browning of fruits and 
+            vegetables it is important to store them under conditions that 
+            suppress the enzymatic activity.</FONT></SPAN></P>
+            <P class=MsoNormal><FONT size=2><SPAN lang=EN-US><![if !supportEmptyParas]>The activity of PPO was 
+            investigated as a function of different levels of O<SUB>2</SUB>, 
+            CO<SUB>2</SUB>, temperature, pH, and substrate according to a 
+            factorial design. A traditional ANOVA model of the data did not shed 
+            much light on the relation between these factors and the activity, 
+            while a multiplicative model based on GEM&shy;ANOVA/PARAFAC was easy 
+            to interpret. The problem presented here is part of an investigation 
+            conducted by Hanne Heimdal and described in detail in </SPAN><!--[if supportFields]><span lang=EN-US
+style='font-size:11.0pt'><span style='mso-element:field-begin'></span><span
+style="mso-spacerun: yes"> </span>QUOTE &quot;[Bro &amp; Heimdal 1996, Heimdal
+et al. 1997]&quot; <span style='display:none;mso-hide:all'><span
+style='mso-element:field-begin'></span><span style="mso-spacerun: yes"> </span>ADDIN
+REFMAN ÿ\11\05‘\19\01\00\00\00)[Bro &amp; Heimdal 1996, Heimdal et al.
+1997]\00)\00!c:\5Cd3\5Coptimax\5Cwww\5Cchemobro\5Cchemom\03\00\03392\1ABro
+&amp; Heimdal 1996 392 /id\00\1A\00 <span style='mso-element:field-end'></span></span><span
+style='mso-element:field-separator'></span></span><![endif]--><SPAN 
+            lang=EN-US style="FONT-SIZE: 11pt">[Bro &amp; Heimdal 1996, Heimdal 
+            et al. 1997]</SPAN><!--[if supportFields]><span
+lang=EN-US style='font-size:11.0pt'><span style='mso-element:field-end'></span></span><![endif]--><!--[if supportFields]><span
+lang=EN-US style='font-size:11.0pt'><span style='mso-element:field-begin'></span>
+QUOTE &quot;&quot; <span style='display:none;mso-hide:all'><span
+style='mso-element:field-begin'></span><span style="mso-spacerun: yes"> </span>ADDIN
+REFMAN ÿ\11\05‘\19\01\00\00\00\00\01\00\00!c:\5Cd3\5Coptimax\5Cwww\5Cchemobro\5Cchemom\03\00\044693&quot;Heimdal,
+Bro, et al. 1997 4693 /id\00&quot;\00 <span style='mso-element:field-end'></span></span></span><![endif]--><!--[if supportFields]><span
+lang=EN-US style='font-size:11.0pt'><span style='mso-element:field-end'></span></span><![endif]--><SPAN 
+            lang=EN-US style="FONT-SIZE: 11pt">.</SPAN></FONT></P>
+            <P class=MsoNormal 
+            style="LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><FONT 
+            face=Verdana size=3><B>Dat<A name=data></A>a</B></FONT></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2>The PPO used was 
+            obtained from fresh iceberg lettuce and extracted and purified 
+            according to Heimdal et al. (1997). PPO activity was measured in 
+            nanomoles of O<SUB>2</SUB> consumed per second by a polarographic 
+            polyphenol oxidase assay. For five O<SUB>2</SUB> levels, three 
+            CO<SUB>2</SUB> levels, three substrate types, three pH values and 
+            three different temperatures B all varied independently B the 
+            activity of PPO was determined in replicate. The substrates used 
+            were 0.01 M chlorogenic acid (CG), 0.01 M epicatechin (EPI) and an 
+            equimolar mixture of both (MIX), where MIX = 0.005M CG + 0.005M EPI, 
+            hence the substrate concentration is also 0.01 M.</FONT></SPAN></P>
+            <P class=MsoNormal><FONT size=2><I><SPAN lang=EN-US>Table 
+</SPAN></I><!--[if supportFields]><i><span
+lang=EN-US><span style='mso-element:field-begin'></span>SEQ tabeller \* ARABIC
+\r 1<span style='mso-element:field-separator'></span></span></i><![endif]--><I><SPAN 
+            lang=EN-US>1</SPAN></I><!--[if supportFields]><i><span lang=EN-US><span
+style='mso-element:field-end'></span></span></i><![endif]--><I><SPAN 
+            lang=EN-US>. Experimental design for the experiment. 
+            </SPAN></I><SPAN lang=EN-US 
+            style="FONT-SIZE: 14pt"><![endif]><O:P></O:P></SPAN></FONT></P>
+            <TABLE 
+            style="MARGIN-LEFT: 79.65pt; BORDER-COLLAPSE: collapse; mso-padding-alt: 0in 6.0pt 0in 6.0pt" 
+            cellSpacing=0 cellPadding=0 border=0>
+              <TBODY>
+              <TR>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: black 0.85pt solid; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: white 0.75pt solid; WIDTH: 118.3pt; PADDING-TOP: 0in; BORDER-BOTTOM: black 2.55pt double" 
+                vAlign=top width=158>
+                  <P class=MsoNormal 
+                  style="LINE-HEIGHT: 15.6pt; mso-line-height-rule: exactly"><FONT 
+                  size=2><SPAN lang=EN-US style="mso-bidi-font-size: 14.0pt"><![if !supportEmptyParas]>&nbsp;</SPAN><B><SPAN 
+                  lang=EN-US 
+                  style="FONT-SIZE: 11pt; mso-bidi-font-size: 14.0pt">Factor<O:P></O:P></SPAN></B></FONT></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: black 0.85pt solid; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 63.8pt; PADDING-TOP: 0in; BORDER-BOTTOM: black 2.55pt double; mso-border-left-alt: solid white .75pt" 
+                vAlign=top width=85>
+                  <P class=MsoNormal 
+                  style="MARGIN-BOTTOM: 4.8pt; LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><B><SPAN 
+                  lang=EN-US style="mso-bidi-font-size: 14.0pt"><FONT 
+                  size=2>Code<O:P></O:P></FONT></SPAN></B></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: black 0.85pt solid; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 106.3pt; PADDING-TOP: 0in; BORDER-BOTTOM: black 2.55pt double; mso-border-left-alt: solid white .75pt" 
+                vAlign=top width=142>
+                  <P class=MsoNormal 
+                  style="MARGIN-BOTTOM: 4.8pt; LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><B><SPAN 
+                  lang=EN-US style="mso-bidi-font-size: 14.0pt"><FONT 
+                  size=2>Levels<O:P></O:P></FONT></SPAN></B></P></TD></TR>
+              <TR>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: white 0.75pt solid; WIDTH: 118.3pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=158>
+                  <P class=MsoNormal 
+                  style="MARGIN-BOTTOM: 3.8pt; LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><SPAN 
+                  lang=EN-US style="mso-bidi-font-size: 14.0pt"><FONT 
+                  size=2>O<SUB>2</SUB> /%<O:P></O:P></FONT></SPAN></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 63.8pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=85>
+                  <P class=MsoNormal 
+                  style="MARGIN-BOTTOM: 3.8pt; LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><FONT 
+                  size=2><I><SPAN lang=EN-US 
+                  style="mso-bidi-font-size: 14.0pt">O</SPAN></I><SPAN 
+                  lang=EN-US 
+                  style="FONT-SIZE: 11pt; mso-bidi-font-size: 14.0pt"><O:P></O:P></SPAN></FONT></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 106.3pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=142>
+                  <P class=MsoNormal 
+                  style="MARGIN-BOTTOM: 3.8pt; LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><SPAN 
+                  lang=EN-US style="mso-bidi-font-size: 14.0pt"><FONT size=2>0, 
+                  5, 10, 20, 80<O:P></O:P></FONT></SPAN></P></TD></TR>
+              <TR>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: white 0.75pt solid; WIDTH: 118.3pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=158>
+                  <P class=MsoNormal 
+                  style="MARGIN-BOTTOM: 3.8pt; LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><SPAN 
+                  lang=EN-US style="mso-bidi-font-size: 14.0pt"><FONT 
+                  size=2>CO<SUB>2</SUB> /%<O:P></O:P></FONT></SPAN></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 63.8pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=85>
+                  <P class=MsoNormal 
+                  style="MARGIN-BOTTOM: 3.8pt; LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><FONT 
+                  size=2><I><SPAN lang=EN-US 
+                  style="mso-bidi-font-size: 14.0pt">C</SPAN></I><SPAN 
+                  lang=EN-US 
+                  style="FONT-SIZE: 11pt; mso-bidi-font-size: 14.0pt"><O:P></O:P></SPAN></FONT></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 106.3pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=142>
+                  <P class=MsoNormal 
+                  style="MARGIN-BOTTOM: 3.8pt; LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><SPAN 
+                  lang=EN-US style="mso-bidi-font-size: 14.0pt"><FONT size=2>0, 
+                  10, 20<O:P></O:P></FONT></SPAN></P></TD></TR>
+              <TR>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: white 0.75pt solid; WIDTH: 118.3pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=158>
+                  <P class=MsoNormal 
+                  style="MARGIN-BOTTOM: 3.8pt; LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><SPAN 
+                  lang=EN-US style="mso-bidi-font-size: 14.0pt"><FONT 
+                  size=2>Sub&shy;strate<O:P></O:P></FONT></SPAN></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 63.8pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=85>
+                  <P class=MsoNormal 
+                  style="MARGIN-BOTTOM: 3.8pt; LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><FONT 
+                  size=2><I><SPAN lang=EN-US 
+                  style="mso-bidi-font-size: 14.0pt">S</SPAN></I><SPAN 
+                  lang=EN-US 
+                  style="FONT-SIZE: 11pt; mso-bidi-font-size: 14.0pt"><O:P></O:P></SPAN></FONT></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 106.3pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=142>
+                  <P class=MsoNormal 
+                  style="MARGIN-BOTTOM: 3.8pt; LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><SPAN 
+                  lang=EN-US style="mso-bidi-font-size: 14.0pt"><FONT size=2>CG, 
+                  EPI, MIX<O:P></O:P></FONT></SPAN></P></TD></TR>
+              <TR>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: white 0.75pt solid; WIDTH: 118.3pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=158>
+                  <P class=MsoNormal 
+                  style="MARGIN-BOTTOM: 3.8pt; LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><SPAN 
+                  lang=DE 
+                  style="mso-ansi-language: DE; mso-bidi-font-size: 14.0pt"><FONT 
+                  size=2>pH<O:P></O:P></FONT></SPAN></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 63.8pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=85>
+                  <P class=MsoNormal 
+                  style="MARGIN-BOTTOM: 3.8pt; LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><FONT 
+                  size=2><I><SPAN lang=DE 
+                  style="mso-ansi-language: DE; mso-bidi-font-size: 14.0pt">P</SPAN></I><SPAN 
+                  lang=DE 
+                  style="FONT-SIZE: 11pt; mso-ansi-language: DE; mso-bidi-font-size: 14.0pt"><O:P></O:P></SPAN></FONT></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 106.3pt; PADDING-TOP: 0in; BORDER-BOTTOM: white 0.75pt solid; mso-border-left-alt: solid white .75pt; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=142>
+                  <P class=MsoNormal 
+                  style="MARGIN-BOTTOM: 3.8pt; LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><SPAN 
+                  lang=DE 
+                  style="mso-ansi-language: DE; mso-bidi-font-size: 14.0pt"><FONT 
+                  size=2>3.0, 4.5, 6.0<O:P></O:P></FONT></SPAN></P></TD></TR>
+              <TR>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: white 0.75pt solid; WIDTH: 118.3pt; PADDING-TOP: 0in; BORDER-BOTTOM: black 0.85pt solid; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=158>
+                  <P class=MsoNormal 
+                  style="MARGIN-BOTTOM: 3.8pt; LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><FONT 
+                  size=2><SPAN lang=EN-US 
+                  style="mso-bidi-font-size: 14.0pt">Temperature / </SPAN><SPAN 
+                  style="mso-char-type: symbol; mso-symbol-font-family: Symbol">°</SPAN><SPAN 
+                  lang=EN-US 
+                  style="FONT-SIZE: 11pt; mso-bidi-font-size: 14.0pt">C<O:P></O:P></SPAN></FONT></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 63.8pt; PADDING-TOP: 0in; BORDER-BOTTOM: black 0.85pt solid; mso-border-left-alt: solid white .75pt; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=85>
+                  <P class=MsoNormal 
+                  style="MARGIN-BOTTOM: 3.8pt; LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><FONT 
+                  size=2><I><SPAN lang=DE 
+                  style="mso-ansi-language: DE; mso-bidi-font-size: 14.0pt">T</SPAN></I><SPAN 
+                  lang=DE 
+                  style="FONT-SIZE: 11pt; mso-ansi-language: DE; mso-bidi-font-size: 14.0pt"><O:P></O:P></SPAN></FONT></P></TD>
+                <TD 
+                style="BORDER-RIGHT: white 0.75pt solid; PADDING-RIGHT: 6pt; BORDER-TOP: medium none; PADDING-LEFT: 6pt; PADDING-BOTTOM: 0in; BORDER-LEFT: medium none; WIDTH: 106.3pt; PADDING-TOP: 0in; BORDER-BOTTOM: black 0.85pt solid; mso-border-left-alt: solid white .75pt; mso-border-top-alt: solid white .75pt" 
+                vAlign=top width=142>
+                  <P class=MsoNormal 
+                  style="MARGIN-BOTTOM: 3.8pt; LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><SPAN 
+                  lang=EN-US style="mso-bidi-font-size: 14.0pt"><FONT size=2>5, 
+                  20, 30<O:P></O:P></FONT></SPAN></P></TD></TR></TBODY></TABLE>
+            <P class=MsoNormal 
+            style="LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><FONT 
+            size=2><SPAN lang=EN-US><![if !supportEmptyParas]>Building a 
+            calibration model to predict the activity from the experimental 
+            conditions can give important information on how the PPO activity - 
+            and therefore the color formation - is influenced by the different 
+            factors. The different levels of the factors are shown in Table 9. 
+            The number of samples in the replicated full factorial design is 5 x 
+            3 x 3 x 3 x 3 x 2 = 810. The data constitute a full five-factor 
+            factorial design, but in the PARAFAC/GEMANOVA model, the data are 
+            interpreted as a multi-way array of activities, specifically a 
+            five-way array. The five different modes are: O<SUB>2</SUB> 
+            (dimension five), CO<SUB>2</SUB> (dimension three), pH (dimension 
+            three), temperature (dimension three), and substrate type (dimension 
+            three). The <I>ijklm</I>th element of the five-way array contains 
+            the activity at the <I>i</I>th O<SUB>2</SUB> level, the <I>j</I>th 
+            CO<SUB>2</SUB> level, the <I>k</I>th level of pH, the <I>l</I>th 
+            level of temperature, for the <I>m</I>th substrate type. The 
+            five-way array is depicted in below.</SPAN></FONT></P>
+            <P class=MsoNormal 
+            style="LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><SPAN 
+            lang=EN-US><FONT size=2><IMG height=408 
+            src="The GEMANOVA procedure for MATLAB_files/image008.gif" width=538 
+            v:shapes="_x0000_i1033"></FONT></SPAN></P>
+            <P class=MsoNormal 
+            style="LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><FONT 
+            size=2><!--[if supportFields]><span
+lang=EN-CA style='mso-bidi-font-family:Arial;mso-ansi-language:EN-CA'><span
+style='mso-element:field-begin'></span><span style="mso-spacerun:
+yes"> </span>SEQ CHAPTER \h \r 1</span><![endif]--><!--[if supportFields]><span
+lang=EN-CA style='mso-bidi-font-family:Arial;mso-ansi-language:EN-CA'><span
+style='mso-element:field-end'></span></span><![endif]--><I><SPAN 
+            lang=EN-US style="COLOR: black; mso-bidi-font-size: 14.0pt">A 
+            graphical representation of the five-way array of enzymatic 
+            activities.</SPAN></I></FONT></P>
+            <P class=MsoNormal 
+            style="LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><SPAN 
+            class=undundka lang=EN-US 
+            style="TEXT-TRANSFORM: uppercase; FONT-VARIANT: normal"><FONT 
+            size=3><B><A name=Results>Results</A></B></FONT></SPAN><SPAN 
+            lang=EN-US style="FONT-SIZE: 14pt"><O:P></O:P></SPAN></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2>To choose the 
+            model, i.e., the number of components, GEMANOVA models (page 192) 
+            were fitted using half the data as calibration set and half as a 
+            test set. The predictions of activity from each model given by the 
+            loadings <B>O</B>, <B>C</B>, <B>S</B>, <B>P</B> and <B>T</B> were 
+            compared to the test set activities. The number of components, 
+            <I>F</I>, was chosen to minimize the predicted residual sum of 
+            squares, PRESS, calculated as</FONT></SPAN></P>
+            <P class=MsoNormal 
+            style="LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><FONT 
+            size=2><SPAN 
+            lang=EN-US><![if !supportEmptyParas]><![endif]><O:P></O:P></SPAN><SUB><SPAN 
+            lang=EN-US><IMG height=51 
+            src="The GEMANOVA procedure for MATLAB_files/image010.gif" width=271 
+            v:shapes="_x0000_i1026"></SPAN></SUB><SPAN 
+            lang=EN-US><SUB>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+            </SUB><FONT face=Verdana>(<SPAN 
+            style="mso-field-code: 'SEQ equation \* ARABIC \n'">7</SPAN>)</FONT></SPAN></FONT></P>
+            <P class=MsoNormal 
+            style="LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><FONT 
+            size=2><I><SPAN lang=EN-US>act<SUB>ijklm</SUB></SPAN></I><SPAN 
+            lang=EN-US> being the <I>ijklm</I>th element/activity of the 
+            replicate set not used to build the model. One component with no 
+            fixed elements gave the lowest prediction error, which furthermore 
+            was in the neighborhood of the intrinsic error of the reference 
+            value. The resulting GEMANOVA model is thus very simple, namely a 
+            one-component PARAFAC model, which is equivalent to a five-way 
+            multiplicative ANOVA model</SPAN></FONT></P>
+            <P class=MsoNormal><FONT size=2><SPAN 
+            lang=EN-US><I>act</I><SUB>ijklm</SUB> = 
+            <I>o</I><SUB>i</SUB><I>c</I><SUB>j</SUB><I>s</I><SUB>k</SUB><I>p</I><SUB>l</SUB><I>t</I><SUB>m</SUB> 
+            + <I>e</I><SUB>ijklm<SPAN 
+            style="mso-tab-count: 1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+            </SPAN></SUB>(<SPAN 
+            style="mso-field-code: 'SEQ equation \* ARABIC \n'">8</SPAN>)</SPAN></FONT></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2>as compared for 
+            example to a traditional ANOVA model which after pruning of 
+            insignificant terms reads</FONT></SPAN></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT 
+            size=2>log(act<SUB>ijklm</SUB>) =</FONT> </SPAN></P>
+            <P class=MsoNormal><FONT size=2><SPAN lang=EN-US>b<SUB>0</SUB> + 
+            b<SUB>1</SUB>x<SUP>o,i</SUP> + b<SUB>2</SUB>x<SUP>s,k</SUP> + 
+            b<SUB>3</SUB>x<SUP>p,l</SUP> + b<SUB>4</SUB>x<SUP>t,m</SUP> + 
+            b<SUB>5</SUB>(x<SUP>o,i</SUP>)<SUP>2</SUP> + 
+            b<SUB>6</SUB>(x<SUP>p,l</SUP>)<SUP>2</SUP><SPAN lang=EN-US 
+            style="mso-bidi-font-family: Arial">+ 
+            &shy;b<SUB>7</SUB>x<SUP>o,i</SUP></SPAN>x<SUP>p,l</SUP> + 
+            &shy;b<SUB>8</SUB>x<SUP>s,k</SUP>x<SUP>t,m</SUP> + e<SUB>ijklm<SPAN 
+            style="mso-tab-count: 1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+            </SPAN></SUB>(<SPAN 
+            style="mso-field-code: 'SEQ equation \* ARABIC \n'">9</SPAN>)</SPAN></FONT></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2>where 
+            x<SUP>o,i</SUP> means the <I>i</I>th setting of oxygen (scaled 
+            appropriately). The PARAFAC model is given by the five loading 
+            vectors depicted in Figure 37. The loadings are interpreted in the 
+            following way. For given settings of the factors simply read the 
+            corresponding five loading elements on the respective plots and 
+            multiply these five numbers. The product is the estimated PPO 
+            activity.</FONT></SPAN></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2>To determine how to 
+            obtain low PPO activity, hence low enzymatic browning, it is clear 
+            from the figures, that the setting for each factor should be the one 
+            with the lowest accompanying loading. As the model is multiplicative 
+            this will be the setting yielding the lowest enzymatic activity. The 
+            main conclusion derived from the model is therefore that by keeping 
+            temperature, oxygen, and pH as low as technologically possible the 
+            enzymatic browning will be minimized. The effect of CO<SUB>2</SUB> 
+            is small, but ignoring it leads to a model with significantly poorer 
+            predictabi&shy;lity. The consequence of this is elaborated on in 
+            Heimdal et al. (1997).</FONT></SPAN></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2><IMG height=418 
+            src="The GEMANOVA procedure for MATLAB_files/image012.gif" width=543 
+            border=0><!--[if gte vml 1]><V:SHAPE id=_x0000_i1033 
+            style="WIDTH: 407.25pt; HEIGHT: 313.5pt" type="#_x0000_t75" 
+            o:allowoverlap="f"> <V:IMAGEDATA o:title="" 
+            src="gemanova-filer/image011.emz" /></V:SHAPE><![endif]--><![if !vml]><![endif]></FONT></SPAN></P>
+            <P class=MsoNormal><FONT size=2><!--[if supportFields]><span lang=EN-CA style='mso-bidi-font-family:
+Arial;mso-ansi-language:EN-CA'><span style='mso-element:field-begin'></span><span
+style="mso-spacerun: yes"> </span>SEQ CHAPTER \h \r 1</span><![endif]--><!--[if supportFields]><span
+lang=EN-CA style='mso-bidi-font-family:Arial;mso-ansi-language:EN-CA'><span
+style='mso-element:field-end'></span></span><![endif]--><I><SPAN 
+            lang=EN-US style="COLOR: black; mso-bidi-font-size: 14.0pt">Loading 
+            vectors of the one-component/one effect GEMANOVA model of the 
+            enzymatic activity data.</SPAN></I></FONT></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT size=2>The multiplicative 
+            model could also have been obtained by traditional ANOVA by using 
+            the logarithm of activity <I>and </I>modeling all factors as 
+            qualitative variables. However, even though this would give the same 
+            structural model, the loss function would not be the same, and the 
+            corresponding model would be poorer with respect to predicting 
+            activity. Specifically the root mean squared error of predicting one 
+            replicate set from a model built from the other replicate set is 
+            18.0 using this approach whereas it is only 14.3 using 
+            PARAFAC/GEMANOVA. A traditional ANOVA model based on a logarithmic 
+            transform of activity and treating all factors except substrate as 
+            quantitative factors is also possible. Though such a model give 
+            almost as good predictions as the GEMANOVA model, it contains more 
+            effects, and is somewhat more difficult to interpret. To compare the 
+            two different models both models were used to predict the activities 
+            of the test set samples. The resulting predictions are shown in the 
+            plot below.</FONT></SPAN></P>
+            <P class=MsoNormal 
+            style="LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><FONT 
+            size=2><SPAN lang=EN-US><IMG height=242 
+            src="The GEMANOVA procedure for MATLAB_files/image014.gif" width=552 
+            border=0><!--[if gte vml 1]><V:SHAPE id=_x0000_i1036 
+            style="WIDTH: 414pt; HEIGHT: 181.5pt" type="#_x0000_t75" 
+            o:allowoverlap="f"> <V:IMAGEDATA o:title="" 
+            src="gemanova-filer/image013.emz" /></V:SHAPE><![endif]--><![if !vml]><![endif]><O:P></O:P></SPAN></FONT></P>
+            <P class=MsoNormal 
+            style="LINE-HEIGHT: 110%; tab-stops: -42.5pt 0in 19.1pt 37.1pt 55.1pt 73.1pt 1.25in 109.1pt 255.2pt 297.75pt 340.3pt 382.85pt 425.4pt"><FONT 
+            size=2><!--[if supportFields]><span
+lang=EN-CA style='mso-bidi-font-family:Arial;mso-ansi-language:EN-CA'><span
+style='mso-element:field-begin'></span><span style="mso-spacerun:
+yes"> </span>SEQ CHAPTER \h \r 1</span><![endif]--><!--[if supportFields]><span
+lang=EN-CA style='mso-bidi-font-family:Arial;mso-ansi-language:EN-CA'><span
+style='mso-element:field-end'></span></span><![endif]--><I><SPAN 
+            lang=EN-US 
+            style="COLOR: black; mso-bidi-font-size: 14.0pt">Predictions of 
+            independent test set obtained from GEM&shy;ANOVA (left) and ANOVA 
+            (right).<O:P></O:P></SPAN></I></FONT></P>
+            <P class=MsoNormal><SPAN 
+            style="mso-bookmark: RMRefList_thesis"><I><SPAN lang=EN-US 
+            style="COLOR: black; mso-bidi-font-size: 14.0pt"><FONT size=2><![if !supportEmptyParas]><![endif]><O:P></O:P></FONT></SPAN></I></SPAN></P>
+            <P class=MsoNormal><SPAN lang=EN-US><FONT face=Verdana size=3><B><A 
+            name="Reference List">Reference 
+            List</A></B></FONT>&nbsp;<![endif]><O:P></O:P></SPAN></P>
+            <P class=MsoNormal 
+            style="MARGIN: 0in 0in 12pt 63pt; TEXT-INDENT: -63pt; tab-stops: right .25in left 27.0pt"><SPAN 
+            lang=EN-US><SPAN style="mso-tab-count: 1">&nbsp; </SPAN><FONT 
+            size=2>1. Bro R, PARAFAC. Tutorial and applications, <I><SPAN 
+            style="mso-spacerun: yes">&nbsp;</SPAN>Chemom Intell Lab Syst,</I> 
+            1997, <B>38</B>, 149-171.</FONT></SPAN></P>
+            <P class=MsoNormal 
+            style="MARGIN: 0in 0in 12pt 63pt; TEXT-INDENT: -63pt; tab-stops: right .25in left 27.0pt"><SPAN 
+            lang=EN-US><FONT size=2><SPAN style="mso-tab-count: 1">&nbsp; 
+            </SPAN>2. Bro R, Heimdal H, Enzymatic browning of vegetables. 
+            Calibration and analysis of variance by multiway methods, <I>Chemom 
+            Intell Lab Syst,</I> 1996, <B>34</B>, 85-102.</FONT></SPAN></P>
+            <P class=MsoNormal 
+            style="MARGIN: 0in 0in 12pt 63pt; TEXT-INDENT: -63pt; tab-stops: right .25in left 27.0pt"><SPAN 
+            lang=EN-US><FONT size=2><SPAN style="mso-tab-count: 1">&nbsp; 
+            </SPAN>3. Fisher RA, MacKenzie WA, Studies in crop variation. II The 
+            manurial response of different potato variaties, <I>J Agri Sci,</I> 
+            1923, <B>13</B>, 311-320.</FONT></SPAN></P>
+            <P class=MsoNormal 
+            style="MARGIN: 0in 0in 12pt 63pt; TEXT-INDENT: -63pt; tab-stops: right .25in left 27.0pt"><SPAN 
+            lang=EN-US><FONT size=2><SPAN style="mso-tab-count: 1">&nbsp; 
+            </SPAN>4. Gollob HF, A statistical model which combines features of 
+            factor analytic and analysis of variance techniques, 
+            <I>Psychometrika,</I> 1968, <B>33</B>, 73-115.</FONT></SPAN></P>
+            <P class=MsoNormal 
+            style="MARGIN: 0in 0in 12pt 63pt; TEXT-INDENT: -63pt; tab-stops: right .25in left 27.0pt"><SPAN 
+            lang=EN-US><FONT size=2><SPAN style="mso-tab-count: 1">&nbsp; 
+            </SPAN>5. Hegemann V, Johnson DE, On analyzing two-way anova data 
+            with interaction, <I>Technometrics,</I> 1976, <B>18</B>, 
+            273-281.</FONT></SPAN></P>
+            <P class=MsoNormal 
+            style="MARGIN: 0in 0in 12pt 63pt; TEXT-INDENT: -63pt; tab-stops: right .25in left 27.0pt"><SPAN 
+            lang=EN-US><FONT size=2><SPAN style="mso-tab-count: 1">&nbsp; 
+            </SPAN>6. Heimdal H, Bro R, Larsen LM, Poll L, Prediction of 
+            polyphenol oxidase activity in model solutions containing various 
+            combinations of chlorogenic acid, (-)-epicatechin, O2, CO2, 
+            temperature and pH by multiway analysis, <I>J Agric Food Chem,</I> 
+            1997, <B>45</B> , 2399-2406.</FONT></SPAN></P>
+            <P class=MsoNormal 
+            style="MARGIN: 0in 0in 12pt 63pt; TEXT-INDENT: -63pt; tab-stops: right .25in left 27.0pt"><SPAN 
+            lang=EN-US><FONT size=2><SPAN style="mso-tab-count: 1">&nbsp; 
+            </SPAN>7. Heiser WJ, Kroonenberg PM,<SPAN 
+            style="mso-spacerun: yes">&nbsp; </SPAN>Dimensionwise fitting in 
+            PARAFAC-CANDECOMP with missing data and constrained parameters,<SPAN 
+            style="mso-spacerun: yes">&nbsp; </SPAN>1997,</FONT> </SPAN></P>
+            <P class=MsoNormal 
+            style="MARGIN: 0in 0in 12pt 63pt; TEXT-INDENT: -63pt; tab-stops: right .25in left 27.0pt"><SPAN 
+            lang=EN-US><FONT size=2><SPAN style="mso-tab-count: 1">&nbsp; 
+            </SPAN>8. Kettenring JR, A case study in data analysis, 
+            <I>Proceedings of Symposia in Applied Mathematics,</I> 1983, 
+            <B>28</B>, 105-139.</FONT></SPAN></P>
+            <P class=MsoNormal 
+            style="MARGIN: 0in 0in 12pt 63pt; TEXT-INDENT: -63pt; tab-stops: right .25in left 27.0pt"><SPAN 
+            lang=EN-US><FONT size=2><SPAN style="mso-tab-count: 1">&nbsp; 
+            </SPAN>9. Mandel J, The partitioning of interaction in analysis of 
+            variance, <I>Journal of Research of the National Bureau of Standards 
+            B Mathematical Sciences,</I> 1969, <B>73B</B>, 
+            309-328.</FONT></SPAN></P>
+            <P class=MsoNormal 
+            style="MARGIN: 0in 0in 12pt 63pt; TEXT-INDENT: -63pt; tab-stops: right .25in left 27.0pt"><SPAN 
+            lang=EN-US><FONT size=2>10. Mandel J, A new analysis of variance 
+            model for non-additive data, <I>Technometrics,</I> 1971, <B>13</B>, 
+            1-18.</FONT></SPAN></P>
+            <P class=MsoNormal 
+            style="MARGIN: 0in 0in 12pt 63pt; TEXT-INDENT: -63pt; tab-stops: right .25in left 27.0pt"><SPAN 
+            lang=EN-US><FONT size=2>11. Montgomery DC, <I>Design and analysis of 
+            experiments</I>. John Wiley &amp; Sons, New York, 1991,</FONT> 
+            </SPAN></P>&nbsp;</TD></TR></TBODY></TABLE></TD></TR></TBODY></TABLE></CENTER>
+<DIV align=center>
+<CENTER>
+<TABLE 
+style="BORDER-RIGHT: #111111 1px solid; BORDER-TOP: #111111 1px solid; BORDER-LEFT: #111111 1px solid; BORDER-BOTTOM: #111111 1px solid; BORDER-COLLAPSE: collapse" 
+cellSpacing=0 cellPadding=0 width="95%" border=0>
+  <TBODY>
+  <TR>
+    <TD class=webmaster align=right width="100%" bgColor=#000000 
+      height=20>Last edited: Tuesday, August 20, 2002 6:25:21 AM &nbsp;· 
+      &nbsp;<A class=webmaster href="mailto:%20nils@lastein.dk">Webmaster</A> 
+  </TD></TR></TBODY></TABLE></CENTER></DIV></BODY></HTML>

@@ -1,0 +1,117 @@
+BODY {
+	BACKGROUND-IMAGE: url(/webmisc/background3.gif); BACKGROUND-REPEAT: repeat; FONT-FAMILY: Verdana
+}
+H1 {
+	FONT-FAMILY: Verdana
+}
+H2 {
+	FONT-FAMILY: Verdana
+}
+H3 {
+	FONT-FAMILY: Verdana
+}
+P {
+	FONT-FAMILY: Verdana
+}
+BR {
+	FONT-FAMILY: Verdana
+}
+TD {
+	FONT-FAMILY: Verdana
+}
+LI {
+	FONT-FAMILY: Verdana
+}
+A {
+	FONT-FAMILY: Verdana
+}
+H1 {
+	FONT-SIZE: 13pt
+}
+H2 {
+	FONT-SIZE: 11pt
+}
+H3 {
+	FONT-SIZE: 9pt
+}
+P {
+	FONT-SIZE: 8pt
+}
+BR {
+	FONT-SIZE: 8pt
+}
+TD {
+	FONT-SIZE: 8pt
+}
+LI {
+	FONT-SIZE: 8pt
+}
+A {
+	FONT-SIZE: 8pt
+}
+P {
+	LINE-HEIGHT: 1.3
+}
+LI {
+	MARGIN-TOP: 5pt; MARGIN-BOTTOM: 5pt; LINE-HEIGHT: 1.3
+}
+UL {
+	MARGIN-TOP: 2pt; MARGIN-BOTTOM: 2pt
+}
+OL {
+	MARGIN-TOP: 2pt; MARGIN-BOTTOM: 2pt
+}
+A:link {
+	FONT-WEIGHT: 900; COLOR: #404040
+}
+A:hover {
+	COLOR: #c00000
+}
+A:visited {
+	FONT-WEIGHT: 100; COLOR: #808080
+}
+A.menu {
+	FONT-WEIGHT: 800; FONT-SIZE: 110%; COLOR: white; TEXT-DECORATION: none
+}
+A.menu:hover {
+	FONT-WEIGHT: 800; COLOR: white
+}
+A.menu:link {
+	FONT-WEIGHT: 800; COLOR: white
+}
+A.menu:visited {
+	FONT-WEIGHT: 800; FONT-SIZE: 110%; COLOR: white
+}
+.small {
+	FONT-SIZE: 7pt
+}
+.red {
+	FONT-WEIGHT: 400; FONT-SIZE: 9pt; COLOR: #ffffff; FONT-FAMILY: Arial, sans-serif
+}
+.searchlogin {
+	FONT-WEIGHT: 400; FONT-SIZE: 8pt; COLOR: #ffffff; FONT-FAMILY: Arial, sans-serif
+}
+.webmaster {
+	FONT-WEIGHT: 400; BACKGROUND: black; COLOR: white; TEXT-DECORATION: none
+}
+.webmaster:link {
+	FONT-WEIGHT: 400; BACKGROUND: black; COLOR: white; TEXT-DECORATION: none
+}
+.webmaster:visited {
+	FONT-WEIGHT: 400; BACKGROUND: black; COLOR: white; TEXT-DECORATION: none
+}
+.webmaster:hover {
+	FONT-WEIGHT: 400; BACKGROUND: black; COLOR: white; TEXT-DECORATION: none
+}
+A.topmenu {
+	COLOR: white; LINE-HEIGHT: 12pt; TEXT-DECORATION: none
+}
+A.topmenu:link {
+	COLOR: white; LINE-HEIGHT: 12pt; TEXT-DECORATION: none
+}
+A.topmenu:visited {
+	COLOR: white; LINE-HEIGHT: 12pt; TEXT-DECORATION: none
+}
+A.topmenu:hover {
+	COLOR: white; LINE-HEIGHT: 12pt; TEXT-DECORATION: none
+}

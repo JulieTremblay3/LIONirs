@@ -1,0 +1,16 @@
+% __________________________________________________________________________
+% Functional Near Infrared Spectroscopy Toolbox for SPM8
+% Beta Version  0  (NIRSHSJ)  2011-06-01
+% Website : 
+% __________________________________________________________________________
+% Copyright (C) 2010 Ecole Polytechnique 
+% 
+% ==========================================================================
+% Description
+%
+% This toolbox is built from the NIRS10 toolbox developped by LIOM.
+%
+% ==========================================================================
+% This toolbox is available to the scientific 
+% community under the terms of the GNU General Public License.
+%

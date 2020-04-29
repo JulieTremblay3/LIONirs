@@ -1,0 +1,6 @@
+PRocédure pour ajouter des options d'affichage :
+
+Ajouter le bouton 
+IO_DisplayOption : ajouter le nom de l'option
+FAire un .get et .set
+IO_Dlg_DisplayOption : mettre dans le ok la nouvelle option 
