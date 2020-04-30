@@ -2038,13 +2038,15 @@ end
 %%MODULE 9a Artefact extract component from noise event (bad interval)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-m_extractcomponent       = cfg_menu;
+m_extractcomponent       = cfg_entry;
 m_extractcomponent.tag  = 'm_extractcomponent';
 m_extractcomponent.name = 'Extract';
-m_extractcomponent.labels = {'MVTPCA'};%,'MVT PARAFAC and PCA', , 'PARAFAC (MVTPARAFAC)'
-m_extractcomponent.values = {1};%,2
-m_extractcomponent.val  = {1}; 
-m_extractcomponent.help = {'Identify artefact component using PCA decomposition'};
+m_extractcomponent.strtype = 's';
+m_extractcomponent.num     = [1 Inf];
+m_extractcomponent.val     = {'MVTPCA'}; 
+m_extractcomponent.help = {'MVTPCA serves as a label of identification to recognize extracted PCA components in the subtract or in the export function.'};
+
+
 
 
 m_extractcomponentfigure       = cfg_menu;
@@ -2082,11 +2084,11 @@ i_extractnoise_nbPCA.val     = {1};
 i_extractnoise_nbPCA.help    = {'Find number of component to identify as artifact in PCA setting the minimal xx % of explain variance.'};
 
 
-b_extractcomponent_noise        = cfg_branch;
-b_extractcomponent_noise.tag    = 'b_extractcomponent_noise';
-b_extractcomponent_noise.name   = 'Identify PCA for artifact period';
-b_extractcomponent_noise.val    = {NIRSmat,  m_extractcomponent,m_extractcomponentfigure,i_extract_pourcentagech, i_extractnoiseupto_nbPCA, i_extractnoise_nbPCA};
-b_extractcomponent_noise.help   = {''};
+b_extractcomponent_PCA        = cfg_branch;
+b_extractcomponent_PCA.tag    = 'b_extractcomponent_PCA';
+b_extractcomponent_PCA.name   = 'Identify PCA for artifact period';
+b_extractcomponent_PCA.val    = {NIRSmat,  m_extractcomponent,m_extractcomponentfigure,i_extract_pourcentagech, i_extractnoiseupto_nbPCA, i_extractnoise_nbPCA};
+b_extractcomponent_PCA.help   = {'First, identify noisy intervals using artifact detection or a manual revision. This function runs a PCA decomposition (targetPCA) on each bad interval (yellow segment in the DisplayGUI). The decomposition is performed on identified channels during a continuous bad interval. PCA decomposition sort component according to the explained variance. The component(s) explaining the highest variance during the artifactual interval is assumed to be mainly related to the artifact event. They will be stored in the component list with the label MVTPCA. We recommend using the module subtract components that will subtract all the components identified with a specific label.'};
 
 f_extractcomponent_physzone        = cfg_files;
 f_extractcomponent_physzone.name    = 'Enter Regressor zone'; 
@@ -2165,7 +2167,7 @@ i_extractnoise_labelPARAFAC.tag     = 'i_extractnoise_labelPARAFAC';
 i_extractnoise_labelPARAFAC.strtype = 's';
 i_extractnoise_labelPARAFAC.num     = [1 Inf];
 i_extractnoise_labelPARAFAC.val     = {'MVTPARAFAC'}; 
-i_extractnoise_labelPARAFAC.help    = {'Label identification to recognized component in the subtract or extract function.'};
+i_extractnoise_labelPARAFAC.help    = {'MVTPARAFAC serves as a label of identification to recognize extracted PARAFAC components in the subtract or in the export function.'};
 
 i_extractnoise_nbPARAFAC         = cfg_entry;
 i_extractnoise_nbPARAFAC.name    = 'Nb component to try';
@@ -2184,9 +2186,9 @@ b_extractnoise_PARAFAC.help     = {'Find the average of a time period for each c
 c_extractcomponent         = cfg_choice;
 c_extractcomponent.tag     = 'c_extractcomponent';
 c_extractcomponent.name    = 'Option';
-c_extractcomponent.val     = {b_extractcomponent_noise};
+c_extractcomponent.val     = {b_extractcomponent_PCA};
 c_extractcomponent.help    = {''};
-c_extractcomponent.values  = {b_extractcomponent_noise,b_extractnoise_PARAFAC, b_extractcomponent_phys, b_extractcomponent_glm,b_extractcomponent_PARAFAC,b_extractcomponent_AVG };
+c_extractcomponent.values  = {b_extractcomponent_PCA,b_extractnoise_PARAFAC, b_extractcomponent_phys, b_extractcomponent_glm,b_extractcomponent_PARAFAC,b_extractcomponent_AVG };
 
 
 % Executable Branch
@@ -2196,7 +2198,7 @@ E_extractcomponent.tag  = 'E_extractcomponent';
 E_extractcomponent.val  = {c_extractcomponent};
 E_extractcomponent.prog = @nirs_run_E_extractcomponent;
 E_extractcomponent.vout = @nirs_cfg_vout_E_extractcomponent;
-E_extractcomponent.help = {'Identify component potential movement artefact (period and channel in yellow), 2 component and use the most equal on 2 wavelenght decomposition'};
+E_extractcomponent.help = {'Identify data components using several data decompositions methods on target data. The component will be added in a list that could be visualized in the displayGUI (extract), subtract in case of an artifactual component using ‘Subtract component’ or export as a relevant activity for further statistics using ‘Export component’.'};
 
 %make NIRS.mat available as a dependency
 function vout = nirs_cfg_vout_E_extractcomponent(job)
@@ -2230,7 +2232,7 @@ i_substractcomponent_label.help    = {'Identify the label of the component you w
 
 % Executable Branch
 E_substractcomponent   = cfg_exbranch;
-E_substractcomponent.name = 'Substract';
+E_substractcomponent.name = 'Subtract';
 E_substractcomponent.tag  = 'E_substractcomponent';
 E_substractcomponent.val  = {NIRSmat,i_substractcomponent_label,m_substract_and_offsetcorrection};
 E_substractcomponent.prog = @nirs_run_E_substractcomponent;

@@ -1,11 +1,11 @@
 function out = nirs_run_E_extractcomponent(job)
 % Batch detection of the components
-if isfield(job.c_extractcomponent,'b_extractcomponent_noise')
-    NIRSmatlst = job.c_extractcomponent.b_extractcomponent_noise.NIRSmat;    
+if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
+    NIRSmatlst = job.c_extractcomponent.b_extractcomponent_PCA.NIRSmat;    
    
-    i_extract_pourcentagech= job.c_extractcomponent.b_extractcomponent_noise.i_extract_pourcentagech;
-    m_extractcomponentfigure= job.c_extractcomponent.b_extractcomponent_noise.m_extractcomponentfigure;
-    m_extractcomponent= job.c_extractcomponent.b_extractcomponent_noise.m_extractcomponent;
+    i_extract_pourcentagech= job.c_extractcomponent.b_extractcomponent_PCA.i_extract_pourcentagech;
+    m_extractcomponentfigure= job.c_extractcomponent.b_extractcomponent_PCA.m_extractcomponentfigure;
+    m_extractcomponent= job.c_extractcomponent.b_extractcomponent_PCA.m_extractcomponent;
     for filenb=1:size(NIRSmatlst,1) %Loop over all subjects
         %Load NIRS.mat information
         tic
@@ -128,8 +128,8 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_noise')
                             [coeff,score,latent,tsquared,explained] = pca(c);
                            
                                             
-                            iscumlowerthantop = cumsum(explained)<job.c_extractcomponent.b_extractcomponent_noise.i_extractnoiseupto_nbPCA;
-                            ishigherthanmin = explained>job.c_extractcomponent.b_extractcomponent_noise.i_extractnoise_nbPCA;
+                            iscumlowerthantop = cumsum(explained)<job.c_extractcomponent.b_extractcomponent_PCA.i_extractnoiseupto_nbPCA;
+                            ishigherthanmin = explained>job.c_extractcomponent.b_extractcomponent_PCA.i_extractnoise_nbPCA;
                             lstSV = find(iscumlowerthantop&ishigherthanmin)                           
                             labelexplainvar =     sprintf('%02.0fn=%d',sum(explained(lstSV)),numel(lstSV));
                             if isempty(lstSV)
@@ -158,8 +158,8 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_noise')
                                 PARCOMP.ComponentToKeep =1;
                                 lstSV =1;
                                 PARCOMP.Xm = PARCOMP.u(:,lstSV)*PARCOMP.s(lstSV,lstSV)*PARCOMP.v(:,lstSV)';
-                                labelid  = 'MVT';
-                                PARCOMP.label= [labelid,'PCA',labelexplainvar,' ' ,sprintf('%03.0f',size(PARCOMP,2)),' ',fil1];
+                                labelid  =  job.c_extractcomponent.b_extractcomponent_PCA.m_extractcomponent;
+                                PARCOMP.label= [labelid,labelexplainvar,' ' ,sprintf('%03.0f',size(PARCOMP,2)),' ',fil1];
                                 PARCOMP.type = 'PCA';
                                 PARCOMP.topo = s(lstSV,lstSV)*v(:,lstSV)';
                                 newfile = 1;
@@ -179,8 +179,8 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_noise')
                                 PARCOMP(id+1).ComponentToKeep =1;
                                 lstSV =1;
                                 PARCOMP(id+1).Xm = PARCOMP(id+1).u(:,lstSV)*PARCOMP(id+1).s(lstSV,lstSV)*PARCOMP(id+1).v(:,lstSV)';
-                                labelid  = 'MVT';
-                                PARCOMP(id+1).label= [labelid,'PCA',labelexplainvar,' ' , sprintf('%03.0f',size(PARCOMP,2)),' ',fil1];
+                                labelid  = job.c_extractcomponent.b_extractcomponent_PCA.m_extractcomponent;;
+                                PARCOMP(id+1).label= [labelid,labelexplainvar,' ' , sprintf('%03.0f',size(PARCOMP,2)),' ',fil1];
                                 PARCOMP(id+1).type = 'PCA';
                                 PARCOMP(id+1).topo = s(lstSV,lstSV)*v(:,lstSV)';
                               %  plot(PARCOMP(id+1).u(:,lstSV),'r');
@@ -488,7 +488,7 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                                 PARCOMP.FacC = Factors{3};
                                 PARCOMP.ComponentToKeep = ComponentToKeep;
                                 labelid  = job.c_extractcomponent.b_extractnoise_PARAFAC.i_extractnoise_labelPARAFAC;%   'MVTPARAFAC';
-                                PARCOMP.label= [labelid,'PARAFAC' sprintf('%03.0f',size(PARCOMP,2)),' ',fil1];
+                                PARCOMP.label= [labelid, sprintf('%03.0f',size(PARCOMP,2)),' ',fil1];
                                 PARCOMP.type = 'PARAFAC';
                                  B = Factors{2};
                                 PARCOMP.topo =   B(:,ComponentToKeep);
@@ -508,8 +508,8 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                                 PARCOMP(id+1).FacB = Factors{2};
                                 PARCOMP(id+1).FacC = Factors{3};
                                 PARCOMP(id+1).ComponentToKeep = ComponentToKeep;
-                                labelid  = 'MVT';
-                                PARCOMP(id+1).label= [labelid,'PARAFAC' sprintf('%03.0f',size(PARCOMP,2)),' ',fil1];
+                                labelid   = job.c_extractcomponent.b_extractnoise_PARAFAC.i_extractnoise_labelPARAFAC;% 
+                                PARCOMP(id+1).label= [labelid, sprintf('%03.0f',size(PARCOMP,2)),' ',fil1];
                                 PARCOMP(id+1).type = job.c_extractcomponent.b_extractnoise_PARAFAC.i_extractnoise_labelPARAFAC; %'PARAFAC';
                                 B = Factors{2};
                                 PARCOMP(id+1).topo =  B(:,ComponentToKeep);
