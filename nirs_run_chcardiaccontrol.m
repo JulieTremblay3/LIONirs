@@ -7,7 +7,8 @@ function out = nirs_run_chcardiaccontrol(job)
 
 NIRS = [];
 idxls = 1;
-
+SNRfft = 0;
+idxlsSNR = 1;
 for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name 
     load(job.NIRSmat{filenb,1});
     ML_new= [NIRS.Cf.H.C.id(2:3,:)',...
@@ -40,7 +41,6 @@ pourcentagetr = job.i_minch_cardiac/100;
             dat = d1(:,Bloc(1,1):Bloc(1,2));
             [y, f_fft]= fft_EEGseries(dat,fs); 
             yall = zeros(size(y,1),size(y,2),size(Bloc,1));
-            
             removetrial = [];
             for ibloc = 1:size(Bloc,1)
                 dat = d1(:,Bloc(ibloc,1):Bloc(ibloc,2));
@@ -90,8 +90,9 @@ pourcentagetr = job.i_minch_cardiac/100;
             matcorr= nan(size(d1,1)/2,size(d1,1)/2,1);          
             matcorrHbR= nan(size(d1,1)/2,size(d1,1)/2,1);
           [val,id] =max( nanmean(nanmean(log10(power(startF:stopF,:,:)),3),2));
-               plot([f_fft(startF+id-1),f_fft(startF+id-1)],[minval,maxval],'k')
-    ylim([minval, maxval])
+          plot([f_fft(startF+id-1),f_fft(startF+id-1)],[minval,maxval],'k')
+         ylim([minval, maxval])
+
             % Outlier zscore by ch and fr
             for ich = 1:size(power,2)%channel
                 removetrial = zeros(size(power,3),1);
@@ -130,6 +131,47 @@ pourcentagetr = job.i_minch_cardiac/100;
             plot([f_fft(stopF),f_fft(stopF)],[minval,maxval],'k')
             listHBO = 1:size(d1)/2;
             listHBR = (size(d1)/2+1) : size(d1);
+            if SNRfft
+                figure;plot(squeeze(mean(abs(yall),2)));hold on
+                plot(startF:stopF,squeeze(mean(abs(yall(startF:stopF,:,:)),2)),'x')
+            end
+             startFr =sum(f_fft<=freq(1));
+            stopFr  =sum(f_fft<=freq(end));
+            if SNRfft
+           [peakfft,peakindividual] = max(nanmean(power(startFr:stopFr,:,:),3))
+           
+           %idpeak = (startFr + peakindividual)
+           % peakfft = squeeze(nanmean(nanmean(abs(yall(startF:stopF,:,:)),3),1));
+           % peakstd =squeeze(std(nanmean(abs(yall(startF+4:end,:,:)),3),1));
+           % snrpeak = peakfft./peakstd;  
+            
+            % peakfft = squeeze(nanmean(nanmean(power(startF:stopF,:,:),3),1));
+            peakstd =squeeze(std(nanmean(power(startF+3:end,:,:),3),1));
+            snrpeak = peakfft./peakstd;  
+            
+            
+           % figure;plot(nanmean(power(10:end, 2 ,:),3))
+         idbad = find(snrpeak<2.5)
+         idgood = find(snrpeak>2.5)
+        figure;hold on
+        cla
+         for ipeak=1:numel(snrpeak)
+             if snrpeak(ipeak)>2.5
+                plot(f_fft(10:end),nanmean(log10(power(10:end,  ipeak ,:)),3),'displayname',[num2str(ipeak),'SNR',num2str(snrpeak(ipeak))] )
+
+             end
+         end
+         title('SNR > 2.5')
+         figure;hold on
+         for ipeak=1:numel(snrpeak)
+             if snrpeak(ipeak)<2.5
+                 plot(f_fft(10:end),nanmean(log10(power(10:end,  ipeak ,:)),3),'displayname',[num2str(ipeak),'SNR',num2str(snrpeak(ipeak))] )
+
+             end
+         end
+         title('SNR < 2.5')
+            end
+         figure(hfig)
             for i=1:numel(listHBO)
                 if listHBO(i)
                     j = 1; 
@@ -240,13 +282,45 @@ pourcentagetr = job.i_minch_cardiac/100;
                 xlsall{idxls,1} =  sprintf('%s\t%s',strDet,strSrs);  
                 xlsall{idxls,2} = ich;
             end
+            if  SNRfft
+            idbadsnr=find(snrpeak<2.5)
+              xlsallSNR{idxlsSNR,1} =  name;
+           idxlsSNR = idxlsSNR + 1;
+            xlsallSNR{idxlsSNR,1} = ['PEAK cardiac='];
+            xlsallSNR{idxlsSNR,2} = num2str(tablepeak(f,1));
+           chremove=find(snrpeak<2.5)
+              
+            for i=1:numel(chremove)
+                idxlsSNR = idxlsSNR + 1;
+                ich =  chremove(i);
+                switch NIRS.Cf.dev.n  
+                case 'ISS Imagent' 
+                    strDet = SDDet2strboxy_ISS(ML_new( ich,2));
+                    strSrs = SDPairs2strboxy_ISS(ML_new( ich,1));
+                case 'NIRx'                     
+                    strDet = SDDet2strboxy(ML_new( ich,2));
+                    strSrs = SDPairs2strboxy(ML_new( ich,1));                  
+                otherwise
+                
+                    strDet = SDDet2strboxy(ML_new( ich,2));
+                    strSrs = SDPairs2strboxy(ML_new( ich,1));  
+                end
+                xlsallSNR{idxlsSNR,1} =  sprintf('%s\t%s',strDet,strSrs);  
+                xlsallSNR{idxlsSNR,2} = ich;
+            end
+            end
+            
             NIRS.Cf.H.C.ok(:,f)=[measlistok,measlistok];
             [filepath,name,ext] = fileparts(job.NIRSmat{1});
             saveas(hfig,fullfile(filepath,[nametmp 'CardiacCHCOH',num2str(f),'.fig']),'fig');
             saveas(hfig,fullfile(filepath,[nametmp 'CardiacCHCOH',num2str(f),'.jpg']),'jpg');
             close(hfig)
     end
-     xlswrite(fullfile(filepath,['CardiacCHCOH.xls']),xlsall);
+        xlswrite(fullfile(filepath,['CardiacCHCOH.xls']),xlsall);
+     if  SNRfft
+        xlswrite(fullfile(filepath,['CardiacCHSNR.xls']),xlsallSNR);
+     end
+
      disp(['Cardiac report : ', fullfile(filepath,['CardiacCHCOH',num2str(f),'.jpg']), ' and ', fullfile(filepath,['CardiacCHCOH.xls']), ' are created'])
      save(job.NIRSmat{1},'NIRS');
     out.NIRSmat = job.NIRSmat;

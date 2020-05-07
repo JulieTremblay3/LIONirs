@@ -32,7 +32,7 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
             mrks = [];
             ind = [];
             noise =  logical(zeros(size(d)));
-            time  = 1/fs:1/fs:1/fs*size(d,1)
+            time  = 1/fs:1/fs:1/fs*size(d,1);
             [ind_dur_ch] = read_vmrk_find(vmrk_path,mrk_type_arr);
             if ~isempty(ind_dur_ch)
                 maxpoint  = ind_dur_ch(:,1)+ind_dur_ch(:,2);
@@ -117,7 +117,7 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
                         spartmp = spar(:,listgood,:);
                         listgood = find(MeasListActplotLst);
                                          %PCA first component !
-                        if m_extractcomponent ==1 || m_extractcomponent ==3
+                        if 1
                             idwhile = 1;
                             nbPCA= 2; %maximal number of iteration
                             while idwhile==1  %find(std(data(:,listgood,1)./mean(data(:,listgood,1))>0.1))
@@ -130,7 +130,9 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
                                             
                             iscumlowerthantop = cumsum(explained)<job.c_extractcomponent.b_extractcomponent_PCA.i_extractnoiseupto_nbPCA;
                             ishigherthanmin = explained>job.c_extractcomponent.b_extractcomponent_PCA.i_extractnoise_nbPCA;
-                            lstSV = find(iscumlowerthantop&ishigherthanmin)                           
+                            atleastone = zeros(size(explained));
+                            atleastone(1) = 1;
+                            lstSV = find((iscumlowerthantop&ishigherthanmin)|atleastone);                        
                             labelexplainvar =     sprintf('%02.0fn=%d',sum(explained(lstSV)),numel(lstSV));
                             if isempty(lstSV)
                                 break
@@ -267,7 +269,8 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
             vmrk_path = fullfile(dir1,[fil1,'.vmrk']);
             %         handles.file_vmrk = handles.NIRS.Dt.fir.pp(end).p{idfile}; %used
             %         in save noise
-            mrk_type_arr = cellstr('bad_step');
+            mrk_type_arr = cellstr('bad_step'); 
+            0.
             mrks = [];
             ind = [];
             noise =  logical(zeros(size(d)));
@@ -316,7 +319,6 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                 eventbadstartstop = [idstart,idstop] ;
                  
                 for ievent=1:size(eventbadstartstop,1)
-                    
                     %listchannel to find component
                     indt = [eventbadstartstop(ievent,1):eventbadstartstop(ievent,2)];
                     if numel(indt)>1
@@ -396,13 +398,30 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                                             corcondiaall(itry,icom)=corcondia;
                                      end
                                  end
-                                 
-                            %try multiple nc
-
                         [val, idnc]= sort(sum(corcondiaall,1),'descend');
                         % normalisederror to be comparable au concordia
                         errorscale = ( max(errall(:)) - errall)/ max(errall(:))*100;
                         [val, idnc]= sort(sum(errorscale,1)+sum(corcondiaall,1),'descend');
+                                 if m_extractcomponentfigure 
+                                 figure;
+                                 subplot(3,2,1);hold on
+                                 plot(1:numel(corcondiaall),corcondiaall,'color','k')
+                                 plot(idnc(1),corcondiaall(idnc(1)),'x','linewidth',4,'color','r')
+                                 title('Concordia')
+                                 ylabel('Concordia')
+                                 xlabel('Nb components')
+                                 subplot(3,2,2);hold on
+                                 plot(1:numel(corcondiaall),errall,'color','k')
+                                 plot(idnc(1),errall(idnc(1)),'x','linewidth',4,'color','r')
+                                 title('Error')
+                                 ylabel('Error')
+                                 xlabel('Nb components')
+                                 end
+                            %try multiple nc
+
+                
+                       
+                        
                         %evaluate factor for best concordia and smallest
                         %error 
                         for itry=1:size(Factorsall,1)
@@ -411,29 +430,45 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                             B = Factors{2};
                             C = Factors{3};
                             distC(itry,:) = abs( C(1,:) - C(2,:));
-                            sumA(itry,:) = sum(A);
+                            sumA(itry,:) = abs(sum(A));
                         end
                         %Choose among try the smallest time course and the largest sum distance 
                         
-                        rejeterhightimecourse =(mean(abs(sumA(:))))< abs(sumA)';                        
+                        rejeterhightimecourse =(mean(sumA(:)))< sumA';                        
                         rejectwavelengthdistance = mean(abs(distC(:))) > abs(distC)';                        
                         oneortheother = rejeterhightimecourse|rejectwavelengthdistance;
-                        
+                         tcmp= indt*1/fs;
                         clear   rejeterhightimecourse  rejectwavelengthdistance    
                          ComponentToKeep = find(oneortheother(:,end));% 1:(idnc-1)
-                        if  0 %m_extractcomponentfigure                            
-                            figure
-                            subplot(1,2,1);hold on
-                            plot(distC,'x')
-                            title('sum distance between wavelength')
+                        if m_extractcomponentfigure                            
+                            subplot(3,2,3);hold on
+                            plot(distC,'x','color','k')                            
+                            plot(ComponentToKeep,distC(ComponentToKeep),'x','linewidth',4,'color','r')
+                            plot([1,numel(oneortheother)],[mean(abs(distC(:))),mean(abs(distC(:)))] )
+                            title('Distance between wavelength')
                             xlabel('iteration')
-                            ylabel(num2str(ComponentToKeep))
+                          
                             xlim([0 ,size(distC,2)+1])
-                            subplot(1,2,2)
-                            plot(sumA,'x')
-                            title('sum time course ')
+                            subplot(3,2,4);hold on
+                            plot(1:numel(oneortheother),(sumA),'x','color','k')
+                            plot(ComponentToKeep,sumA(ComponentToKeep),'x','linewidth',4,'color','r')
+                            plot([1,numel(oneortheother)],[(mean(sumA(:))),(mean(sumA(:)))] )
+                            title('Abs sum time course ')
                             xlabel('iteration')
                             xlim([0 ,size(distC,2)+1])
+                        end 
+                        if m_extractcomponentfigure
+                             subplot(3,2,5);hold on
+                            plot(C,'color','k')
+                            plot(C(:,ComponentToKeep),'linewidth',4,'color','r')
+                            title('Wavelength')
+                            xlabel('Wavelenth')                    
+                            xlim([0 ,size(distC,2)+1])
+                            subplot(3,2,6);hold on
+                            plot(tcmp,A,'color','k')
+                            plot(tcmp,A(:,ComponentToKeep),'linewidth',4,'color','r')
+                            title(['Time course file', num2str(f)])
+                            xlabel('Time (s)')                            
                         end
                              clear rejeterhightimecourse rejectwavelengthdistance distC sumA
                              end

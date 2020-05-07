@@ -2790,24 +2790,24 @@ I_zonecorrlist.val     = {};
 I_zonecorrlist.filter  = 'zone';
 I_zonecorrlist.ufilter = '.zone';    
 I_zonecorrlist.num     = [1 Inf];     % Number of inputs required 
-I_zonecorrlist.help    = {'File of zone node to be used, all the selected subject should be acquired with the same helmet.'};
+I_zonecorrlist.help    = {'Use a zone structure that identifies channels belonging to a region of interest. This structure could be created and saved in the DisplayGUI.'};
 
 
 I_chcorrlist        = cfg_files; %Select NIRS.mat for this subject 
-I_chcorrlist.name    = 'List of channel node'; % The displayed name
+I_chcorrlist.name    = 'List of channels as nodes:'; % The displayed name
 I_chcorrlist.tag     = 'I_chcorrlist';       %file names
 I_chcorrlist.val     = {};
 I_chcorrlist.filter  = 'txt';
 I_chcorrlist.ufilter = '.txt';    
 I_chcorrlist.num     = [1 Inf];     % Number of inputs required 
-I_chcorrlist.help    = {'List all channel to be use as a node in a text file, one node per line, example: F a1b2; special option if you want to create a list '};
+I_chcorrlist.help    = {'List channels to be used as a node using a text file, one node per line, example: F a1b2; To create automatically this list use the module Utility /Create channel list.'};
 
 b_nodelist         =  cfg_choice; %Select NIRS.mat for this subject 
 b_nodelist.name    = 'Node list'; % The displayed name
 b_nodelist.tag     = 'b_nodelist';       %file names
 b_nodelist.val     = {I_chcorrlist };
 b_nodelist.values  = {I_chcorrlist I_zonecorrlist};  
-b_nodelist.help    = {'Node could be a channel or the average of a zone of channel in the same region.'};
+b_nodelist.help    = {'Nodes could be defined by a region of interest (zones) or each channel. Technical note, to allow subject comparison to ensure channels or zones spatial localization analogous.'};
 
 
 
@@ -2870,9 +2870,7 @@ b_crossspectrum        = cfg_branch;
 b_crossspectrum.tag    = 'b_crossspectrum';
 b_crossspectrum.name   = 'Coherence';
 b_crossspectrum.val    = {i_Freq_crossspectrum,i_ch_crossspectrum,i_TrialLenght_crossspectrum,i_RandomSample_crossspectrum,i_OutlierControl_crossspectrum,m_savefft_crossspectrum};
-b_crossspectrum.help   = {'Perform magnitude square coherence.Cxy(f) = |Gxy(f)|/(Gxx(f)Gyy(f))',...
-                          'Where Gxy is the cross spectrum i.e. the conplex conjugate profuct of the fourier transformed, Gxx and Gyy the autospectrum. Use random trial of a x length in the continuous data used one long bloc you may used concatenate fonction to put one after the other the bloc',...
-                          'to perform this fonction, set the artefact as NAN to avoid using it (nullify bad intervall'};
+b_crossspectrum.help   = {'Coherence is a statistic representing the relationship between two signals and is also an extension of correlation to the frequency domain (Kida, 2016). Coherence is known as magnitude squared coherence is defined as the complex conjugate product of the Fourier transforms data X(f)* Y*T(f). x(t) and y(t) are two time series, Gxy(f) is the cross-spectral density between x and y, and Gxx(f) and Gyy(f) are the auto spectral densities of x and y, respectively. The coherence is implemented to use one long continuous segment of the recording. In case you record multiple sessions you may join them using the concatenate module. A large number of segments (Number of random samples) of duration (Length of the segment) will be picked randomly (circular bootstrap). Any segments that belong to a specific artifact period will be excluded from the coherence calculation. The segment will be randomly segmented to calculate coherence based on many segments. An fft is computed on each random segment and the coherence is measured based on the specified frequency range (The frequency range to obtain Cxy(f)) to obtain a connectivity matrix representative of the whole recording. '};
 
 
 estd_Phase          = cfg_entry; %path
@@ -2983,9 +2981,9 @@ b_waveletcluster.help   = {''};
 I_chcorrlist_type     = cfg_choice;
 I_chcorrlist_type.tag  = 'I_chcorrlist_type';
 I_chcorrlist_type.name = 'Connectivity to use';
-I_chcorrlist_type.val     = {b_Pearson};
+I_chcorrlist_type.val     = {b_crossspectrum};
 I_chcorrlist_type.help    = {''};
-I_chcorrlist_type.values  = {b_Pearson, b_Hilbert,b_Granger,b_Phase,b_crossspectrum,b_waveletcluster};%,b_Hilbert,b_Granger, b_Phase, b_crossspectrum
+I_chcorrlist_type.values  = {b_crossspectrum,b_Pearson, b_Hilbert,b_Granger,b_Phase,b_waveletcluster};%,b_Hilbert,b_Granger, b_Phase, b_crossspectrum
 % 
 % I_chcorrlist_type.labels = {'Pearson', 'Pearson with zscore','Hilbert phase joint probability', 'Granger','Phase ISS','Analyzer Correlation/Autocorrelation'};
 % I_chcorrlist_type.values = {1 2 3 4 5 6};
@@ -3016,7 +3014,7 @@ E_chcorrMat.tag  = 'E_chcorrMat';
 E_chcorrMat.val  = {NIRSmat, b_nodelist I_chcorrlist_type I_chcorrlistoutpath I_ConnectivityMATName};   
 E_chcorrMat.prog = @nirs_run_chcorrMat;  
 E_chcorrMat.vout = @nirs_cfg_vout_chcorrMat;
-E_chcorrMat.help = {'For each channel calculate the correlation matrix'};
+E_chcorrMat.help = {'Create a connectivity matrix using channels as node information or zones as node information.'};
 %make NIRS.mat available as a dependency
 function vout = nirs_cfg_vout_chcorrMat(job)
     vout = cfg_dep;                    
