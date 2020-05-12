@@ -152,14 +152,14 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
             
             
         elseif isfield(job.b_nodelist,'I_chcorrlist')       %Channel list  channel
-            idabsent = find(listHBOch==0);
-            listHBOtmp =listHBOch;
-            listHBOtmp( idabsent) = 1;
+            idabsent = find(listHBOch==0)
+            listHBOtmp =listHBOch
+            listHBOtmp( idabsent) = 1
             idokHBO = NIRS.Cf.H.C.ok(listHBOtmp,f);
             idokHBO(idabsent)=0;
-            idabsent = find(listHBRch==0);
-            listHBRtmp =listHBRch;
-            listHBRtmp( idabsent) = 1;
+            idabsent = find(listHBRch==0)
+            listHBRtmp =listHBRch
+            listHBRtmp( idabsent) = 1
             idokHBR = NIRS.Cf.H.C.ok(listHBRtmp,f);
             idokHBR(idabsent)=0;
             listHBO = listHBOch;%(idok);
@@ -216,8 +216,8 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                     Bloc(ibloc,:) = [idstart(ibloc), idstart(ibloc)+Bsize];
                 end
          for ibloc = 1:size(Bloc,1)
-                ibloc
-                    
+                    ibloc
+                    tic
                 
                 dat = d1(:,Bloc(ibloc,1):Bloc(ibloc,2));
            for i=1:numel(listHBO)
@@ -249,7 +249,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                     end
                 end
             end
-         
+            toc
          end
                 
             end
@@ -1119,11 +1119,11 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
     %add nan on row with rejected channel
     idbad = find( idokHBO==0);
     matcorr(idbad,:,:) = nan;
-    matcorr(:,idbad,:) = nan;
+    matcorr(:,idbad) = nan;
     meancorr=nanmean(matcorr,3);
     idbad = find(idokHBR==0);
-    matcorrHbR(idbad,:,:) = nan;
-    matcorrHbR(:,idbad,:) = nan;
+    matcorrHbR(idbad,:) = nan;
+    matcorrHbR(:,idbad) = nan;
     meancorrHbR=nanmean(matcorrHbR,3);
     
     

@@ -32,7 +32,7 @@ DATA = get(handles.GUI_LookMat,'UserData');
 id = get(handles.popup_listsujet, 'value');
 MAT = DATA{id}.MAT;
 if get(handles.radio_fisher,'value')
-    MAT =abs(1/2*(log((1+MAT )./(1-MAT ))));
+    MAT =1/2*(log((1+MAT )./(1-MAT )));
 end
 
 

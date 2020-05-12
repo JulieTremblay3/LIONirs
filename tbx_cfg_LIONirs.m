@@ -2914,33 +2914,67 @@ b_Granger.help   = {'Perform time domain Multivariate granger causality, Use MVG
                     'this toolbox are Copyright (C) Lionel Barnett and Anil K. Seth, 2012.',...
                     'Please include in Matlab set path the mvgc_v1.0 toolbox,it cause some conflic with other built in matlab function,',...
                     'then we recomand to remove the folder from the set path after used to avoid potential conflics'};
+            
+                     
+b_PearsonBootstrap         = cfg_branch;
+b_PearsonBootstrap.tag     = 'b_PearsonBootstrap';
+b_PearsonBootstrap.name    = 'Circular bootstrap';
+b_PearsonBootstrap.val     = {i_TrialLenght_crossspectrum,i_RandomSample_crossspectrum,i_OutlierControl_crossspectrum};
+b_PearsonBootstrap.help    = {'Use circular bootstrap to compute cross-corelation analysis'};
                 
 m_Pearson          = cfg_menu;
 m_Pearson.tag       = 'm_Pearson';
-m_Pearson.name      = 'Pearson Option';
-m_Pearson.labels    = {'Pearson correlation','Pearson correlation fisher transform'};
-m_Pearson.values    = {1,2};
+m_Pearson.name      = 'Segments';
+m_Pearson.labels    = {'Zero lag Cross-Correlation (Pearson)'};
+m_Pearson.values    = {1};
 m_Pearson.val       = {1};
-m_Pearson.help      = {'Output option record pearson correlation or the directly the fisher transform '};
+m_Pearson.help      = {'Apply the zero lag Cross-Correlation on each segmented file of the data set'};
+
+
+c_Pearson          = cfg_choice;
+c_Pearson.tag     = 'c_Pearson';
+c_Pearson.name    = 'Option';
+c_Pearson.values  = {m_Pearson,b_PearsonBootstrap};
+c_Pearson.val     = {m_Pearson}; %Default option
+c_Pearson.help    = {''};
 
 b_Pearson       = cfg_branch;
 b_Pearson.tag    = 'b_Pearson';
-b_Pearson.name   = 'Pearson correlation';
-b_Pearson.val    = {m_Pearson};
-b_Pearson.help   = {''};                  
+b_Pearson.name   = 'Cross-correlation analysis';
+b_Pearson.val    = {c_Pearson};
+b_Pearson.help   = {'Compute zeros lag cross-correlation between channel or region of interest.'};                  
+
+
 
 m_Hilbert         = cfg_menu;
 m_Hilbert.tag       = 'm_Hilbert';
-m_Hilbert.name      = 'Hilbert Option';
+m_Hilbert.name      = 'Use file segment';
 m_Hilbert.labels    = {'Hilbert transform'};
 m_Hilbert.values    = {1};
 m_Hilbert.val       = {1};
-m_Hilbert.help      = {''};
+m_Hilbert.help      = {'Use each data file segmented to compute the hilbert transform'};
+
+
+
+b_HilbertBootstrap         = cfg_branch;
+b_HilbertBootstrap.tag     = 'b_HilbertBootstrap';
+b_HilbertBootstrap.name    = 'Circular bootstrap';
+b_HilbertBootstrap.val     = {i_TrialLenght_crossspectrum,i_RandomSample_crossspectrum,i_OutlierControl_crossspectrum};
+b_HilbertBootstrap.help    = {'Use circular bootstrap to segment randomly multiple segment in the fNIRS files to compute the hilbert transform.'};
+
+
+
+c_Hilbert          = cfg_choice;
+c_Hilbert.tag     = 'c_Hilbert';
+c_Hilbert.name    = 'Option';
+c_Hilbert.values  = {m_Hilbert,b_HilbertBootstrap};
+c_Hilbert.val     = {m_Hilbert}; %Default option
+c_Hilbert.help    = {''};
 
 b_Hilbert       = cfg_branch;
 b_Hilbert.tag    = 'b_Hilbert';
 b_Hilbert.name   = 'Hilbert join phase probability';
-b_Hilbert.val    = {m_Hilbert};
+b_Hilbert.val    = {c_Hilbert};
 b_Hilbert.help   = {'See B. Molavi et al., “Analyzing the resting state functional connectivity in the human language system using near infrared spectroscopy.,',...
                     'Front. Hum. Neurosci. 7(January), 921 (2013) [doi:10.3389/fnhum.2013.00921].',...
                     'Use fonction from the CircStat2012a toolbox' };
@@ -2983,7 +3017,7 @@ I_chcorrlist_type.tag  = 'I_chcorrlist_type';
 I_chcorrlist_type.name = 'Connectivity to use';
 I_chcorrlist_type.val     = {b_crossspectrum};
 I_chcorrlist_type.help    = {''};
-I_chcorrlist_type.values  = {b_crossspectrum,b_Pearson, b_Hilbert,b_Granger,b_Phase,b_waveletcluster};%,b_Hilbert,b_Granger, b_Phase, b_crossspectrum
+I_chcorrlist_type.values  = {b_crossspectrum,b_Pearson, b_Hilbert};%,b_Granger,b_Phase,b_waveletcluster};%,b_Hilbert,b_Granger, b_Phase, b_crossspectrum
 % 
 % I_chcorrlist_type.labels = {'Pearson', 'Pearson with zscore','Hilbert phase joint probability', 'Granger','Phase ISS','Analyzer Correlation/Autocorrelation'};
 % I_chcorrlist_type.values = {1 2 3 4 5 6};

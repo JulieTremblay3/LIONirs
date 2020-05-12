@@ -19,7 +19,7 @@ cmin=str2num(get(handles.edit_cmin,'string'))
 MAT = DATA{id}.MAT;
 %Ordoner en ordre de zone
 if get(handles.radio_fisher,'value')
-    MAT =abs(1/2*(log((1+MAT )./(1-MAT ))));
+    MAT =1/2*(log((1+MAT )./(1-MAT )));
 end
 List=   strvcat(DATA{id}.ZoneList)
 ML = DATA{id}.zone.ml

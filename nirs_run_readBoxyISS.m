@@ -297,8 +297,24 @@ fprintf('%s\n','File processed');
     
     %idbad = find(NIRS.Cf.H.C.gp<job.distmin|NIRS.Cf.H.C.gp>job.distmax);
     NIRS.Cf.H.C.ok = SD.ok;
-    
-
+     zone.SD.Lambda = NIRS.Cf.dev.wl;
+     zone.SD.SrcPos = NIRS.Cf.H.S.r.o.mm.p';
+     zone.SD.DetPos = NIRS.Cf.H.D.r.o.mm.p';
+     zone.SD.nSrcs  = numel(zone.SD.SrcPos)/3;
+     zone.SD.nDets  = numel(zone.SD.DetPos)/3;
+     zone.SD.SrcAmp = ones(zone.SD.nSrcs ,2);
+     zone.SD.DetAmp = ones(zone.SD.nDets,2);
+     zone.color = [lines(8);lines(8)];     
+     zone.ml = SD.ml;
+     zone.peak = [];
+     zone.pos = pos;
+    zone.label{1} = ['Regressor All'];
+    zone.plot{1} = [SD.ml(SD.ml(: ,4)==1,1), SD.ml(SD.ml(: ,4)==1,2)];
+    zone.plotLst{1} =  [find(SD.ml(: ,4)==1)];
+    zone.label{2} = ['All'];
+    zone.plot{2} = [SD.ml(SD.ml(: ,4)==1,1), SD.ml(SD.ml(: ,4)==1,2)];
+    zone.plotLst{2} =  [find(SD.ml(: ,4)==1)];
+    save( [pathout, filesep,'Global.zone'],'zone');
 
 end
     %write out NIRS in .mat file

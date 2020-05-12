@@ -22,7 +22,7 @@ function varargout = GUI_LookMatrices(varargin)
 
 % Edit the above text to modify the response to help GUI_LookMatrices
 
-% Last Modified by GUIDE v2.5 21-Feb-2020 14:05:01
+% Last Modified by GUIDE v2.5 12-May-2020 04:36:36
 
 % Begin initialization code - DO NOT EDITspm
 gui_Singleton = 1;
@@ -117,7 +117,7 @@ function Btn_browseList_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 [file,filepath] = uigetfile({'*.xlsx;*.xls; Excel file';...
-    ;'*.csv';'*.*'});
+    ;'*.csv';'*.txt';, '*.*'});
 if ~file
     return
 end
@@ -127,6 +127,8 @@ if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
 [~,~, info]=xlsread(fullfile(filepath, file));
 elseif strcmp(ext,'.csv')
     info = table2cell(readtable(fullfile(filepath, file),'Delimiter',';','ReadVariableNames',0));
+elseif strcmp(ext,'.txt')
+   [~,~, info]= readtxtfile_asxlsread([filepath,file])
 end
 
 
@@ -1232,7 +1234,7 @@ if get(handles.popupmenu_linkoption,'value')==1 %connectogramme
     
   
     
-elseif get(handles.popupmenu_linkoption,'value')==2 %2d map 
+elseif get(handles.popupmenu_linkoption,'value')==3 %2d map 
     
 end
 
@@ -1673,7 +1675,10 @@ function popupmenu_linkoption_Callback(hObject, eventdata, handles)
 if get(handles.popupmenu_linkoption,'value')==1 %Connectogram
      set(handles.edit_linkSettingmapConnectogram,'visible','on')
     set(handles.edit_linkSettingmap2dmap,'visible','off')
-elseif  get(handles.popupmenu_linkoption,'value')==2 
+elseif get(handles.popupmenu_linkoption,'value')==2 %notting
+    set(handles.edit_linkSettingmapConnectogram,'visible','off')
+    set(handles.edit_linkSettingmap2dmap,'visible','off')
+elseif get(handles.popupmenu_linkoption,'value')==3
     set(handles.edit_linkSettingmapConnectogram,'visible','off')
     set(handles.edit_linkSettingmap2dmap,'visible','on')   
 end %2d map
@@ -1939,3 +1944,19 @@ function radio_negativemap_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of radio_negativemap
 updateNetAllView(handles)
+
+
+% --- Executes on button press in btn_savelisttxt.
+function btn_savelisttxt_Callback(hObject, eventdata, handles)
+% hObject    handle to btn_savelisttxt (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[file,path] = uiputfile('.txt')
+fid = fopen([path,file],'w')
+tmp = get(handles.listbox_selectedzone,'string')
+for i=1:size(tmp,1)
+    fprintf(fid,'%s\n',tmp{i})
+end
+fclose(fid)
+
+1

@@ -7,11 +7,15 @@ raw = [];
 fid = fopen(filename);
 while ~feof(fid)
 icol = 1;
+
     line = fgetl(fid);
     while ~isempty(line)
+        if icol==4
+            1
+        end
     [token, line] = strtok(line,char(9));
     numtoken=str2num(token);
-    if isempty(numtoken)
+    if isempty(numtoken) | numel(numtoken)>1
         raw{irow,icol} = token;
     else
         raw{irow,icol} = str2num(token);
@@ -109,6 +113,7 @@ function [numericData, textData] = xlsreadSplitNumericAndText(data)
     for n = 1:cols
         tempDataColumnCell{n} = cat(1, data{:,n});
     end
+  
     % Now concatenate the single column of cells into a numeric array.
     numericData = cat(2, tempDataColumnCell{:});
     % Clear the mask to save memory

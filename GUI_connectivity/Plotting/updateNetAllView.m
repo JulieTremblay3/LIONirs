@@ -4,16 +4,16 @@ function updateNetAllView(GUI_LookMatrice_handles)
        % GUI_LookMatrice_handles = guihandles(GUI_LookMat); 
         %DATA = get(GUI_LookMatrice_handles.GUI_LookMat,'UserData');
         GUI_LookMatrice_handles = plot_axesAij(GUI_LookMatrice_handles);
-        GUI_LookMatrice_handles = plot_histogrammeAij(GUI_LookMatrice_handles);
+      %  GUI_LookMatrice_handles = plot_histogrammeAij(GUI_LookMatrice_handles);
         if get(GUI_LookMatrice_handles.popupmenu_linkoption,'value')==1 
             if get(GUI_LookMatrice_handles.popupmenu_view,'value')==1 %channel mode
             GUI_LookMatrice_handles = plot_axes_linkConnectogramm(GUI_LookMatrice_handles);
             end   
-        elseif get(GUI_LookMatrice_handles.popupmenu_linkoption,'value')==2
-            1
-            GUI_LookMatrice_handles = plot_axes_linkMAP(GUI_LookMatrice_handles);
-        elseif    get(GUI_LookMatrice_handles.popupmenu_linkoption,'value')==3
+        elseif get(GUI_LookMatrice_handles.popupmenu_linkoption,'value')==2 %nothing
+            1;
             
+        elseif    get(GUI_LookMatrice_handles.popupmenu_linkoption,'value')==3 %2dmap not finish remove from release
+            GUI_LookMatrice_handles = plot_axes_linkMAP(GUI_LookMatrice_handles);
         end
         
 % %          plot_axes_linkConnectogramm
