@@ -427,7 +427,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                 meantrial =  nanmean(matcorr(:,:,:),3);
                 stdtrial =  nanstd(matcorr(:,:,:),0,3);
                 ztrial = (matcorr- repmat( meantrial,1,1,size(matcorr,3)))./repmat( stdtrial,1,1,size(matcorr,3));
-                idoutlier =  find(abs(ztrial)>job.I_chcorrlist_type.b_Pearson.c_Pearson.b_PearsonBootstrap.i_OutlierControl_crossspectrum);
+                idoutlier = find(abs(ztrial)>job.I_chcorrlist_type.b_Hilbert.c_Hilbert.b_HilbertBootstrap.i_OutlierControl_crossspectrum);
                 % zscore across trial to detect outlier trial and set them to nan.
                 if ~isempty(idoutlier)
                     matcorr(idoutlier)=nan;
@@ -435,7 +435,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                 meantrial =  nanmean(matcorrHbR(:,:,:),3);
                 stdtrial =  nanstd(matcorrHbR(:,:,:),0,3);
                 ztrial = (matcorrHbR- repmat( meantrial,1,1,size(matcorrHbR,3)))./repmat( stdtrial,1,1,size(matcorrHbR,3));
-                idoutlier =  find(abs(ztrial)>job.I_chcorrlist_type.b_Hilbert.c_Hilbert.b_b_HilbertBootstrap.i_OutlierControl_crossspectrum);
+                idoutlier =  find(abs(ztrial)>job.I_chcorrlist_type.b_Hilbert.c_Hilbert.b_HilbertBootstrap.i_OutlierControl_crossspectrum);
                 % zscore across trial to detect outlier trial and set them to nan.
                 if ~isempty(idoutlier)
                     matcorrHbR(idoutlier)=nan;

@@ -12,7 +12,7 @@ if isfield(job.c_statcomponent,'b_TtestOneSample')
      for ich=1:size(AllC,1)
        % [h,p,ci,stats] = ttest(AllC(ich,:)); %do not suport nan 
         tval(ich) =  nanmean(AllC(ich,:))./        (nanstd(AllC(ich,:)./sqrt(sum(~isnan(AllC(ich,:))))));
-        df = sum(~isnan(AllC(ich,:)))-1
+        df = sum(~isnan(AllC(ich,:)))-1;
         if job.c_statcomponent.b_TtestOneSample.m_TtestOneSample == 1
             pval(ich) = 2 * tcdf(-abs(tval(ich)), df);
             option = 'twotail'
@@ -54,31 +54,31 @@ elseif isfield(job.c_statcomponent,'b_TtestUnpaired')
     
     
         if job.c_statcomponent.b_TtestUnpaired.m_TtestOneSample == 1
-            option = 'twotail'
+            option = 'twotail';
         elseif job.c_statcomponent.b_TtestUnpaired.m_TtestOneSample == 2  
-            option = 'lefttail'
+            option = 'lefttail';
         elseif job.c_statcomponent.b_TtestUnpaired.m_TtestOneSample == 3
-            option = 'righttail'
+            option = 'righttail';
         end
     
       AllG1 = [];
     for i=1:numel(job.c_statcomponent.b_TtestUnpaired.f_componentG1)
         load(job.c_statcomponent.b_TtestUnpaired.f_componentG1{i},'-mat');
-        [dir1,file1,ext1]=fileparts(job.c_statcomponent.b_TtestUnpaired.f_componentG1{i})
+        [dir1,file1,ext1]=fileparts(job.c_statcomponent.b_TtestUnpaired.f_componentG1{i});
         AllG1 = [AllG1,A];
     end 
     
      AllG2 = [];
     for i=1:numel(job.c_statcomponent.b_TtestUnpaired.f_componentG2)
         load(job.c_statcomponent.b_TtestUnpaired.f_componentG2{i},'-mat');
-        [dir1,file1,ext1]=fileparts(job.c_statcomponent.b_TtestUnpaired.f_componentG2{i})
+        [dir1,file1,ext1]=fileparts(job.c_statcomponent.b_TtestUnpaired.f_componentG2{i});
         AllG2 = [AllG2,A];
     end
     
      for ich=1:size(AllG1,1)
         stats = testt(AllG1(ich,:),AllG2(ich,:)); %do not suport nan 
         tval(ich) =   stats.tvalue;
-        df = stats.tdf
+        df = stats.tdf;
         pval(ich)=stats.tpvalue;      
         mval(ich) =  nanmean(AllG1(ich,:)) - nanmean(AllG2(ich,:));
      end
@@ -105,17 +105,18 @@ elseif isfield(job.c_statcomponent,'b_TtestUnpaired')
      save(fullfile(dir1,['TWOSAMPLE__mean001unc.mat']),'A','zonelist','option')
     
      
-     [FDR,Q] = mafdr(pval)         
+     [FDR,Q] = mafdr(pval);         
      A = mval.*double(Q<0.05);
      save(fullfile(dir1,['TWOSAMPLE__mean05fdr.mat']),'A','zonelist','option')
-    [FDR,Q] = mafdr(pval)
+    [FDR,Q] = mafdr(pval);
      A = mval.*double(Q<0.01);
      save(fullfile(dir1,['TWOSAMPLE__mean01fdr.mat']),'A','zonelist','option')
-    [FDR,Q] = mafdr(pval)
+    [FDR,Q] = mafdr(pval);
      A = mval.*double(Q<0.001);
      save(fullfile(dir1,['TWOSAMPLE_mean001fdr.mat']),'A','zonelist','option')
      
-     
+elseif isfield(job.c_statcomponent,'b_anovan')     
+     listing = dir('C:\data\Tutorial3_DataRetinotopy\Analyse\Export')
 
 end
 
@@ -148,3 +149,5 @@ try
 catch
     out = 'no dependancy';
 end
+
+

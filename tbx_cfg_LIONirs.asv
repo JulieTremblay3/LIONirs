@@ -2417,7 +2417,7 @@ f_componentG2.tag     = 'f_componentG2';       %file names
 f_componentG2.filter  = 'xlsx';
 f_componentG2.ufilter = '.xlsx';    
 f_componentG2.num     = [1 Inf];     % Number of inputs required 
-f_componentG2.help    = {'Enter the of observation to compute the anovan first row : dir, second row: compenent file name, 3 row and  '}; 
+f_componentG2.help    = {'Enter the of observation to compute the anovan  '}; 
 
 
 

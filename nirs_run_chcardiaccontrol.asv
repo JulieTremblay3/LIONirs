@@ -180,7 +180,7 @@ pourcentagetr = job.i_minch_cardiac/100;
                 startF = repmat((interval(id))-nbpoint,size(yall,2),1);
                 stopF = repmat((interval(id))+nbpoint,size(yall,2),1);;
            else 
-               startF = (interval(ideach))-nbpoint; %fine tuning take peak on channel individual
+               startF = (interval(ideach))-nbpoint; %fine tuning 
                 stopF = (interval(ideach))+nbpoint;
            end 
          figure(hfig)

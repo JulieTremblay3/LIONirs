@@ -13,16 +13,16 @@ else
 end
 axis ij
 DATA = get(handles.GUI_LookMat,'UserData');
-id = get(handles.popup_listsujet, 'value')
-cmax=str2num(get(handles.edit_cmax,'string'))
-cmin=str2num(get(handles.edit_cmin,'string'))
+id = get(handles.popup_listsujet, 'value');
+cmax=str2num(get(handles.edit_cmax,'string'));
+cmin=str2num(get(handles.edit_cmin,'string'));
 MAT = DATA{id}.MAT;
 %Ordoner en ordre de zone
 if get(handles.radio_fisher,'value')
     MAT =1/2*(log((1+MAT )./(1-MAT )));
 end
-List=   strvcat(DATA{id}.ZoneList)
-ML = DATA{id}.zone.ml
+List=   strvcat(DATA{id}.ZoneList);
+ML = DATA{id}.zone.ml;
 idzone = [];
 idlist = [];
 idlabelall = [];
@@ -83,7 +83,7 @@ if get(handles.popupmenu_view,'value')==1%view zone
                %     idzone =[idzone, izone];
                % else
                     idzone =[idzone,izone, zeros(1,numel(idch)-1)];
-                     izonebelong  = [ izonebelong ,ones(1,numel(idch)).*izone]
+                     izonebelong  = [ izonebelong ,ones(1,numel(idch)).*izone];
               %  end
 %             end
             idlabel = [idlabel, {[DATA{id}.zone.label{izone}, sprintf('_%03.0f',ilistzone)]}];
@@ -103,14 +103,14 @@ if get(handles.popupmenu_view,'value')==1%view zone
         h = imagesc(MAT(idlist,idlist));
         nbchbadbyzone = [];
         for izone=1:max(izonebelong(:))
-             ch = find(izonebelong==izone)
-            nbchbad= numel(find(sum(0==(MAT(idlist,idlist(ch))))> (0.70*numel(idlist))))   
+             ch = find(izonebelong==izone);
+            nbchbad= numel(find(sum(0==(MAT(idlist,idlist(ch))))> (0.70*numel(idlist)))) ;  
             if isempty(nbchbad)
-                nbchbadbyzone = 0
+                nbchbadbyzone = 0;
             end
-            nbchbadbyzone = [nbchbadbyzone,nbchbad, numel(idlist(ch))]
+            nbchbadbyzone = [nbchbadbyzone,nbchbad, numel(idlist(ch))];
         end 
-        set(handles.editchnb,'string',num2str(nbchbadbyzone))
+        set(handles.editchnb,'string',num2str(nbchbadbyzone));
         
         if newfigure ==0
             

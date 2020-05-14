@@ -197,11 +197,9 @@ for isubject=2:size(info,1)
     groupeall = [groupeall; info{isubject,4}];
 end
 %avg zone groupe 
-idnew = size(info,1)-1; %placer les moyennes a la fin des sujets existants. 
 for igroupe = 1:max(groupeall)
-
+    try
    idsubject = find(groupeall==igroupe);
-   if ~isempty(idsubject)
    idlabelall= DATA{idsubject(1)}.zone.label; %zone premier sujet du groupe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
    MATAVGALL = zeros(numel(idlabelall),numel(idlabelall),numel(idsubject));
    for isubject=1:numel(idsubject)
@@ -290,7 +288,7 @@ for igroupe = 1:max(groupeall)
        ZoneList = [];
        plot= [];
        plotLst = [];
-       idnew =  idnew + 1;  
+       idnew = size(info,1)+igroupe-1;
        for izoneList = 1:size(MATAVGALL,1)
            MLfake(izoneList,1) = izoneList;%source
            MLfake(izoneList,2) = 1; %detecteur
@@ -322,12 +320,17 @@ for igroupe = 1:max(groupeall)
        clear MATAVGALL
        clear MLfake
        clear MAT    
-      end
+    catch
+        1
+    end
 end
 for igroupe = 1:max(groupeall)
+%     try
+%     catch
+%     end
+        idnew = idnew +1;
     	idsubject = find(groupeall==igroupe);
         if ~isempty(idsubject)
-              idnew = idnew +1;
         for isubject = 1:numel(idsubject)
              MATall(:,:,isubject) = DATA{idsubject(isubject)}.MAT;
         end    
@@ -345,7 +348,6 @@ for igroupe = 1:max(groupeall)
        DATA{idnew}.zone.pos = DATA{idsubject(1)}.zone.pos;
        DATA{idnew}.zone.chMAT =  DATA{idsubject(1)}.zone.chMAT;
        list_subject{idnew} =DATA{idnew}.name;
-        end
         
 end%AVG groupe all
   clear MATall 
