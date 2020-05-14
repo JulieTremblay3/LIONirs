@@ -22,7 +22,7 @@ function varargout = plot_sessions_GUI(varargin)
 
 % Edit the above text to modify the response to help plot_sessions_GUI
 
-% Last Modified by GUIDE v2.5 01-Apr-2020 17:09:43
+% Last Modified by GUIDE v2.5 13-May-2020 15:43:35
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -10563,3 +10563,41 @@ function Context_infotrig_Callback(hObject, eventdata, handles)
 % hObject    handle to Context_infotrig (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function context_clearartifact_Callback(hObject, eventdata, handles)
+% hObject    handle to context_clearartifact (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+ guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
+    currentsub=1;
+    PMI = get(guiHOMER,'UserData');
+    cf = PMI{currentsub}.currentFile;
+    NChalf = numel(PMI{currentsub}.data(cf).MeasListAct)/2;
+    plotLst = PMI{currentsub}.plotLst;
+    plotLstAll = [];
+    for i=1:numel(plotLst)
+        chlist = plotLst(i);
+        if isempty(find(chlist - NChalf < 1 ))
+            plotLstAll = [plotLstAll,chlist, chlist-NChalf]; %add 830 nm channels
+        else
+            plotLstAll = [plotLstAll,chlist,chlist+NChalf]; %add 690 nm channels
+        end
+    end
+    plotLst = plotLstAll;
+    posxstart = str2num(get(handles.edit_time_start,'string'));
+    posxstop = str2num(get(handles.edit_time_stop,'string'));
+    if isempty(posxstart)
+        indstart=1;
+    else
+        indstart= find(posxstart>PMI{currentsub}.data(cf).HRF.tHRF);
+    end
+    if isempty(posxstop)
+        indstop = numel(PMI{currentsub}.data(cf).HRF.tHRF);
+    else
+        indstop= find(posxstop>PMI{currentsub}.data(cf).HRF.tHRF);
+    end
+    PMI{currentsub}.data(cf).HRF.noise(:,plotLst)= 0;
+    set(guiHOMER,'UserData',PMI);
+    updatedisplay(handles);

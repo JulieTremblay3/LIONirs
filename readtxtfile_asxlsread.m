@@ -11,7 +11,7 @@ icol = 1;
     while ~isempty(line)
     [token, line] = strtok(line,char(9));
     numtoken=str2num(token);
-    if isempty(numtoken)
+    if isempty(numtoken)|numel(numtoken)>1
         raw{irow,icol} = token;
     else
         raw{irow,icol} = str2num(token);

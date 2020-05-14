@@ -80,9 +80,43 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
         matcorr = nan(numel(listname),numel(listname),size(rDtp,1));
         matcorrHbR = nan(numel(listname),numel(listname),size(rDtp,1));
     end
-    
+    padtime = 0;
     for f=1:size(rDtp,1) %Loop over all files of a NIRS.mat
         d1 = fopen_NIR(rDtp{f,1},NC);
+        
+         %load the noise marker dnan
+            mrk_type = 'bad_step';
+            mrk_type_arr = cellstr(mrk_type);
+            [dir1,fil1,~] = fileparts(rDtp{f});
+            vmrk_path = fullfile(dir1,[fil1 '.vmrk']);
+            [ind_dur_ch] = read_vmrk_find(vmrk_path,mrk_type_arr);
+            dnan = d1;
+            if ~isempty(ind_dur_ch)
+                %hwaitbar = waitbar(0);
+                for Idx = 1:NC %Loop over all channels
+                   % waitbar(Idx/NC,hwaitbar,'Nullifying bad intervals...');
+                    mrks = find(ind_dur_ch(:,3)==Idx | ind_dur_ch(:,3)==0);
+                    
+                    ind = ind_dur_ch(mrks,1);
+                    indf = ind + ind_dur_ch(mrks,2);
+                    
+                    for i = 1:numel(ind)
+                        if ind(i)-padtime < 1
+                            ind(i) = padtime+1;
+                        end
+                        if indf(i)+padtime > size(d1,2)
+                            indf(i) = size(d1,2)-padtime;
+                        end
+                        dnan(Idx,ind(i)-padtime:indf(i)+padtime) = NaN;
+                    end
+                end
+                %close(hwaitbar);
+             else
+                disp(['Failed to nullify bad intervals for Subject ',int2str(filenb),', file ',int2str(f),'. No markers found in the .vmrk file. If you have already used the Step Detection function, your data may have no bad steps in it.']);
+            end
+        
+        
+        
         id = 1;
         correctplotLst = 0;
         if isfield(job.b_nodelist,'I_zonecorrlist')
@@ -94,11 +128,10 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                 if ML_new ~=zone.ml
                     disp(['List of channel from ', job.NIRSmat{filenb,1},' not concordant with the zone.'])
                     correctplotLst = 1;
-                end
+                end 
             end
             
-            %new
-            
+           
             
             %ensure the zone are with the good channel for the subject it
             %mean always source a1b2 and detector A and the other of
@@ -215,10 +248,24 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                     %pstart and pstop for each bloc
                     Bloc(ibloc,:) = [idstart(ibloc), idstart(ibloc)+Bsize];
                 end
-         for ibloc = 1:size(Bloc,1)
-                ibloc
-                    
                 
+                %donot compute for nanbloc...
+            removetrial = [];            
+            for ibloc = 1:size(Bloc,1)              
+                datnan = dnan(:,Bloc(ibloc,1):Bloc(ibloc,2));
+                if sum(isnan(datnan(:)))
+                    removetrial = [removetrial,ibloc];    
+                 end
+            end
+            if ~isempty(removetrial)
+                Bloc(removetrial,:)=[];
+                totaltrialgood = size(Bloc,1);
+            else
+                totaltrialgood = size(Bloc,1);
+            end
+                
+         for ibloc = 1:size(Bloc,1)
+                ibloc                 
                 dat = d1(:,Bloc(ibloc,1):Bloc(ibloc,2));
            for i=1:numel(listHBO)
                 if listHBO(i)
@@ -227,8 +274,8 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                         if listHBO(j)
                             d1ok = dat(listHBO(i,1),:);
                             d2ok = dat(listHBO(j,1),:);
-                            matcorr(i,j,f)=corr(d1ok',d2ok');
-                            matcorr(j,i,f)= matcorr(i,j,f);
+                            matcorr(i,j,ibloc)=corr(d1ok',d2ok');
+                            matcorr(j,i,ibloc)= matcorr(i,j,ibloc);
                         end
                         j = j + 1;
                     end
@@ -242,8 +289,8 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                         if  listHBO(j)
                             d1ok = dat(listHBR(i,1),:);
                             d2ok = dat(listHBR(j,1),:);
-                            matcorrHbR(i,j,f)=corr(d1ok',d2ok');
-                            matcorrHbR(j,i,f)= matcorrHbR(i,j,f);
+                            matcorrHbR(i,j,ibloc)=corr(d1ok',d2ok');
+                            matcorrHbR(j,i,ibloc)= matcorrHbR(i,j,ibloc);
                         end
                         j = j + 1;
                     end
@@ -254,11 +301,25 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                 
             end
                 
-                
-           
-            
-            
-            
+         %zscore outlier on matcorr matcorrHbR trial distribution ensure no outlier due to forget artifact.            
+         meantrial =  nanmean(matcorr(:,:,:),3);
+         stdtrial =  nanstd(matcorr(:,:,:),0,3);
+         ztrial = (matcorr- repmat( meantrial,1,1,size(matcorr,3)))./repmat( stdtrial,1,1,size(matcorr,3));
+          idoutlier =  find(abs(ztrial)>job.I_chcorrlist_type.b_Pearson.c_Pearson.b_PearsonBootstrap.i_OutlierControl_crossspectrum);
+         % zscore across trial to detect outlier trial and set them to nan. 
+         if ~isempty(idoutlier)
+            matcorr(idoutlier)=nan;
+         end
+         meantrial =  nanmean(matcorrHbR(:,:,:),3)
+         stdtrial =  nanstd(matcorrHbR(:,:,:),0,3)
+         ztrial = (matcorrHbR- repmat( meantrial,1,1,size(matcorrHbR,3)))./repmat( stdtrial,1,1,size(matcorrHbR,3));
+         idoutlier =  find(abs(ztrial)>job.I_chcorrlist_type.b_Pearson.c_Pearson.b_PearsonBootstrap.i_OutlierControl_crossspectrum);
+         % zscore across trial to detect outlier trial and set them to nan. 
+         if ~isempty(idoutlier)
+            matcorrHbR(idoutlier)=nan;
+         end
+         
+         
         elseif isfield(job.I_chcorrlist_type,'b_Hilbert') %hilbert joint probability distribution
             if isfield(job.I_chcorrlist_type.b_Hilbert.c_Hilbert,'m_Hilbert') %by segment       
                 hil = hilbert(d1);
@@ -292,8 +353,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                         end
                     end
                 end
-                %set missing channel in the block as nan.
-                find(NIRS.Cf.H.C.ok)
+       
                 
             elseif isfield(job.I_chcorrlist_type.b_Hilbert.c_Hilbert,'b_HilbertBootstrap')  %circular bootstrap
                 fs = NIRS.Cf.dev.fs;                         % Sample frequency (Hz)
@@ -311,7 +371,19 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                     %pstart and pstop for each bloc
                     Bloc(ibloc,:) = [idstart(ibloc), idstart(ibloc)+Bsize];
                 end
-                
+                   removetrial = [];            
+            for ibloc = 1:size(Bloc,1)              
+                datnan = dnan(:,Bloc(ibloc,1):Bloc(ibloc,2));
+                if sum(isnan(datnan(:)))
+                    removetrial = [removetrial,ibloc];    
+                 end
+            end
+            if ~isempty(removetrial)
+                Bloc(removetrial,:)=[];
+                totaltrialgood = size(Bloc,1);
+            else
+                totaltrialgood = size(Bloc,1);
+            end
                 for ibloc = 1:size(Bloc,1)
                     ibloc
                     tic
@@ -349,7 +421,25 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                     end
                     toc
                     clear dat                    
-                end                               
+                end       
+                
+                %zscore outlier on matcorr matcorrHbR trial distribution ensure no outlier due to forget artifact.
+                meantrial =  nanmean(matcorr(:,:,:),3);
+                stdtrial =  nanstd(matcorr(:,:,:),0,3);
+                ztrial = (matcorr- repmat( meantrial,1,1,size(matcorr,3)))./repmat( stdtrial,1,1,size(matcorr,3));
+                idoutlier =  find(abs(ztrial)>job.I_chcorrlist_type.b_Pearson.c_Pearson.b_PearsonBootstrap.i_OutlierControl_crossspectrum);
+                % zscore across trial to detect outlier trial and set them to nan.
+                if ~isempty(idoutlier)
+                    matcorr(idoutlier)=nan;
+                end
+                meantrial =  nanmean(matcorrHbR(:,:,:),3);
+                stdtrial =  nanstd(matcorrHbR(:,:,:),0,3);
+                ztrial = (matcorrHbR- repmat( meantrial,1,1,size(matcorrHbR,3)))./repmat( stdtrial,1,1,size(matcorrHbR,3));
+                idoutlier =  find(abs(ztrial)>job.I_chcorrlist_type.b_Hilbert.c_Hilbert.b_b_HilbertBootstrap.i_OutlierControl_crossspectrum);
+                % zscore across trial to detect outlier trial and set them to nan.
+                if ~isempty(idoutlier)
+                    matcorrHbR(idoutlier)=nan;
+                end                        
             end
             
         elseif isfield(job.I_chcorrlist_type,'b_Granger') %Granger causality
@@ -468,17 +558,22 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
             [y, f_fft]= fft_EEGseries(dat,fs);
             yall = zeros(size(y,1),size(y,2),size(Bloc,1));
             
+            %could be more efficient but do the job for now ! 
             removetrial = [];
+
             for ibloc = 1:size(Bloc,1)
                 dat = d1(:,Bloc(ibloc,1):Bloc(ibloc,2));
                 dat=dat - mean(dat,2)*ones(1,Bsize+1) ;
-                if sum(isnan(dat(:)))
+                datnan = dnan(:,Bloc(ibloc,1):Bloc(ibloc,2));
+                if sum(isnan(datnan(:)))
                     removetrial = [removetrial,ibloc];
                 else
                     [y, f_fft]= fft_EEGseries(dat,fs);
-                    yall(:,:,ibloc)=y;
-                end
+                    yall(:,:,ibloc )=y;
+                 end
             end
+%             t= 1/fs:1/fs:1/fs*size(d1,2)
+%             t(Bloc)
             if ~isempty(removetrial)
                 yall(:,:,removetrial)=[];
                 totaltrialgood = size(yall,3);
@@ -1165,7 +1260,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
         %             meancorr =  1/2*(log((1+nanmean(meancorr,3))./(1-nanmean(meancorr,3))));
         %             meancorrHbR =  1/2*(log((1+nanmean(meancorrHbR,3))./(1-nanmean(meancorrHbR,3))));
         
-        totaltrialgood = 0;
+
         RecordDevice = NIRS.Cf.dev.n;
         save(fullfile(pathout,[filloutput,'_HBO','_COH FFT','.mat']),'ZoneList','matcorr','meancorr', 'totaltrialgood'  );
         matcorr = matcorrHbR; meancorr = meancorrHbR;
