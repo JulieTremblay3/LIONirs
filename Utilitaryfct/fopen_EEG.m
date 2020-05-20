@@ -59,7 +59,7 @@ try
     end
         
 catch
-    disp('Failed to open file');
+    disp(['Failed to open file ', filename,' use binary export format'] );
 end
 end
 function infoBV = read_vhdr(file)

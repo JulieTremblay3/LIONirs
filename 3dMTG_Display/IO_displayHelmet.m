@@ -724,17 +724,26 @@ function displayMRI(oMRI,DispParameter)
     end
     nb_color = size(map,1);
     delta_map = (cmax-cmin)/nb_color;
-    cthresh =  DispParameter.cthresh;
+    cthresh =  abs(DispParameter.cthresh);
     nb_map_min = floor(abs(cmin+cthresh)/delta_map);  
     nb_map_max = ceil(abs(cmin-cthresh)/delta_map);
     nb_map_list = nb_map_min:nb_map_max;
     nb_map = size(nb_map_list,2);
+   scalelist = cmin : delta_map:cmax;
+   sum(scalelist<0);
   
+   if sum(scalelist<0)==0
+        zeroid = 1;
+   else
+        zeroid =[ sum(scalelist<0),sum(scalelist<0)+1,sum(scalelist<0)+2];
+   end
     for i_map = 1:nb_map;
         if DispParameter.viewskin
             map( nb_map_list(i_map),:) = [255/256 255/256 179/256];
+            map(zeroid,:)=repmat([255/256 255/256 179/256],numel(zeroid),1) ;
         elseif  DispParameter.viewcortex
             map( nb_map_list(i_map),:) =  [192/256 192/256 192/256];%[88/256 88/256 88/256];%
+             map(zeroid,:)=repmat([255/256 255/256 179/256],numel(zeroid),1); 
         end
     end
     if DispParameter.mapoption == 2
@@ -762,16 +771,23 @@ function displayMRI(oMRI,DispParameter)
     end
       if DispParameter.HideNotCover; %Black uncovered region
           if DispParameter.viewskin
-              i_map = ceil(nb_map/2)+1;
-              map( nb_map_list(i_map),:) = [0.5,0.5,0.5];
-              i_map = ceil(nb_map/2);
-              map( nb_map_list(i_map),:) = [0.5,0.5,0.5];
+              
+              map(zeroid,:)=repmat([0.5,0.5,0.5],numel(zeroid),1);
           else
-         	i_map = ceil(nb_map/2)+1;
-            map( nb_map_list(i_map),:) = [192/256 192/256 192/256];%
-            i_map = ceil(nb_map/2);
-            map( nb_map_list(i_map),:) = [192/256 192/256 192/256];%
+              map(zeroid,:)=repmat([192/256 192/256 192/256],numel(zeroid),1);
           end
+%           
+%           if DispParameter.viewskin
+%               i_map = ceil(nb_map/2)+1;
+%               map( nb_map_list(i_map),:) = [0.5,0.5,0.5];
+%               i_map = ceil(nb_map/2);
+%               map( nb_map_list(i_map),:) = [0.5,0.5,0.5];
+%           else
+%          	i_map = ceil(nb_map/2)+1;
+%             map( nb_map_list(i_map),:) = [192/256 192/256 192/256];%
+%             i_map = ceil(nb_map/2);
+%             map( nb_map_list(i_map),:) = [192/256 192/256 192/256];%
+%           end
       end
 end
     if DispParameter.viewskin
@@ -865,18 +881,50 @@ end
       cmax = nb_atlas;
     end
     if DispParameter.viewscale %timecolor
-         map = jet(50);
-         if DispParameter.viewskin
-            map( 1,:) = [255/256 255/256 179/256];
-        elseif  DispParameter.viewcortex
-            map(1,:) =  [88/256 88/256 88/256];%[192/256 192/256 192/256];%
+         map = jet(300);
+         nb_color = size(map,1);
+        delta_map = (cmax-cmin)/nb_color;
+        cthresh =  DispParameter.cthresh;
+        nb_map_min = nb_color - floor((cmax-cthresh)/delta_map);  
+        scalelist = cmin : delta_map:cmax;
+        sum(scalelist<0);
+         if sum(scalelist<0)==0
+            zeroid = 1;
+         else
+            zeroid =[ sum(scalelist<0),sum(scalelist<0)+1,sum(scalelist<0)+2];
         end
+%     nb_map_list = nb_map_min:nb_map_max;
+%     nb_map = size(nb_map_list,2);
+         if DispParameter.viewskin
+            map( 1:nb_map_min,:) = repmat([255/256 255/256 179/256],nb_map_min,1) ;
+        elseif  DispParameter.viewcortex
+            map(1:nb_map_min,:) = repmat([88/256 88/256 88/256],nb_map_min,1);%[192/256 192/256 192/256];%
+         end
+        
+        if DispParameter.HideNotCover; %Black uncovered region
+          if DispParameter.viewskin
+%               i_map = ceil(nb_map/2)+1;
+%               map( nb_map_list(i_map),:) = [0.5,0.5,0.5];
+%               i_map = ceil(nb_map/2);
+%               map( nb_map_list(i_map),:) = [0.5,0.5,0.5];
+               map(zeroid,:)=repmat([0.5,0.5,0.5],numel(zeroid),1); 
+          else
+%          	i_map = ceil(nb_map/2)+1;
+%             map( nb_map_list(i_map),:) = [192/256 192/256 192/256];%
+%             i_map = ceil(nb_map/2);
+%             map( nb_map_list(i_map),:) = [192/256 192/256 192/256];%
+             map(zeroid,:)=repmat([192/256 192/256 192/256],numel(zeroid),1); 
+          end
+      end
+         
          colormap (map);
     end
     T = get_matTransform(oMRI);
     Vertex_tmp = VertexBuffer*T;
     
    caxis([cmin,cmax])
+   c = colorbar;
+    set(c,'fontsize',14)
    
 % %   %Julie pour dima
 %   %vColor atlas

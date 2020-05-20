@@ -167,6 +167,7 @@ elseif isfield(job.c_statcomponent,'b_ANOVAN')
         % results = multcompare(stats,'Dimension',[1 2]);
     end 
     [FDR,Q] = mafdr(pval(:));
+    FDR = reshape(FDR, size(pval));
     for idim = 1:size(pval,2)
         A = double( pval(:,idim)<0.05)
         save(fullfile( dir1,['anovan_p0.05 ',name{idim},'.mat']),'A','zonelist') 
@@ -174,7 +175,10 @@ elseif isfield(job.c_statcomponent,'b_ANOVAN')
         save(fullfile( dir1,['anovan_1-p',name{idim},'.mat']),'A','zonelist') 
          A = double( Fval(:,idim))
         save(fullfile( dir1,['anovan_F ',name{idim},'.mat']),'A','zonelist') 
-        
+          A = double(FDR(:,idim)<0.05)
+        save(fullfile( dir1,['anovan_FDRq0.05 ',name{idim},'.mat']),'A','zonelist') 
+         A = double(1- FDR(:,idim))
+        save(fullfile( dir1,['anovan_FDR1-q ',name{idim},'.mat']),'A','zonelist') 
     end
 end
 1

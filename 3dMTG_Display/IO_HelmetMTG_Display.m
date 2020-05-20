@@ -113,7 +113,8 @@ cmin = str2num(get(handles.edit_climmin,'string'));
 cmax = str2num(get(handles.edit_climmax,'string'));
 caxis([cmin,cmax]);
 axes(handles.axes_Mtg2);
-colorbar;
+c = colorbar;
+set(c,'fontsize',14)
 guidata(hObject, handles);
 global currentsub
 if get(handles.radio_guiSPMnirsHSJ,'value')==1
@@ -1290,7 +1291,8 @@ colormapeditor;
 cmin = str2num(get(handles.edit_climmin,'string'));
 cmax = str2num(get(handles.edit_climmax,'string'));
 caxis([cmin,cmax]);
-colorbar;
+c = colorbar;
+set(c,'fontsize',14)
 
 
 % --------------------------------------------------------------------
@@ -1391,7 +1393,9 @@ function edit_climmax_Callback(hObject, eventdata, handles)
 cmin = str2num(get(handles.edit_climmin,'string'));
 cmax = str2num(get(handles.edit_climmax,'string'));
 caxis([cmin,cmax]);
-colorbar;
+c = colorbar;
+set(c,'fontsize',14)
+resetview(handles)
 % --- Executes during object creation, after setting all properties.
 function edit_climmax_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to edit_climmax (see GCBO)
@@ -1416,7 +1420,9 @@ function edit_climmin_Callback(hObject, eventdata, handles)
 cmin = str2num(get(handles.edit_climmin,'string'));
 cmax = str2num(get(handles.edit_climmax,'string'));
 caxis([cmin,cmax]);
-colorbar;
+c = colorbar;
+set(c,'fontsize',14)
+resetview(handles)
 
 % --- Executes during object creation, after setting all properties.
 function edit_climmin_CreateFcn(hObject, eventdata, handles)
@@ -1852,7 +1858,8 @@ else
 end
 cthresh = str2num(max_color) /10;
 set(handles.edit_cminthreshold,'string',num2str(cthresh));
-colorbar;
+c = colorbar;
+set(c,'fontsize',14)
 
 
 
@@ -3108,7 +3115,7 @@ function btn_scale_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of btn_scale
 
-
+resetview(handles)
 
 
 % --------------------------------------------------------------------
@@ -3262,7 +3269,7 @@ function radio_show_cover_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of radio_show_cover
-
+resetview(handles)
 
 % --------------------------------------------------------------------
 function menu_open_Topomat_Callback(hObject, eventdata, handles)
