@@ -937,13 +937,13 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                 if numel(Regressorlist{iReg})>4
                     checkzone = Regressorlist{iReg};
                     if strcmp(upper(checkzone(end-3:end)),'ZONE')
-                        try 
+                        try  
                             load(Regressorlist{iReg} ,'-mat'); %try the fullfile correct 
                         catch
                             try
                             load(fullfile(dirxls, Regressorlist{iReg} ),'-mat'); %try in the excel folder
                             catch
-                            disp(['Regressor zone :', fullfile(dirxls, Regressorlist{iReg} ),' could not be load'])
+                            disp(['Regressor zone :',  Regressorlist{iReg} ,' or ',fullfile(dirxls,Regressorlist{iReg}) , ' could not be load'])
                             return
                             end
                         end

@@ -56,7 +56,7 @@ if ~isempty(getappdata(0,'guiHOMER'));
 end
 if isfield(option,'SPMgui')
      set(handles.radio_guiSPMnirsHSJ,'visible','on','value',2); %Gui SPM
-     set(handles.popupmenu_display,'string',{'Current module','Mean start stop time','Projection Channel .cp','PARAFAC','PCA','GLM','COMPONENT'});
+     set(handles.popupmenu_display,'string',{'Current module','Mean start stop time','Projection Channel .cp','PARAFAC','PCA','ICA','GLM','COMPONENT'});
 end
 if isfield(option,'video')
       set(handles.radio_guiSPMnirsHSJ,'visible','on','value',3); %Gui video
@@ -944,10 +944,8 @@ if get(handles.radio_guiSPMnirsHSJ,'value')==1 %Homer old version
     d1=selectimagetype(echantillon_time,type,dconc);
 elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
     %actually used 
-    type=get(handles.popupmenu_display,'value');
-    typelabel = get(handles.popupmenu_display,'string');
     nbhalf = size(PMI{currentsub}.data(cf).HRF.AvgC,2)/2;
-    if strcmp(typelabel{type}, 'Current module') %type==1 %Current module value 
+    if type==1 %Current module value 
         if dconc ==1 %HbO ou 830
             d1 = PMI{currentsub}.data(cf).HRF.AvgC(echantillon_time,1:nbhalf);
         elseif dconc==2 %HbR ou 690
@@ -966,7 +964,7 @@ elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
              d1= opentopo([path name]);
              set(handles.popupmenu_display,'string',{'Current module',['Topo ',name1]});
          end
-    elseif strcmp(typelabel{type}, 'Mean start stop time')  %Mean time start time stop 
+    elseif type==2 %Mean time start time stop 
     echantillon_timestart = find(str2num(get(HOMERhandles.edit_time_start,'string'))<=PMI{currentsub}.data(cf).HRF.tHRF);
     echantillon_timestop = find(str2num(get(HOMERhandles.edit_time_stop,'string'))<=PMI{currentsub}.data(cf).HRF.tHRF);
     echantillon_time = echantillon_timestart(1): echantillon_timestop(1) ;
@@ -979,7 +977,7 @@ elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
                 mean(PMI{currentsub}.data(cf).HRF.AvgC(echantillon_time,nbhalf+1:end));
         end
         echantillon_time = echantillon_time(1);
-    elseif strcmp(typelabel{type}, 'Projection Channel .cp')  %load D1 matrix 'Projection Channel .cp',
+    elseif type==3 %load D1 matrix 'Projection Channel .cp',
         [name,path]= uigetfile({'*.mat';'Select channel projection *.cp'});
         d1 = load('-mat',[path name]);
         if isfield(d1,'zonelist')
@@ -1017,7 +1015,7 @@ elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
         get(handles.edit_D1matrix,'position') 
          set(handles.edit_D1matrix,'value',1)
          guidata(hObject,handles);
-    elseif strcmp(typelabel{type}, 'PARAFAC')  %PARAFAC FACTOR
+    elseif type==4 %PARAFAC FACTOR
          FacSpatial = PMI{currentsub}.tmpPARAFAC.Factors{2}
          selected = PMI{currentsub}.tmpPARAFAC.selected;
          d1 = zeros( size(PMI{1}.data.MeasListAct,1)/2,1)
@@ -1027,7 +1025,7 @@ elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
              d1(PMI{1}.tmpPARAFAC.listgood,1) =-FacSpatial(:,selected);
          end
          %d1 =  FacSpatial(:,selected);
-    elseif strcmp(typelabel{type}, 'ICA') %ICA FACTOR
+    elseif type==6 %ICA FACTOR
          FacSpatial = PMI{currentsub}.tmpICA.Factors{2}
          selected =PMI{currentsub}.tmpICA.selected;
          if dconc==1
@@ -1038,7 +1036,7 @@ elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
             d1(PMI{1}.tmpICA.listgood(1:end/2),1) =FacSpatial(selected,end/2+1:end)
          end
          %d1 =  FacSpatial(:,selected);
-     elseif strcmp(typelabel{type}, 'PCA') %PCA FACTOR
+     elseif type==5 %PCA FACTOR
          s = PMI{currentsub}.tmpPCA.s;
          u = PMI{currentsub}.tmpPCA.u;
          v = PMI{currentsub}.tmpPCA.v;
@@ -1100,7 +1098,7 @@ elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
          elseif dconc==2
              d1(PMI{1}.tmpPARAFACwavelet.listgood,1) =-FacSpatial(:,selected);
          end
-    elseif strcmp(typelabel{type}, 'GLM')  %GLM
+    elseif type==7 %GLM
          beta = PMI{currentsub}.tmpGLM.beta;
          selected = PMI{currentsub}.tmpGLM.selected;
          d1 = zeros( size(PMI{1}.data.MeasListAct,1)/2,1)
@@ -1109,7 +1107,7 @@ elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
          elseif dconc==2
              d1(PMI{1}.tmpGLM.listgood,1) =-beta(selected,:);
          end
-    elseif strcmp(typelabel{type}, 'COMPONENT')%Selected component topo
+    elseif type==8 %Selected component topo
           d1 = zeros( size(PMI{1}.data.MeasListAct,1)/2,1); 
           %tmp list good could containt both wavelenght of just one if it
           %contain both separate hbo and hbr as first and second half else
@@ -1225,10 +1223,9 @@ if get(handles.radio_viewdistance,'value')& get(handles.popup_labelch,'value')==
     DispParameter.idnb = 0;
     DispParameter.nbavg =0;
     if isfield(handles,'d1')
-        DispParameter.d1 = handles.d1;
+    DispParameter.d1 = handles.d1;
     else
-        DispParameter.D1label = 0;
-    end
+     DispParameter.D1label
 elseif get(handles.radio_viewdistance,'value')&get(handles.popup_labelch,'value')==2
     DispParameter.D1label = 0;
     DispParameter.dist = 1;

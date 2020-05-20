@@ -2363,6 +2363,15 @@ function vout = nirs_cfg_vout_E_exportcomponent_zone(job)
 end
 
 
+% Folder selector.
+e_STATCOMPPath          = cfg_files; %path
+e_STATCOMPPath.name     = 'Result folder';
+e_STATCOMPPath.tag      = 'e_STATCOMPPath';
+e_STATCOMPPath.filter   = {'dir'};
+e_STATCOMPPath.ufilter  = '.*';    %
+e_STATCOMPPath.num      = [1 1];     % Number of inputs required 
+e_STATCOMPPath.help     = {'Result of the statistic will be saved in this folder'};
+
 
 m_TtestOneSample       = cfg_menu;
 m_TtestOneSample.tag  = 'm_TtestOneSample';
@@ -2397,7 +2406,7 @@ f_componentG1.num     = [1 Inf];     % Number of inputs required
 f_componentG1.help    = {'Enter the list of component to test statisticly.'}; 
 
 f_componentG2        = cfg_files;
-f_componentG2.name    = 'Groupe 2 (components export)'; 
+f_componentG2.name    = 'Group 2 (components export)'; 
 f_componentG2.tag     = 'f_componentG2';       %file names
 f_componentG2.filter  = 'mat';
 f_componentG2.ufilter = '.mat';    
@@ -2411,33 +2420,33 @@ b_TtestUnpaired.name   = 'Unpaired t-test' ;
 b_TtestUnpaired.val    = {f_componentG1,f_componentG2,m_TtestOneSample};
 b_TtestUnpaired.help   = {'The implementation an unpaired ttest'};
 
-f_componentG2        = cfg_files;
-f_componentG2.name    = 'Groupe 2 (components export)'; 
-f_componentG2.tag     = 'f_componentG2';       %file names
-f_componentG2.filter  = 'xlsx';
-f_componentG2.ufilter = '.xlsx';    
-f_componentG2.num     = [1 Inf];     % Number of inputs required 
-f_componentG2.help    = {'Enter the of observation to compute the anovan first row : dir, second row: compenent file name, 3 row and  '}; 
+f_anovan         = cfg_files;
+f_anovan.name    = 'Group identification'; 
+f_anovan.tag     = 'f_anovan';       %file names
+f_anovan.filter  = {'xlsx','xls','txt'};
+f_anovan.ufilter =  '.*';    
+f_anovan.num     = [1 Inf];     % Number of inputs required 
+f_anovan.help    = {'Enter the of observation to compute the anovan first row : dir, second row: compenent file name, 3 row and  '}; 
 
-
+ 
 
 b_ANOVAN        = cfg_branch;
 b_ANOVAN.tag    = 'b_ANOVAN';
 b_ANOVAN.name   = 'Anovan' ;
-b_ANOVAN.val    = {f_componentG1,f_componentG2,m_TtestOneSample};
+b_ANOVAN.val    = {f_anovan};
 b_ANOVAN.help   = {'N-way analysis of variance'};
 
 c_statcomponent          = cfg_choice;
 c_statcomponent.tag     = 'c_statcomponent';
 c_statcomponent.name    = 'Choose the statistical test';
-c_statcomponent.values  = {b_TtestOneSample, b_TtestUnpaired };
+c_statcomponent.values  = {b_TtestOneSample, b_TtestUnpaired,b_ANOVAN };
 c_statcomponent.val     = {b_TtestOneSample}; %Default option
 c_statcomponent.help    = {''};
 
 E_statcomponent    = cfg_exbranch;
 E_statcomponent.name = 'Stats components';
 E_statcomponent.tag  = 'E_statcomponent';
-E_statcomponent.val  = {c_statcomponent};
+E_statcomponent.val  = {c_statcomponent, e_STATCOMPPath};
 E_statcomponent.prog = @nirs_run_E_statcomponent;
 E_statcomponent.vout = @nirs_cfg_vout_E_statcomponent;
 E_statcomponent.help = {'Apply basic statistic on component exported'};

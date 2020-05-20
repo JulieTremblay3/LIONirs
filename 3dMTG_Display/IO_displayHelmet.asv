@@ -483,12 +483,7 @@ function displaychannelcortex(DispHelm,PMI,DispParameter)
             x = ((srsx+detx)/2)+0.005;
             y = (srsy+dety)/2+0.005;
             z = (srsz+detz)/2+0.005;
-            text(x,y,z,num2str(PMI{currentsub}.plotLst(ind)),'color','black','FontSize',14);      
-        elseif DispParameter.navg
-            x = ((srsx2+detx2)/2)+0.005;
-            y = (srsy2+dety2)/2+0.005;
-            z = (srsz2+detz2)/2+0.005;                      
-            text(x,y,z,num2str(PMI{currentsub}.data(cf).HRF.navg(PMI{currentsub}.plotLst(ind))),'color','black','FontSize',14,'BackgroundColor',[1,1,1]);
+            text(x,y,z,num2str(PMI{currentsub}.plotLst(ind)),'color','black','FontSize',14);            
         end
     end
     end
@@ -584,29 +579,20 @@ function displaychannel(DispHelm,PMI,DispParameter)
         
          if  DispParameter.D1label & isfield(DispParameter,'d1')
             x = ((srsx+detx)/2)+0.005*((srsx+detx)/2)/abs(((srsx+detx)/2));
-            y = (srsy+dety)/2+0.005*((srsy+dety)/2)/abs(((srsy+dety)/2));
-            z = (srsz+detz)/2+0.005*((srsz+detz)/2)/abs(((srsz+detz)/2));
-            if PMI{currentsub}.plotLst(ind)<numel(DispParameter.d1)
-                val = DispParameter.d1(PMI{currentsub}.plotLst(ind));  
-            else 
-                val = '';
-            end
+            y = (srsy+dety)/2+0.005*((srsx+detx)/2)/abs(((srsx+detx)/2));
+            z = (srsz+detz)/2+0.005;
+            val = DispParameter.d1(PMI{currentsub}.plotLst(ind));            
             text(x,y,z,num2str(val),'color','black','FontSize',14);
         elseif DispParameter.dist
-            x = ((srsx+detx)/2)+0.005*((srsx+detx)/2)/abs(((srsx+detx)/2));
-            y = (srsy+dety)/2+0.005*((srsy+dety)/2)/abs(((srsy+dety)/2));
-            z = (srsz+detz)/2+0.005*((srsz+detz)/2)/abs(((srsz+detz)/2));
+            x = ((srsx+detx)/2)+0.005;
+            y = (srsy+dety)/2+0.005;
+            z = (srsz+detz)/2+0.005;
             text(x,y,z,d_str,'color','black','FontSize',14);
         elseif DispParameter.idnb
-            x = ((srsx+detx)/2)+0.005*((srsx+detx)/2)/abs(((srsx+detx)/2));
-            y = (srsy+dety)/2+0.005*((srsy+dety)/2)/abs(((srsy+dety)/2));
-            z = (srsz+detz)/2+0.005*((srsz+detz)/2)/abs(((srsz+detz)/2));
-            text(x,y,z,num2str(PMI{currentsub}.plotLst(ind)),'color','black','FontSize',14);         
-         elseif DispParameter.nbavg&isfield(PMI{currentsub}.data(cf).HRF,'navg')
-             x = ((srsx2+detx2)/2)+0.005*((srsx+detx)/2)/abs(((srsx+detx)/2));
-            y = (srsy2+dety2)/2+0.005*((srsy+dety)/2)/abs(((srsy+dety)/2));
-            z = (srsz2+detz2)/2+0.005*((srsz+detz)/2)/abs(((srsz+detz)/2));                      
-            text(x,y,z,num2str(PMI{currentsub}.data(cf).HRF.navg(PMI{currentsub}.plotLst(ind))),'color','black','FontSize',14,'BackgroundColor',[1,1,1]);
+            x = ((srsx+detx)/2)+0.005;
+            y = (srsy+dety)/2+0.005;
+            z = (srsz+detz)/2+0.005;
+            text(x,y,z,num2str(PMI{currentsub}.plotLst(ind)),'color','black','FontSize',14);            
         end
         
     
@@ -851,9 +837,9 @@ end
 %                       255/255,255/255,0;
 %                       0,255/255,0;
 %                       0,255/255,0;]
-%           mixcolor = [0,128/255,0;
-%                      0,128/255,0;
-%                      0,128/255,0];
+          mixcolor = [0,128/255,0;
+                     0,128/255,0;
+                     0,128/255,0]
           for ind_map = 1:numel(DispParameter.enumaltas)
               map(DispParameter.enumaltas(ind_map),:) = mixcolor(ind_map,:);
           end

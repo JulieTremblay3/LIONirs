@@ -1317,17 +1317,17 @@ try
             end
         end
         if epochavg
-            [pathstr, name, ext] = fileparts(handles.NIRS.Dt.fir.pp(idmodule).p{idfile})
+            [pathstr, name, ext] = fileparts(handles.NIRS.Dt.fir.pp(idmodule).p{idfile});
+               xnumstim = fullfile(pathstr,[name,'_events',ext]);
+                numstim = fopen_NIR(xnumstim,NC)';
+                PMI{currentsub}.data(cf).HRF.navg = numstim;            
             if get(handles.popup_average,'value')==1 %mean
-                xname =fullfile(pathstr,[name,ext]);
+                xname =fullfile(pathstr,[name,ext]);             
             elseif get(handles.popup_average,'value')==2 %mean et std
                 xname =fullfile(pathstr,[name,ext]);
-                xstd = fullfile(pathstr,[name,'_std',ext]);
-                xnumstim = fullfile(pathstr,[name,'_events',ext]);
+                xstd = fullfile(pathstr,[name,'_std',ext]);;
                 AvgStd = fopen_NIR(xstd,NC)';
-                numstim = fopen_NIR(xnumstim,NC)';
-                PMI{currentsub}.data(cf).HRF.AvgStdErr = AvgStd./ numstim.^0.5;
-                PMI{currentsub}.data(cf).HRF.navg = numstim;
+                PMI{currentsub}.data(cf).HRF.AvgStdErr = AvgStd./ numstim.^0.5;    
             elseif get(handles.popup_average,'value')==3 %tval
                 xname =fullfile(pathstr,[name,'_tval',ext]);
             elseif get(handles.popup_average,'value')==4 %event
@@ -1360,7 +1360,7 @@ try
         PMI{currentsub}.data(cf).HRF.tHRF = 1/handles.NIRS.Cf.dev.fs:1/handles.NIRS.Cf.dev.fs:size(PMI{currentsub}.data(cf).HRF.AvgC,1)*1/handles.NIRS.Cf.dev.fs;
         %Timing setting for epoch average
         if epochavg
-            PMI{currentsub}.data(cf).HRF.tHRF =PMI{currentsub}.data(cf).HRF.tHRF - handles.NIRS.Dt.fir.pp(idmodule).job.choiceave.pretime  ;
+            PMI{currentsub}.data(cf).HRF.tHRF =PMI{currentsub}.data(cf).HRF.tHRF - str2num(handles.NIRS.Dt.fir.pp(idmodule).job.choiceave.pretime)  ;
             %                 figure
             %                 xname =fullfile(pathstr,[name,'_events',ext]);
             %                 events = fopen_NIR(xname,NC)';
@@ -1509,7 +1509,7 @@ try
         PMI{currentsubhold}.data(cf).HRF.tHRF = 1/handles.NIRS.Cf.dev.fs:1/handles.NIRS.Cf.dev.fs:size(PMI{currentsubhold}.data(cf).HRF.AvgC,1)*1/handles.NIRS.Cf.dev.fs;
         %Timing setting for epoch average
         if epochavg
-            PMI{currentsubhold}.data(cf).HRF.tHRF =PMI{currentsub}.data(cf).HRF.tHRF - handles.NIRS.Dt.fir.pp(idmodulehold).job.choiceave.pretime  ;
+            PMI{currentsubhold}.data(cf).HRF.tHRF =PMI{currentsub}.data(cf).HRF.tHRF - str2num(handles.NIRS.Dt.fir.pp(idmodulehold).job.choiceave.pretime)  ;
             %                 figure
             %                 xname =fullfile(pathstr,[name,'_events',ext]);
             %                 events = fopen_NIR(xname,NC)';

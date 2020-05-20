@@ -273,8 +273,8 @@ end
         x2 =  NIRS.Cf.H.D.r.o.mm.p(1,ml(i,2));
         y1 =  NIRS.Cf.H.S.r.o.mm.p(2,ml(i,1));
         y2 =  NIRS.Cf.H.D.r.o.mm.p(2,ml(i,2));
-        z1 =  NIRS.Cf.H.S.r.o.mm.p(3,ml(i,1));
-        z2 =  NIRS.Cf.H.D.r.o.mm.p(3,ml(i,2));
+        z1 =  NIRS.Cf.H.S.r.o.mm.p(3,SD.ml(i,1));
+        z2 =  NIRS.Cf.H.D.r.o.mm.p(3,SD.ml(i,2));
         NIRS.Cf.H.C.gp(i,1) = sqrt((x2-x1)^2+(y2-y1)^2+ (z2-z1)^2);%À CALCULER DISTANCE GÉOMETRIQUE
         pos(i,1) = (x2-x1)/2+x1;
         pos(i,2) = (y2-y1)/2+y1;
@@ -283,6 +283,7 @@ end
     end
     
     %idbad = find(NIRS.Cf.H.C.gp<job.distmin|NIRS.Cf.H.C.gp>job.distmax);
+     NIRS.Cf.H.C.ok = SD.ok;
      zone.SD.Lambda = NIRS.Cf.dev.wl;
      zone.SD.SrcPos = NIRS.Cf.H.S.r.o.mm.p';
      zone.SD.DetPos = NIRS.Cf.H.D.r.o.mm.p';
@@ -291,16 +292,16 @@ end
      zone.SD.SrcAmp = ones(zone.SD.nSrcs ,2);
      zone.SD.DetAmp = ones(zone.SD.nDets,2);
      zone.color = [lines(8);lines(8)];     
-     zone.ml = ml;
+     zone.ml = SD.ml;
      zone.peak = [];
      zone.pos = pos;
     zone.label{1} = ['Regressor All'];
-    zone.plot{1} = [ml(ml(: ,4)==1,1), ml(ml(: ,4)==1,2)];
-    zone.plotLst{1} =  [find(ml(: ,4)==1)];
+    zone.plot{1} = [SD.ml(SD.ml(: ,4)==1,1), SD.ml(SD.ml(: ,4)==1,2)];
+    zone.plotLst{1} =  [find(SD.ml(: ,4)==1)];
     zone.label{2} = ['All'];
-    zone.plot{2} = [ml(ml(: ,4)==1,1), ml(ml(: ,4)==1,2)];
-    zone.plotLst{2} =  [find(ml(: ,4)==1)];
-    save( [dirout, filesep,'Global.zone'],'zone');
+    zone.plot{2} = [SD.ml(SD.ml(: ,4)==1,1), SD.ml(SD.ml(: ,4)==1,2)];
+    zone.plotLst{2} =  [find(SD.ml(: ,4)==1)];
+    save( [pathout, filesep,'Global.zone'],'zone');
 
     save(fullfile(dirout,'NIRS.mat'),'NIRS');
     job.NIRSmat{1} =fullfile(dirout,'NIRS.mat');

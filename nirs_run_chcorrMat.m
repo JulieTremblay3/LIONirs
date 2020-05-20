@@ -310,8 +310,8 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
          if ~isempty(idoutlier)
             matcorr(idoutlier)=nan;
          end
-         meantrial =  nanmean(matcorrHbR(:,:,:),3)
-         stdtrial =  nanstd(matcorrHbR(:,:,:),0,3)
+         meantrial =  nanmean(matcorrHbR(:,:,:),3);
+         stdtrial =  nanstd(matcorrHbR(:,:,:),0,3);
          ztrial = (matcorrHbR- repmat( meantrial,1,1,size(matcorrHbR,3)))./repmat( stdtrial,1,1,size(matcorrHbR,3));
          idoutlier =  find(abs(ztrial)>job.I_chcorrlist_type.b_Pearson.c_Pearson.b_PearsonBootstrap.i_OutlierControl_crossspectrum);
          % zscore across trial to detect outlier trial and set them to nan. 
