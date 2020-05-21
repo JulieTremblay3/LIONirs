@@ -316,13 +316,16 @@ pourcentagetr = job.i_minch_cardiac/100;
             saveas(hfig,fullfile(filepath,[nametmp 'CardiacCHCOH',num2str(f),'.jpg']),'jpg');
             close(hfig)
     end
+    if ismac
+        writetxtfile_asxlsfile(fullfile(filepath,['CardiacCHCOH.xls']),xlsall);
+    else
         xlswrite(fullfile(filepath,['CardiacCHCOH.xls']),xlsall);
-     if  SNRfft
-        xlswrite(fullfile(filepath,['CardiacCHSNR.xls']),xlsallSNR);
-     end
-
-     disp(['Cardiac report : ', fullfile(filepath,['CardiacCHCOH',num2str(f),'.jpg']), ' and ', fullfile(filepath,['CardiacCHCOH.xls']), ' are created'])
-     save(job.NIRSmat{1},'NIRS');
+        if  SNRfft
+            xlswrite(fullfile(filepath,['CardiacCHSNR.xls']),xlsallSNR);
+        end
+    end
+    disp(['Cardiac report : ', fullfile(filepath,['CardiacCHCOH',num2str(f),'.jpg']), ' and ', fullfile(filepath,['CardiacCHCOH.xls']), ' are created'])
+    save(job.NIRSmat{1},'NIRS');
     out.NIRSmat = job.NIRSmat;
 end
 end
