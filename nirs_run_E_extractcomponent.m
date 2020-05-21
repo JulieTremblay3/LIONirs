@@ -1146,14 +1146,15 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
             end
                 %disp(['Error unable to GLM on ' , NIRSmat])
     end    
-
-    
-    
+   
 elseif isfield(job.c_extractcomponent,'b_extractcomponent_PARAFAC')
-    
-    [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_PARAFAC.f_component_PARAFAClist{1});
+    [~,~,ext] =fileparts(job.c_extractcomponent.b_extractcomponent_PARAFAC.f_component_PARAFAClist{1});
+    if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
+        [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_PARAFAC.f_component_PARAFAClist{1});
+    elseif strcmp(ext,'.txt')   
+        [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_PARAFAC.f_component_PARAFAClist{1});
+    end
      
-    
     for icol=1:size(rawData,2)  
         if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat folder')))
             id.NIRSDtp = icol;
@@ -1325,10 +1326,16 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_PARAFAC')
         
     end
 elseif isfield(job.c_extractcomponent,'b_extractcomponent_AVG')
-    [pathstr, name, ext]= fileparts(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1})
-    [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
-    
-    
+    elseif isfield(job.c_extractcomponent,'b_extractcomponent_PARAFAC')
+    [~,~,ext] =fileparts(job.c_extractcomponent.b_extractcomponent_PARAFAC.f_component_PARAFAClist{1});
+    if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
+        [pathstr, name, ext]= fileparts(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
+        [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
+    elseif strcmp(ext,'.txt')   
+        [pathstr, name, ext]= fileparts(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
+        [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
+    end 
+       
    for icol=1:size(rawData,2)  
         if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat folder')))
             id.NIRSDtp = icol;
