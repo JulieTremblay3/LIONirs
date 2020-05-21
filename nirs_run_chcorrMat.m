@@ -584,9 +584,10 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
             load(job.I_chcorrlist_type.b_crossspectrum.i_ch_crossspectrum{1},'-mat');
             
             power = yall.*conj(yall)/n;
-            
-            matcorr= nan(numel(listname),numel(listname),1);
-            matcorrHbR= nan(numel(listname),numel(listname),1);
+            if isfield(job.b_nodelist,'I_chcorrlist')  
+                matcorr= nan(numel(listname),numel(listname),1);
+                matcorrHbR= nan(numel(listname),numel(listname),1);
+            end
             freq = job.I_chcorrlist_type.b_crossspectrum.i_Freq_crossspectrum;
             startF =sum(f_fft<=freq(1));
             stopF  =sum(f_fft<=freq(end));
@@ -629,25 +630,44 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
             power = yall.*conj(yall)/n;
             zonelist = 1:numel(zone.plotLst);
             hplot = figure;
-            for izone=1:numel(zonelist)
-                subplot(ceil(sqrt(numel(zone.plotLst))),ceil(sqrt(numel(zone.plotLst))),izone);hold on
-                list =  zoneuse.plotLst{zonelist(izone)};
-                colorlst= jet(numel(list));
-                for i=1:numel(list)
-                    sumnan = sum(sum(isnan(power(:,list(i),:)),3),1);
-                    if strcmp(NIRS.Cf.dev.n,'ISS')
-                        srs = SDPairs2strboxy_ISS(ML_new(list(i),1));
-                        det = SDDet2strboxy_ISS(ML_new(list(i),2));
-                    else
-                        srs = SDPairs2strboxy(ML_new(list(i),1));
-                        det = SDDet2strboxy(ML_new(list(i),2));
+            try
+                for izone=1:numel(zonelist)
+                    subplot(ceil(sqrt(numel(zone.plotLst))),ceil(sqrt(numel(zone.plotLst))),izone);hold on
+                    list =  zoneuse.plotLst{zonelist(izone)};
+                    colorlst= jet(numel(list));
+                    for i=1:numel(list)
+                        sumnan = sum(sum(isnan(power(:,list(i),:)),3),1);
+                        if strcmp(NIRS.Cf.dev.n,'ISS')
+                            srs = SDPairs2strboxy_ISS(ML_new(list(i),1));
+                            det = SDDet2strboxy_ISS(ML_new(list(i),2));
+                        else
+                            srs = SDPairs2strboxy(ML_new(list(i),1));
+                            det = SDDet2strboxy(ML_new(list(i),2));
+                        end
+                        plot(f_fft,nanmean(log10(power(:,list(i),:)),3),'color',colorlst(i,:),'displayname',[srs,'_',det,' ',num2str(sumnan)]);
+                        ylim([minval,maxval]);
+                        plot([f_fft(startF),f_fft(startF)],[minval,maxval],'r')
+                        plot([f_fft(stopF),f_fft(stopF)],[minval,maxval],'r')
                     end
-                    plot(f_fft,nanmean(log10(power(:,list(i),:)),3),'color',colorlst(i,:),'displayname',[srs,'_',det,' ',num2str(sumnan)]);
-                    ylim([minval,maxval]);
-                    plot([f_fft(startF),f_fft(startF)],[minval,maxval],'r')
-                    plot([f_fft(stopF),f_fft(stopF)],[minval,maxval],'r')
+                    title(zoneuse.label{zonelist(izone)})
                 end
-                title(zoneuse.label{zonelist(izone)})
+            catch
+                subplot(1,1,1);hold on
+                list = 1:size(power,2);
+                    for i=1:numel(list)
+                        sumnan = sum(sum(isnan(power(:,list(i),:)),3),1);
+                        if strcmp(NIRS.Cf.dev.n,'ISS')
+                            srs = SDPairs2strboxy_ISS(ML_new(list(i),1));
+                            det = SDDet2strboxy_ISS(ML_new(list(i),2));
+                        else
+                            srs = SDPairs2strboxy(ML_new(list(i),1));
+                            det = SDDet2strboxy(ML_new(list(i),2));
+                        end
+                        plot(f_fft,nanmean(log10(power(:,list(i),:)),3),'displayname',[srs,'_',det,' ',num2str(sumnan)]);
+                        ylim([minval,maxval]);
+                        plot([f_fft(startF),f_fft(startF)],[minval,maxval],'r')
+                        plot([f_fft(stopF),f_fft(stopF)],[minval,maxval],'r')
+                    end
             end
             avgfft = nanmean(nanmean(log10(power(startF:stopF,:,:)),3),2);
             interval  = startF:stopF;
@@ -1208,20 +1228,20 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
         zone.ml = MLfake;
         zone.chMAT = plotLst;
         save(fullfile(pathout,['avg',filezone,'.zone']),'zone','-mat')
+        meancorr=nanmean(matcorr,3);
+        meancorrHbR=nanmean(matcorrHbR,3);  
     elseif isfield(job.b_nodelist,'I_chcorrlist')       %Channel list
-        ZoneList  = listname;
+        ZoneList  = listname;   
+        %add nan on row with rejected channel
+        idbad = find( idokHBO==0);
+        matcorr(idbad,:,:) = nan;
+        matcorr(:,idbad,:) = nan;
+        meancorr=nanmean(matcorr,3);
+        idbad = find(idokHBR==0);
+        matcorrHbR(idbad,:,:) = nan;
+        matcorrHbR(:,idbad,:) = nan;
+        meancorrHbR=nanmean(matcorrHbR,3);    
     end
-    %add nan on row with rejected channel
-    idbad = find( idokHBO==0);
-    matcorr(idbad,:,:) = nan;
-    matcorr(:,idbad,:) = nan;
-    meancorr=nanmean(matcorr,3);
-    idbad = find(idokHBR==0);
-    matcorrHbR(idbad,:,:) = nan;
-    matcorrHbR(:,idbad,:) = nan;
-    meancorrHbR=nanmean(matcorrHbR,3);
-    
-    
     
     if isfield(job.I_chcorrlist_type,'b_Pearson')
         if 0 % job.I_chcorrlist_type.b_Pearson.m_Pearson == 2 %fisher transform on the data

@@ -298,7 +298,7 @@ for igroupe = 1:max(groupeall)
            MLfake(izoneList,4) = 1;        
            strDet = SDDet2strboxy_ISS(MLfake(izoneList,2));
            strSrs = SDPairs2strboxy_ISS(MLfake(izoneList,1)); 
-           ZoneList{izoneList,1}=[strDet,' ', strSrs]
+           ZoneList{izoneList,1}=[strDet,' ', strSrs];
            plot{izoneList} = [izoneList,1];
            plotLst{izoneList} = [izoneList];
          
@@ -309,7 +309,7 @@ for igroupe = 1:max(groupeall)
        DATA{idnew}.name = ['AVG groupe ',num2str(igroupe)];
        DATA{idnew}.MATtrial =  MATAVGALL;
        DATA{idnew}.GR = 0;     
-       DATA{idnew}.System = 'ISS'
+       DATA{idnew}.System = 'ISS';
        DATA{idnew}.zone.plot = plot;
        DATA{idnew}.zone.plotLst = plotLst;
        DATA{idnew}.zone.label = idlabelall;

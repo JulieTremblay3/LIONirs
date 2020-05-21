@@ -12,13 +12,24 @@ function  [ listHBOch, listHBRch, listnameHbO, listnameHbR, zonelist]= findchinC
         fclose(fid);
         DetL= chlist{1};
         SrsL= chlist{2};
+        name =  DetL{1};
+        if numel(name)>1
+            if strcmp(name(1:2),'D0')
+                Devicename = 'NIRx';
+            else
+                Devicename  = 'ISS Imagent';
+            end
+        else
+            Devicename  = 'ISS Imagent';
+        end
+        
         list = zeros(numel(chlist{1}),1);
         for i=1:numel(chlist{1})
-            if strcmp(NIRS.Cf.dev.n,'NIRx')
+            if strcmp(Devicename,'NIRx')
                 SDdetL = StrBoxy2SDDet(DetL{i});
                  tmp = SrsL{i};
                  SDsrsL = str2num(tmp(2:end));
-            elseif strcmp(NIRS.Cf.dev.n,'NIRS FILE HOMER')
+            elseif strcmp(Devicename,'NIRS FILE HOMER')
                  SDdetL = StrBoxy2SDDet(DetL{i});
                  tmp = SrsL{i};
                  SDsrsL = str2num(tmp(2:end));

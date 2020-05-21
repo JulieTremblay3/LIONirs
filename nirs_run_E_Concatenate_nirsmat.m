@@ -169,11 +169,22 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
         fclose(fid);
         DetL= chlist{1};
         SrsL= chlist{2};
+          name =  DetL{1};
+        if numel(name)>1
+            if strcmp(name(1:2),'D0')
+                Devicename = 'NIRx';
+            else
+                Devicename  = 'ISS Imagent';
+            end
+        else
+            Devicename  = 'ISS Imagent';
+        end
+        
         list = zeros(numel(chlist{1}),1);
         for i=1:numel(chlist{1})
             NIRS.Cf.dev.n;
             NIRSDtp{filenb};
-            switch NIRS.Cf.dev.n
+            switch Devicename %NIRS.Cf.dev.n
                 case 'ISS Imagent'
                     SDdetL = StrBoxy2SDDet_ISS(DetL{i});
                     SDsrsL = StrBoxy2SDPairs(SrsL{i});

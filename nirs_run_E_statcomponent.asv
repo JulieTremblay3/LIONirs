@@ -196,24 +196,31 @@ elseif strcmp(ext,'.zone')
           disp(['File ',fullfile(raw{i,1},raw{i,3}),' could not be load'])
           return
       end
-        labelzone = raw{i,4};
+        labelzone = raw{i,4}
         for izone=1:numel(zone.zone.label)
             if strcmp(zone.zone.label{izone}, labelzone)
                 goodzone = izone;
-                %zoneidnum{i-1,1} = izone;
-                zoneid{i-1,1} = labelzone;
+                zoneidnum{i-1,1} = izone;
+                zoneid{i-1,1} = labelzone
             end
         end
-        plotLst = zone.zone.plotLst{goodzone};
+        plotLst = zone.zone.plotLst{goodzone}
         AllCOM = [AllCOM,nanmax(tmp.A(plotLst))];
      end
      
-     groupcell = raw(2:end, 5:end);
+%       mean(AllCOM(1:10))
+%        mean(AllCOM(11:20))
+%      mean(AllCOM(21:30))
+%      mean(AllCOM(31:40))
+%      groupedef = [repmat(1,10,1);repmat(2,10,1);repmat(3,10,1);repmat(4,10,1)]
+%      [p,tbl,stats,terms] = anovan(y',groupedef,'display','off' );
+%       multcompare(stats);
+
+     groupcell = [zoneidnum,raw(2:end, 5:end)];
      name = raw(1, 4:end);%conditioni  could be a number or a zone label to identify region if zone ! 
      groupe = cell2mat(groupcell); 
-      groupedef{1} =  zoneid;
      for i = 1:size(groupe,2)
-        groupedef{i+1}=( groupe(:,i));
+        groupedef{i}=( groupe(:,i));
      end
     dir1 = job.e_STATCOMPPath{1}; 
     for ich = 1:size(AllCOM,1)         
