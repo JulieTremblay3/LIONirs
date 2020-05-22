@@ -686,10 +686,9 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
             saveas(hplot,  [pathout,filloutput,sprintf('%03.0f', f),'FFTPLOT.jpg'],'jpg')
             if job.I_chcorrlist_type.b_crossspectrum.m_savefft_crossspectrum
                 if  isfield(job.b_nodelist,'I_zonecorrlist') 
-                    save([pathout,filloutput,'ComplexFFT.mat'],'yall','f_fft','ML_new','Bloc','ZoneList')
-                elseif isfield(job.b_nodelist,'I_chcorrlist') 
-                    save([pathout,filloutput,'ComplexFFT.mat'],'yall','f_fft','listHBOch','listHBRch','ML_new','Bloc')
-                end
+                save([pathout,filloutput,'ComplexFFT.mat'],'yall','f_fft','listHBOch','listHBRch','ML_new','Bloc')
+                elseif
+                    
             end
             %close(hplot)
             
