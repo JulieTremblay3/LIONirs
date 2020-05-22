@@ -188,7 +188,7 @@ elseif isfield(job.c_statcomponent,'b_ANOVAN')
 %               c1 = gnames{mult(icomp,1)}
 %               c2 = gnames{mult(icomp,2)}
                 eval( ['p',gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},'(',num2str(ich),',',num2str(idim),')','=',num2str(mult(icomp,6)),';']);
-               eval( ['mdiff',gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},'(',num2str(ich),',',num2str(idim),')','=',num2str(mult(icomp,4)),';']);
+               eval( ['mdiff',gnames{mult(icomp,1)},'_',GRFac1{mult(icomp,2)},'(',num2str(ich),',',num2str(idim),')','=',num2str(mult(icomp,4)),';']);
 
             end
          end 
@@ -197,6 +197,7 @@ elseif isfield(job.c_statcomponent,'b_ANOVAN')
     end 
     [FDR,Q] = mafdr(pval(:));
     FDR = reshape(FDR, size(pval));
+           terms
 
     for idim = 1:size(pval,2)
         A = double( pval(:,idim)<0.05);
@@ -215,15 +216,15 @@ elseif isfield(job.c_statcomponent,'b_ANOVAN')
          A = double(1- FDR(:,idim));
         save(fullfile( dir1,['anovan_FDR1-q ',label,'.mat']),'A','zonelist'); 
         for icomp = 1:size(mult,1)
-            eval(['A = p',gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},';']);           
-            fileout =fullfile(dir1,['posthoc p ',gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},'.mat']);
+            eval(['A = p',gnames{mult(icomp,1)},'_',GRFac1{mult(icomp,2)},';']);           
+            fileout =fullfile(dir1,['posthoc p ',gnames{mult(icomp,1)},'_',GRFac1{mult(icomp,2)},'.mat']);
             save(fileout,'A','zonelist'); 
-             eval(['A = mdiff',gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},';']);               
-            fileout =fullfile(dir1,['posthoc mdiff ',gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},'.mat']);
+             eval(['A = mdiff',gnames{mult(icomp,1)},'_',GRFac1{mult(icomp,2)},';']);               
+            fileout =fullfile(dir1,['posthoc mdiff ',gnames{mult(icomp,1)},'_',GRFac1{mult(icomp,2)},'.mat']);
             save(fileout,'A','zonelist');
-            eval(['ptmp = p',gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},';']);  
+            eval(['ptmp = p',gnames{mult(icomp,1)},'_',GRFac1{mult(icomp,2)},';']);  
             A = A.*(ptmp<0.05);
-            fileout =fullfile(dir1,['posthoc mdiffp05 ',gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},'.mat']);
+            fileout =fullfile(dir1,['posthoc mdiffp05 ',gnames{mult(icomp,1)},'_',GRFac1{mult(icomp,2)},'.mat']);
             save(fileout,'A','zonelist');  
        end
     end 

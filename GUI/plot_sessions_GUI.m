@@ -8906,7 +8906,7 @@ try
 for i=1:numel(PARCOMP(1,id).listgood)
  idxc = find_idx_color(PMI{currentsub}.data(cf).MeasList, PARCOMP(1,id).listgood(i),...
             numel(PMI{currentsub}.color)/3);
-         h=plot(PMI{currentsub}.data(cf).HRF.tHRF(PARCOMP(1,id).indt(1):PARCOMP(1,id).indt(end)),PARCOMP(1,id).Xm(:,i,1)+step,'color',PMI{currentsub}.color(idxc,:))
+         h=plot(PMI{currentsub}.data(cf).HRF.tHRF(PARCOMP(1,id).indt(1):PARCOMP(1,id).indt(end)),PARCOMP(1,id).Xm(:,i,1)+step,'color',PMI{currentsub}.color(idxc,:));
         srs = SDPairs2strboxy(PMI{currentsub}.data(cf).MeasList(PARCOMP(1,id).listgood(i),1));
         det = SDDet2strboxy(PMI{currentsub}.data(cf).MeasList(PARCOMP(1,id).listgood(i),2));
         set(h,'displayname',['ch',num2str(PARCOMP(1,id).listgood(i)),'_',srs, '_', det]);
@@ -8954,9 +8954,9 @@ currentsub=1;
 PMI = get(guiHOMER,'UserData');
 cf = PMI{currentsub}.currentFile;
 d = PMI{currentsub}.data(cf).HRF.AvgC;
-[pathstr, name, ext] = fileparts(handles.NIRSpath{1})
-idcurrent = get(handles.listbox_Component,'value')
-idval = get(handles.popupmethodselected,'value')
+[pathstr, name, ext] = fileparts(handles.NIRSpath{1});
+idcurrent = get(handles.listbox_Component,'value');
+idval = get(handles.popupmethodselected,'value');
 listmethod = get(handles.popupmethodselected,'string');
 if strcmp(listmethod{idval},'Parafac') %get(handles.popupmethodselected,'value')==1  %extract PARAFAC
     indt = [PMI{currentsub}.tmpPARAFAC.indt(1):PMI{currentsub}.tmpPARAFAC.indt(2)];%Time indice
@@ -9088,11 +9088,12 @@ elseif strcmp(listmethod{idval},'PCA')  %extract PCA get(handles.radio_PCA,'valu
         PARCOMP.listgood =  listgood
         PARCOMP.indt = indt %indice de temps.
         PARCOMP.data = data(:,listgood,:);
-        PARCOMP.Xm = temp;
+        %PARCOMP.Xm = temp;
         PARCOMP.u =  PMI{currentsub}.tmpPCA.u;
         PARCOMP.s = PMI{currentsub}.tmpPCA.s;
         PARCOMP.v = PMI{currentsub}.tmpPCA.v;
-        PARCOMP.Xm = PARCOMP.u*PARCOMP.s*PARCOMP.v';
+        lstSV = PMI{1}.tmpPCA.selected;
+        PARCOMP.Xm = PARCOMP.u(:,lstSV)*PARCOMP.s(lstSV,lstSV)*PARCOMP.v(:,lstSV)';
         PARCOMP.ComponentToKeep = PMI{1}.tmpPCA.selected;
         labelid  = get(handles.edit_selectedlabel,'string');
         PARCOMP.label= [labelid,'PCA' sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}];
