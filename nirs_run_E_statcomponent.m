@@ -153,19 +153,30 @@ elseif isfield(job.c_statcomponent,'b_ANOVAN')
      
      groupcell =raw(2:end, 4:end);
      name = raw(1, 4:end);%conditioni  could be a number or a zone label to identify region if zone ! 
-     groupe = cell2mat(groupcell); 
-     for i = 1:size(groupe,2)
-        groupedef{i}=( groupe(:,i));
-     end
+      for i = 1:size(groupcell ,2)
+        groupedef{i}=( groupcell(:,i));
+      end
+    
+
     dir1 = job.e_STATCOMPPath{1}; 
+      if ~isdir(fullfile(dir1,'ch'))
+            mkdir(fullfile(dir1,'ch'))
+      end
     for ich = 1:size(AllCOM,1)         
          y =  AllCOM(ich,:);         
          [p,tbl,stats,terms] = anovan(y',groupedef,'model','interaction','varnames',name,'display','off' );
          for idim = 1:numel(p)
             pval(ich,idim)=p(idim);
             Fval(ich,idim)=tbl{idim+1,6};
+            mult  = multcompare(stats,'display','off');
+            mult  = multcompare(stats,'dimension',[1],'display','off');
+            GRFac1 = stats.grpnames{1};
+           % eval(stats.grpnames{1})
+            for icomp = 1:size(mult,1)
+               eval( ['p',GRFac1{mult(icomp ,1)},'_',GRFac1{mult(icomp,2)},'=',GRFac1{mult(icomp,6)}])
+            end
          end 
-       save(fullfile(dir1,['anovan', zonelist{ich},'stat.mat']), 'stats');
+       save(fullfile([dir1,filesep,'ch'],[ zonelist{ich},'stats.mat']), 'stats');
         % results = multcompare(stats,'Dimension',[1 2]);
     end 
     [FDR,Q] = mafdr(pval(:));
@@ -181,6 +192,7 @@ elseif isfield(job.c_statcomponent,'b_ANOVAN')
         save(fullfile( dir1,['anovan_FDRq0.05 ',name{idim},'.mat']),'A','zonelist') 
          A = double(1- FDR(:,idim));
         save(fullfile( dir1,['anovan_FDR1-q ',name{idim},'.mat']),'A','zonelist') 
+       
     end
     
 elseif strcmp(ext,'.zone')
@@ -209,11 +221,11 @@ elseif strcmp(ext,'.zone')
      end
      
      groupcell = raw(2:end, 5:end);
-     name = raw(1, 4:end);%conditioni  could be a number or a zone label to identify region if zone ! 
-     groupe = cell2mat(groupcell); 
-      groupedef{1} =  zoneid;
-     for i = 1:size(groupe,2)
-        groupedef{i+1}=( groupe(:,i));
+     name = raw(1, 5:end);%conditioni  could be a number or a zone label to identify region if zone ! 
+
+    %  groupedef{1} =  zoneid;
+     for i = 1:size(groupcell ,2)
+        groupedef{i}=( groupcell(:,i));
      end
     dir1 = job.e_STATCOMPPath{1}; 
     for ich = 1:size(AllCOM,1)         

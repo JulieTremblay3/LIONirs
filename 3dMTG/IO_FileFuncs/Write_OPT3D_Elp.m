@@ -28,7 +28,7 @@ function Write_OPT3D_Elp( oHelmet, PathFileName,all,fitonskin,flag_MRIfid )
 %         fid = fid' 
 %     end
 %     if fid(1,2)==0 & fid(1,3)==0 & fid(2,3)==0 & fid(3,3)== 0
-%         rotate_ok = 0;
+         rotate_ok = 0;
 %     else 
 %         rotate_ok = 1;
 %     end
