@@ -2116,8 +2116,8 @@ b_extractcomponent_phys.help    = {'Apply substraction of the short distance phy
 f_extractcomponent_glmlist      = cfg_files;
 f_extractcomponent_glmlist.name    = 'List GLM to identify (xls)'; 
 f_extractcomponent_glmlist.tag     = 'f_extractcomponent_glmlist';       %file names
-f_extractcomponent_glmlist.filter  = 'xls';
-f_extractcomponent_glmlist.ufilter = '.xls';    
+f_extractcomponent_glmlist.filter  = 'txt' ;
+f_extractcomponent_glmlist.ufilter = '.txt';    
 f_extractcomponent_glmlist.num     = [1 Inf];     % Number of inputs required 
 f_extractcomponent_glmlist.help    = {'Enter the list xls to extract GLM, the list must include the following column: ''NIRS.mat folder'': directory of the NIRS.mat to use, ''file''',...
     ': number to identify the file to use,  ''tStart'' : time start in second, tStop : time stop in second, the multiple regression will be applied on this',...
