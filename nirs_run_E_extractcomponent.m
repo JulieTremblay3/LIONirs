@@ -875,12 +875,12 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
             
             tHRF = 1/NIRS.Cf.dev.fs:1/NIRS.Cf.dev.fs:size(d1,1)*1/NIRS.Cf.dev.fs;
             fsNIRS = NIRS.Cf.dev.fs;
-            tstart = find(tHRF'<=startDtp{ievent});
+            tstart = find(tHRF<=startDtp{ievent});
             
             if isempty(tstart)
                 tstart = 1;
             end
-            tstop = find(tHRF'<= stopDtp{ievent});
+            tstop = find(tHRF<= stopDtp{ievent});
             tmpGLM.indt = [tstart(end),tstop(end)];%Time indice
             tmpGLM.spar = d1(tmpGLM.indt(1):tmpGLM.indt(end),:);
             iRegressor =  2;
@@ -1193,8 +1193,8 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_PARAFAC')
        
         tHRF = 1/NIRS.Cf.dev.fs:1/NIRS.Cf.dev.fs:size(d,1)*1/NIRS.Cf.dev.fs;
         fsNIRS = NIRS.Cf.dev.fs;
-        tstart = find(tHRF'<=startDtp{ievent});
-        tstop = find(tHRF'<= stopDtp{ievent});
+        tstart = find(tHRF<=startDtp{ievent});
+        tstop = find(tHRF<= stopDtp{ievent});
         indt = [tstart(end),tstop(end)];%Time indice
         intensnorm = d(indt(1):indt(end),:);
         
