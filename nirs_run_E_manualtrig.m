@@ -5,7 +5,7 @@ load(job.NIRSmat{1,1});
 for itrigfile=1:numel(job.m_trigfile)
     run(job.m_trigfile{itrigfile});
     totaltrig  = 0;
-    for ifile = 1:numel(NIRS.Dt.fir.pp(1).p)      
+    for ifile = 1:numel(NIRS.Dt.fir.pp(end).p)      
         if job.m_trigmode==1 %ajouter les évènement à aux5
             trigfile = [];
             for itrigifile = 1:numel(timingfile)      

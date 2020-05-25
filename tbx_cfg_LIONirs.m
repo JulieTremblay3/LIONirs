@@ -2426,20 +2426,35 @@ f_anovan.tag     = 'f_anovan';       %file names
 f_anovan.filter  = {'xlsx','xls','txt'};
 f_anovan.ufilter =  '.*';    
 f_anovan.num     = [1 Inf];     % Number of inputs required 
-f_anovan.help    = {'Enter the of observation to compute the anovan first row : dir, second row: compenent file name, 3 row and  '}; 
+f_anovan.help    = {''}; 
 
  
 
 b_ANOVAN        = cfg_branch;
 b_ANOVAN.tag    = 'b_ANOVAN';
-b_ANOVAN.name   = 'Anovan' ;
+b_ANOVAN.name   = 'By channel' ;
 b_ANOVAN.val    = {f_anovan};
-b_ANOVAN.help   = {'N-way analysis of variance'};
+b_ANOVAN.help   = {'Apply the anonan on each channel of the xls list. Enter the of observation to compute the anovan first row : dir, second row: compenent file name, third row and following for factor identification '};
 
-c_statcomponent          = cfg_choice;
+
+b_ANOVANzone        = cfg_branch;
+b_ANOVANzone.tag    = 'b_ANOVANzone';
+b_ANOVANzone.name   = 'By zone' ;
+b_ANOVANzone.val    = {f_anovan};
+b_ANOVANzone.help   = {'Apply the anonan on each specific region define by the xls file.Enter the of observation to compute the anovan first row : dir, second row: compenent file name, third row for the zone file, fourth row for the region label to used, fifth and following for factor identification '};
+
+c_ANOVAN        = cfg_choice;
+c_ANOVAN.tag    = 'c_ANOVAN';
+c_ANOVAN.name   = 'Anovan' ;
+c_ANOVAN.values  = {b_ANOVAN,b_ANOVANzone};
+c_ANOVAN.val     = {b_ANOVAN};
+c_ANOVAN.help   = {'N-way analysis of variance'};
+
+
+c_statcomponent         = cfg_choice; 
 c_statcomponent.tag     = 'c_statcomponent';
 c_statcomponent.name    = 'Choose the statistical test';
-c_statcomponent.values  = {b_TtestOneSample, b_TtestUnpaired,b_ANOVAN };
+c_statcomponent.values  = {b_TtestOneSample, b_TtestUnpaired,c_ANOVAN};
 c_statcomponent.val     = {b_TtestOneSample}; %Default option
 c_statcomponent.help    = {''};
 

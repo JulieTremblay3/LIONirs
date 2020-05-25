@@ -117,18 +117,18 @@ elseif isfield(job.c_statcomponent,'b_TtestUnpaired')
      A = mval.*double(Q<0.001);
      save(fullfile(dir1,['TWOSAMPLE_mean001fdr.mat']),'A','zonelist','option')
      
-elseif isfield(job.c_statcomponent,'b_ANOVAN')     
-     [filepath,name,ext] = fileparts(job.c_statcomponent.b_ANOVAN.f_anovan{1});
+elseif isfield(job.c_statcomponent,'c_ANOVAN') 
+    if isfield(job.c_statcomponent.c_ANOVAN,'b_ANOVAN') %by channel     
+     [filepath,name,ext] = fileparts(job.c_statcomponent.c_ANOVAN.b_ANOVAN.f_anovan{1});
      if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
-            [num,txt,raw] = xlsread(job.c_statcomponent.b_ANOVAN.f_anovan{1});
+            [num,txt,raw] = xlsread(job.c_statcomponent.c_ANOVAN.b_ANOVAN.f_anovan{1});
      elseif  strcmp(ext,'.txt')
-          [num,txt,raw] = readtxtfile_asxlsread(job.c_statcomponent.b_ANOVAN.f_anovan{1});
+          [num,txt,raw] = readtxtfile_asxlsread(job.c_statcomponent.c_ANOVAN.b_ANOVAN.f_anovan{1});
      end
      
      %Case anovan each ch save each average and pval add fdr correction! 
      %load the observation if 
     [pathstr, name, ext]=fileparts(raw{2,3});
-    if strcmp(ext,'.txt')
      AllCOM = [];
      for i=2:size(raw,1)         
       tmp= load(fullfile(raw{i,1},raw{i,2}),'-mat');      
@@ -192,7 +192,7 @@ elseif isfield(job.c_statcomponent,'b_ANOVAN')
 
             end
          end 
-       save(fullfile([dir1,filesep,'ch'],[ zonelist{ich},'stats.mat']), 'stats');
+       save(fullfile([dir1,filesep,'ch'],[ zonelist{ich},'stats.mat']), 'stats','terms','p','tbl')
         % results = multcompare(stats,'Dimension',[1 2]);
     end 
     [FDR,Q] = mafdr(pval(:));
@@ -227,18 +227,27 @@ elseif isfield(job.c_statcomponent,'b_ANOVAN')
             save(fileout,'A','zonelist');  
        end
     end 
-    
-elseif strcmp(ext,'.zone')
-    
-    
+    elseif  isfield(job.c_statcomponent.c_ANOVAN,'b_ANOVANzone')
+      
+     [filepath,name,ext] = fileparts(job.c_statcomponent.c_ANOVAN.b_ANOVANzone.f_anovan{1});
+     if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
+            [num,txt,raw] = xlsread(job.c_statcomponent.c_ANOVAN.b_ANOVANzone.f_anovan{1});
+     elseif  strcmp(ext,'.txt')
+          [num,txt,raw] = readtxtfile_asxlsread(job.c_statcomponent.c_ANOVAN.b_ANOVANzone.f_anovan{1});
+     end
+     
+     %Case anovan each ch save each average and pval add fdr correction! 
+     %load the observation if 
+    [pathstr, name, ext]=fileparts(raw{2,3});
      AllCOM = [];
+   
     
      for i=2:size(raw,1)         
       tmp= load(fullfile(raw{i,1},raw{i,2}),'-mat');       
       try
           zone = load(fullfile(raw{i,1},raw{i,3}),'-mat'); 
       catch
-          disp(['File ',fullfile(raw{i,1},raw{i,3}),' could not be load'])
+          disp(['Zone expected, file ',fullfile(raw{i,1},raw{i,3}),' could not be load'])
           return
       end
         labelzone = raw{i,4};
@@ -268,14 +277,12 @@ elseif strcmp(ext,'.zone')
             pval(ich,idim)=p(idim);
             Fval(ich,idim)=tbl{idim+1,6};
          end 
-       save(fullfile(dir1,['anovan', 'REGION','stat.mat']), 'stats');
+       save(fullfile(dir1,['anovan', 'REGION','stat.mat']), 'stats','terms','p','tbl');
 %        results = multcompare(stats,'Dimension',[1 2]);
-    end 
-     % tablevalue =raw(2:end, 5:end) AllCOM
-  %  results = multcompare(stats,'dimension',[1,2])
-    
-
-    
+    end
+    lastcol = [{'Val'};num2cell(y')]
+    tmp = [raw,lastcol]
+    xlswrite(fullfile(dir1,'ROI.xls'),tmp) 
 
     end
 end
