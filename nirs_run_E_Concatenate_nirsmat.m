@@ -6,7 +6,13 @@ function out = nirs_run_E_Concatenate_nirsmat(job)
 
  
 prefix = 'All'; 
-[data, text, rawData] = xlsread(job.f_nirsmatinfo{1});
+[~,~,ext] =fileparts(job.f_nirsmatinfo{1});
+if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
+    [data, text, rawData] = xlsread(job.f_nirsmatinfo{1});
+elseif strcmp(ext,'.txt')
+    [data, text, rawData] = readtxtfile_asxlsread(job.f_nirsmatinfo{1});
+end
+    
 NIRSDtp = rawData(2:end,1);
 ListDtp = rawData(2:end,2);
 [pathoutlist, namelist, ext] = fileparts(job.f_nirsmatinfo{1});

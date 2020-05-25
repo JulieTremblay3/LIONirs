@@ -4,8 +4,14 @@ function out = nirs_run_E_exportcomponent_zone(job)
 % missing channel in the subject or in the component list will be put as missing value. 
  
 figureflag = 0;
-[data, text, rawData] = xlsread(job.f_component_zone{1});
-    for icol=1:size(rawData,2)  
+[~,~,ext] =fileparts(job.f_component_zone{1});
+if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
+    [data, text, rawData] = xlsread(job.f_component_zone{1});
+elseif strcmp(ext,'.txt')
+    [data, text, rawData] = readtxtfile_asxlsread(job.f_component_zone{1});
+end
+
+for icol=1:size(rawData,2)
         if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat folder')))
             id.NIRSDtp = icol;
         elseif strcmp(upper(deblank(rawData{1,icol})),upper('Type'))
