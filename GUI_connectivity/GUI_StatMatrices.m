@@ -80,8 +80,13 @@ function btn_browseXLS_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 [file,path]=uigetfile('.xls');
 set(handles.edit_listXLS,'string',[path,file]);
+[~,~,ext] =fileparts(fileevent);
+if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
+    [num, txt, raw] = xlsread([path,file]);
+elseif strcmp(ext,'.txt')   
+    [num, txt, raw] = readtxtfile_asxlsread([path,file]);
+end
 
-[num, txt, raw] = xlsread([path,file]);
 set(handles.edit_zonemodel,'string',fullfile(raw{2,1},raw{2,3}));
 
 function edit_listXLS_Callback(hObject, eventdata, handles)
@@ -112,7 +117,12 @@ function btn_zscore_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 xlslistfile = get(handles.edit_listXLS,'string')
-[raw, txt, info]=xlsread([xlslistfile]);
+[~,~,ext] =fileparts([xlslistfile]);
+if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
+    [raw, txt, info]=xlsread([xlslistfile])
+elseif strcmp(ext,'.txt')   
+    [num, txt, info] = readtxtfile_asxlsread([xlslistfile])
+end
 
 groupeall = [];
 for isubject=2:size(info,1)
@@ -197,10 +207,22 @@ function btn_Permutationttest_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
  
 xlslistfile = get(handles.edit_listXLS,'string');
-[raw, txt, info]=xlsread([xlslistfile]);
+[~,~,ext] =fileparts([xlslistfile]);
+if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
+    [raw, txt, info]=xlsread([xlslistfile]);
+elseif strcmp(ext,'.txt')   
+    [num, txt, info] = readtxtfile_asxlsread([xlslistfile])
+end
+
 testcardiac =0
 if testcardiac
-    [rawcard, txtcard, infocard]=xlsread('C:\data\Data_NIRS\BebeResting\connectivityMAT_COH_cardiac\Listsujet_Bydetector.xls');
+   % [~,~,ext] =fileparts('C:\data\Data_NIRS\BebeResting\connectivityMAT_COH_cardiac\Listsujet_Bydetector.xls');
+    %if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
+        [rawcard, txtcard, infocard]=xlsread('C:\data\Data_NIRS\BebeResting\connectivityMAT_COH_cardiac\Listsujet_Bydetector.xls');
+    %elseif strcmp(ext,'.txt')   
+     %   [rawcard, txtcard, infocard] = readtxtfile_asxlsread('C:\data\Data_NIRS\BebeResting\connectivityMAT_COH_cardiac\Listsujet_Bydetector.txt');
+    %end
+    
 end
 groupeall = []; 
 %Load the data
@@ -834,8 +856,12 @@ function btn_NBS_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 xlslistfile = get(handles.edit_listXLS,'string')
-[raw, txt, info]=xlsread([xlslistfile]);
-
+[~,~,ext] =fileparts(fileevent);
+    if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
+        [raw, txt, info]=xlsread([xlslistfile]);
+    elseif strcmp(ext,'.txt')   
+        [num, txt, info] = readtxtfile_asxlsread([xlslistfile]);
+    end
 groupeall = [];
 for isubject=2:size(info,1)
     id = isubject-1;
@@ -906,7 +932,12 @@ function btn_ZoneCH_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 xlslistfile = get(handles.edit_listXLS,'string')
-[raw, txt, info]=xlsread([xlslistfile]);
+[~,~,ext] =fileparts(fileevent);
+    if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
+        [raw, txt, info]=xlsread([xlslistfile]);
+    elseif strcmp(ext,'.txt')   
+        [raw, txt, info] = readtxtfile_asxlsread([xlslistfile]);
+    end
 
 groupeall = [];
 for isubject=2:size(info,1)

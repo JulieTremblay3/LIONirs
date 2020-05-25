@@ -172,12 +172,18 @@ pathout = get(handles.edit_pathout,'string')
 %Read onset
 listoption = get(handles.popupmenuoption,'string')
 idval = get(handles.popupmenuoption,'value')
+
 if strcmp(listoption{idval},'Create HRF using onset duration xls file')
-    [num, txt, raw] = xlsread(fileevent)
+    [~,~,ext] =fileparts(fileevent);
+    if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
+        [num, txt, raw] = xlsread(fileevent)
+    elseif strcmp(ext,'.txt')   
+        [num, txt, raw] = readtxtfile_asxlsread(fileevent)
+    end
     [EEG.data,EEG.infoBV,EEG.marker,EEG.ind_dur_ch]= fopen_EEG(filedata);
-     idtrigger = find(strcmp('trigger',EEG.marker(:,1))& EEG.ind_dur_ch(:,1)>0);
-     EEG.marker = EEG.marker(idtrigger,:);
-     EEG.ind_dur_ch = EEG.ind_dur_ch(idtrigger,:);
+    idtrigger = find(strcmp('trigger',EEG.marker(:,1))& EEG.ind_dur_ch(:,1)>0);
+    EEG.marker = EEG.marker(idtrigger,:);
+    EEG.ind_dur_ch = EEG.ind_dur_ch(idtrigger,:);
     %HRF convolution
     onset =num(:,1);
     dur = num(:,2);
