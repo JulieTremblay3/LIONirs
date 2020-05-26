@@ -8,17 +8,17 @@ if isfield(NIRS.Dt,'AUX')
     if job.m_replaceaux % if one add aux to the existing one
     idAUX = numel(NIRS.Dt.AUX)+1; %new fields for AUX 
     else  %remove old field and create new
-        NIRS.Dt = rmfield(NIRS.Dt,'AUX');
+        rmfield(NIRS.Dt,'AUX')
         idAUX = 1; %new fields for AUX 
-        NIRS.Dt.AUX(idAUX).pp.p{size(rDtp,1),1}=[];
-        NIRS.Dt.AUX(idAUX).pp.sync_timesec{size(rDtp,1),1}=[];
-        NIRS.Dt.AUX(idAUX).label = [];
+        NIRS.Dt.AUX(idAUX ).pp.p{size(rDtp,1),1}=[];
+        NIRS.Dt.AUX(idAUX ).pp.sync_timesec{size(rDtp,1),1}=[];
+        NIRS.Dt.AUX(idAUX ).label = [];
     end
 else
     idAUX = 1; %new fields for AUX 
-    NIRS.Dt.AUX(idAUX).pp.p{size(rDtp,1),1}=[];
-    NIRS.Dt.AUX(idAUX).pp.sync_timesec{size(rDtp,1),1}=[];
-    NIRS.Dt.AUX(idAUX).label = [];
+    NIRS.Dt.AUX.pp.p{size(rDtp,1),1}=[];
+    NIRS.Dt.AUX.pp.sync_timesec{size(rDtp,1),1}=[];
+    NIRS.Dt.AUX.label = [];
 end
 for ifile =1:numel(rDtp)
      %[num, txt, raw] = xlsread(fileevent)
