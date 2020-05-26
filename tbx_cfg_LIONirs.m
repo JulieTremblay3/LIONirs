@@ -3112,6 +3112,23 @@ function vout = nirs_cfg_vout_createseedlist(job)
     vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
 end
 
+% Executable Branch
+E_qualityreport     = cfg_exbranch;      
+E_qualityreport.name = 'Quality report' ;            
+E_qualityreport.tag  = 'E_qualityreport'; 
+E_qualityreport.val  = {NIRSmat};   
+E_qualityreport.prog = @nirs_run_qualityreport;  
+E_qualityreport.vout = @nirs_cfg_vout_qualityreport;
+E_qualityreport.help = {'Create a small report of the time of data corrected in the signal.'};
+
+%make NIRS.mat available as a dependency
+function vout = nirs_cfg_vout_qualityreport(job)
+    vout = cfg_dep;                    
+    vout.sname      = 'NIRS.mat';       
+    vout.src_output = substruct('.','NIRSmat'); 
+    vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
+end
+
 m_zonematformat        = cfg_menu;
 m_zonematformat.tag       = 'm_zonematformat';
 m_zonematformat.name      = 'Label format';
@@ -3275,15 +3292,12 @@ M_GUI.help   = {'Graphical user interface for data display.'};
 
 %Module 8 Connectivity
 
-
 %Module 9 Component
 M_dataComponent = cfg_choice;
 M_dataComponent.name   = 'Decomposition';
 M_dataComponent.tag    = 'M_dataComponent';
 M_dataComponent.values = { E_extractcomponent E_substractcomponent E_exportcomponent_list E_exportcomponent_zone E_statcomponent}; 
 M_dataComponent.help   = {'Apply operation on selected component identify in display GUI data decomposition'};
-
-
 
 
 %Module Connectivity
@@ -3297,7 +3311,7 @@ M_Connectivity.help   = {'Connectivity fonction.'};
 M_Utility       = cfg_choice; 
 M_Utility.name   = 'Utility NIRSmat';
 M_Utility.tag    = 'M_Utility';
-M_Utility.values = {E_NIRSmatdiradjust, E_NIRSmatcreatenewbranch  E_createseedlist E_zone2channellist E_channellist2zone E_viewNIRS M_datawritenirs}; %
+M_Utility.values = {E_NIRSmatdiradjust, E_NIRSmatcreatenewbranch  E_createseedlist E_qualityreport E_zone2channellist E_channellist2zone E_viewNIRS M_datawritenirs}; %
 M_Utility.help   = {'Utility on NIRSmat fonction.'};
 
 nirsHSJ        = cfg_choice;
