@@ -2692,6 +2692,14 @@ function vout = nirs_cfg_vout_readAUX(job)
     vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
 end
 
+m_replaceaux          = cfg_menu;
+m_replaceaux.tag      = 'm_replaceaux';
+m_replaceaux.name     = 'Option';  
+m_replaceaux.labels   = {'Replace aux','Add aux'}; 
+m_replaceaux.values   = {0,1};
+m_replaceaux.val      = {0};
+m_replaceaux.help     = {'Replace aux will erase any reference to previous aux file, will add aux will add the new hrf as an additional auxilairy file please do not use the same name if you want to add a new one.'};
+
 e_TimetoPeak1         = cfg_entry; 
 e_TimetoPeak1.name    = 'Time to peak of the first gamma density'; 
 e_TimetoPeak1.tag     = 'e_TimetoPeak1';      
@@ -2791,7 +2799,7 @@ c_createAUXauto.help    = {''};
 E_createAUXauto     = cfg_exbranch;      
 E_createAUXauto.name = 'Create AUX' ;            
 E_createAUXauto.tag  = 'E_createAUXauto'; 
-E_createAUXauto.val  = {NIRSmat,c_createAUXauto};   
+E_createAUXauto.val  = {NIRSmat,m_replaceaux,c_createAUXauto};   
 E_createAUXauto.prog = @nirs_run_createAUXauto;  
 E_createAUXauto.vout = @nirs_cfg_vout_createAUXauto;
 E_createAUXauto.help = {'Read simulteneaous AUX data; Note trig must be syncrhonised with the NIRS',... 
@@ -3112,11 +3120,20 @@ function vout = nirs_cfg_vout_createseedlist(job)
     vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
 end
 
+f_qualityreport          = cfg_files; %path
+f_qualityreport.name     = 'Result folder';
+f_qualityreport.tag      = 'f_qualityreport';
+f_qualityreport.filter   = {'dir'};
+f_qualityreport.ufilter  = '.*';    %
+f_qualityreport.num      = [1 1];     % Number of inputs required 
+f_qualityreport.help     = {'QualityReport.xlsx result will be saved in this folder.'};
+
+
 % Executable Branch
 E_qualityreport     = cfg_exbranch;      
 E_qualityreport.name = 'Quality report' ;            
 E_qualityreport.tag  = 'E_qualityreport'; 
-E_qualityreport.val  = {NIRSmat};   
+E_qualityreport.val  = {NIRSmat, f_qualityreport};   
 E_qualityreport.prog = @nirs_run_qualityreport;  
 E_qualityreport.vout = @nirs_cfg_vout_qualityreport;
 E_qualityreport.help = {'Create a small report of the time of data corrected in the signal.'};
