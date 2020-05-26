@@ -814,18 +814,20 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
 
     
 elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
-    [~,~,ext] =fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
-    if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
-        [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
-        [dirxls,filexls,extxls] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
-        id.Regressor = [];
 
-    elseif strcmp(ext,'.txt')   
-        [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
-        [dirxls,filexls,extxls] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
-        id.Regressor = [];
-    end
-    for icol=1:size(rawData,2)
+[~,~,ext] =fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
+    if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
+    [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
+    [dirxls,filexls,extxls] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
+    id.Regressor = [];
+
+elseif strcmp(ext,'.txt')   
+    [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
+    [dirxls,filexls,extxls] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
+    id.Regressor = [];
+end    
+   
+    for icol=1:size(rawData,2)  
         if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat folder')))
             id.NIRSDtp = icol;
         elseif strcmp(upper(deblank(rawData{1,icol})),upper('File'))
@@ -837,11 +839,11 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
         elseif strcmp(upper(deblank(rawData{1,icol})),upper('Label'))
             id.labelDtp =  icol;
         end
-        for i=1:21 %up to a max of 20 regressor
+          for i=1:21 %up to a max of 20 regressor
             if strcmp(upper(deblank(rawData{1,icol})),upper(['X',num2str(i-1)]))
                 id.Regressor = [id.Regressor,icol];
             end
-        end
+          end           
     end
     try
     NIRSDtp = rawData(2:end,id.NIRSDtp );
@@ -945,13 +947,13 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                 if numel(Regressorlist{iReg})>4
                     checkzone = Regressorlist{iReg};
                     if strcmp(upper(checkzone(end-3:end)),'ZONE')
-                        try  
+                        try 
                             load(Regressorlist{iReg} ,'-mat'); %try the fullfile correct 
                         catch
                             try
                             load(fullfile(dirxls, Regressorlist{iReg} ),'-mat'); %try in the excel folder
                             catch
-                            disp(['Regressor zone :',  Regressorlist{iReg} ,' or ',fullfile(dirxls,Regressorlist{iReg}) , ' could not be load'])
+                            disp(['Regressor zone :', fullfile(dirxls, Regressorlist{iReg} ),' could not be load'])
                             return
                             end
                         end
@@ -1146,15 +1148,14 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
             end
                 %disp(['Error unable to GLM on ' , NIRSmat])
     end    
-   
+
+    
+    
 elseif isfield(job.c_extractcomponent,'b_extractcomponent_PARAFAC')
-    [~,~,ext] =fileparts(job.c_extractcomponent.b_extractcomponent_PARAFAC.f_component_PARAFAClist{1});
-    if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
-        [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_PARAFAC.f_component_PARAFAClist{1});
-    elseif strcmp(ext,'.txt')   
-        [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_PARAFAC.f_component_PARAFAClist{1});
-    end
+    
+    [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_PARAFAC.f_component_PARAFAClist{1});
      
+    
     for icol=1:size(rawData,2)  
         if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat folder')))
             id.NIRSDtp = icol;
@@ -1326,15 +1327,10 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_PARAFAC')
         
     end
 elseif isfield(job.c_extractcomponent,'b_extractcomponent_AVG')
-    [~,~,ext] =fileparts(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
-    if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
-        [pathstr, name, ext]= fileparts(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
-        [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
-    elseif strcmp(ext,'.txt')   
-        [pathstr, name, ext]= fileparts(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
-        [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
-    end 
-       
+    [pathstr, name, ext]= fileparts(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1})
+    [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
+    
+    
    for icol=1:size(rawData,2)  
         if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat folder')))
             id.NIRSDtp = icol;

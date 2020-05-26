@@ -4,7 +4,14 @@ function out = nirs_run_E_exportcomponent_list(job)
 % missing channel in the subject or in the component list will be put as missing value. 
 
 figureflag = 0;
-[data, text, rawData] = xlsread(job.f_component_list{1});
+
+ [~,~,ext] =fileparts(job.f_component_list{1});
+    if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
+       [data, text, rawData] = xlsread(job.f_component_list{1});
+    elseif strcmp(ext,'.txt')   
+        [data, text, rawData] = readtxtfile_asxlsread(job.f_component_list{1});
+    end
+    
     for icol=1:size(rawData,2)  
         if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat folder')))
             id.NIRSDtp = icol;
@@ -188,23 +195,38 @@ if 0
     Astd = nanstd(allsubject(:,idkeep),1,2);
     Anb  = sum(~isnan(allsubject(:,idkeep)),2)-1;
     tmp = [alllabel;num2cell(allsubject)];
-    
-  
-    try
-    xlswrite(fullfile(pathoutlist,['Component' type,label,'.xls']),tmp);
-    catch
-        msgbox(['File ', fullfile(pathoutlist,['Component' type,label,'.xls']),' could not be written'])
+    if ismac
+        try
+            writetxtfile_asxlsfile(fullfile(pathoutlist,['Component' type,label,'.txt']),tmp);
+        catch
+            msgbox(['File ', fullfile(pathoutlist,['Component' type,label,'.txt']),' could not be written'])
+        end
+    else 
+        try
+            xlswrite(fullfile(pathoutlist,['Component' type,label,'.xls']),tmp);
+        catch
+            msgbox(['File ', fullfile(pathoutlist,['Component' type,label,'.xls']),' could not be written'])
+        end
     end
+    
     try
         
         tmp = num2cell(Tglmall);
-        xlswrite(fullfile(pathoutlist,['Component Tval' type,label,'.xls']),tmp);
+        if ismac
+            writetxtfile_asxlsfile(fullfile(pathoutlist,['Component Tval' type,label,'.txt']),tmp);
+        else
+            xlswrite(fullfile(pathoutlist,['Component Tval' type,label,'.xls']),tmp);
+        end 
     catch
     end
     try
        tmp = [chlist{1}, chlist{2},num2cell(Rall)];
-        tmp = [labelall;tmp ];
-        xlswrite(fullfile(pathoutlist,['Component R2' type,label,'.xls']),tmp);
+       tmp = [labelall;tmp ];
+       if ismac
+           writetxtfile_asxlsfile(fullfile(pathoutlist,['Component R2' type,label,'.txt']),tmp);
+       else
+           xlswrite(fullfile(pathoutlist,['Component R2' type,label,'.xls']),tmp);
+       end
     catch
     end
     A = Amean;

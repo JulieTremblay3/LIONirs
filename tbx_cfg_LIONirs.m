@@ -795,8 +795,8 @@ end
 f_nirsmatinfo          = cfg_files;
 f_nirsmatinfo.name    = 'Enter NIRS.mat list to group (xls)'; 
 f_nirsmatinfo.tag     = 'f_nirsmatinfo';       %file names
-f_nirsmatinfo.filter  = 'xls';
-f_nirsmatinfo.ufilter = '.xls';    
+f_nirsmatinfo.filter  = {'xlsx','xls','txt'};
+f_nirsmatinfo.ufilter = '.*';    
 f_nirsmatinfo.num     = [1 Inf];     % Number of inputs required 
 f_nirsmatinfo.help    = {'Create the list of subject to group in a new forder example : ./GrandAverage/List.xlsx. The excel file must have 2 columns, first, the NIRS.mat subject location and second the channel list order to respect or zone to use. The result will kept the same helmet of the first subject in the list.'}; 
 
@@ -2116,8 +2116,8 @@ b_extractcomponent_phys.help    = {'Apply substraction of the short distance phy
 f_extractcomponent_glmlist      = cfg_files;
 f_extractcomponent_glmlist.name    = 'List GLM to identify (xls)'; 
 f_extractcomponent_glmlist.tag     = 'f_extractcomponent_glmlist';       %file names
-f_extractcomponent_glmlist.filter  = 'xls';
-f_extractcomponent_glmlist.ufilter = '.xls';    
+f_extractcomponent_glmlist.filter  = {'xlsx','xls','txt'};
+f_extractcomponent_glmlist.ufilter = '.*';
 f_extractcomponent_glmlist.num     = [1 Inf];     % Number of inputs required 
 f_extractcomponent_glmlist.help    = {'Enter the list xls to extract GLM, the list must include the following column: ''NIRS.mat folder'': directory of the NIRS.mat to use, ''file''',...
     ': number to identify the file to use,  ''tStart'' : time start in second, tStop : time stop in second, the multiple regression will be applied on this',...
@@ -2133,8 +2133,8 @@ b_extractcomponent_glm.help     = {'Apply multiple linear regression (regress.m)
 f_extractcomponent_PARAFAClist      = cfg_files;
 f_extractcomponent_PARAFAClist.name    = 'List Parafac to identify (xls)'; 
 f_extractcomponent_PARAFAClist.tag     = 'f_component_PARAFAClist';       %file names
-f_extractcomponent_PARAFAClist.filter  = 'xls';
-f_extractcomponent_PARAFAClist.ufilter = '.xls';    
+f_extractcomponent_PARAFAClist.filter  = {'xlsx','xls','txt'};
+f_extractcomponent_PARAFAClist.ufilter = '.*';    
 f_extractcomponent_PARAFAClist.num     = [1 Inf];     % Number of inputs required 
 f_extractcomponent_PARAFAClist.help    = {'Enter the list xls to extract PARAFAC, the list must include the following column : ''NIRS.mat folder'': directory of the NIRS.mat to use, ''file''',...
     ': number to identify the file to use,  ''tStart'' : time start in second, tStop : time stop in second, the multiple regression will be applied on this',...
@@ -2150,8 +2150,8 @@ b_extractcomponent_PARAFAC.help     = {'Display option for HSJ helmet.'};
 f_extractcomponent_AVGlist      = cfg_files;
 f_extractcomponent_AVGlist.name    = 'List AVG to identify (xls)'; 
 f_extractcomponent_AVGlist.tag     = 'f_component_AVGlist';       %file names
-f_extractcomponent_AVGlist.filter  = 'xls';
-f_extractcomponent_AVGlist.ufilter = '.xls';    
+f_extractcomponent_AVGlist.filter  = {'xlsx','xls','txt'};
+f_extractcomponent_AVGlist.ufilter = '.*';    
 f_extractcomponent_AVGlist.num     = [1 Inf];     % Number of inputs required 
 f_extractcomponent_AVGlist.help    = {'Enter the list to average between tStart tStop label'}; 
 
@@ -2295,8 +2295,8 @@ v_component_list_remove.help    = {['Allow to remove few component that could be
 f_component_list        = cfg_files;
 f_component_list.name    = 'Enter list of component to export (xls)'; 
 f_component_list.tag     = 'f_component_list';       %file names
-f_component_list.filter  = 'xls';
-f_component_list.ufilter = '.xls';    
+f_component_list.filter  = {'xlsx','xls','txt'};
+f_component_list.ufilter = '.*';    
 f_component_list.num     = [1 Inf];     % Number of inputs required 
 f_component_list.help    = {'This module helps to export component extract from the NIRS.mat data for further statistique. The export will be organised using the channel list order.  Each subject must have a close localisation on the head to be compared. Enter the list to export columns such as :  ‘NIRS.mat folder’, ‘Type’ (GLM, PARAFAC,PCA),’Label’ ,Component name to filter, ‘Channel List’ full file or .txt same folder as xls file'}; 
 
@@ -2317,8 +2317,8 @@ end
 f_component_zone        = cfg_files;
 f_component_zone.name    = 'Enter list of component to export and there zone (xls)'; 
 f_component_zone.tag     = 'f_component_zone';       %file names
-f_component_zone.filter  = 'xls';
-f_component_zone.ufilter = '.xls';    
+f_component_zone.filter  = {'xlsx','xls','txt'};
+f_component_zone.ufilter = '.*';    
 f_component_zone.num     = [1 Inf];     % Number of inputs required 
 f_component_zone.help    = {'Enter the list to export columns such as :  ‘NIRS.mat folder’, ‘Type’ (GLM, PARAFAC,PCA),’Label’ ,Component name to filter, ‘Zone List’ full file or .txt same folder as xls file and ‘Name’ the output name of the export .'}; 
 
@@ -3201,8 +3201,8 @@ m_TtestOneSample_matrix.help = {'Test option'};
 f_matrix        = cfg_files;
 f_matrix.name    = 'Enter list connectivity matrix'; 
 f_matrix.tag     = 'f_matrix';       %file names
-f_matrix.filter  = 'xls';
-f_matrix.ufilter = '.xls';    
+f_matrix.filter  = {'xlsx','xls','txt'};
+f_matrix.ufilter = '.*';    
 f_matrix.num     = [1 Inf];     % Number of inputs required 
 f_matrix.help    = {'Enter the list of connectivity matrix to test statistically column 1 dir, column 2 name,  column 3 zone id; column 4 groupe 1 include 0 exclude'}; 
 

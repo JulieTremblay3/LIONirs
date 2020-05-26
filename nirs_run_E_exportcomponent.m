@@ -96,7 +96,12 @@ function out = nirs_run_E_exportcomponent(job)
     tmp = [alllabel;num2cell(all)];
     
     all(:,idkeep)
-    xlswrite(fullfile(pathout,['Component' type,label,'.xls']),tmp)
+    if ismac
+        writetxt_asxlswrite(fullfile(pathout,['Component' type,label,'.xls']),tmp)
+    else
+        xlswrite(fullfile(pathout,['Component' type,label,'.xls']),tmp)
+    end
+     
     A = Amean(1:end/2);
     save(fullfile(pathout,['D1matrix ','mean', label,type,'.mat']),'A' );
     A = Astd(1:end/2);
