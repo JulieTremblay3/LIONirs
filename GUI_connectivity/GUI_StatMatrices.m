@@ -216,11 +216,11 @@ end
 
 testcardiac =0
 if testcardiac
-   % [~,~,ext] =fileparts('C:\data\Data_NIRS\BebeResting\connectivityMAT_COH_cardiac\Listsujet_Bydetector.xls');
+    %[~,~,ext] =fileparts('C:\data\Data_NIRS\BebeResting\connectivityMAT_COH_cardiac\Listsujet_Bydetector.xls');
     %if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
         [rawcard, txtcard, infocard]=xlsread('C:\data\Data_NIRS\BebeResting\connectivityMAT_COH_cardiac\Listsujet_Bydetector.xls');
-    %elseif strcmp(ext,'.txt')   
-     %   [rawcard, txtcard, infocard] = readtxtfile_asxlsread('C:\data\Data_NIRS\BebeResting\connectivityMAT_COH_cardiac\Listsujet_Bydetector.txt');
+    %elseif strcmp(ext,'.txt')  
+    %    [rawcard, txtcard, infocard] = readtxtfile_asxlsread('C:\data\Data_NIRS\BebeResting\connectivityMAT_COH_cardiac\Listsujet_Bydetector.txt');
     %end
     
 end
