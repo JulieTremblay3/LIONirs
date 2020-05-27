@@ -80,7 +80,7 @@ function btn_browseXLS_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 [file,path]=uigetfile('.xls');
 set(handles.edit_listXLS,'string',[path,file]);
-[~,~,ext] =fileparts(fileevent);
+[~,~,ext] =fileparts(fullfile([path,file]));
 if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
     [num, txt, raw] = xlsread([path,file]);
 elseif strcmp(ext,'.txt')   

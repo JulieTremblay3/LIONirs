@@ -45,8 +45,9 @@ Tglmall = [];
 Rall = [];
 labelall = [{'Detector'},{'Source'} ];
 for filenb=1:size(NIRSDtp,1)
+    try
     srsfile = [NIRSDtp{filenb},filesep,'NIRS.mat'];
-    alltb =[];
+    alltb =[]; 
     allb = [];
     allbHbO = [];
     allbHbR = [];
@@ -178,6 +179,10 @@ for filenb=1:size(NIRSDtp,1)
     A =[Amean];
     allsubjectHBR =  [allsubjectHBR,allbHbR];
     save(fullfile(pathoutlist,['HBRmean',labelout,'.mat']),'A' ,'zonelist','srsfile' );
+
+    catch
+        disp(['Could not export data from: '   srsfile])
+    end
 end
 
 if 0

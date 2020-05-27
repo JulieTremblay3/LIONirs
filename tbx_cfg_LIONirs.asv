@@ -3256,7 +3256,7 @@ b_TtestOneSamplematrix.val    = {m_TtestOneSample_matrix,e_TtestOneSampleGR};
 b_TtestOneSamplematrix.help   = {'The one-sample t-test is a parametric test of the location parameter when the population standard deviation is unknown. T = mean(X)/(STD(x)*sqrt(n))'};
 
 e_TtestOneSampleGR2         = cfg_entry; %path
-e_TtestOneSampleGR2.name    = 'Group 2 identification';
+e_TtestOneSampleGR2.name    = 'Group identification';
 e_TtestOneSampleGR2.tag     = 'e_TtestOneSampleGR2';       
 e_TtestOneSampleGR2.strtype = 'r';
 e_TtestOneSampleGR2.num     = [1 Inf];     
@@ -3275,7 +3275,7 @@ e_npermutation.help    = {'Define the number of non parametric permutation to us
 b_PermutationTest = cfg_branch;
 b_PermutationTest.tag    = 'b_PermutationTest';
 b_PermutationTest.name   = 'Unpaired permutation t-test' ;
-b_PermutationTest.val    = {e_npermutation, e_TtestOneSampleGR, e_TtestOneSampleGR2};
+b_PermutationTest.val    = {e_npermutation};
 b_PermutationTest.help   = {'Compared 2 groups using permutation '};
 
 

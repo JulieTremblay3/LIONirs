@@ -144,9 +144,7 @@ for isubject=2:size(info,1)
     if isfield( MAT,'ZoneList')
          DATA{id}.ZoneList = MAT.ZoneList;
     end
-    if isfield(MAT, 'meancorrPearson')
-        MAT.meancorr = MAT.meancorrPearson;
-    end
+
 %     idbad =find(isnan(MAT.meancorr))
 %     MAT.meancorr(idbad)=0;
     DATA{id}.MAT = MAT.meancorr;
