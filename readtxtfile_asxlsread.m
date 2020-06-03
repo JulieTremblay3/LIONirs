@@ -7,9 +7,14 @@ raw = [];
 fid = fopen(filename);
 while ~feof(fid)
 icol = 1;
-    line = fgetl(fid);
+    line = fgetl(fid);  
     while ~isempty(line)
-    [token, line] = strtok(line,char(9));
+        if line(1:1)==char(9)&  icol==1%start with a blank 
+            token = ' ';
+            line = line(2:end);
+        else
+            [token, line] = strtok(line,char(9));
+        end
     numtoken=str2num(token);
     if isempty(numtoken)|numel(numtoken)>1
         raw{irow,icol} = token;
@@ -29,8 +34,8 @@ for  irow = 1:size(raw,1)
     end
 end
 
-    [num, txt] = xlsreadSplitNumericAndText(raw)
-    fclose(fid)
+    [num, txt] = xlsreadSplitNumericAndText(raw);
+    fclose(fid);
  end
 
 

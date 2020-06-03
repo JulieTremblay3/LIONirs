@@ -4526,6 +4526,26 @@ if strcmp(eventdata.Key,'c')
     updatedisplay(handles);
 end
 
+
+if strcmp(eventdata.Key,'w') %Whole (Whole channels restore for this trial)
+    button = questdlg('Are you sure you want to restore whole channels for this trial ?','Confirm','Yes','No','No');
+    if strcmp(button,'Yes')
+        guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
+        currentsub=1;
+        PMI = get(guiHOMER,'UserData');
+        cf = PMI{currentsub}.currentFile;
+        fileid=get(handles.popupmenu_file,'value');
+        handles.NIRS.Cf.H.C.ok(:, fileid) = 1;
+        NIRS=handles.NIRS;
+        save(handles.NIRSpath{handles.subjectnb,1},'NIRS','-mat');
+        PMI{currentsub}.data(cf).MeasListAct(:)=1;
+        set(guiHOMER,'UserData',PMI);
+        handles.newlist=1; %update helmet channel
+        guidata(hObject,handles);
+        updatedisplay(handles);
+    end
+end
+
 if strcmp(eventdata.Key,'i')
     context_createinterval_Callback(hObject, eventdata, handles)
 end

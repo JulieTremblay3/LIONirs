@@ -13,21 +13,45 @@ else
 end
  
   fileorderconnectogramme  = get(handles.edit_linkSettingmapConnectogram,'string');
-    fid = fopen( fileorderconnectogramme,'r');
-    id = 1;
-    try 
-    get(handles.listbox_selectedzone,'string');
-    while ~feof(fid)
-        tline = fgetl(fid);
-        listselected{id} = tline;
-        id = id+1;
-    end
-        fclose(fid);
-    catch
-        listselected = get(handles.listbox_selectedzone,'string');
-        disp('Enter a list order for connectogram');
-    end
     
+  [filepath,name,ext] = fileparts( fileorderconnectogramme); 
+  try
+    if strcmp(ext,'.txt')
+         [num,txt,rawzonecolor] = readtxtfile_asxlsread(fileorderconnectogramme);     
+         if size(rawzonecolor,2)>2
+            listselected= rawzonecolor(2:end,1);
+         else
+            listselected= rawzonecolor(1:end,1);      
+         end
+         
+    elseif strcmp(ext,'.xls')|strcmp(ext,'.xlsx')
+       %  [num,txt,raw] = xlsread(fileorderconnectogramme);
+           [num,txt,rawzonecolor] = xlsread(fileorderconnectogramme);
+           listselected= rawzonecolor(2:end,1);
+    elseif 0  %just list without color    
+        fid = fopen( fileorderconnectogramme,'r');
+        id = 1;
+        get(handles.listbox_selectedzone,'string');
+        while ~feof(fid)
+            tline = fgetl(fid);
+            listselected{id} = tline;
+            id = id+1;
+        end
+            fclose(fid);
+
+    
+    end
+     if size(rawzonecolor,2)>2
+        maskcolor = 1;
+     else
+        maskcolor = 0; %could not perform mask color options
+     end
+  catch
+       listselected = get(handles.listbox_selectedzone,'string');
+       maskcolor = 0;
+       disp('Advice: enter a list order for connectogram');
+  end
+  
 DATA = get(handles.GUI_LookMat,'UserData');
 id = get(handles.popup_listsujet, 'value');
 MAT = DATA{id}.MAT;
@@ -66,6 +90,7 @@ end
     idlist = [];
     idlabel=[];
     idzone =[];
+    idzonecolor = [];
     for ilistzone = 1:numel(listok)
     for izone = 1:numel(DATA{id}.zone.plotLst)
         chzone = DATA{id}.zone.plotLst{izone};
@@ -85,7 +110,8 @@ end
                %     idzone =[idzone, izone];
                % else
                     idzone =[idzone,izone, zeros(1,numel(idch)-1)];
-              %  end
+                    idzonecolor = [idzonecolor, ilistzone.*ones(1,numel(idch))];
+                    %  end
 %             end
             idlabel = [idlabel, {[DATA{id}.zone.label{izone}, sprintf('_%03.0f',ilistzone)]}];
          end
@@ -99,20 +125,93 @@ if get(handles.radio_negativemap,'value')
 else
    MAT = MAT;
 end
-if get(handles.radio_negativemap,'value')
-    colorMap = flipud(jet(100));
-else
-    colorMap = jet(100);
-end
-cmin = str2num(get(handles.edit_cmin,'string'));
-cmax = str2num(get(handles.edit_cmax,'string'));
-cstep = (cmax-cmin)/100;
-cf=cmin:cstep:cmax-cstep;
-for i=1:size(MAT,1)
-    for j = 1:size(MAT,2)
-    colorMatrix(i,j) = sum(cf<MAT(i,j));
+if get(handles.popup_ConnectogramColor,'value')==1 %jet colormap list only no mask need
+    if get(handles.radio_negativemap,'value')
+        colorMap = flipud(jet(100));
+    else
+        colorMap = jet(100);
     end
+    cmin = str2num(get(handles.edit_cmin,'string'));
+    cmax = str2num(get(handles.edit_cmax,'string'));
+    cstep = (cmax-cmin)/100;
+    cf=cmin:cstep:cmax-cstep;
+    for i=1:size(MAT,1)
+        for j = 1:size(MAT,2)
+        colorMatrix(i,j) = sum(cf<MAT(i,j));
+        end
+    end
+     colorMatrix = colorMatrix(idlist,idlist);
+elseif get(handles.popup_ConnectogramColor,'value')==2 %jet colormap mask/color needed  
+    if maskcolor
+    cmin = str2num(get(handles.edit_cmin,'string'));
+    cmax = str2num(get(handles.edit_cmax,'string'));
+    cstep = (cmax-cmin)/100;
+    cf=cmin:cstep:cmax-cstep;
+    for i=1:size(MAT,1)
+        for j = 1:size(MAT,2)
+        colorMatrix(i,j) = sum(cf<MAT(i,j));
+        end
+    end
+     colorMatrix = colorMatrix(idlist,idlist);
+     
+     %use definition xls color to find all not define ROI combinaision
+    colorMatrixmask= ones(numel(idlist));
+    idMap = 1;
+    colorMap = zeros((size(rawzonecolor,1)-1)^2,3) ;
+    for i=2:size(rawzonecolor,1)
+       for j=2:size(rawzonecolor,1)
+           try
+                colorMap(idMap,:) = str2num(rawzonecolor{i,j})./255;    
+           catch
+               colorMap(idMap,:) = nan;
+           end
+        i_id = find(idzonecolor==(i-1));
+        j_id = find(idzonecolor==(j-1));
+        if isnan(colorMap(idMap,:))
+            colorMatrix(i_id,j_id) = nan;
+        end
+        idMap = idMap+1;
+        end
+    end
+     if get(handles.radio_negativemap,'value')
+        colorMap = flipud(jet(100));
+    else
+        colorMap = jet(100);
+     end
+    else
+        msgbox('Define zone x zone matrix color or mask to use this mode')
+        return
+    end
+   
+elseif get(handles.popup_ConnectogramColor,'value')==3   %color by zone mask/color needed
+    if maskcolor
+    colorMatrix= ones(numel(idlist));
+    colorMap = zeros((size(rawzonecolor,1)-1)^2,3); %-(size(rawzonecolor,1)-1)
+    idMap = 1;
+    for i=2:size(rawzonecolor,1)
+       for j=2:size(rawzonecolor,1)
+           try
+                colorMap(idMap,:) = str2num(rawzonecolor{i,j})./255;    
+           catch
+               colorMap(idMap,:) = nan;
+           end
+        i_id = find(idzonecolor==(i-1));
+        j_id = find(idzonecolor==(j-1));
+        colorMatrix(i_id,j_id)=idMap;
+        idMap = idMap+1;
+        end
+    end
+    else
+        msgbox('Define zone x zone matrix color or mask to use this mode')
+        return
+    end
+   
+elseif get(handles.popup_ConnectogramColor,'value')==4 %black color
+    colorMap = zeros(100,3);
+    colorMatrix = ones(size(MAT));
+    colorMatrix = colorMatrix(idlist,idlist);
 end
+%figure;imagesc(colorMatrix)
 
 
 colorlistline = zeros(size(MAT,1),3);
@@ -171,7 +270,7 @@ x(x >=  thresh) = 1;
  
  adjacencyMatrix = x;
  label = myLabel;
- colorMatrix = colorMatrix(idlist,idlist);
+
 t = linspace(-pi+0.01,pi-0.01,(length(adjacencyMatrix)+1)); %to avoid 0 tan
 factor = 1.1;
 coordinate = zeros(length(adjacencyMatrix),2);
@@ -206,15 +305,22 @@ end
 for iorder = 1:length(idchrono)
        i = idchrono(iorder);
        max(idlist);
-      if  colorMatrix(row(i),col(i))==0;  newcolor = [0,0,0];    else;  newcolor = colorMap(colorMatrix(row(i),col(i)),:);    end
+       if isnan(colorMatrix(row(i),col(i)))
+   
+       else
+      if  colorMatrix(row(i),col(i))==0;  newcolor = [0,0,0];   
+      else;  newcolor = colorMap(colorMatrix(row(i),col(i)),:);   
+      end
      if  abs(row(i) - col(i)) - length(adjacencyMatrix)/2 == 0;
+         if ~isnan(newcolor)
            u = [cos(t(row(i)));sin(t(row(i)))];
             v = [cos(t(col(i)));sin(t(col(i)))];
            h =  line(...
               [u(1);v(1)],...
               [u(2);v(2)],...
               'LineWidth',4,...
-              'Color', newcolor);          
+              'Color', newcolor);     
+         end
      else
    
            u  = [cos(t(row(i)));sin(t(row(i)))];
@@ -237,15 +343,18 @@ for iorder = 1:length(idchrono)
      %DRAW ARC OF CIRCLEnum2str( u1),',',num2str( v1),
    LINKNAME =  ['(i,j)=(',num2str(idlist(row(i))),',',num2str(idlist(col(i))),')=(',List(idlist(row(i)),:),',',List(idlist(col(i)),:) ,')'];
  
-   
-    h = line( r*cos(theta)+x0,...
-              r*sin(theta)+y0,...
-              'LineWidth', 4,...
-              'Color', newcolor,'displayname',LINKNAME );
-          %set(gca,'visible','off')
-    
-     end
+   if ~isnan(newcolor)
+        h = line( r*cos(theta)+x0,...
+                  r*sin(theta)+y0,...
+                  'LineWidth', 4,...
+                  'Color', newcolor,'displayname',LINKNAME );
+              %set(gca,'visible','off')
+
+       
      if newfigure ==0
         set(h,'uicontextmenu',handles.context_link);
-    end
+     end
+     end
+   end
+       end
 end

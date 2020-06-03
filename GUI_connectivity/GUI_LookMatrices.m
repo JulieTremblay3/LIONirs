@@ -161,7 +161,11 @@ for isubject=2:size(info,1)
         %Define Additional covariable 
         idcov = 1 ;       
         for icolumn = 5:size(info,2)
-            eval( ['DATA{id}.cov',num2str(idcov),' = ', num2str(info{isubject,icolumn}),';']);
+            try
+                 eval( ['DATA{id}.cov',num2str(idcov),' = ', num2str(info{isubject,icolumn}),';']);
+            catch
+                 eval( ['DATA{id}.cov',num2str(idcov),' = nan;']);
+            end
             idcov=idcov+1;
             if isubject==2
             infocov = [infocov ;info(1,icolumn)];
@@ -1534,6 +1538,9 @@ function popup_ConnectogramColor_Callback(hObject, eventdata, handles)
 %        contents{get(hObject,'Value')} returns selected item from popup_ConnectogramColor
 
 guidata(handles.GUI_LookMat, handles);
+
+
+
 updateNetAllView(handles)
 % --- Executes during object creation, after setting all properties.
 function popup_ConnectogramColor_CreateFcn(hObject, eventdata, handles)
@@ -1599,11 +1606,11 @@ function btn_EntersettingLink_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
-if get(handles.popupmenu_linkoption,'value')==1 %notting
-  [file,path] =  uigetfile('.txt')
+if get(handles.popupmenu_linkoption,'value')==1
+  [file,path] =  uigetfile({'*.xlsx';'*.xls'; '*.txt';'*.*'})
    set(handles.edit_linkSettingmapConnectogram,'string',[path,file]) %connectogramme
 elseif get(handles.popupmenu_linkoption,'value')==2
-   [file,path] =  uigetfile('.txt')
+    [file,path] =  uigetfile({ '*.xlsx';'*.xls';'*.txt';'*.*'})
    set(handles.edit_linkSettingmapConnectogram,'string',[path,file])
 elseif get(handles.popupmenu_linkoption,'value')==3
    [file,path] =  uigetfile('.mat')
@@ -1816,24 +1823,48 @@ linkselected = get(handles.context_link_name,'label')
 [linkname,rem] = strtok(rem,'=')
 valG1 = [];
 valG2 = [];
+groupeall = [];
+for i=1:numel(DATA)
+    groupeall=[groupeall,DATA{1,i}.GR];
+end
+
 figure;hold on
-for id = 1:numel(DATA)
-if DATA{id}.GR == 1
-    eval(['new=DATA{',num2str(id),'}.MAT',linkij])
-    valG1 = [valG1,new]
-    eval(['namesubject = DATA{',num2str(id),'}.name;'])
-    plot(1,new,'x','displayname',[namesubject, '=' num2str(new) ])
+for igr = 1:max(groupeall)
+    idgroupe =  find(groupeall==igr);
+    valG1 = []
+for id = 1:numel(idgroupe)
+      idsubjet = idgroupe(id);
+    if DATA{idsubjet}.GR == igr
+        eval(['new=DATA{',num2str(idsubjet),'}.MAT',linkij,';'])
+        if get(handles.radio_fisher,'value')
+            new =1/2*(log((1+new )./(1-new )));
+        end
+        valG1 = [valG1,new];
+        eval(['namesubject = DATA{',num2str(idsubjet),'}.name;']);
+        plot(igr,new,'x','displayname',[namesubject, '=' num2str(new) ]);
+    end
+
+       
+%     if DATA{id}.GR == 2
+%         eval(['new=DATA{',num2str(id),'}.MAT',linkij])
+%         valG2 = [valG2,new];
+%           eval(['namesubject = DATA{',num2str(id),'}.name;'])
+%         plot(2,new,'x','displayname',[namesubject, '=' num2str(new) ])
+%     end
 end
-if DATA{id}.GR == 2
-    eval(['new=DATA{',num2str(id),'}.MAT',linkij])
-    valG2 = [valG2,new];
-      eval(['namesubject = DATA{',num2str(id),'}.name;'])
-    plot(2,new,'x','displayname',[namesubject, '=' num2str(new) ])
+ bar(igr,nanmean(valG1),'facealpha',0.5,'displayname',['mean group ',num2str(igr) ]);
 end
-end
-bar(1,nanmean(valG1),'facealpha',0.5)
-bar(2,nanmean(valG2),'facealpha',0.5)
-title(linkname)
+
+xlabel('Groups')
+   if get(handles.radio_fisher,'value')==0
+        ylabel('Connectivity score')
+   elseif get(handles.radio_fisher,'value')==1
+       ylabel('Connectivity score (Fisher)')
+   end
+%bar(2,nanmean(valG2),'facealpha',0.5)
+[filepath,name,ext] =fileparts(get(handles.edit_subjetxls,'string'))
+
+title([linkname,' ' , name])
 
 
 
@@ -1844,34 +1875,37 @@ function context_link_Covariable_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 DATA = get(handles.GUI_LookMat,'UserData');
 id = get(handles.popup_listsujet, 'value');
-linkselected = get(handles.context_link_name,'label')
+linkselected = get(handles.context_link_name,'label');
 
-covnumber = get(handles.popupmenu_covariable,'value')
-covname = get(handles.popupmenu_covariable,'string')
-[tok,rem] = strtok(linkselected,'=')
-[linkij,rem] = strtok(rem,'=')
-[linkname,rem] = strtok(rem,'=')
+covnumber = get(handles.popupmenu_covariable,'value');
+covname = get(handles.popupmenu_covariable,'string');
+[tok,rem] = strtok(linkselected,'=');
+[linkij,rem] = strtok(rem,'=');
+[linkname,rem] = strtok(rem,'=');
 valG1 = [];
 valG2 = [];
+groupeall = [];
+for i=1:numel(DATA)
+    groupeall=[groupeall,DATA{1,i}.GR];
+end
+colorlink = lines(max(groupeall));
+
 figure;hold on
 for id = 1:numel(DATA)
-    if DATA{id}.GR ==1 | DATA{id}.GR ==2
-    eval(['COH=DATA{',num2str(id),'}.MAT',linkij])    
+    if DATA{id}.GR > 0
+    eval(['COH=DATA{',num2str(id),'}.MAT',linkij,';'])    
     eval(['namesubject = DATA{',num2str(id),'}.name;'])
-    eval(['COV=DATA{',num2str(id),'}.cov',num2str(covnumber)])   
-    hplot= plot(COV,COH,'x','displayname',[namesubject])
-    if DATA{id}.GR == 1
-        set(hplot,'color','b')
-    elseif DATA{id}.GR == 2
-       set(hplot,'color','r')
-    end
+    eval(['COV=DATA{',num2str(id),'}.cov',num2str(covnumber),';'])   
+    hplot= plot(COV,COH,'x','displayname',['G',num2str(DATA{id}.GR),namesubject]);
+    set(hplot,'color',colorlink(DATA{id}.GR ,:));
+  
     end
 end
 
 
-xlabel(covname{covnumber})
-ylabel('COH')
-title(linkname)
+xlabel(covname{covnumber});
+ylabel('COH');
+title(linkname);
 
 
 
@@ -1963,4 +1997,3 @@ for i=1:size(tmp,1)
 end
 fclose(fid)
 
-1
