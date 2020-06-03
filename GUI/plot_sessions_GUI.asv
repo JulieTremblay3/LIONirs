@@ -4353,13 +4353,15 @@ if strcmp(eventdata.Key,'r')   %restore ch for this event
     x = handles.NIRS.Dt.fir.pp(end).p{fileid};
     
     %Get the co-channel too
-    nbhalf=numel(PMI{currentsub}.data(cf).MeasListAct)/2;
-    ch1 = PMI{currentsub}.plotLst;%(1);
-    idfirst = find(ch1<=nbhalf);
-    idlast = find(ch1>nbhalf);
-    halflist = zeros(nbhalf,2);
-    halflist(ch1(idfirst),:)=1;
-    halflist(ch1(idlast)-nbhalf,:)=1;
+    nbhalf=numel(PMI{currentsub}.data(cf).MeasListAct)/2
+    ch1 = PMI{currentsub}.plotLst%(1);
+    idfirst = find(ch1<=nbhalf)
+    idlast = find(ch1>nbhalf)
+    halflist = zeros(nbhalf,2)
+    halflist(ch1(idfirst),:)=1
+     halflist(ch1(idlast),:)=1
+    [ch1(idfirst), ch1(idlast)-nbhalf]
+    ch2 = PMI{currentsub}.plotLst(2);
     idmodule = get(handles.popupmenu_module, 'value');
     
     epochavg = 0;
@@ -4370,13 +4372,13 @@ if strcmp(eventdata.Key,'r')   %restore ch for this event
     end
     
     if epochavg
-        handles.NIRS.Dt.fir.pp(idmodule).chok(find(halflist(:)))=1;
+        handles.NIRS.Dt.fir.pp(idmodule).chok([ch1,ch2])=1;
     else
-        handles.NIRS.Cf.H.C.ok(find(halflist(:)), fileid) = 1;
+        handles.NIRS.Cf.H.C.ok([ch1 ch2], fileid) = 1;
     end
     NIRS=handles.NIRS;
     save(handles.NIRSpath{handles.subjectnb,1},'NIRS','-mat');
-    PMI{currentsub}.data(cf).MeasListAct(find(halflist(:)))=1;
+    PMI{currentsub}.data(cf).MeasListAct([ch1 ch2])=1;
     set(guiHOMER,'UserData',PMI);
     handles.newlist=1; %update helmet channel
     guidata(hObject,handles);
