@@ -326,7 +326,7 @@ for igroupe = 1:max(groupeall)
        clear MAT    
       end
 end
-for igroupe = 1:max(groupeall)
+for  igroupe = 1:max(groupeall)
     	idsubject = find(groupeall==igroupe);
         if ~isempty(idsubject)
               idnew = idnew +1;
