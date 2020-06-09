@@ -50,7 +50,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 copyfile(infilevmrk,outfilevmrk);
                 catch;end
                 try
-                    ChannelLabels = ConvertmlIDsrs2label(NIRS)
+                    ChannelLabels = ConvertmlIDsrs2label(NIRS);
                     SamplingInterval =floor(1000000/NIRS.Cf.dev.fs);
                     nirs_boxy_write_vhdr(outfilevhdr,... %Output file
                         outfile,... %DataFile
