@@ -2,7 +2,7 @@ function out = nirs_run_writenirs(job)
 %JT
 fileout = job.FileOutput;
 load(job.NIRSmat{1})     % Matrice NIRS
-Session = job.Session; 
+Session = job.NIRSsession; 
 %Big loop over all subjects
 if job.NIRS_exportoption == 1 %concatenate file together in one big file 
 %% Loop over all nirs.mat file defined 

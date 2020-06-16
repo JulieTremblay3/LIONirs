@@ -32,8 +32,9 @@ if strcmp(temp(end-3:end),'zone')% USE ZONE TEMPLATE FIRST TO LOOK IN OTHER FILE
         fs = NIRS.Cf.dev.fs; 
         rDtp = NIRS.Dt.fir.pp(lst).p; % path for files to be processed
         
-    if strfind(NIRS.Dt.fir.pp(lst).pre,'Epoch averaging') %do only first file
-        nmax =1;
+    if strfind(NIRS.Dt.fir.pp(lst).pre,'Epoch averaging') %do only first file %use average chok
+        nmax =1; 
+        
     else
         nmax=numel(rDtp); %do all file
     end
@@ -227,6 +228,7 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
             NIRSref.Cf.H.C.id =  NIRS.Cf.H.C.id(:,chlst);
             NIRSref.Cf.H.C.wl =  NIRS.Cf.H.C.wl(:,chlst);
             NIRSref.Cf.H.C.gp =  NIRS.Cf.H.C.gp(chlst,:);
+          
             NIRSref.Cf.H.C.ok =  NIRS.Cf.H.C.ok(chlst,:);
         end
         try 
@@ -245,10 +247,13 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
             A = reshape(X,numel(X),1)*reshape( Mb1,1,numel(Mb1)) +ones(numel(X),1)*reshape( Mb2,1,numel(Mb2));
             d = (intensnorm - A)';       
         end
-        
-         
+        if strfind(NIRS.Dt.fir.pp(lst).pre,'Epoch averaging')
+            Measlistact = NIRS.Cf.H.C.okavg;
+        else
+            Measlistact = NIRS.Cf.H.C.ok(:,f);
+        end
        %Normalized do not consider artifact channels. 
-       idexclude= find(NIRS.Cf.H.C.ok(:,f)==0);
+       idexclude= find(Measlistact ==0);
        if job.m_Concatenate_Exclude == 0
            d(idexclude,:) = nan;
        elseif job.m_Concatenate_Exclude == 1 %keep all

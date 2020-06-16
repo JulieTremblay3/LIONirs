@@ -349,8 +349,8 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
         infonew = [infonew;new];
         
         file = [name,'_',labelnode,num2str(NPERM),'permutation G2-G1 p05'];
-        matcorr = real(squeeze(nanmean(cb1,1))-squeeze(nanmean(pb1,1))).*double(FUniv<0.05);
-        meancorr = real(squeeze(nanmean(cb1,1))-squeeze(nanmean(pb1,1))).*double(FUniv<0.05);
+        matcorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1))).*double(FUniv<0.05);
+        meancorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1))).*double(FUniv<0.05);
         save(fullfile(info{isubject,1},[file,'.mat']),'ZoneList','matcorr','meancorr');
         new = [{info{isubject,1}},{file}, {ZONEid},{1} ];
         infonew = [infonew;new];

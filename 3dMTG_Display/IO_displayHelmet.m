@@ -572,13 +572,13 @@ function displaychannel(DispHelm,PMI,DispParameter)
         if PMI{currentsub}.data(cf).MeasListAct(PMI{currentsub}.plotLst(ind))           
                 idxc = find_idx_color(PMI{currentsub}.data(cf).MeasList,...
                     PMI{currentsub}.plotLst(ind),numel(colorch)/3);                
-                plot3( [srsx2,detx2], [srsy2,dety2], [srsz2,detz2],'color',colorch(idxc,:),'LineWidth',2);
+                plot3( [srsx2,detx2], [srsy2,dety2], [srsz2,detz2],'color',colorch(idxc,:),'LineWidth',DispParameter.LineWidth  );
                 
         else
              if DispParameter.viewMeasListAct
                 idxc = find_idx_color(PMI{currentsub}.data(cf).MeasList,...
                     PMI{currentsub}.plotLst(ind),numel(colorch)/3);
-                plot3( [srsx2,detx2], [srsy2,dety2], [srsz2,detz2],'color',colorch(idxc,:),'LineWidth',3,'linestyle','--');
+                plot3( [srsx2,detx2], [srsy2,dety2], [srsz2,detz2],'color',colorch(idxc,:),'LineWidth',DispParameter.LineWidth ,'linestyle','--');
             end
         end
         

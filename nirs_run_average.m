@@ -178,6 +178,7 @@ for filenb=1:size(job.NIRSmat,1) %For every specified NIRS.mat file
                 trialnb = trialnb+1;
             end             
         end   
+       1
        
         if avtype==2 %save data file for separate files average %NON VÉRIfIER JT
             av = nanmean(A,3);
@@ -321,10 +322,11 @@ if avtype==1 %save data file for average over many files
  
     modeTvalue = job.choiceave.m_Tvalueoption; %0 against zero, 1 unpaired vs baseline Worstcase , 2 Avg baseline 
 
-    NIRS.Dt.fir.pp(lst+1).chok =  mediannbevents >= ((trialnb-1)*job.choiceave.badchannelratio);
+    NIRS.Cf.H.C.okavg =  (mediannbevents >= ((trialnb-1)*job.choiceave.badchannelratio))';
+    %NIRS.Dt.fir.pp(lst+1).chok replace by NIRS.Cf.H.C.okavg
     zeronbevent=find(nbevents==0);
     tval = av./(stdav./sqrt(nbevents));
-    tval(zeronbevent)=0; 
+    tval(zeronbevent)=0;  
 
      %Mettre les NAN à zero
     if modeTvalue>=1;
@@ -368,7 +370,7 @@ if avtype==1 %save data file for average over many files
     set(gca,'fontsize',14)
     hold on
     for ichannel=1:numel(mediannbevents)/2
-        if NIRS.Dt.fir.pp(lst+1).chok(ichannel)
+        if NIRS.Cf.H.C.okavg(ichannel)
             plot(ichannel,(mediannbevents(ichannel)/(trialnb-1))*100,'xk','markersize',10,'linewidth',3)
         else
             plot(ichannel,(mediannbevents(ichannel)/(trialnb-1))*100,'xg','markersize',10,'linewidth',3)

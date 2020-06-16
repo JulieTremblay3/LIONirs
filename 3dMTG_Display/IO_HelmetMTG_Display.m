@@ -64,7 +64,7 @@ end
 
 set(handles.radio_guiSPMnirsHSJ, 'visible', 'off'); % Set the view selector to invisible as it is not needed.
 
-if 1 %~isempty(varargin)
+if 0 %~isempty(varargin)
     set(handles.radio_Channel,'value',0);
     set(handles.radio_holes,'value',0);
     set(handles.radio_ViewMeasListAct,'value',0);
@@ -1266,6 +1266,7 @@ DispParameter.viewMeasListAct = get(handles.radio_ViewMeasListAct,'value');
 DispParameter.enumaltas = str2num(get(handles.edit_atlasview,'string'));
 DispParameter.viewcortexandatlas  = get(handles.radio_cortexandatlas,'value');
 DispParameter.HideNotCover = get(handles.radio_show_cover,'value');
+DispParameter.LineWidth = str2num(get(handles.edit_channelwidth,'string'));
 if get(handles.radio_d1color,'value')==1;
     DispParameter.viewd1chcolor  = 1;
 elseif get(handles.radio_viewch,'value')==1;
@@ -2098,6 +2099,7 @@ DispParameter.MRIviewtransparent = get(handles.radio_transparent,'value');
 DispParameter.viewMeasListAct = get(handles.radio_ViewMeasListAct,'value');
 DispParameter.viewcortexandatlas   = get(handles.radio_cortexandatlas,'value');
 DispParameter.HideNotCover = get(handles.radio_show_cover,'value');
+DispParameter.LineWidth = str2num(get(handles.edit_channelwidth,'string'));
 if get(handles.radio_d1color,'value')==1;
     DispParameter.viewd1chcolor  = 1;
 elseif get(handles.radio_viewch,'value')==1;
@@ -3488,3 +3490,27 @@ function uipanel10_ButtonDownFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 resetview(handles)
+
+
+
+function edit_channelwidth_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_channelwidth (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_channelwidth as text
+%        str2double(get(hObject,'String')) returns contents of edit_channelwidth as a double
+resetview(handles)
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_channelwidth_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_channelwidth (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

@@ -246,7 +246,11 @@ PMI{currentsub}.data(cf).MeasList = [NIRS.Cf.H.C.id(2:3,:)',...
     ones(size(NIRS.Cf.H.C.id,2),1),...
     [ones(size(NIRS.Cf.H.C.id,2)/2,1);ones(size(NIRS.Cf.H.C.id,2)./2,1).*2]];
 fileid=get(handles.popupmenu_file,'value');
-PMI{currentsub}.data(cf).MeasListAct = handles.NIRS.Cf.H.C.ok(:, fileid);
+% if isfield(handles.NIRS.Cf.H.C, 'okavg')
+%     PMI{currentsub}.data(cf).MeasListAct = handles.NIRS.Cf.H.C.okavg;
+% else 
+     PMI{currentsub}.data(cf).MeasListAct = handles.NIRS.Cf.H.C.ok(:, fileid);
+% end
 PMI{currentsub}.color = PMIcolordef(size(NIRS.Cf.H.C.id,2));
 PMI{currentsub}.plotLst = [1];
 PMI{currentsub}.plot = [1,1]; 
@@ -1312,7 +1316,7 @@ try
         
         epochavg = 0;
         if numel(handles.NIRS.Dt.fir.pp(idmodule).pre)>15
-            if strcmp(handles.NIRS.Dt.fir.pp(idmodule).pre(1:15), 'Epoch averaging');
+            if  strcmp(handles.NIRS.Dt.fir.pp(idmodule).pre(1:15), 'Epoch averaging');
                 epochavg = 1;
             end
         end
@@ -1370,8 +1374,13 @@ try
         
         fileid=get(handles.popupmenu_file,'value');
         
-        if epochavg
-            PMI{currentsub}.data(cf).MeasListAct = handles.NIRS.Dt.fir.pp(idmodule).chok;
+        if ~isempty( strfind(handles.NIRS.Dt.fir.pp(idmodule).pre, 'Epoch averaging')); %
+            if isfield(handles.NIRS.Cf.H.C,'okavg')
+                PMI{currentsub}.data(cf).MeasListAct = handles.NIRS.Cf.H.C.okavg;
+            else
+                PMI{currentsub}.data(cf).MeasListAct = ones(size (handles.NIRS.Cf.H.C.ok,1),1);
+                disp('channellist reinitialized')
+            end
         else
             PMI{currentsub}.data(cf).MeasListAct = handles.NIRS.Cf.H.C.ok(:, fileid);
         end
@@ -1519,11 +1528,11 @@ try
         
         fileid=get(handles.popupmenu_file,'value');
         
-        if epochavg
-            PMI{currentsubhold}.data(cf).MeasListAct = handles.NIRS.Dt.fir.pp(idmodulehold).chok;
-        else
-            PMI{currentsubhold}.data(cf).MeasListAct = handles.NIRS.Cf.H.C.ok(:, fileid);
-        end
+%         if epochavg
+%             PMI{currentsubhold}.data(cf).MeasListAct = handles.NIRS.Dt.fir.pp(idmodulehold).chok;
+%         else
+%             PMI{currentsubhold}.data(cf).MeasListAct = handles.NIRS.Cf.H.C.ok(:, fileid);
+%         end
         
         %Find if a normalisation module in the data.
         
@@ -1836,7 +1845,11 @@ write_vmrk_all(vmrk_path,ind_dur_ch,label);
 Nc = numel(PMI{currentsub}.data(cf).MeasListAct)/2;
 MeasListAct = [double(sum(reshape(PMI{currentsub}.data(cf).MeasListAct,Nc,2),2)>1);double(sum(reshape(PMI{currentsub}.data(cf).MeasListAct,Nc,2),2)>1)];
 PMI{currentsub}.data(cf).MeasListAct = MeasListAct;
-handles.NIRS.Cf.H.C.ok(:, fileid)=MeasListAct;
+  if ~isempty( strfind(handles.NIRS.Dt.fir.pp(end).pre, 'Epoch averaging')); %
+    handles.NIRS.Cf.H.C.okavg(:, fileid)=MeasListAct;
+  else      
+    handles.NIRS.Cf.H.C.ok(:, fileid)=MeasListAct;
+  end
 NIRS = handles.NIRS;
 save(handles.NIRSpath{1},'NIRS');
 pause(0.5)
@@ -2263,8 +2276,10 @@ if numel(handles.NIRS.Dt.fir.pp(idmodule).pre)>15
         epochavg = 1;
     end
 end
-if epochavg
-    handles.NIRS.Dt.fir.pp(idmodule).chok([ch1,ch2])=0;
+
+
+if ~isempty( strfind(handles.NIRS.Dt.fir.pp(idmodule).pre, 'Epoch averaging')); 
+    handles.NIRS.Cf.H.C.okavg([ch1 ch2],:) =0;
 else
     handles.NIRS.Cf.H.C.ok([ch1 ch2], fileid) = 0;
 end
@@ -2336,8 +2351,8 @@ if numel(handles.NIRS.Dt.fir.pp(idmodule).pre)>15
     end
 end
 
-if epochavg
-    handles.NIRS.Dt.fir.pp(idmodule).chok([ch1,ch2])=1;
+if ~isempty( strfind(handles.NIRS.Dt.fir.pp(idmodule).pre, 'Epoch averaging')); 
+    handles.NIRS.Cf.H.C.okavg([ch1 ch2],:) =1;
 else
     handles.NIRS.Cf.H.C.ok([ch1 ch2], fileid) = 1;
 end
@@ -2390,8 +2405,11 @@ chbad = find(badch(1:end/2)| badch(end/2+1:end));
 nbch = numel(badch(1:end/2));
 fileid=get(handles.popupmenu_file,'value');
 
-
-handles.NIRS.Cf.H.C.ok([chbad chbad+nbch], fileid) = 0;
+if ~isempty( strfind(handles.NIRS.Dt.fir.pp(idmodule).pre, 'Epoch averaging')); 
+    handles.NIRS.Cf.H.C.okavg([ch1 ch2],:) =0;
+else
+    handles.NIRS.Cf.H.C.ok([chbad chbad+nbch], fileid) = 0;
+end
 NIRS=handles.NIRS;
 save(handles.NIRSpath{handles.subjectnb,1},'NIRS','-mat');
 
@@ -4305,8 +4323,8 @@ if strcmp(get(handles.radio_on_norm,'enable'),'on')
     end
     
 end
+idmodule = get(handles.popupmenu_module, 'value');
 if strcmp(eventdata.Key,'d')   %deleted ch for this event
-    %RESTORE CH
     guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
     currentsub=1;
     PMI = get(guiHOMER,'UserData');
@@ -4314,23 +4332,29 @@ if strcmp(eventdata.Key,'d')   %deleted ch for this event
     fileid=get(handles.popupmenu_file,'value');
     x = handles.NIRS.Dt.fir.pp(end).p{fileid};
     if size(PMI{currentsub}.plotLst) > 1 % Verify if the channel removal can be done.
-        %Get the co-channel too
-        ch1 = PMI{currentsub}.plotLst(1);
-        ch2 = PMI{currentsub}.plotLst(2);
-        idmodule = get(handles.popupmenu_module, 'value');
+        %Get the other wavelenght too
+        
+    nbhalf=numel(PMI{currentsub}.data(cf).MeasListAct)/2;
+    ch1 = PMI{currentsub}.plotLst;%(1);
+    idfirst = find(ch1<=nbhalf);
+    idlast = find(ch1>nbhalf);
+    halflist = zeros(nbhalf,2);
+    halflist(ch1(idfirst),:)=1;
+    halflist(ch1(idlast)-nbhalf,:)=1;  
+   
+    if ~isempty( strfind(handles.NIRS.Dt.fir.pp(idmodule).pre, 'Epoch averaging')); 
+         handles.NIRS.Cf.H.C.okavg(find(halflist(:)))=0;
+    else
+         handles.NIRS.Cf.H.C.ok(find(halflist(:)), fileid) = 0;
+    end
+  
+% old
+%         if ~isempty( strfind(handles.NIRS.Dt.fir.pp(idmodule).pre, 'Epoch averaging')); 
+%             handles.NIRS.Cf.H.C.okavg([ch1,ch2])=0;
+%         else
+%             handles.NIRS.Cf.H.C.ok([ch1 ch2], fileid) = 0;
+%         end
 
-        epochavg = 0;
-        if numel(handles.NIRS.Dt.fir.pp(idmodule).pre)>15
-            if strcmp(handles.NIRS.Dt.fir.pp(idmodule).pre(1:15), 'Epoch averaging')
-                epochavg = 1;
-            end
-        end
-
-        if epochavg
-            handles.NIRS.Dt.fir.pp(idmodule).chok([ch1,ch2])=0;
-        else
-            handles.NIRS.Cf.H.C.ok([ch1 ch2], fileid) = 0;
-        end
         NIRS=handles.NIRS;
         save(handles.NIRSpath{handles.subjectnb,1},'NIRS','-mat');
         PMI{currentsub}.data(cf).MeasListAct([ch1 ch2])=0;
@@ -4362,17 +4386,12 @@ if strcmp(eventdata.Key,'r')   %restore ch for this event
     halflist(ch1(idlast)-nbhalf,:)=1;
     idmodule = get(handles.popupmenu_module, 'value');
     
-    epochavg = 0;
-    if numel(handles.NIRS.Dt.fir.pp(idmodule).pre)>15
-        if strcmp(handles.NIRS.Dt.fir.pp(idmodule).pre(1:15), 'Epoch averaging');
-            epochavg = 1;
-        end
-    end
-    
-    if epochavg
-        handles.NIRS.Dt.fir.pp(idmodule).chok(find(halflist(:)))=1;
+
+  
+    if ~isempty( strfind(handles.NIRS.Dt.fir.pp(idmodule).pre, 'Epoch averaging')); 
+         handles.NIRS.Cf.H.C.okavg(find(halflist(:)))=1;
     else
-        handles.NIRS.Cf.H.C.ok(find(halflist(:)), fileid) = 1;
+         handles.NIRS.Cf.H.C.ok(find(halflist(:)), fileid) = 1;
     end
     NIRS=handles.NIRS;
     save(handles.NIRSpath{handles.subjectnb,1},'NIRS','-mat');
@@ -4404,7 +4423,13 @@ if  strcmp(eventdata.Key,'a')
                 PMI{currentsub}.data.MeasListAct = PMI{currentsub}.data.MeasListAct(1:size(PMI{currentsub}.data.MeasList,1))
             end
                 
-            handles.NIRS.Cf.H.C.ok(  tmptoremove,:) = 0;
+            
+            if ~isempty( strfind(handles.NIRS.Dt.fir.pp(idmodule).pre, 'Epoch averaging')); 
+                 handles.NIRS.Cf.H.C.okavg(tmptoremove,:)=0;
+            else
+                 handles.NIRS.Cf.H.C.ok(tmptoremove,:) = 0;
+            end
+            
           %  handles.NIRS.Cf.H.C.ok(ch2,:) = 0;
             NIRS=handles.NIRS;
             save(handles.NIRSpath{handles.subjectnb,1},'NIRS','-mat');
@@ -4427,7 +4452,14 @@ if strcmp(eventdata.Key,'t')
         PMI = get(guiHOMER,'UserData');
         cf = PMI{currentsub}.currentFile;
         fileid=get(handles.popupmenu_file,'value');
-        handles.NIRS.Cf.H.C.ok(:, fileid) = 0;
+        
+        
+         if ~isempty( strfind(handles.NIRS.Dt.fir.pp(idmodule).pre, 'Epoch averaging')); 
+                 handles.NIRS.Cf.H.C.okavg(:, fileid)=0;
+         else
+                 handles.NIRS.Cf.H.C.ok(:, fileid) = 0;
+         end
+        
         NIRS=handles.NIRS;
         save(handles.NIRSpath{handles.subjectnb,1},'NIRS','-mat');
         PMI{currentsub}.data(cf).MeasListAct(:)=0;
@@ -4540,7 +4572,12 @@ if strcmp(eventdata.Key,'w') %Whole (Whole channels restore for this trial)
         PMI = get(guiHOMER,'UserData');
         cf = PMI{currentsub}.currentFile;
         fileid=get(handles.popupmenu_file,'value');
-        handles.NIRS.Cf.H.C.ok(:, fileid) = 1;
+         if ~isempty( strfind(handles.NIRS.Dt.fir.pp(idmodule).pre, 'Epoch averaging')); 
+                 handles.NIRS.Cf.H.C.okavg(:, fileid)=1;
+         else
+                 handles.NIRS.Cf.H.C.ok(:, fileid) = 1;
+         end
+ 
         NIRS=handles.NIRS;
         save(handles.NIRSpath{handles.subjectnb,1},'NIRS','-mat');
         PMI{currentsub}.data(cf).MeasListAct(:)=1;

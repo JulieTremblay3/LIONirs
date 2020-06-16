@@ -47,7 +47,7 @@ for filenb = 1:size(job.NIRSmat,1)
             catch
             end
             
-          if 1
+          if 0
               figure 
               hold on
               actualNIRStrig = NIRS.Dt.fir.aux5{1};
@@ -205,6 +205,7 @@ for filenb = 1:size(job.NIRSmat,1)
                         idtocheckAUX = AUX(iaux).ind_dur_ch(idstimAUX{iaux},1)
                         timetrig = idtocheckAUX * AUX(iaux).infoBV.SamplingInterval/1000000
                         timestim = indstim*1/NIRS.Cf.dev.fs
+                        if 0
                         figure;hold on;
                         for i=1:numel(timetrig)
                             plot( timetrig(i),1,'+r','displayname',['AUX',num2str(i)])
@@ -215,6 +216,7 @@ for filenb = 1:size(job.NIRSmat,1)
                         
                         title(['Error in number of trig ',num2str(trigger) ,' between AUX ', NIRS.Dt.AUX(iaux).label,' and NIRS, Please Ajust trig manualy or in VMRK file to make them match before segmentation.'])
                         return
+                        end
                     end
                     
                     fsAUX{iaux} = 1/(AUX(iaux).infoBV.SamplingInterval/1000000); %uS en seconde

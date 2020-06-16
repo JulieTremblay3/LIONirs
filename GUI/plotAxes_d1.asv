@@ -781,23 +781,14 @@ end
 
 IO_HelmetMTG_Display
 idmodule = get(handles.popupmenu_module, 'value');
-fileid=get(handles.popupmenu_file,'value');
-    nbhalf=numel(PMI{currentsub}.data(cf).MeasListAct)/2;
-    ch1 = find(PMI{currentsub}.data(cf).MeasListAct);%(1);
-    idfirst = find(ch1<=nbhalf);
-    idlast = find(ch1>nbhalf);
-    halflist = zeros(nbhalf,2);
-    halflist(ch1(idfirst),:)=1;
-    halflist(ch1(idlast)-nbhalf,:)=1;  
-if ~isempty( strfind(handles.NIRS.Dt.fir.pp(idmodule).pre, 'Epoch averaging')); 
-    handles.NIRS.Cf.H.C.okavg(:,:) = 0;
-    handles.NIRS.Cf.H.C.okavg(find(halflist(:)),:)=1 ;
-else
-    handles.NIRS.Cf.H.C.ok(:,fileid)=0;
-    handles.NIRS.Cf.H.C.ok(find(halflist(:)),fileid) = 1 ;
-end
-
-  NIRS=handles.NIRS;
-save(handles.NIRSpath{handles.subjectnb,1},'NIRS','-mat');
+  if ~isempty( strfind(handles.NIRS.Dt.fir.pp(idmodule).pre, 'Epoch averaging')); 
+                 handles.NIRS.Cf.H.C.okavg(tmptoremove,:)=PMI{1, 1}.data.MeasListAct  ;
+            else
+                 handles.NIRS.Cf.H.C.ok(tmptoremove,:) = PMI{1, 1}.data.MeasListAct  ;
+            end
+            
+          %  handles.NIRS.Cf.H.C.ok(ch2,:) = 0;
+            NIRS=handles.NIRS;
+            save(handles.NIRSpath{handles.subjectnb,1},'NIRS','-mat');
 
 set(guiHOMER,'UserData',PMI)
