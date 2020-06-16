@@ -119,9 +119,9 @@ function btn_zscore_Callback(hObject, eventdata, handles)
 xlslistfile = get(handles.edit_listXLS,'string')
 [~,~,ext] =fileparts([xlslistfile]);
 if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
-    [raw, txt, info]=xlsread([xlslistfile])
+    [raw, txt, info]=xlsread([xlslistfile]);
 elseif strcmp(ext,'.txt')   
-    [raw, txt, info] = readtxtfile_asxlsread([xlslistfile])
+    [raw, txt, info] = readtxtfile_asxlsread([xlslistfile]);
 end
 
 groupeall = [];
@@ -211,7 +211,7 @@ xlslistfile = get(handles.edit_listXLS,'string');
 if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
     [raw, txt, info]=xlsread([xlslistfile]);
 elseif strcmp(ext,'.txt')   
-    [raw, txt, info] = readtxtfile_asxlsread([xlslistfile])
+    [raw, txt, info] = readtxtfile_asxlsread([xlslistfile]);
 end
 
 testcardiac =0

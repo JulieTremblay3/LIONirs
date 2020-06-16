@@ -176,9 +176,9 @@ idval = get(handles.popupmenuoption,'value')
 if strcmp(listoption{idval},'Create HRF using onset duration xls file')
     [~,~,ext] =fileparts(fileevent);
     if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
-        [num, txt, raw] = xlsread(fileevent)
+        [num, txt, raw] = xlsread(fileevent);
     elseif strcmp(ext,'.txt')   
-        [num, txt, raw] = readtxtfile_asxlsread(fileevent)
+        [num, txt, raw] = readtxtfile_asxlsread(fileevent);
     end
     [EEG.data,EEG.infoBV,EEG.marker,EEG.ind_dur_ch]= fopen_EEG(filedata);
     idtrigger = find(strcmp('trigger',EEG.marker(:,1))& EEG.ind_dur_ch(:,1)>0);
