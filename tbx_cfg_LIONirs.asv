@@ -1577,16 +1577,16 @@ NIRSname.val     = {'name'};
 NIRSname.help    = {'OutputName only use to name concatenate file else initial name will be kept'};
 
 
-NIRS_export_Concatenatefile         = cfg_branch;
-NIRS_export_Concatenatefile.tag     = 'NIRS_export_Concatenatefile';
-NIRS_export_Concatenatefile.name    = 'Concatenate file';
-NIRS_export_Concatenatefile.val     = {NIRSname};
-NIRS_export_Concatenatefile.help    = {'Export nirs file with all segment one after the other.'}';
+NIRS_export_Separatefile         = cfg_branch;
+NIRS_export_Separatefile.tag     = 'NIRS_export_Concatenatefile';
+NIRS_export_Separatefile.name    = 'Concatenate file';
+NIRS_export_Separatefile.val     = {NIRSname};
+NIRS_export_Separatefile.help    = {''}';
 
 NIRS_export_Separatefile         = cfg_branch;
 NIRS_export_Separatefile.tag     = 'NIRS_export_Separatefile';
 NIRS_export_Separatefile.name    = 'Separate file';
-NIRS_export_Separatefile.val     = {};
+NIRS_export_Separatefile.val     = {NIRSname};
 NIRS_export_Separatefile.help    = {'Export each file in a separe .nirs file'}';
 
 %to be delete
@@ -1601,8 +1601,8 @@ NIRS_exportoption.help    = {'Export each file in a separe .nirs file or in one 
 
 c_NIRS_exportoption           = cfg_choice;
 c_NIRS_exportoption.tag     = 'c_NIRS_exportoption';
-c_NIRS_exportoption.name    = 'Options';
-c_NIRS_exportoption.values  = {NIRS_export_Separatefile,NIRS_export_Concatenatefile };
+c_NIRS_exportoption.name    = 'Reject outlier trial';
+c_NIRS_exportoption.values  = {NIRS_export_Separatefile,b_reject_trial};
 c_NIRS_exportoption.val     = {NIRS_export_Separatefile}; %Default option
 c_NIRS_exportoption.help    = {''};
 
@@ -1611,7 +1611,7 @@ c_NIRS_exportoption.help    = {''};
 E_writeNIRS      = cfg_exbranch;
 E_writeNIRS.name = 'Write NIRS';
 E_writeNIRS.tag  = 'WriteNIRS';
-E_writeNIRS.val  = {NIRSsession,NIRSmat,c_NIRS_exportoption};
+E_writeNIRS.val  = {NIRSsession,NIRSmat,NIRS_exportoption,NIRSname};
 E_writeNIRS.prog = @nirs_run_writenirs;
 E_writeNIRS.vout = @nirs_cfg_vout_writenirs;
 E_writeNIRS.help = {'Write in .nirs format for Homer'};

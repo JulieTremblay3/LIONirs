@@ -1,10 +1,11 @@
 function out = nirs_run_writenirs(job)
 %JT
-fileout = job.FileOutput;
+ %NIRS_exportoption,NIRSname
 load(job.NIRSmat{1})     % Matrice NIRS
 Session = job.NIRSsession; 
 %Big loop over all subjects
-if job.NIRS_exportoption == 1 %concatenate file together in one big file 
+if isfield(job.c_NIRS_exportoption,'NIRS_export_Concatenatefile')% == 1 %concatenate file together in one big file 
+    fileout = job.c_NIRS_exportoption.NIRS_export_Concatenatefile.FileOutput;
 %% Loop over all nirs.mat file defined 
     for Idx=1:size(job.NIRSmat,1)      
         nbch = numel(NIRS.Cf.H.C.n);
@@ -22,7 +23,7 @@ if job.NIRS_exportoption == 1 %concatenate file together in one big file
         end 
         fwrite_NIR_JT([pathstr,filesep,fileout,'.nirs'],dall,NIRS);
     end %end for  Big loop over subjects
-elseif job.NIRS_exportoption == 2 
+elseif isfield(job.c_NIRS_exportoption,'NIRS_export_Separatefile')
     for Idx=1:size(job.NIRSmat,1)      
     nbch = numel(NIRS.Cf.H.C.n);
     dall = [];
