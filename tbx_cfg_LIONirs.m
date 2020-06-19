@@ -3309,11 +3309,19 @@ c_statmatrix.values  = {b_TtestOneSamplematrix,b_PermutationTest};
 c_statmatrix.val     = {b_TtestOneSamplematrix}; %Default option
 c_statmatrix.help    = {''};
 
+% Folder selector.
+e_statmatrixPath          = cfg_files; %path
+e_statmatrixPath.name     = 'Result folder';
+e_statmatrixPath.tag      = 'e_statmatrixPath';
+e_statmatrixPath.filter   = {'dir'};
+e_statmatrixPath.ufilter  = '.*';    %
+e_statmatrixPath.num      = [1 1];     % Number of inputs required 
+e_statmatrixPath.help     = {'Result of the statistic will be saved in this folder'};
 
 E_statmatrix    = cfg_exbranch;
 E_statmatrix.name = 'Stats Matrices';
 E_statmatrix.tag  = 'E_statmatrix';
-E_statmatrix.val  = {f_matrix,m_fishertransform,m_nodeunit,c_statmatrix};
+E_statmatrix.val  = {f_matrix,m_fishertransform,m_nodeunit,c_statmatrix, e_statmatrixPath};
 E_statmatrix.prog = @nirs_run_E_statmatrix;
 E_statmatrix.vout = @nirs_cfg_vout_E_statmatrix;
 E_statmatrix.help = {'Apply basic statistic on component exported'};
@@ -3355,7 +3363,6 @@ M_Segment.help   = {'These modules segment or combine data.'};
 
 
 
-M_artefactdetection.help   = {'These modules detect possible artefacts in the NIRS data.'};
 %Module 3 Preprocessing NIRS data (3a,3b,3c,3d,3e,3f)
 M_preprocessing        = cfg_choice; 
 M_preprocessing.name   = 'Preprocessing NIRS data';

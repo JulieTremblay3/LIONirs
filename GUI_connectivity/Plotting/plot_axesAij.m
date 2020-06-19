@@ -124,6 +124,8 @@ if get(handles.popupmenu_view,'value')==1%view zone
                 set(hplot,'uicontextmenu',handles.context_mat);
                 
             end
+        else
+           title(DATA{id}.name)
         end
 %         for id = 1:(numel(idline)-1)
 %             plot([idline(id), idline(id)],[idline(id+1), idline(id)],'k','linewidth',4)
@@ -222,6 +224,8 @@ elseif  get(handles.popupmenu_view,'value')==2%view avg zone
     h = imagesc(MATAVG);
     if newfigure ==0
         set(h,'uicontextmenu',handles.context_mat);
+    else
+         title(DATA{id}.name)
     end
     idzone = 1:numel(listok)
     idlabel = listok
