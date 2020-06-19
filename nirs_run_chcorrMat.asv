@@ -414,10 +414,10 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                                     % k for join phase distribution see Moldavi 2013
                                     matcorrHbR(i,j,ibloc) = circ_kurtosis(angle(z1)'-angle(z2)');
                                     matcorrHbR(j,i,ibloc) = matcorrHbR(i,j,ibloc);
-                                    figure;hist(angle(z1));   figure;hist(angle(z2))
                                     figure;subplot(3,1,1);plot(dat(listHBR(i,1),:),'b','displayname', 'ch 1');hold on;plot(dat(listHBR(j,1),:),'r','displayname', 'ch 2')
-                                    subplot(3,2,3); hist(angle(z1),100);title(ch2);subplot(3,2,4);hist(angle(z2),100)
-                                    z2 = hil(listHBR(j,1),:);
+                                    subplot(3,2,3); hist(angle(z1),100);title('ch 1');subplot(3,2,4);hist(angle(z2),100);title('ch 2')
+                                    subplot(3,1,3);hist(angle(z1)'-angle(z2)',100), title(['Phase joint probability=', num2str(circ_kurtosis(angle(z1)'-angle(z2)'))])
+                                  
                                     j = j + 1;
                                 end
                             end

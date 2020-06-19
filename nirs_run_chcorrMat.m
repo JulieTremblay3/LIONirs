@@ -333,6 +333,10 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                                 % k for join phase distribution see Moldavi 2013
                                 matcorr(i,j,f) = circ_kurtosis(angle(z1)'-angle(z2)');
                                 matcorr(j,i,f) = matcorr(i,j,f);
+%                                     figure;subplot(3,1,1);plot(d1(listHBR(i,1),:),'b','displayname', 'ch 1');hold on;plot(d1(listHBR(j,1),:),'r','displayname', 'ch 2')
+%                                     subplot(3,2,3); hist(angle(z1),100);title('ch 1');subplot(3,2,4);hist(angle(z2),100);title('ch 2')
+%                                     subplot(3,1,3);hist(angle(z1)'-angle(z2)',100), title(['Phase joint probability=', num2str(circ_kurtosis(angle(z1)'-angle(z2)'))])
+%                                   
                             end
                             j = j + 1;
                         end
