@@ -16,9 +16,6 @@ for isubject=2:size(info,1)
     if isfield(MAT, 'meancorr')
         matcorr = MAT.meancorr;
         if job.m_fishertransform==1 % add fisher transform  
-            matcorr =  1/2*log((1+matcorr)./(1-matcorr));
-            DATA{id}.MAT = matcorr;
-        else
             DATA{id}.MAT = matcorr;
         end
     end
@@ -138,8 +135,8 @@ elseif  job.m_nodeunit==2
 end
 
  [filepath,name,ext] = fileparts(xlslistfile);
-if isfield(job.c_statmatrix,'b_TtestOneSamplematrix') 
-    AllC = []; 
+if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
+    AllC = [];
     id =1;
     %Use a specific groupe
     idG1 = find(  groupeall==job.c_statmatrix.b_TtestOneSamplematrix.e_TtestOneSampleGR);
@@ -433,58 +430,58 @@ elseif isfield(job.c_statmatrix,'b_exportNBSformat')%
         mkdir(dir1)
     end
     
-%     xlslistfile = get(handles.edit_listXLS,'string')
-% [~,~,ext] =fileparts(xlslistfile);
-%     if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
-%         [raw, txt, info]=xlsread([xlslistfile]);
-%     elseif strcmp(ext,'.txt')   
-%         [raw, txt, info] = readtxtfile_asxlsread([xlslistfile]);
-%     end
-% groupeall = [];
-% for isubject=2:size(info,1)
-%     id = isubject-1;
-%     MAT = load(fullfile(info{isubject,1}, info{isubject,2}));
-%     DATA{id}.ZoneList = MAT.ZoneList;
-%     if isfield(MAT, 'meancorrPearsonFisher')
-%         DATA{id}.MAT = MAT.meancorrPearsonFisher;
-%     end
-%     if isfield(MAT, 'meancorr')
-%         matcorr = MAT.meancorr;
-%         matcorr =  1/2*log((1+nanmean(matcorr,3))./(1-nanmean(matcorr,3)));
-%         DATA{id}.MAT = matcorr
-%     end
-%     
-%     DATA{id}.name = info{isubject,2};
-%     DATA{id}.MATtrial =  MAT.matcorr;
-%     DATA{id}.GR = info{isubject,4};
-%     DATA{id}.System = 'ISS'
-%     %if isubject==10
-%     load(fullfile(info{isubject,1}, info{isubject,3}),'-mat');
-%     %end
-%     names = fieldnames(zone);
-%     for iname = 1:numel(names)
-%         eval(['DATA{id}.zone.',names{iname},' =zone.',names{iname},';']);
-%     end
-%     list_subject{id} =DATA{id}.name;
-%     groupeall = [groupeall; info{isubject,4}];
-% end
-% idsubject = 1:numel(groupeall)
+    xlslistfile = get(handles.edit_listXLS,'string')
+[~,~,ext] =fileparts(xlslistfile);
+    if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
+        [raw, txt, info]=xlsread([xlslistfile]);
+    elseif strcmp(ext,'.txt')   
+        [raw, txt, info] = readtxtfile_asxlsread([xlslistfile]);
+    end
+groupeall = [];
+for isubject=2:size(info,1)
+    id = isubject-1;
+    MAT = load(fullfile(info{isubject,1}, info{isubject,2}));
+    DATA{id}.ZoneList = MAT.ZoneList;
+    if isfield(MAT, 'meancorrPearsonFisher')
+        DATA{id}.MAT = MAT.meancorrPearsonFisher;
+    end
+    if isfield(MAT, 'meancorr')
+        matcorr = MAT.meancorr;
+        matcorr =  1/2*log((1+nanmean(matcorr,3))./(1-nanmean(matcorr,3)));
+        DATA{id}.MAT = matcorr
+    end
+    
+    DATA{id}.name = info{isubject,2};
+    DATA{id}.MATtrial =  MAT.matcorr;
+    DATA{id}.GR = info{isubject,4};
+    DATA{id}.System = 'ISS'
+    %if isubject==10
+    load(fullfile(info{isubject,1}, info{isubject,3}),'-mat');
+    %end
+    names = fieldnames(zone);
+    for iname = 1:numel(names)
+        eval(['DATA{id}.zone.',names{iname},' =zone.',names{iname},';']);
+    end
+    list_subject{id} =DATA{id}.name;
+    groupeall = [groupeall; info{isubject,4}];
+end
+idsubject = 1:numel(groupeall)
 
 
-% for isubject = 1:numel(groupeall)
-%     MATall(:,:,isubject) = DATA{idsubject(isubject)}.MAT;
-%     groupid(isubject)= DATA{idsubject(isubject)}.GR
-% end
-
-Mat = permute(MATall,[3,2,1])
-save(fullfile(dir1,'DATA.mat'),'Mat')
+for isubject = 1:numel(groupeall)
+    MATall(:,:,isubject) = DATA{idsubject(isubject)}.MAT;
+    groupid(isubject)= DATA{idsubject(isubject)}.GR
+end
+mkdir([info{isubject,1},'/NBS'])
+Mat = MATall
+save(fullfile([info{isubject,1},filesep,'NBS'],'DATA.mat'),'Mat')
 design= double([ groupeall==1,groupeall==2])
-save(fullfile(dir1,'design.mat'),'design')
+save(fullfile([info{isubject,1},filesep,'NBS'],'design.mat'),'design')
 contrast= [ 1,-1]
-save(fullfile(dir1,'G1higherG2contrast.mat'),'contrast','-mat')
+save(fullfile([info{isubject,1},filesep,'NBS'],'G1higherG2contrast.mat'),'contrast','-mat')
 
 listelectrode = DATA{1}.ZoneList
-fid = fopen(fullfile(dir1,'nodeLabels.txt'),'w')
+fid = fopen(fullfile([info{isubject,1},filesep,'NBS'],'nodeLabels.txt'),'w')
 for i=1:numel(listelectrode)
     fprintf(fid,'%s',listelectrode{i})
     if i<numel(listelectrode)
@@ -494,7 +491,7 @@ end
 fclose(fid)
 
 %OUTOUT POUR NBSToolbox not realisitic position... to be built if needed
-fid = fopen(fullfile(dir1,'COG.txt'),'w')
+fid = fopen(fullfile([info{isubject,1},filesep,'NBS'],'COG.txt'),'w')
 for i=1:numel(listelectrode)
     fprintf(fid,'%2.3f %2.3f %2.3f\r',0,0,0 )
 end

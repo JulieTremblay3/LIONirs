@@ -855,7 +855,7 @@ function btn_NBS_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 xlslistfile = get(handles.edit_listXLS,'string')
-[~,~,ext] =fileparts(fileevent);
+[~,~,ext] =fileparts(xlslistfile);
     if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
         [raw, txt, info]=xlsread([xlslistfile]);
     elseif strcmp(ext,'.txt')   
@@ -899,8 +899,8 @@ end
 mkdir([info{isubject,1},'/NBS'])
 Mat = MATall
 save(fullfile([info{isubject,1},filesep,'NBS'],'DATA.mat'),'Mat')
-design= double([ groupeall==1,gr,oupeall==2])
-save(fullfile([info{isubject,1},filesep,NBS'],'design.mat'),'design')
+design= double([ groupeall==1,groupeall==2])
+save(fullfile([info{isubject,1},filesep,'NBS'],'design.mat'),'design')
 contrast= [ 1,-1]
 save(fullfile([info{isubject,1},filesep,'NBS'],'G1higherG2contrast.mat'),'contrast','-mat')
 

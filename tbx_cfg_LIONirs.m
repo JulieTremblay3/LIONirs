@@ -3301,11 +3301,17 @@ b_PermutationTest.name   = 'Unpaired permutation t-test' ;
 b_PermutationTest.val    = {e_npermutation, e_TtestOneSampleGR, e_TtestOneSampleGR2};
 b_PermutationTest.help   = {'Compared 2 groups using permutation '};
 
+b_exportNBSformat        = cfg_branch;
+b_exportNBSformat.tag    = 'b_exportNBSformat';
+b_exportNBSformat.name   = 'Export NBS format' ;
+b_exportNBSformat.val    = {};
+b_exportNBSformat.help   = {'Export to NBS network based statistic format. A Zalesky(2010) [doi: 10.1016/j.neuroimage.2010.06.041] '};
+
 
 c_statmatrix          = cfg_choice;
 c_statmatrix.tag     = 'c_statmatrix';
 c_statmatrix.name    = 'Choose the statistical test';
-c_statmatrix.values  = {b_TtestOneSamplematrix,b_PermutationTest};
+c_statmatrix.values  = {b_TtestOneSamplematrix,b_PermutationTest,b_exportNBSformat};
 c_statmatrix.val     = {b_TtestOneSamplematrix}; %Default option
 c_statmatrix.help    = {''};
 

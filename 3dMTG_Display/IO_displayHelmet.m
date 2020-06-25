@@ -743,7 +743,7 @@ function displayMRI(oMRI,DispParameter)
             map(zeroid,:)=repmat([255/256 255/256 179/256],numel(zeroid),1) ;
         elseif  DispParameter.viewcortex
             map( nb_map_list(i_map),:) =  [192/256 192/256 192/256];%[88/256 88/256 88/256];%
-             map(zeroid,:)=repmat([255/256 255/256 179/256],numel(zeroid),1); 
+             map(zeroid,:)=repmat([192/256 192/256 192/256],numel(zeroid),1); 
         end
     end
     if DispParameter.mapoption == 2
@@ -753,7 +753,7 @@ function displayMRI(oMRI,DispParameter)
         if DispParameter.viewskin
             map( i,:) = [255/256 255/256 179/256];
         elseif  DispParameter.viewcortex
-            map( i,:) =  [88/256 88/256 88/256];%[192/256 192/256 192/256];%
+            map( i,:) =  [192/256 192/256 192/256];%[192/256 192/256 192/256];%
         end
        end
       if strcmp(DispParameter.backgroundcolor,'white')
@@ -898,7 +898,7 @@ end
          if DispParameter.viewskin
             map( 1:nb_map_min,:) = repmat([255/256 255/256 179/256],nb_map_min,1) ;
         elseif  DispParameter.viewcortex
-            map(1:nb_map_min,:) = repmat([88/256 88/256 88/256],nb_map_min,1);%[192/256 192/256 192/256];%
+            map(1:nb_map_min,:) = repmat([192/256 192/256 192/256],nb_map_min,1);%[192/256 192/256 192/256];%
          end
         
         if DispParameter.HideNotCover; %Black uncovered region
