@@ -231,9 +231,9 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
       
      [filepath,name,ext] = fileparts(job.c_statcomponent.c_ANOVAN.b_ANOVANzone.f_anovan{1});
      if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
-            [num,txt,raw] = xlsread(job.c_statcomponent.c_ANOVAN.b_ANOVANzone.f_anovan{1});
+         [num,txt,raw] = xlsread(job.c_statcomponent.c_ANOVAN.b_ANOVANzone.f_anovan{1});
      elseif  strcmp(ext,'.txt')
-          [num,txt,raw] = readtxtfile_asxlsread(job.c_statcomponent.c_ANOVAN.b_ANOVANzone.f_anovan{1});
+         [num,txt,raw] = readtxtfile_asxlsread(job.c_statcomponent.c_ANOVAN.b_ANOVANzone.f_anovan{1});
      end
      
      %Case anovan each ch save each average and pval add fdr correction! 
