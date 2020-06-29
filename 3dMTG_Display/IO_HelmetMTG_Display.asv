@@ -1119,7 +1119,7 @@ elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
               %on affiche juste du HBO
             listgoodHbO =PMI{currentsub}.tmplistgood;
             topoHbO =PMI{currentsub}.tmptopo;
-            topoHbR = -PMI{currentsub}.tmptopo; %inverse pour HbR cas parafac only half of the channel ! 
+            topoHbR = -PMI{currentsub}.tmptopo; %inverse pour HbR 
           elseif  min(PMI{currentsub}.tmplistgood)>numel(d1)
             listgoodHbR =PMI{currentsub}.tmplistgood;
             topoHbR =PMI{currentsub}.tmptopo;

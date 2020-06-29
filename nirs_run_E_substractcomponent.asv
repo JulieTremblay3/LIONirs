@@ -286,7 +286,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 %listgood must be for the 2 wavelenght for the offset
                 %correction 
                 if strfind(PARCOMP(icomp).type,'PARAFAC')
-                    listgood2wv = [ PARCOMP(icomp).listgood; PARCOMP(icomp).listgood+NC/2];
+                    listgood2wv = [ PARCOMP(icomp).listgood; PARCOMP(icomp).listgood+NC/2]
                 else
                     listgood2wv = PARCOMP(icomp).listgood;
                 end
@@ -299,13 +299,11 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 A = reshape(X,numel(X),1)*reshape( Mb1,1,numel(Mb1)) +ones(numel(X),1)*reshape( Mb2,1,numel(Mb2));
                 spar = intensnorm - A;
                 Xm = A-1;
-                if indstop>=size(d,1)
-                    1
-                end
+              
                 if indstart == 1 
                 d(PARCOMP(icomp).indt(1):PARCOMP(icomp).indt(end) ,listgood2wv) = spar + ones(numel(indt),1)*d(indstart,listgood2wv) ;
-                 d(indstop+1:end,listgood2wv) =  d(indstop+1:end,listgood2wv)-...
-                    ones(size(d(indstop+1:end,1)))* (d(indstop+1,listgood2wv) - d(indstart,listgood2wv) );
+                 d(indstop+1:end,listgood) =  d(indstop+1:end,listgood)-...
+                    ones(size(d(indstop+1:end,1)))* (d(indstop+1,listgood) - d(indstart,listgood) );
                 else
                     d(PARCOMP(icomp).indt(1):PARCOMP(icomp).indt(end) ,listgood2wv) = spar + ones(numel(PARCOMP(icomp).indt),1)*d(indstart-1,listgood2wv) ;
                     d(indstop+1:end,listgood2wv) =  d(indstop+1:end,listgood2wv)-...

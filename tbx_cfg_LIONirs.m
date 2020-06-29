@@ -3308,10 +3308,26 @@ b_exportNBSformat.val    = {};
 b_exportNBSformat.help   = {'Export to NBS network based statistic format. A Zalesky(2010) [doi: 10.1016/j.neuroimage.2010.06.041] '};
 
 
+b_Covariable_Mat         =  cfg_entry;
+b_Covariable_Mat.name    = 'Covariable';
+b_Covariable_Mat.tag     = 'b_Covariable_Mat';       
+b_Covariable_Mat.strtype = 's';
+b_Covariable_Mat.num     = [0 inf];
+b_Covariable_Mat.val     = {'Name column'};
+b_Covariable_Mat.help    = {'Use the exact column title to reconized which covariable to correlate with the connectivity scores. Separate by a comma when they are many covariables to explore'};
+
+
+b_PearsonCorr_Mat        = cfg_branch;
+b_PearsonCorr_Mat.tag    = 'b_PearsonCorr_Mat';
+b_PearsonCorr_Mat.name   = 'Pearson correlation' ;
+b_PearsonCorr_Mat.val    = {b_Covariable_Mat};
+b_PearsonCorr_Mat.help   = {'Compute the pearson correlation coefficient between connectivity score and one covariable in the excel file'};
+
+
 c_statmatrix          = cfg_choice;
 c_statmatrix.tag     = 'c_statmatrix';
 c_statmatrix.name    = 'Choose the statistical test';
-c_statmatrix.values  = {b_TtestOneSamplematrix,b_PermutationTest,b_exportNBSformat};
+c_statmatrix.values  = {b_TtestOneSamplematrix,b_PermutationTest,b_PearsonCorr_Mat, b_exportNBSformat};
 c_statmatrix.val     = {b_TtestOneSamplematrix}; %Default option
 c_statmatrix.help    = {''};
 
@@ -3330,7 +3346,7 @@ E_statmatrix.tag  = 'E_statmatrix';
 E_statmatrix.val  = {f_matrix,m_fishertransform,m_nodeunit,c_statmatrix, e_statmatrixPath};
 E_statmatrix.prog = @nirs_run_E_statmatrix;
 E_statmatrix.vout = @nirs_cfg_vout_E_statmatrix;
-E_statmatrix.help = {'Apply basic statistic on component exported'};
+E_statmatrix.help = {'Apply basic statistic on connectivity matrices exported'};
 
 function vout = nirs_cfg_vout_E_statmatrix(job)
     vout = cfg_dep;                    

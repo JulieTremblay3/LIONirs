@@ -188,8 +188,8 @@ if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     matcorr =  meanall;
     meancorr = meanall;
     totaltrialgood = mean(dfall(:));    
-    file = [name,labelnode,'OneSampleTtest mean'];
-    save(fullfile(dir1,[file,'.mat']),'ZoneList','matcorr','meancorr','totaltrialgood');
+    file = [name,labelnode,'OneSampleTtest mean','.mat'];
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
@@ -198,42 +198,42 @@ if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     matcorr =  tval;
     meancorr = tval;
     totaltrialgood = mean(dfall(:));    
-    file = [name,labelnode,'OneSampleTtest tval'];
-    save(fullfile(dir1,[file,'.mat']),'ZoneList','matcorr','meancorr','totaltrialgood');
+    file = [name,labelnode,'OneSampleTtest tval','.mat'];
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
-    file = [name,labelnode,'OneSampleTtest tvalp05'];
+    file = [name,labelnode,'OneSampleTtest tvalp05','.mat'];
     matcorr = tval.*double(pval<0.05);
     meancorr = tval.*double(pval<0.05);
-    save(fullfile(dir1,[file,'.mat']),'ZoneList','matcorr','meancorr','totaltrialgood');
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     [FDR,Q] = mafdr(pval(:));
     Q = reshape(Q,size(pval));
     infonew = [infonew;new];
     
-    file = [name,labelnode,'OneSampleTtest meanp05'];
+    file = [name,labelnode,'OneSampleTtest meanp05','.mat'];
     matcorr = meanall.*double(pval<0.05);
     meancorr = meanall.*double(pval<0.05);
-    save(fullfile(dir1,[file,'.mat']),'ZoneList','matcorr','meancorr','totaltrialgood');
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
-    file = [name,labelnode,'OneSampleTtest tvalFDR05'];
+    file = [name,labelnode,'OneSampleTtest tvalFDR05','.mat'];
     matcorr = tval.*double(Q<0.05);
     meancorr = tval.*double(Q<0.05);
-    save(fullfile(dir1,[file,'.mat']),'ZoneList','matcorr','meancorr','totaltrialgood');
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
     
     [FDR,Q] = mafdr(pval(:));
     Q = reshape(Q,size(pval));
-    file = [name,'OneSampleTtest tvalFDR01'];
+    file = [name,'OneSampleTtest tvalFDR01','.mat'];
     matcorr = tval.*double(Q<0.01);
     meancorr = tval.*double(Q<0.01);
-    save(fullfile(dir1,[file,'.mat']),'ZoneList','matcorr','meancorr','totaltrialgood');
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid))
@@ -339,77 +339,77 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
         
         %WRITE IN A NEW FILE
         infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
-        file = [name,'_',labelnode,num2str(NPERM),'permutation tstat'];
+        file = [name,'_',labelnode,num2str(NPERM),'permutation tstat','.mat'];
         matcorr = Toij;
         meancorr = Toij;
-        save(fullfile(dir1,[file,'.mat']),'ZoneList','matcorr','meancorr');
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         new = [{dir1},{file}, {ZONEid},{1} ];
         infonew = [infonew;new];
         
-        file = [name,'_',labelnode,num2str(NPERM),'permutation 1-pval'];
+        file = [name,'_',labelnode,num2str(NPERM),'permutation 1-pval','.mat'];
         matcorr = 1-FUniv;
         meancorr = 1-FUniv;
-        save(fullfile(dir1,[file,'.mat']),'ZoneList','matcorr','meancorr');
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         new = [{dir1},{file}, {ZONEid},{1} ];
         infonew = [infonew;new];
               
         
-        file = [name,'_',labelnode,num2str(NPERM),'permutation G1-G2'];
+        file = [name,'_',labelnode,num2str(NPERM),'permutation G1-G2','.mat'];
         matcorr = real(squeeze((nanmean(cb1,1)- nanmean(pb1,1))));
         meancorr = real(squeeze((nanmean(cb1,1)- nanmean(pb1,1))));
-        save(fullfile(dir1,[file,'.mat']),'ZoneList','matcorr','meancorr');
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         new = [{dir1},{file}, {ZONEid},{1} ];
         infonew = [infonew;new];
         
 
-        file = [name,'_',labelnode,num2str(NPERM),'permutation G2-G1'];
+        file = [name,'_',labelnode,num2str(NPERM),'permutation G2-G1','.mat'];
         matcorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1)));
         meancorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1)));
-        save(fullfile(dir1,[file,'.mat']),'ZoneList','matcorr','meancorr');
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         new = [{dir1},{file}, {ZONEid},{1} ];
         infonew = [infonew;new];
         
-        file = [name,'_',labelnode,num2str(NPERM),'permutation G1-G2 p05'];
+        file = [name,'_',labelnode,num2str(NPERM),'permutation G1-G2 p05','.mat'];
         matcorr = real(squeeze(nanmean(cb1,1))-squeeze(nanmean(pb1,1))).*double(FUniv<0.05);
         meancorr = real(squeeze(nanmean(cb1,1))-squeeze(nanmean(pb1,1))).*double(FUniv<0.05);
-        save(fullfile(dir1,[file,'.mat']),'ZoneList','matcorr','meancorr');
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         new = [{dir1},{file}, {ZONEid},{1} ];
         infonew = [infonew;new];
         
-        file = [name,'_',labelnode,num2str(NPERM),'permutation G2-G1 p05'];
+        file = [name,'_',labelnode,num2str(NPERM),'permutation G2-G1 p05','.mat'];
         matcorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1))).*double(FUniv<0.05);
         meancorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1))).*double(FUniv<0.05);
-        save(fullfile(dir1,[file,'.mat']),'ZoneList','matcorr','meancorr');
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         new = [{dir1},{file}, {ZONEid},{1} ];
         infonew = [infonew;new];
         
-        file = [name,'_',labelnode,num2str(NPERM),'permutation mean G1'];
+        file = [name,'_',labelnode,num2str(NPERM),'permutation mean G1','.mat'];
         matcorr = real(squeeze(nanmean(cb1,1)));
         meancorr = real(squeeze(nanmean(cb1,1)));
-        save(fullfile(dir1,[file,'.mat']),'ZoneList','matcorr','meancorr');
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         new = [{dir1},{file}, {ZONEid},{1} ];
         infonew = [infonew;new];
 
-        file = [name,'_',labelnode,num2str(NPERM),'permutation mean G2'];
+        file = [name,'_',labelnode,num2str(NPERM),'permutation mean G2','.mat'];
         matcorr = real(squeeze(nanmean(pb1,1)));
         meancorr = real(squeeze(nanmean(pb1,1)));
-        save(fullfile(dir1,[file,'.mat']),'ZoneList','matcorr','meancorr');
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         new = [{dir1},{file}, {ZONEid},{1} ];
         infonew = [infonew;new];
         
         
-        file = [name,'_',labelnode,num2str(NPERM),'permutation N G1'];
+        file = [name,'_',labelnode,num2str(NPERM),'permutation N G1','.mat'];
         matcorr = ncb1;
         meancorr = ncb1;
-        save(fullfile(dir1,[file,'.mat']),'ZoneList','matcorr','meancorr');
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         new = [{dir1},{file}, {ZONEid},{1} ];
         infonew = [infonew;new];
        
  
-        file = [name,'_',labelnode,num2str(NPERM),'permutation N G2'];
+        file = [name,'_',labelnode,num2str(NPERM),'permutation N G2','.mat'];
         matcorr = npb1;
         meancorr = npb1;
-        save(fullfile(dir1,[file,'.mat']),'ZoneList','matcorr','meancorr');
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         new = [{dir1},{file}, {ZONEid},{1} ];
         infonew = [infonew;new];
         
@@ -432,56 +432,13 @@ elseif isfield(job.c_statmatrix,'b_exportNBSformat')%
     if ~isdir(dir1)
         mkdir(dir1)
     end
-    
-%     xlslistfile = get(handles.edit_listXLS,'string')
-% [~,~,ext] =fileparts(xlslistfile);
-%     if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
-%         [raw, txt, info]=xlsread([xlslistfile]);
-%     elseif strcmp(ext,'.txt')   
-%         [raw, txt, info] = readtxtfile_asxlsread([xlslistfile]);
-%     end
-% groupeall = [];
-% for isubject=2:size(info,1)
-%     id = isubject-1;
-%     MAT = load(fullfile(info{isubject,1}, info{isubject,2}));
-%     DATA{id}.ZoneList = MAT.ZoneList;
-%     if isfield(MAT, 'meancorrPearsonFisher')
-%         DATA{id}.MAT = MAT.meancorrPearsonFisher;
-%     end
-%     if isfield(MAT, 'meancorr')
-%         matcorr = MAT.meancorr;
-%         matcorr =  1/2*log((1+nanmean(matcorr,3))./(1-nanmean(matcorr,3)));
-%         DATA{id}.MAT = matcorr
-%     end
-%     
-%     DATA{id}.name = info{isubject,2};
-%     DATA{id}.MATtrial =  MAT.matcorr;
-%     DATA{id}.GR = info{isubject,4};
-%     DATA{id}.System = 'ISS'
-%     %if isubject==10
-%     load(fullfile(info{isubject,1}, info{isubject,3}),'-mat');
-%     %end
-%     names = fieldnames(zone);
-%     for iname = 1:numel(names)
-%         eval(['DATA{id}.zone.',names{iname},' =zone.',names{iname},';']);
-%     end
-%     list_subject{id} =DATA{id}.name;
-%     groupeall = [groupeall; info{isubject,4}];
-% end
-% idsubject = 1:numel(groupeall)
 
-
-% for isubject = 1:numel(groupeall)
-%     MATall(:,:,isubject) = DATA{idsubject(isubject)}.MAT;
-%     groupid(isubject)= DATA{idsubject(isubject)}.GR
-% end
-
-Mat = permute(MATall,[3,2,1])
-save(fullfile(dir1,'DATA.mat'),'Mat')
-design= double([ groupeall==1,groupeall==2])
-save(fullfile(dir1,'design.mat'),'design')
-contrast= [ 1,-1]
-save(fullfile(dir1,'G1higherG2contrast.mat'),'contrast','-mat')
+    Mat = permute(MATall,[3,2,1])
+    save(fullfile(dir1,'DATA.mat'),'Mat')
+    design= double([ groupeall==1,groupeall==2])
+    save(fullfile(dir1,'design.mat'),'design')
+    contrast= [ 1,-1]
+    save(fullfile(dir1,'G1higherG2contrast.mat'),'contrast','-mat')
 
 listelectrode = DATA{1}.ZoneList
 fid = fopen(fullfile(dir1,'nodeLabels.txt'),'w')
@@ -492,15 +449,89 @@ for i=1:numel(listelectrode)
     end
 end
 fclose(fid)
-
 %OUTOUT POUR NBSToolbox not realisitic position... to be built if needed
 fid = fopen(fullfile(dir1,'COG.txt'),'w')
 for i=1:numel(listelectrode)
     fprintf(fid,'%2.3f %2.3f %2.3f\r',0,0,0 )
 end
 fclose(fid)
+elseif isfield(job.c_statmatrix,'b_PearsonCorr_Mat')
+    dir1 = job.e_statmatrixPath{1};
+     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
+    covariableall=[];
+    covariablestring = job.c_statmatrix.b_PearsonCorr_Mat.b_Covariable_Mat
+    [token,remain] =strtok(covariablestring,',')
+    covariableall =  [covariableall,{token}]
+    while ~isempty(remain)        
+        [token,remain] =strtok(remain,',')
+        covariableall =  [covariableall,{token}];
+    end
     
+    for icov = 1:numel(covariableall)
+        
+     Pearsony = covariableall{icov};
+     ycol = 0; 
+     for icol=1:size(info,2)  
+         if ~isnan(info{1,icol})
+            if strcmp(deblank(upper(deblank(info{1,icol}))), deblank(upper(Pearsony)))
+                ycol = icol;
+            end   
+         end
+     end
+     if ycol
+         id= 1;
+         for i=2:size(info,1)
+            score(id,1) = info{i,ycol };
+            id = id+1;
+         end
+     else
+         disp([Pearsony,' column not found'])
+     end 
+     PearsonCoef = zeros(size(MATall,2),size(MATall,2));
+     PearsonCoefSig = zeros(size(MATall,2),size(MATall,2));
+    for i=1:size(MATall,2)
+        for j=1:size(MATall,2)
+            iduse = find(~isnan(score)& ~isnan(MATall(:,i,j)));
+            X = MATall(iduse,i,j);
+            y = score(iduse,1);
+            if ~isempty(iduse)
+             [rho,pval] = corr(X, y);
+             PearsonCoef(i,j)=rho;
+             PearsonCoefSig(i,j)=rho*double(pval< 0.05);
+            end            
+        end        
+    end
     
+    %WRITE IN A NEW FILE
+      
+        file = [name,'_',Pearsony,'PEARSON','.mat'];
+        matcorr = PearsonCoef;
+        meancorr = PearsonCoef;
+        save(fullfile(dir1,[file,'.mat']),'ZoneList','matcorr','meancorr');
+        new = [{dir1},{file}, {ZONEid},{1} ];
+        infonew = [infonew;new];
+        
+
+        file = [name,'_',Pearsony,'PEARSONp05','.mat'];
+        matcorr = PearsonCoefSig;
+        meancorr = PearsonCoefSig;
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        new = [{dir1},{file}, {ZONEid},{1} ];
+        infonew = [infonew;new];            
+    end
+        copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
+    if ismac
+        % Code to run on Mac platform problem with xlswrite
+        [filepath,name,ext] = fileparts(xlslistfile);
+        writetxtfile(fullfile(dir1,['PearsonCorrelation.txt']),infonew);
+        disp(['Result .txt file saved: ' fullfile(dir1,['PearsonCorrelation.txt'])])
+
+    else
+        [filepath,name,ext] = fileparts(xlslistfile);
+        xlswrite(fullfile(dir1,['PearsonCorrelation.xlsx']),infonew);
+        disp(['Result .xlsx file saved ' fullfile(dir1,['PearsonCorrelationPermutationTtest.xlsx'])])
+
+    end
 end
 out='Stat tests';
 

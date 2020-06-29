@@ -125,7 +125,7 @@ for filenb=1:1 %only one NIRS.mat merge file inside
         %         badind = find(maxpoint>size(noise,1));
         %         if ~isempty(badind)
         %             disp(['Warning file ' vmrk_path ' marker : ' num2str(badind') ' are out of range'])
-        %             ind_dur_ch(badind,2)=size(noise,1)- ind_dur_ch(badind,1);
+        %             ind_dur_ch(badind,2)=size(noise,2)- ind_dur_ch(badind,1);
         %         end
         %         for Idx = 1:size(noise,2)
         %             mrks = find(ind_dur_ch(:,3)==Idx);

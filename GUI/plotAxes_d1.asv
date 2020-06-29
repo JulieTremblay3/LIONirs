@@ -781,8 +781,8 @@ end
 if get(handles.radio_3dmontageupdate,'value')
     option.conc = 1;
     option.SPMgui = 1;
-    option.restorestetting = 0;
-    IO_HelmetMTG_Display(handles, option)
+    option
+    IO_HelmetMTG_Display(handles,[])
 end
 idmodule = get(handles.popupmenu_module, 'value');
 fileid=get(handles.popupmenu_file,'value');

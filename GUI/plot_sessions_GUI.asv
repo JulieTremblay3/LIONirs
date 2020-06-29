@@ -8722,7 +8722,7 @@ PMI{currentsub}.plot = [PMI{currentsub}.data(cf).MeasList(plotLst,1),PMI{current
 set(handles.edit_time_start,'string', num2str(PMI{currentsub}.data(cf).HRF.tHRF(PARCORR(1,id).indt(1))));
 set(handles.edit_time_stop,'string', num2str(PMI{currentsub}.data(cf).HRF.tHRF(PARCORR(1,id).indt(end))));
 if isfield(PARCORR(1,id),'topo')
-    PMI{currentsub}.tmptopo =  PARCORR(1,id).topo;
+    PMI{currentsub}.tmptopo =  sum(PARCORR(1,id).topo,2);
     PMI{currentsub}.tmplistgood =  PARCORR(1,id).listgood;
 else
     PMI{currentsub}.tmptopo = [0 ,0];

@@ -259,12 +259,12 @@ pourcentagetr = job.i_minch_cardiac/100;
              set(gca,'fontsize',12)
                          title(['Coherence matrix ', num2str(NIRS.Cf.dev.wl(1)),'nm'])
 
-            imagesc( matcorr(:,:,f) >COHtr), caxis([0 0.2]);
+            imagesc( matcorr(:,:,f) ), caxis([0 0.2]); %>COHtr
             if ~isempty(find( measlistok==0))
                     %title(['Rejected : ',num2str(find( measlistok==0))]);
             end
             subplot(5,4, [15,16,19,20]);hold on
-            imagesc( matcorrHbR(:,:,f) >COHtr), caxis([0 0.2]);
+            imagesc( matcorrHbR(:,:,f)), caxis([0 0.2]); % >COHtr
             title(['Coherence matrix ', num2str(NIRS.Cf.dev.wl(2)),'nm'])
 
             xlabel('CH id','fontsize',12)
@@ -324,7 +324,7 @@ pourcentagetr = job.i_minch_cardiac/100;
             
             NIRS.Cf.H.C.ok(:,f)=[measlistok,measlistok];
             [filepath,name,ext] = fileparts(job.NIRSmat{1});
-            saveas(hfig,fullfile(filepath,[nametmp 'CardiacCHCOH',num2str(f),'.fig']),'fig');
+            saveas(hfig,fullfile(filepath,[nametmp 'CardiacCHCOH',num2str(f),'.fig']),'fig'); 
             saveas(hfig,fullfile(filepath,[nametmp 'CardiacCHCOH',num2str(f),'.jpg']),'jpg');
             close(hfig)
     end
