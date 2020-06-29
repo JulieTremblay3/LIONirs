@@ -22,7 +22,7 @@ function varargout = GUI_LookMatrices(varargin)
 
 % Edit the above text to modify the response to help GUI_LookMatrices
 
-% Last Modified by GUIDE v2.5 12-May-2020 04:36:36
+% Last Modified by GUIDE v2.5 29-Jun-2020 15:39:47
 
 % Begin initialization code - DO NOT EDITspm
 gui_Singleton = 1;
@@ -1997,3 +1997,10 @@ for i=1:size(tmp,1)
 end
 fclose(fid)
 
+
+
+% --- Executes on button press in btn_autoscale.
+function btn_autoscale_Callback(hObject, eventdata, handles)
+% hObject    handle to btn_autoscale (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
