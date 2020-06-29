@@ -459,11 +459,11 @@ elseif isfield(job.c_statmatrix,'b_PearsonCorr_Mat')
     dir1 = job.e_statmatrixPath{1};
      infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
     covariableall=[];
-    covariablestring = job.c_statmatrix.b_PearsonCorr_Mat.b_Covariable_Mat
-    [token,remain] =strtok(covariablestring,',')
-    covariableall =  [covariableall,{token}]
+    covariablestring = job.c_statmatrix.b_PearsonCorr_Mat.b_Covariable_Mat;
+    [token,remain] =strtok(covariablestring,',');
+    covariableall =  [covariableall,{token}];
     while ~isempty(remain)        
-        [token,remain] =strtok(remain,',')
+        [token,remain] =strtok(remain,',');
         covariableall =  [covariableall,{token}];
     end
     
@@ -473,7 +473,7 @@ elseif isfield(job.c_statmatrix,'b_PearsonCorr_Mat')
      ycol = 0; 
      for icol=1:size(info,2)  
          if ~isnan(info{1,icol})
-            if strcmp(deblank(upper(deblank(info{1,icol}))), deblank(upper(Pearsony)))
+            if strcmp(strtrim(upper(deblank(info{1,icol}))), strtrim(upper(Pearsony)))
                 ycol = icol;
             end   
          end
@@ -484,9 +484,12 @@ elseif isfield(job.c_statmatrix,'b_PearsonCorr_Mat')
             score(id,1) = info{i,ycol };
             id = id+1;
          end
+         notfoundstophere = 1;
      else
          disp([Pearsony,' column not found'])
+         notfoundstophere = 0;
      end 
+     if notfoundstophere
      PearsonCoef = zeros(size(MATall,2),size(MATall,2));
      PearsonCoefSig = zeros(size(MATall,2),size(MATall,2));
     for i=1:size(MATall,2)
@@ -507,7 +510,7 @@ elseif isfield(job.c_statmatrix,'b_PearsonCorr_Mat')
         file = [name,'_',Pearsony,'PEARSON','.mat'];
         matcorr = PearsonCoef;
         meancorr = PearsonCoef;
-        save(fullfile(dir1,[file,'.mat']),'ZoneList','matcorr','meancorr');
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         new = [{dir1},{file}, {ZONEid},{1} ];
         infonew = [infonew;new];
         
@@ -517,7 +520,8 @@ elseif isfield(job.c_statmatrix,'b_PearsonCorr_Mat')
         meancorr = PearsonCoefSig;
         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         new = [{dir1},{file}, {ZONEid},{1} ];
-        infonew = [infonew;new];            
+        infonew = [infonew;new];     
+     end
     end
         copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
     if ismac
