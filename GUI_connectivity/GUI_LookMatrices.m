@@ -2004,5 +2004,19 @@ function btn_autoscale_Callback(hObject, eventdata, handles)
 % hObject    handle to btn_autoscale (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+% 
+data = get(handles.GUI_LookMat,'UserData')
+
+% Userdata = 
+cmax = max(data{1}.MATtrial);
+% cmin = min(DATA);
+% cmin = sprintf('%0.2g',cmin);
+ cmax = sprintf('%0.2g',cmax);
+% set(handles.edit_cmin,'string',[cmin]);
+set(handles.edit_cmax,'string',[cmax]);
+% 
+guidata(handles.GUI_LookMat, handles);
+updateNetAllView(handles)
+% 
 
 msgbox('Not code yet !')
