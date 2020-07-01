@@ -2006,9 +2006,15 @@ function btn_autoscale_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
  
 %data = get(handles.GUI_LookMat,'UserData')
+guidata(handles.GUI_LookMat, handles);
+handles.GUI_LookMat
 
-cmax = 
-cmin = 
+DATA = get(handles.GUI_LookMat,'UserData');
+id = get(handles.popup_listsujet, 'value')
+MAT = DATA{id}.MAT
+
+cmax = max(MAT)
+cmin = min(MAT)
 cmin = sprintf('%0.2g',cmin);
 cmax = sprintf('%0.2g',cmax);
 set(handles.edit_cmin,'string',[cmin]);
