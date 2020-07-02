@@ -405,7 +405,7 @@ for ik = 1:numel(listselected)
         alllist = [alllist, {[listselected{ik},'/' ,listselected{jk}]}];
     end    
 end
-set(handles.listbox_subzone,'string',alllist)
+set(handles.listbox_subzone,'string',alllist);
 guidata(handles.GUI_LookMat, handles);
 updateNetAllView(handles);
 
@@ -475,7 +475,7 @@ for ik = 1:numel(listselected)
         alllist = [alllist, {[listselected{ik},'/' ,listselected{jk}]}]
     end    
 end
-set(handles.listbox_subzone,'string',alllist)
+set(handles.listbox_subzone,'string',alllist);
 guidata(handles.GUI_LookMat, handles);
 %plot_axesAij(handles);
 updateNetAllView(handles)
@@ -2004,23 +2004,24 @@ function btn_autoscale_Callback(hObject, eventdata, handles)
 % hObject    handle to btn_autoscale (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
- 
-%data = get(handles.GUI_LookMat,'UserData')
-guidata(handles.GUI_LookMat, handles);
 
+guidata(handles.GUI_LookMat, handles);
 DATA = get(handles.GUI_LookMat,'UserData');
 id = get(handles.popup_listsujet, 'value');
 MAT = DATA{id}.MAT;
-cmax=MAT(1,1);
-cmin=MAT(1,1);
+if get(handles.radio_fisher,'value')
+    MAT =1/2*(log((1+MAT )./(1-MAT )));
+end
+cmax=(MAT(1,1));
+cmin=(MAT(1,1));
 dim=size(MAT);
 
 for i=1:dim(1)
     for j=1:dim(2)
-        if MAT(i,j)< cmin
-            cmin= MAT(i,j);
-        elseif MAT(i,j)> cmax
-            cmax = MAT(i,j);
+        if (MAT(i,j))< cmin
+            cmin= (MAT(i,j));
+        elseif(MAT(i,j))> cmax
+            cmax = (MAT(i,j));
         end
     end
 end
@@ -2028,11 +2029,11 @@ cmin = sprintf('%0.2g',cmin);
 cmax = sprintf('%0.2g',cmax);
 set(handles.edit_cmin,'string',[cmin]);
 set(handles.edit_cmax,'string',[cmax]);
-
+cmin
+cmax
 guidata(handles.GUI_LookMat, handles);
 updateNetAllView(handles);
  
-
-msgbox('Not code yet !')
+msgbox('In progress')
 
 

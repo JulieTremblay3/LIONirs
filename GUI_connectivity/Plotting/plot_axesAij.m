@@ -21,7 +21,7 @@ MAT = DATA{id}.MAT;
 if get(handles.radio_fisher,'value')
     MAT =1/2*(log((1+MAT )./(1-MAT )));
 end
-List=   strvcat(DATA{id}.ZoneList);
+List = strvcat(DATA{id}.ZoneList);
 ML = DATA{id}.zone.ml;
 idzone = [];
 idlist = [];
@@ -83,7 +83,7 @@ if get(handles.popupmenu_view,'value')==1%view zone
                %     idzone =[idzone, izone];
                % else
                     idzone =[idzone,izone, zeros(1,numel(idch)-1)];
-                     izonebelong  = [ izonebelong ,ones(1,numel(idch)).*izone];
+                    izonebelong  = [ izonebelong ,ones(1,numel(idch)).*izone];
               %  end
 %             end
             idlabel = [idlabel, {[DATA{id}.zone.label{izone}, sprintf('_%03.0f',ilistzone)]}];
