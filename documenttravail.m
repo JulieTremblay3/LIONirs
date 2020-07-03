@@ -31,14 +31,14 @@ if get(handles.popupmenu_view,'value')==1%view zone
         end
         idtr = find(abs(MAT)<tr);
         MAT(idtr)=0;
-        MAT2=MAT(idlist,idlist));
+        MAT2=MAT(idlist,idlist);
         cmax=MAT2(1,1);
         cmin=MAT2(1,1);
         dim=size(MAT2);
     end
     
     %POUR L'AFFICHAGE DES ZONES SELECTIONNÉES MOYENNES DES ZONES
-elseif  get(handles.popupmenu_view,'value')==2%view avg zone
+elseif get(handles.popupmenu_view,'value')==2%view avg zone
     listok = get(handles.listbox_selectedzone,'string');
     MATAVG = zeros(numel(listok));
     idlist = [];
@@ -88,9 +88,10 @@ elseif  get(handles.popupmenu_view,'value')==2%view avg zone
     tr = str2num(get(handles.edit_threshold,'string'));
     idtr = find(abs(MATAVG)<tr);
     MATAVG(idtr)=0;
-    cmax=MATAVG(1,1);
-    cmin=MATAVG(1,1);
-    dim=size(MATAVG);
+    cmax = MATAVG(1,1);
+    cmin = MATAVG(1,1);
+    dim = size(MATAVG);
+    MAT2 = MATAVG;
 end 
 for i=1:dim(1)
     for j=1:dim(2)
@@ -101,7 +102,6 @@ for i=1:dim(1)
         end
     end
 end
-
 
 cmin = sprintf('%0.2g',cmin);
 cmax = sprintf('%0.2g',cmax);
