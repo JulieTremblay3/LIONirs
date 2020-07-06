@@ -2014,27 +2014,18 @@ MAT = DATA{id}.MAT;
 if get(handles.popupmenu_view,'value')==1%view zone
     listok = get(handles.listbox_selectedzone,'string');
     idlist = [];
-    idlabel=[];
-    idzone =[];
-    izonebelong = [];
     for ilistzone = 1:numel(listok)
-    for izone = 1:numel(DATA{id}.zone.plotLst)
-        chzone = DATA{id}.zone.plotLst{izone};
-        labelzone = DATA{id}.zone.label{izone};
-         x = strmatch({labelzone} , {listok{ilistzone}}, 'exact');
-         if ~isempty(x)
-             idch=DATA{id}.zone.chMAT{izone};
-             idlist = [idlist, idch];
-             idzone =[idzone,izone, zeros(1,numel(idch)-1)];
-             izonebelong  = [ izonebelong ,ones(1,numel(idch)).*izone];
-             idlabel = [idlabel, {[DATA{id}.zone.label{izone}, sprintf('_%03.0f',ilistzone)]}];
-         end
+        for izone = 1:numel(DATA{id}.zone.plotLst)
+            labelzone = DATA{id}.zone.label{izone};
+            x = strmatch({labelzone} , {listok{ilistzone}}, 'exact');
+            if ~isempty(x)
+                idch=DATA{id}.zone.chMAT{izone};
+                idlist = [idlist, idch];
+           
+            end
+        end
     end
-    end
-    idline = [find(idzone)-0.5,numel(idzone)+0.5];
-   
-    %AFFICHAGE THRESHOLD 
-    if ~isempty(idlist)
+        if ~isempty(idlist)
         tr = str2num(get(handles.edit_threshold,'string'));
         if isempty(tr)
             tr = 0;
@@ -2042,8 +2033,8 @@ if get(handles.popupmenu_view,'value')==1%view zone
         idtr = find(abs(MAT)<tr);
         MAT(idtr)=0;
         MAT2=MAT(idlist,idlist);
-        cmax=MAT2(1,1);
-        cmin=MAT2(1,1);
+        cmax=MAT2(1,2);
+        cmin=MAT2(1,2);
         dim=size(MAT2);
     end
     
@@ -2098,8 +2089,8 @@ elseif get(handles.popupmenu_view,'value')==2%view avg zone
     tr = str2num(get(handles.edit_threshold,'string'));
     idtr = find(abs(MATAVG)<tr);
     MATAVG(idtr)=0;
-    cmax = MATAVG(1,1);
-    cmin = MATAVG(1,1);
+    cmax = MATAVG(1,2);
+    cmin = MATAVG(1,2);
     dim = size(MATAVG);
     MAT2 = MATAVG;
 end
@@ -2108,16 +2099,21 @@ if get(handles.radio_fisher,'value')
 end
 for i=1:dim(1)
     for j=1:dim(2)
-        if MAT2(i,j)< cmin
-            cmin= MAT2(i,j);
-        elseif MAT2(i,j)> cmax
-            cmax = MAT2(i,j);
+        out= isnan(MAT2(i,j));
+        if out==0
+            if MAT2(i,j)< cmin
+                cmin= MAT2(i,j);
+            elseif MAT2(i,j)> cmax && ~isnan(MAT2(i,j))
+                cmax = MAT2(i,j);
+            end
         end
     end
 end
 
 cmin = sprintf('%0.2g',cmin);
 cmax = sprintf('%0.2g',cmax);
+cmin
+cmax
 set(handles.edit_cmin,'string',[cmin]);
 set(handles.edit_cmax,'string',[cmax]);
 
