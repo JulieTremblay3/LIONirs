@@ -2033,9 +2033,7 @@ if get(handles.popupmenu_view,'value')==1%view zone
         idtr = find(abs(MAT)<tr);
         MAT(idtr)=0;
         MAT2=MAT(idlist,idlist);
-        cmax=MAT2(1,2);
-        cmin=MAT2(1,2);
-        dim=size(MAT2);
+        
     end
     
     %POUR L'AFFICHAGE DES ZONES SELECTIONNÉES MOYENNES DES ZONES
@@ -2089,13 +2087,25 @@ elseif get(handles.popupmenu_view,'value')==2%view avg zone
     tr = str2num(get(handles.edit_threshold,'string'));
     idtr = find(abs(MATAVG)<tr);
     MATAVG(idtr)=0;
-    cmax = MATAVG(1,2);
-    cmin = MATAVG(1,2);
-    dim = size(MATAVG);
     MAT2 = MATAVG;
 end
 if get(handles.radio_fisher,'value')
     MAT2 =1/2*(log((1+MAT2 )./(1-MAT2 )));
+end
+dim=size(MAT2);
+out=isnan(MAT2(1,1));
+if out==0
+    cmin=MAT2(1,1);
+    cmax=MAT2(1,1);
+else
+    irows=1;
+    jcols=1;
+    while out == 1
+        out= isnan(MAT2(irows,jcols));
+        irows = irows + 1;
+    end
+    cmin=MAT2(irows,jcols);
+    cmax=MAT2(irows,jcols);
 end
 for i=1:dim(1)
     for j=1:dim(2)
@@ -2103,7 +2113,7 @@ for i=1:dim(1)
         if out==0
             if MAT2(i,j)< cmin
                 cmin= MAT2(i,j);
-            elseif MAT2(i,j)> cmax && ~isnan(MAT2(i,j))
+            elseif MAT2(i,j)> cmax
                 cmax = MAT2(i,j);
             end
         end
@@ -2112,8 +2122,7 @@ end
 
 cmin = sprintf('%0.2g',cmin);
 cmax = sprintf('%0.2g',cmax);
-cmin
-cmax
+
 set(handles.edit_cmin,'string',[cmin]);
 set(handles.edit_cmax,'string',[cmax]);
 
