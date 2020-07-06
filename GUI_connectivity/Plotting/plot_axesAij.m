@@ -14,8 +14,8 @@ end
 axis ij
 DATA = get(handles.GUI_LookMat,'UserData');
 id = get(handles.popup_listsujet, 'value');
-cmax=str2num(get(handles.edit_cmax,'string'));
-cmin=str2num(get(handles.edit_cmin,'string'));
+cmax = str2num(get(handles.edit_cmax,'string'));
+cmin = str2num(get(handles.edit_cmin,'string'));
 MAT = DATA{id}.MAT;
 %Ordoner en ordre de zone
 if get(handles.radio_fisher,'value')
@@ -65,30 +65,30 @@ if get(handles.popupmenu_view,'value')==1%view zone
     idzone =[];
     izonebelong = [];
     for ilistzone = 1:numel(listok)
-    for izone = 1:numel(DATA{id}.zone.plotLst)
-        chzone = DATA{id}.zone.plotLst{izone};
-        labelzone = DATA{id}.zone.label{izone};
-         x = strmatch({labelzone} , {listok{ilistzone}}, 'exact');
-         if ~isempty(x)
-%             for ichzone = 1:numel(chzone)
-%                 ich = chzone(ichzone);
-%                 if strcmp(DATA{id}.System,'ISS')
-%                     strDet = SDDet2strboxy_ISS(ML(ich,2));
-%                     strSrs = SDPairs2strboxy_ISS(ML(ich,1));
-%                     idch = strmatch([strDet, ' ',strSrs ],List,'exact');
-%                 end
-                 idch=DATA{id}.zone.chMAT{izone};
-                 idlist = [idlist, idch];
-               % if ichzone==1
-               %     idzone =[idzone, izone];
-               % else
-                    idzone =[idzone,izone, zeros(1,numel(idch)-1)];
-                    izonebelong  = [ izonebelong ,ones(1,numel(idch)).*izone];
-              %  end
+        for izone = 1:numel(DATA{id}.zone.plotLst)
+            chzone = DATA{id}.zone.plotLst{izone};
+            labelzone = DATA{id}.zone.label{izone};
+            x = strmatch({labelzone} , {listok{ilistzone}}, 'exact');
+            if ~isempty(x)
+%                 for ichzone = 1:numel(chzone)
+%                     ich = chzone(ichzone);
+%                     if strcmp(DATA{id}.System,'ISS')
+%                         strDet = SDDet2strboxy_ISS(ML(ich,2));
+%                         strSrs = SDPairs2strboxy_ISS(ML(ich,1));
+%                         idch = strmatch([strDet, ' ',strSrs ],List,'exact');
+%                     end
+                    idch=DATA{id}.zone.chMAT{izone};
+                    idlist = [idlist, idch];
+%                     if ichzone==1
+%                         idzone =[idzone, izone];
+%                     else
+                        idzone =[idzone,izone, zeros(1,numel(idch)-1)];
+                        izonebelong  = [ izonebelong ,ones(1,numel(idch)).*izone];
+%                     end
 %             end
             idlabel = [idlabel, {[DATA{id}.zone.label{izone}, sprintf('_%03.0f',ilistzone)]}];
-         end
-    end
+            end
+        end
     end
     idline = [find(idzone)-0.5,numel(idzone)+0.5];
    
@@ -103,7 +103,7 @@ if get(handles.popupmenu_view,'value')==1%view zone
         h = imagesc(MAT(idlist,idlist));
         nbchbadbyzone = [];
         for izone=1:max(izonebelong(:))
-             ch = find(izonebelong==izone);
+            ch = find(izonebelong==izone);
             nbchbad= numel(find(sum(0==(MAT(idlist,idlist(ch))))> (0.70*numel(idlist)))) ;  
             if isempty(nbchbad)
                 nbchbadbyzone = 0;

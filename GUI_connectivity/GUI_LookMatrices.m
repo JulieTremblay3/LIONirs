@@ -2011,29 +2011,30 @@ id = get(handles.popup_listsujet, 'value');
 MAT = DATA{id}.MAT;
 
 listok = get(handles.listbox_selectedzone,'string');
-    idlist = [];
-    for ilistzone = 1:numel(listok)
-        for izone = 1:numel(DATA{id}.zone.plotLst)
-            labelzone = DATA{id}.zone.label{izone};
-            x = strmatch({labelzone} , {listok{ilistzone}}, 'exact');
-            if ~isempty(x)
-                idch=DATA{id}.zone.chMAT{izone};
-                idlist = [idlist, idch];
-            end
+idlist = [];
+for ilistzone = 1:numel(listok)
+    for izone = 1:numel(DATA{id}.zone.plotLst)
+        labelzone = DATA{id}.zone.label{izone};
+        x = strmatch({labelzone} , {listok{ilistzone}}, 'exact');
+        if ~isempty(x)
+            idch=DATA{id}.zone.chMAT{izone};
+            idlist = [idlist, idch];
         end
     end
-    if ~isempty(idlist)
-        tr = str2num(get(handles.edit_threshold,'string'));
-        if isempty(tr)
-            tr = 0;
-        end
-        idtr = find(abs(MAT)<tr);
-        MAT(idtr)=0;
-         DisplayedMAT = MAT(idlist,idlist);
+end
+if ~isempty(idlist)
+    tr = str2num(get(handles.edit_threshold,'string'));
+    if isempty(tr)
+        tr = 0;
     end
-    if get(handles.radio_fisher,'value')
-            DisplayedMAT  =1/2*(log((1+ DisplayedMAT  )./(1- DisplayedMAT  )));
-    end
+    idtr = find(abs(MAT)<tr);
+    MAT(idtr)=0;
+    DisplayedMAT = MAT(idlist,idlist);
+end
+if get(handles.radio_fisher,'value')
+    DisplayedMAT  =1/2*(log((1+ DisplayedMAT  )./(1- DisplayedMAT  )));
+end
+
 dim=size(DisplayedMAT);
 NaNCheck=isnan(DisplayedMAT);
 DisplayedMAT(NaNCheck)=0;
@@ -2051,8 +2052,8 @@ for i=1:dim(1)
 end
 
 if cmin == cmax
-    cmin = cmin - 1 ;
-    cmax = cmax + 1 ;
+    cmin = cmin-1;
+    cmax = cmax+1;
 end
 
 cmin = sprintf('%0.2g',cmin);
@@ -2064,7 +2065,6 @@ set(handles.edit_cmax,'string',[cmax]);
 guidata(handles.GUI_LookMat, handles);
 updateNetAllView(handles);
 
- 
 msgbox('In progress')
 
 
