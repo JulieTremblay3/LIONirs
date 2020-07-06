@@ -2011,7 +2011,6 @@ id = get(handles.popup_listsujet, 'value');
 MAT = DATA{id}.MAT;
 
 %POUR L'AFFICHAGE DES ZONES SELECTIONNÉES CANAL PAR CANAL
-if get(handles.popupmenu_view,'value')==1%view zone
     listok = get(handles.listbox_selectedzone,'string');
     idlist = [];
     for ilistzone = 1:numel(listok)
@@ -2025,7 +2024,7 @@ if get(handles.popupmenu_view,'value')==1%view zone
             end
         end
     end
-        if ~isempty(idlist)
+    if ~isempty(idlist)
         tr = str2num(get(handles.edit_threshold,'string'));
         if isempty(tr)
             tr = 0;
@@ -2033,77 +2032,31 @@ if get(handles.popupmenu_view,'value')==1%view zone
         idtr = find(abs(MAT)<tr);
         MAT(idtr)=0;
         MAT2=MAT(idlist,idlist);
-        
     end
-    
-    %POUR L'AFFICHAGE DES ZONES SELECTIONNÉES MOYENNES DES ZONES
-elseif get(handles.popupmenu_view,'value')==2%view avg zone
-    listok = get(handles.listbox_selectedzone,'string');
-    MATAVG = zeros(numel(listok));
-    idlist = [];
-    idlabel=[];
-    idzone =[];
-    for adji = 1:numel(listok)
-        for adjj = 1:numel(listok)            
-            labelzone = listok{adji};
-            x = strmatch({labelzone} ,idlabelall, 'exact');            
-            labelzone = listok{adjj};
-            y = strmatch({labelzone} ,idlabelall, 'exact');
-            if isempty(x)|isempty(y)
-                msgbox('problem zone in subject')
-            end
-            chzone = DATA{id}.zone.plotLst{x};
-            idlisti = [];
-            for ichzone = 1:numel(chzone);
-                ich = chzone(ichzone);
-                if strcmp(DATA{id}.System,'ISS')
-                    strDet = SDDet2strboxy_ISS(ML(ich,2));
-                    strSrs = SDPairs2strboxy_ISS(ML(ich,1));
-                    idch = strmatch([strDet, ' ',strSrs ],List,'exact');
-                end
-                idlisti = [idlisti, idch];
-            end
-            
-            chzone = DATA{id}.zone.plotLst{y};
-            idlistj = [];
-            for ichzone = 1:numel(chzone)
-                ich = chzone(ichzone);
-                 if strcmp(DATA{id}.System,'ISS')
-                    strDet = SDDet2strboxy_ISS(ML(ich,2));
-                    strSrs = SDPairs2strboxy_ISS(ML(ich,1));
-                    idch = strmatch([strDet, ' ',strSrs ],List,'exact');
-                 end
-                idlistj = [idlistj, idch];
-            end
-            if isempty(idlisti)|isempty(idlistj)
-                MATAVG(adji,adjj)=nan
-            else
-                temp = MAT(idlisti, idlistj)
-                MATAVG(adji,adjj)= nanmean(temp(:))
-            end
-            
+        if get(handles.radio_fisher,'value')
+            MAT2 =1/2*(log((1+MAT2 )./(1-MAT2 )));
         end
-    end
-    tr = str2num(get(handles.edit_threshold,'string'));
-    idtr = find(abs(MATAVG)<tr);
-    MATAVG(idtr)=0;
-    MAT2 = MATAVG;
-end
-if get(handles.radio_fisher,'value')
-    MAT2 =1/2*(log((1+MAT2 )./(1-MAT2 )));
-end
 dim=size(MAT2);
 out=isnan(MAT2(1,1));
 if out==0
     cmin=MAT2(1,1);
     cmax=MAT2(1,1);
 else
-    irows=1;
-    jcols=1;
+    irows = 1;
+    jcols = 1;
     while out == 1
-        out= isnan(MAT2(irows,jcols));
-        irows = irows + 1;
+        for jcols = 1:dim(2)
+            for irows = 1:dim(1)
+                out = isnan(MAT2(irows,jcols));
+                if out==0
+                    break;
+                end
+                
+            end
+            break;
+        end
     end
+  
     cmin=MAT2(irows,jcols);
     cmax=MAT2(irows,jcols);
 end
@@ -2119,6 +2072,12 @@ for i=1:dim(1)
         end
     end
 end
+
+if cmin == cmax
+    cmin = cmin - 1 ;
+    cmax = cmax + 1 ;
+end
+
 
 cmin = sprintf('%0.2g',cmin);
 cmax = sprintf('%0.2g',cmax);

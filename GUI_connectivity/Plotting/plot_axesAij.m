@@ -184,7 +184,7 @@ elseif  get(handles.popupmenu_view,'value')==2%view avg zone
             labelzone = listok{adjj};
             y = strmatch({labelzone} ,idlabelall, 'exact');
             if isempty(x)|isempty(y)
-                msgbox('problem zone in subject')
+                msgbox('problem zone in subject');
             end
             chzone = DATA{id}.zone.plotLst{x};
             idlisti = [];
@@ -210,10 +210,10 @@ elseif  get(handles.popupmenu_view,'value')==2%view avg zone
                 idlistj = [idlistj, idch];
             end
             if isempty(idlisti)|isempty(idlistj)
-                MATAVG(adji,adjj)=nan
+                MATAVG(adji,adjj)=nan;
             else
-                temp = MAT(idlisti, idlistj)
-                MATAVG(adji,adjj)= nanmean(temp(:))
+                temp = MAT(idlisti, idlistj);
+                MATAVG(adji,adjj)= nanmean(temp(:));
             end
             
         end
@@ -227,8 +227,8 @@ elseif  get(handles.popupmenu_view,'value')==2%view avg zone
     else
          title(DATA{id}.name)
     end
-    idzone = 1:numel(listok)
-    idlabel = listok
+    idzone = 1:numel(listok);
+    idlabel = listok;
     set(gca,'xtick', find(idzone));
     set(gca,'xticklabel', idlabel);
     set(gca,'ytick', find(idzone));
