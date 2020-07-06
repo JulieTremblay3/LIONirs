@@ -2010,8 +2010,7 @@ DATA = get(handles.GUI_LookMat,'UserData');
 id = get(handles.popup_listsujet, 'value');
 MAT = DATA{id}.MAT;
 
-%POUR L'AFFICHAGE DES ZONES SELECTIONNÉES CANAL PAR CANAL
-    listok = get(handles.listbox_selectedzone,'string');
+listok = get(handles.listbox_selectedzone,'string');
     idlist = [];
     for ilistzone = 1:numel(listok)
         for izone = 1:numel(DATA{id}.zone.plotLst)
@@ -2020,7 +2019,6 @@ MAT = DATA{id}.MAT;
             if ~isempty(x)
                 idch=DATA{id}.zone.chMAT{izone};
                 idlist = [idlist, idch];
-           
             end
         end
     end
@@ -2031,24 +2029,24 @@ MAT = DATA{id}.MAT;
         end
         idtr = find(abs(MAT)<tr);
         MAT(idtr)=0;
-        MAT2=MAT(idlist,idlist);
+         DisplayedMAT = MAT(idlist,idlist);
     end
         if get(handles.radio_fisher,'value')
-            MAT2 =1/2*(log((1+MAT2 )./(1-MAT2 )));
+             DisplayedMAT  =1/2*(log((1+ DisplayedMAT  )./(1- DisplayedMAT  )));
         end
-dim=size(MAT2);
-out=isnan(MAT2(1,1));
-if out==0
-    cmin=MAT2(1,1);
-    cmax=MAT2(1,1);
+dim=size( DisplayedMAT );
+NaNCheck=isnan( DisplayedMAT (1,1));
+if NaNCheck==0
+    cmin= DisplayedMAT (1,1);
+    cmax= DisplayedMAT (1,1);
 else
     irows = 1;
     jcols = 1;
-    while out == 1
+    while NaNCheck == 1
         for jcols = 1:dim(2)
             for irows = 1:dim(1)
-                out = isnan(MAT2(irows,jcols));
-                if out==0
+                NaNCheck = isnan( DisplayedMAT (irows,jcols));
+                if NaNCheck==0
                     break;
                 end
                 
@@ -2057,17 +2055,17 @@ else
         end
     end
   
-    cmin=MAT2(irows,jcols);
-    cmax=MAT2(irows,jcols);
+    cmin= DisplayedMAT (irows,jcols);
+    cmax= DisplayedMAT (irows,jcols);
 end
 for i=1:dim(1)
     for j=1:dim(2)
-        out= isnan(MAT2(i,j));
-        if out==0
-            if MAT2(i,j)< cmin
-                cmin= MAT2(i,j);
-            elseif MAT2(i,j)> cmax
-                cmax = MAT2(i,j);
+        NaNCheck= isnan( DisplayedMAT (i,j));
+        if NaNCheck==0
+            if  DisplayedMAT (i,j)< cmin
+                cmin=  DisplayedMAT (i,j);
+            elseif  DisplayedMAT (i,j)> cmax
+                cmax =  DisplayedMAT (i,j);
             end
         end
     end
