@@ -2031,42 +2031,21 @@ listok = get(handles.listbox_selectedzone,'string');
         MAT(idtr)=0;
          DisplayedMAT = MAT(idlist,idlist);
     end
-        if get(handles.radio_fisher,'value')
-             DisplayedMAT  =1/2*(log((1+ DisplayedMAT  )./(1- DisplayedMAT  )));
-        end
-dim=size( DisplayedMAT );
-NaNCheck=isnan( DisplayedMAT (1,1));
-if NaNCheck==0
-    cmin= DisplayedMAT (1,1);
-    cmax= DisplayedMAT (1,1);
-else
-    irows = 1;
-    jcols = 1;
-    while NaNCheck == 1
-        for jcols = 1:dim(2)
-            for irows = 1:dim(1)
-                NaNCheck = isnan( DisplayedMAT (irows,jcols));
-                if NaNCheck==0
-                    break;
-                end
-                
-            end
-            break;
-        end
+    if get(handles.radio_fisher,'value')
+            DisplayedMAT  =1/2*(log((1+ DisplayedMAT  )./(1- DisplayedMAT  )));
     end
-  
-    cmin= DisplayedMAT (irows,jcols);
-    cmax= DisplayedMAT (irows,jcols);
-end
+dim=size(DisplayedMAT);
+NaNCheck=isnan(DisplayedMAT);
+DisplayedMAT(NaNCheck)=0;
+cmin= DisplayedMAT (1,1);
+cmax= DisplayedMAT (1,1);
+
 for i=1:dim(1)
     for j=1:dim(2)
-        NaNCheck= isnan( DisplayedMAT (i,j));
-        if NaNCheck==0
-            if  DisplayedMAT (i,j)< cmin
-                cmin=  DisplayedMAT (i,j);
-            elseif  DisplayedMAT (i,j)> cmax
+        if  DisplayedMAT (i,j)< cmin
+                cmin =  DisplayedMAT (i,j);
+        elseif  DisplayedMAT (i,j)> cmax
                 cmax =  DisplayedMAT (i,j);
-            end
         end
     end
 end
@@ -2075,7 +2054,6 @@ if cmin == cmax
     cmin = cmin - 1 ;
     cmax = cmax + 1 ;
 end
-
 
 cmin = sprintf('%0.2g',cmin);
 cmax = sprintf('%0.2g',cmax);
