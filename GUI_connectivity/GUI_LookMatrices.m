@@ -22,7 +22,7 @@ function varargout = GUI_LookMatrices(varargin)
 
 % Edit the above text to modify the response to help GUI_LookMatrices
 
-% Last Modified by GUIDE v2.5 29-Jun-2020 15:39:47
+% Last Modified by GUIDE v2.5 01-Jul-2020 11:18:42
 
 % Begin initialization code - DO NOT EDITspm
 gui_Singleton = 1;
@@ -2005,4 +2005,66 @@ function btn_autoscale_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-msgbox('Not code yet !')
+guidata(handles.GUI_LookMat, handles);
+DATA = get(handles.GUI_LookMat,'UserData');
+id = get(handles.popup_listsujet, 'value');
+MAT = DATA{id}.MAT;
+
+listok = get(handles.listbox_selectedzone,'string');
+idlist = [];
+for ilistzone = 1:numel(listok)
+    for izone = 1:numel(DATA{id}.zone.plotLst)
+        labelzone = DATA{id}.zone.label{izone};
+        x = strmatch({labelzone} , {listok{ilistzone}}, 'exact');
+        if ~isempty(x)
+            idch=DATA{id}.zone.chMAT{izone};
+            idlist = [idlist, idch];
+        end
+    end
+end
+if ~isempty(idlist)
+    tr = str2num(get(handles.edit_threshold,'string'));
+    if isempty(tr)
+        tr = 0;
+    end
+    idtr = find(abs(MAT)<tr);
+    MAT(idtr)=0;
+    DisplayedMAT = MAT(idlist,idlist);
+end
+if get(handles.radio_fisher,'value')
+    DisplayedMAT  =1/2*(log((1+ DisplayedMAT  )./(1- DisplayedMAT  )));
+end
+
+dim=size(DisplayedMAT);
+NaNCheck=isnan(DisplayedMAT);
+DisplayedMAT(NaNCheck)=0;
+cmin= DisplayedMAT (1,1);
+cmax= DisplayedMAT (1,1);
+
+for i=1:dim(1)
+    for j=1:dim(2)
+        if  DisplayedMAT (i,j)< cmin
+                cmin =  DisplayedMAT (i,j);
+        elseif  DisplayedMAT (i,j)> cmax
+                cmax =  DisplayedMAT (i,j);
+        end
+    end
+end
+
+if cmin == cmax
+    cmin = cmin-1;
+    cmax = cmax+1;
+end
+
+cmin = sprintf('%0.2g',cmin);
+cmax = sprintf('%0.2g',cmax);
+
+set(handles.edit_cmin,'string',[cmin]);
+set(handles.edit_cmax,'string',[cmax]);
+
+guidata(handles.GUI_LookMat, handles);
+updateNetAllView(handles);
+
+msgbox('In progress')
+
+
