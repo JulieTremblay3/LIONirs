@@ -1174,8 +1174,12 @@ if get(handles.radio_viewskin,'value')
 elseif get(handles.radio_viewcortex,'value')
     type = 1;
 end
-
-PrjStruct = display_MRIcolor(PrjStruct,PMI,d1, type);
+if strcmp(get(handles.context_topo_radial,'checked'),'on')
+    PrjStruct = display_MRIcolor(PrjStruct,PMI,d1, type);
+elseif strcmp(get(handles.context_topo_IWD,'checked'),'on')
+    PrjStruct = display_MRIcolor_InverseWeightedDistance(PrjStruct,PMI,d1, type);
+end
+    
 setappdata(handles.IO_HelmetMTG,'PrjStruct',PrjStruct);
 
 %handles.PrjStruct = display_MRIcolorHomer(handles)
@@ -3535,3 +3539,25 @@ function edit_channelwidth_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --------------------------------------------------------------------
+function context_topo_radial_Callback(hObject, eventdata, handles)
+% hObject    handle to context_topo_radial (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+set(handles.context_topo_IWD,'checked','off')
+set(handles.context_topo_radial,'checked','on')
+
+% --------------------------------------------------------------------
+function context_topo_IWD_Callback(hObject, eventdata, handles)
+% hObject    handle to context_topo_IWD (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+set(handles.context_topo_IWD,'checked','on')
+set(handles.context_topo_radial,'checked','off')
+% --------------------------------------------------------------------
+function Topographymode_Callback(hObject, eventdata, handles)
+% hObject    handle to Topographymode (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

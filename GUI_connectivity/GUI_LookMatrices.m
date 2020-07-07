@@ -402,10 +402,10 @@ listselected = [listselected;{list{value}} ];
 alllist = [];
 for ik = 1:numel(listselected)
     for jk = 1:numel(listselected)
-        alllist = [alllist, {[listselected{ik},'/' ,listselected{jk}]}]
+        alllist = [alllist, {[listselected{ik},'/' ,listselected{jk}]}];
     end    
 end
-set(handles.listbox_subzone,'string',alllist)
+set(handles.listbox_subzone,'string',alllist);
 guidata(handles.GUI_LookMat, handles);
 updateNetAllView(handles);
 
@@ -472,10 +472,10 @@ set(handles.listbox_selectedzone,'string',listselected);
 alllist = [];
 for ik = 1:numel(listselected)
     for jk = 1:numel(listselected)
-        alllist = [alllist, {[listselected{ik},'/' ,listselected{jk}]}]
+        alllist = [alllist, {[listselected{ik},'/' ,listselected{jk}]}];
     end    
 end
-set(handles.listbox_subzone,'string',alllist)
+set(handles.listbox_subzone,'string',alllist);
 guidata(handles.GUI_LookMat, handles);
 %plot_axesAij(handles);
 updateNetAllView(handles)

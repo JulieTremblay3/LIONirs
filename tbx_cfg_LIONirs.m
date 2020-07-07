@@ -3323,11 +3323,17 @@ b_PearsonCorr_Mat.name   = 'Pearson correlation' ;
 b_PearsonCorr_Mat.val    = {b_Covariable_Mat};
 b_PearsonCorr_Mat.help   = {'Compute the pearson correlation coefficient between connectivity score and one covariable in the excel file'};
 
+b_GLM_Mat        = cfg_branch;
+b_GLM_Mat.tag    = 'b_GLM_Mat';
+b_GLM_Mat.name   = 'GLM' ;
+b_GLM_Mat.val    = {b_Covariable_Mat};
+b_GLM_Mat.help   = {'Apply the general linear model, specify covariable as regressor y=b1*x1+b2*x2+...+c, do not forget to include a covariable for the constante'};
+
 
 c_statmatrix          = cfg_choice;
 c_statmatrix.tag     = 'c_statmatrix';
 c_statmatrix.name    = 'Choose the statistical test';
-c_statmatrix.values  = {b_TtestOneSamplematrix,b_PermutationTest,b_PearsonCorr_Mat, b_exportNBSformat};
+c_statmatrix.values  = {b_TtestOneSamplematrix,b_PermutationTest,b_PearsonCorr_Mat, b_GLM_Mat, b_exportNBSformat};
 c_statmatrix.val     = {b_TtestOneSamplematrix}; %Default option
 c_statmatrix.help    = {''};
 

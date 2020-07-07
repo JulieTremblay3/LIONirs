@@ -1,5 +1,5 @@
 %Description : Utilise les valeurs de concentration a un temps donnee et
-%produit un colormap sur le cortex ou la peau. Moyenne les canaux
+%produit un colormap sur le cortex ou la peau. Projection radial, moyenne les canaux
 %superposés.
 function PrjStruct = display_MRIcolor(PrjStruct,PMI,d1,type)
 %type 0  = skin

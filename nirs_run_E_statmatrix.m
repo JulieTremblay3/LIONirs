@@ -529,13 +529,107 @@ elseif isfield(job.c_statmatrix,'b_PearsonCorr_Mat')
         [filepath,name,ext] = fileparts(xlslistfile);
         writetxtfile(fullfile(dir1,['PearsonCorrelation.txt']),infonew);
         disp(['Result .txt file saved: ' fullfile(dir1,['PearsonCorrelation.txt'])])
-
     else
         [filepath,name,ext] = fileparts(xlslistfile);
         xlswrite(fullfile(dir1,['PearsonCorrelation.xlsx']),infonew);
         disp(['Result .xlsx file saved ' fullfile(dir1,['PearsonCorrelationPermutationTtest.xlsx'])])
-
     end
+elseif isfield(job.c_statmatrix,'b_GLM_Mat')
+    
+    dir1 = job.e_statmatrixPath{1};
+    infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
+    covariableall=[];
+    covariablestring = job.c_statmatrix. b_GLM_Mat.b_Covariable_Mat;
+    [token,remain] =strtok(covariablestring,',');
+    covariableall =  [covariableall,{token}];
+    while ~isempty(remain)        
+        [token,remain] =strtok(remain,',');
+        covariableall =  [covariableall,{token}];
+    end
+    
+    for icov = 1:numel(covariableall)
+     notfoundstophere = 1;
+     Pearsony = covariableall{icov};
+     ycol = 0; 
+     for icol=1:size(info,2)  
+         if ~isnan(info{1,icol})
+            if strcmp(strtrim(upper(deblank(info{1,icol}))), strtrim(upper(Pearsony)))
+                ycol = icol;
+            end   
+         end
+     end
+     if ycol
+         id= 1;
+         for i=2:size(info,1)
+            score(id,icov) = info{i,ycol };
+            id = id+1;
+         end
+       
+     else
+         disp([Pearsony,' column not found, no regression could be compute'])
+         out='Stat tests';
+         return
+     end 
+    end
+    
+      
+        for icov = 1:numel(covariableall)
+            eval(['bCOV',num2str(icov),' = zeros(size(MATall,2),size(MATall,2));']);
+            eval(['bCOV',num2str(icov),'sig = zeros(size(MATall,2),size(MATall,2));']);
+        end
+  
+       for i=1:size(MATall,2)
+        for j=1:size(MATall,2)
+            iduse = find(sum(~isnan(score),2)==size(score,2)& ~isnan(MATall(:,i,j)));
+            X = score(iduse,:);
+            y = MATall(iduse,i,j);
+            if ~isempty(iduse)
+                %R2 statistic, the F-statistic and its p-value, and an estimate of the error variance.
+                [b,bint,r,rint,stats] = regress(y,X);
+                try
+                for icov = 1:numel(covariableall)
+                 eval(['bCOV',num2str(icov),'(',num2str(i),',',num2str(j),')=',num2str(b(icov)),';'])
+                end
+                catch
+                    1
+                end
+                if stats(3)<0.05
+                    for icov = 1:numel(covariableall)
+                        eval(['bCOV',num2str(icov),'sig(',num2str(i),',',num2str(j),')=',num2str(b(icov)),';'])
+                    end
+                end
+            end            
+        end        
+    end
+    
+    %WRITE IN A NEW FILE
+      for icov = 1:numel(covariableall)
+        file = [name,'_',covariableall{icov},'.mat'];
+         eval(['matcorr =','bCOV',num2str(icov),';'])
+         eval(['meancorr =','bCOV',num2str(icov),';'])
+         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+         new = [{dir1},{file}, {ZONEid},{1} ];
+         infonew = [infonew;new];
+          file = [name,'_',covariableall{icov},'p05.mat'];
+         eval(['matcorr =','bCOV',num2str(icov),'sig;'])
+         eval(['meancorr =','bCOV',num2str(icov),'sig;'])
+         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+         new = [{dir1},{file}, {ZONEid},{1} ];
+         infonew = [infonew;new];
+      end
+             
+        copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
+    if ismac
+        % Code to run on Mac platform problem with xlswrite
+        [filepath,name,ext] = fileparts(xlslistfile);
+        writetxtfile(fullfile(dir1,['GLM.txt']),infonew);
+        disp(['Result .txt file saved: ' fullfile(dir1,['GLM.txt'])])
+    else
+        [filepath,name,ext] = fileparts(xlslistfile);
+        xlswrite(fullfile(dir1,['GLM.xlsx']),infonew);
+        disp(['Result .xlsx file saved ' fullfile(dir1,['GLM.xlsx'])])
+    end
+    
 end
 out='Stat tests';
 
