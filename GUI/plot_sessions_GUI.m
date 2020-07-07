@@ -22,7 +22,7 @@ function varargout = plot_sessions_GUI(varargin)
 
 % Edit the above text to modify the response to help plot_sessions_GUI
 
-% Last Modified by GUIDE v2.5 29-Jun-2020 11:32:18
+% Last Modified by GUIDE v2.5 07-Jul-2020 15:06:46
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -10675,3 +10675,17 @@ function radio_3dmontageupdate_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of radio_3dmontageupdate
+
+
+% --------------------------------------------------------------------
+function context_listbox_Correction_CopyData_Callback(hObject, eventdata, handles)
+% hObject    handle to context_listbox_Correction_CopyData (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function context_listbox_Component_CopyData_Callback(hObject, eventdata, handles)
+% hObject    handle to context_listbox_Component_CopyData (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
