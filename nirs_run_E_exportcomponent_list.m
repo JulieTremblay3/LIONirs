@@ -76,100 +76,97 @@ for filenb=1:size(NIRSDtp,1)
          if ~isempty(findstr(upper(PARCOMP(icomp).label),upper(label)))
             if strcmp(PARCOMP(icomp).type,type)            
               if strcmp(upper(PARCOMP(icomp).type),'PARAFAC')
-
-                     listgood=[PARCOMP(icomp).listgood;PARCOMP(icomp).listgood+NC/2];
-                     ChannelListfile = fullfile(pathoutlist,ListDtp{filenb});                     
-                    [listHBOch, listHBRch, listnameHbO, listnameHbR , zonelist]= findchinChannelList(NIRS, ChannelListfile,listgood);
-                                          
-                    % HBO parafac 
-                      k = PARCOMP(icomp).ComponentToKeep;
-                     topo=  PARCOMP(icomp).FacB(:,k) * PARCOMP(icomp).FacC(1,k);
-                      A = NaN(numel( listHBOch),1);
-                      idok = find(~isnan(listHBOch));
-                      A(idok,1)=topo(listHBOch(idok));
-                     alllabel = [alllabel,{PARCOMP(icomp).label}];                  
-                     allbHbO = [allbHbO,A];
-                     save(fullfile(pathoutlist,['TopoHbO',labelout,PARCOMP(icomp).label,'.mat']),'A' ,'zonelist','srsfile' );
-                     clear A
-                     %HBR parafac
-                     topo=  PARCOMP(icomp).FacB(:,k) * PARCOMP(icomp).FacC(2,k);
-                     A = NaN(numel( listHBOch),1);
-                      idok = find(~isnan(listHBOch));
-                      A(idok,1)=topo(listHBOch(idok));
-                     alllabel = [alllabel,{PARCOMP(icomp).label}];                  
-                     allbHbR = [allbHbR,A];    
-                     save(fullfile(pathoutlist,['TopoHbR',labelout,PARCOMP(icomp).label,'.mat']),'A','zonelist','srsfile' );
-                     clear A
-                    alllabel = [alllabel,{PARCOMP(icomp).label}];
-                    ncomp = ncomp +1
-              elseif strcmp(upper(PARCOMP(icomp).type),'GLM')
-                     listgood=PARCOMP(icomp).listgood;
+                  listgood=[PARCOMP(icomp).listgood;PARCOMP(icomp).listgood+NC/2];
+                  ChannelListfile = fullfile(pathoutlist,ListDtp{filenb});
+                  [listHBOch, listHBRch, listnameHbO, listnameHbR , zonelist]= findchinChannelList(NIRS, ChannelListfile,listgood);
                     
-                       [pathtxt,filetxt,ext]= fileparts(ListDtp{filenb});
-                        if isempty(pathtxt)
-                            ChannelListfile = fullfile(pathoutlist,ListDtp{filenb});
-                        else
-                              ChannelListfile = ListDtp{filenb};
-                        end
-                    [listHBOch, listHBRch, listnameHbO, listnameHbR, zonelist]= findchinChannelList(NIRS, ChannelListfile,listgood);
-                     topo=PARCOMP(icomp).topo;
-                     labelall = [labelall,{PARCOMP(icomp).label}];
-  
-                      A= nan(size(listHBOch,1),1);
-                      idok = find(~isnan(listHBOch));
-                      A(idok,1)=topo(listHBOch(idok));
-                      alllabel = [alllabel,{PARCOMP(icomp).label}];                  
-                      allbHbO = [allbHbO,A];
-                      save(fullfile(pathoutlist,['TopoHbO',labelout,PARCOMP(icomp).label,'.mat']),'A' ,'zonelist','srsfile' );
-                      clear A
+                  % HBO parafac 
+                  k = PARCOMP(icomp).ComponentToKeep;
+                  topo=  PARCOMP(icomp).FacB(:,k) * PARCOMP(icomp).FacC(1,k);
+                  A = NaN(numel( listHBOch),1);
+                  idok = find(~isnan(listHBOch));
+                  A(idok,1)=topo(listHBOch(idok));
+                  alllabel = [alllabel,{PARCOMP(icomp).label}];
+                  allbHbO = [allbHbO,A];
+                  save(fullfile(pathoutlist,['TopoHbO',labelout,PARCOMP(icomp).label,'.mat']),'A' ,'zonelist','srsfile' );
+                  clear A
+                  %HBR parafac
+                  topo=  PARCOMP(icomp).FacB(:,k) * PARCOMP(icomp).FacC(2,k);
+                  A = NaN(numel( listHBOch),1);
+                  idok = find(~isnan(listHBOch));
+                  A(idok,1)=topo(listHBOch(idok));
+                  alllabel = [alllabel,{PARCOMP(icomp).label}];                  
+                  allbHbR = [allbHbR,A];    
+                  save(fullfile(pathoutlist,['TopoHbR',labelout,PARCOMP(icomp).label,'.mat']),'A','zonelist','srsfile' );
+                  clear A
+                  alllabel = [alllabel,{PARCOMP(icomp).label}];
+                  ncomp = ncomp +1
+              elseif strcmp(upper(PARCOMP(icomp).type),'GLM')
+                  listgood=PARCOMP(icomp).listgood;
+                  [pathtxt,filetxt,ext]= fileparts(ListDtp{filenb});
+                  if isempty(pathtxt)
+                      ChannelListfile = fullfile(pathoutlist,ListDtp{filenb});
+                  else
+                      ChannelListfile = ListDtp{filenb};
+                  end
+                  [listHBOch, listHBRch, listnameHbO, listnameHbR, zonelist]= findchinChannelList(NIRS, ChannelListfile,listgood);
+                  topo=PARCOMP(icomp).topo;
+                  labelall = [labelall,{PARCOMP(icomp).label}];
+                  
+                  A= nan(size(listHBOch,1),1);
+                  idok = find(~isnan(listHBOch));
+                  A(idok,1)=topo(listHBOch(idok));
+                  alllabel = [alllabel,{PARCOMP(icomp).label}];                  
+                  allbHbO = [allbHbO,A];
+                  save(fullfile(pathoutlist,['TopoHbO',labelout,PARCOMP(icomp).label,'.mat']),'A' ,'zonelist','srsfile' );
+                  clear A
                    
-                      A= nan(size(listHBRch,1),1);
-                      idok = find(~isnan(listHBRch));
-                      A(idok,1)=topo(listHBRch(idok));               
-                      allbHbR = [allbHbR,A];
-                      save(fullfile(pathoutlist,['TopoHbR',labelout,PARCOMP(icomp).label,'.mat']),'A' ,'zonelist','srsfile' );
-                      clear A        
-                      ncomp = ncomp +1;
+                  A= nan(size(listHBRch,1),1);
+                  idok = find(~isnan(listHBRch));
+                  A(idok,1)=topo(listHBRch(idok));               
+                  allbHbR = [allbHbR,A];
+                  save(fullfile(pathoutlist,['TopoHbR',labelout,PARCOMP(icomp).label,'.mat']),'A' ,'zonelist','srsfile' );
+                  clear A        
+                  ncomp = ncomp +1;
               elseif strcmp(upper(PARCOMP(icomp).type),'AVG')
                   listgood=PARCOMP(icomp).listgood; %check canaux pour séparer.... 
-                     listgood=PARCOMP(icomp).listgood;
-                     ChannelListfile = fullfile(pathoutlist,ListDtp{filenb});                     
-                    [listHBOch, listHBRch, listnameHbO, listnameHbR, zonelist]= findchinChannelList(NIRS, ChannelListfile,listgood);
+                  listgood=PARCOMP(icomp).listgood;
+                  ChannelListfile = fullfile(pathoutlist,ListDtp{filenb});                     
+                  [listHBOch, listHBRch, listnameHbO, listnameHbR, zonelist]= findchinChannelList(NIRS, ChannelListfile,listgood);
                     
-                   alllabel = [alllabel,{PARCOMP(icomp).label}];
+                  alllabel = [alllabel,{PARCOMP(icomp).label}];
 
-                      topo=PARCOMP(icomp).topo;              
-                      A= nan(size(listHBOch,1),1);
-                      idok = find(~isnan(listHBOch));
-                      A(idok,1)=topo(listHBOch(idok));
-                      alllabel = [alllabel,{PARCOMP(icomp).label}];                  
-                      allbHbO = [allbHbO,A];
-                      save(fullfile(pathoutlist,['TopoHbO',labelout,PARCOMP(icomp).label,'.mat']),'A' ,'zonelist','srsfile' );
-                      clear A
+                  topo=PARCOMP(icomp).topo;              
+                  A= nan(size(listHBOch,1),1);
+                  idok = find(~isnan(listHBOch));
+                  A(idok,1)=topo(listHBOch(idok));
+                  alllabel = [alllabel,{PARCOMP(icomp).label}];                  
+                  allbHbO = [allbHbO,A];
+                  save(fullfile(pathoutlist,['TopoHbO',labelout,PARCOMP(icomp).label,'.mat']),'A' ,'zonelist','srsfile' );
+                  clear A
                    
-                      A= nan(size(listHBRch,1),1);
-                      idok = find(~isnan(listHBRch));
-                      A(idok,1)=topo(listHBRch(idok));               
-                      allbHbR = [allbHbR,A];
-                      save(fullfile(pathoutlist,['TopoHbR',labelout,PARCOMP(icomp).label,'.mat']),'A','zonelist','srsfile' );
-                      clear A            
-                      ncomp = ncomp +1;
-              end             
-            end            
-        end
+                  A= nan(size(listHBRch,1),1);
+                  idok = find(~isnan(listHBRch));
+                  A(idok,1)=topo(listHBRch(idok));               
+                  allbHbR = [allbHbR,A];
+                  save(fullfile(pathoutlist,['TopoHbR',labelout,PARCOMP(icomp).label,'.mat']),'A','zonelist','srsfile' );
+                  clear A            
+                  ncomp = ncomp +1;
+              end
+            end
+         end
     end
     idkeep = [1:size(allb,2)];
-   tmp= scomp:ncomp;
-   idremovebloc = 0;
-   id = find(removeid>=scomp & removeid<ncomp);
-   if isempty(id)
-       idremovebloc = 0;
-   else
-       idremovebloc = (removeid(id) - scomp+1);
-       idkeep(idremovebloc) = [];
-   end
-
-
+    tmp= scomp:ncomp;
+    idremovebloc = 0;
+    id = find(removeid>=scomp & removeid<ncomp);
+    if isempty(id)
+        idremovebloc = 0;
+    else
+        idremovebloc = (removeid(id) - scomp+1);
+        idkeep(idremovebloc) = [];
+    end
+    
     Amean = nanmean(allbHbO,2);
     allsubjectHBO =   [allsubjectHBO,allbHbO];
     A =[ Amean] ;
