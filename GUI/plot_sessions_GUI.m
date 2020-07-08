@@ -22,7 +22,7 @@ function varargout = plot_sessions_GUI(varargin)
 
 % Edit the above text to modify the response to help plot_sessions_GUI
 
-% Last Modified by GUIDE v2.5 07-Jul-2020 15:06:46
+% Last Modified by GUIDE v2.5 08-Jul-2020 14:39:43
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -10682,10 +10682,112 @@ function context_listbox_Correction_CopyData_Callback(hObject, eventdata, handle
 % hObject    handle to context_listbox_Correction_CopyData (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+idComp = get(get(handles.listbox_CorrectionDecomposition,'value'));
+strComp = get(handles.listbox_CorrectionDecomposition,'string');
+label = strComp{idComp};
 
+msgbox(label);
+clear
 
 % --------------------------------------------------------------------
 function context_listbox_Component_CopyData_Callback(hObject, eventdata, handles)
 % hObject    handle to context_listbox_Component_CopyData (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+idComp = get(handles.listbox_Component,'value');
+strComp = get(handles.listbox_Component,'string');
+label = strComp{idComp};
+
+[pathstr, name, ext] = fileparts(handles.NIRSpath{1});
+try
+    load(fullfile(pathstr,'SelectedFactors.mat'))
+catch
+    return
+end
+
+if ~isempty(findstr(upper(PARCOMP(idComp).label),upper(label)))
+    
+        if strcmp(upper(PARCOMP(idComp).type),'PARAFAC')
+            listgood=[PARCOMP(idComp).listgood;PARCOMP(idComp).listgood+NC/2];
+            ChannelListfile = fullfile(pathoutlist,ListDtp{filenb});
+            [listHBOch, listHBRch, listnameHbO, listnameHbR , zonelist]= findchinChannelList(NIRS, ChannelListfile,listgood);
+            % HBO parafac
+            k = PARCOMP(idComp).ComponentToKeep;
+            topo =  PARCOMP(idComp).FacB(:,k) * PARCOMP(idComp).FacC(1,k);
+            A = NaN(numel( listHBOch),1);
+            idok = find(~isnan(listHBOch));
+            A(idok,1) = topo(listHBOch(idok));
+            alllabel = [alllabel,{PARCOMP(idComp).label}];
+            allbHbO = [allbHbO,A];
+            
+            clipboard('copy', A);
+            save(fullfile(pathoutlist,['TopoHbO',labelout,PARCOMP(idComp).label,'.mat']),'A' ,'zonelist','srsfile' );
+            clear A
+            %HBR parafac
+            topo =  PARCOMP(idComp).FacB(:,k) * PARCOMP(idComp).FacC(2,k);
+            A = NaN(numel( listHBOch),1);
+            idok = find(~isnan(listHBOch));
+            A(idok,1) = topo(listHBOch(idok));
+            alllabel = [alllabel,{PARCOMP(idComp).label}];
+            allbHbR = [allbHbR,A];
+            clipboard('copy', A);
+            clear A
+            alllabel = [alllabel,{PARCOMP(idComp).label}];
+            ncomp = ncomp +1
+        elseif strcmp(upper(PARCOMP(idComp).type),'GLM')
+            listgood=PARCOMP(idComp).listgood;
+            [pathtxt,filetxt,ext] = fileparts(ListDtp{filenb});
+            if isempty(pathtxt)
+                ChannelListfile = fullfile(pathoutlist,ListDtp{filenb});
+            else
+                ChannelListfile = ListDtp{filenb};
+            end
+            [listHBOch, listHBRch, listnameHbO, listnameHbR, zonelist] = findchinChannelList(NIRS, ChannelListfile,listgood);
+            topo = PARCOMP(idComp).topo;
+            labelall = [labelall,{PARCOMP(idComp).label}];
+            
+            A = nan(size(listHBOch,1),1);
+            idok = find(~isnan(listHBOch));
+            A(idok,1) = topo(listHBOch(idok));
+            alllabel = [alllabel,{PARCOMP(idComp).label}];
+            allbHbO = [allbHbO,A];
+            clipboard('copy', A);
+            clear A
+            
+            A = nan(size(listHBRch,1),1);
+            idok = find(~isnan(listHBRch));
+            A(idok,1) = topo(listHBRch(idok));
+            allbHbR = [allbHbR,A];
+            clipboard('copy', A);
+            clear A
+            ncomp = ncomp +1;
+        
+        elseif strcmp(upper(PARCOMP(idComp).type),'AVG')
+            listgood = PARCOMP(idComp).listgood; %check canaux pour séparer.... 
+            listgood = PARCOMP(idComp).listgood;
+            ChannelListfile = fullfile(pathoutlist,ListDtp{filenb});
+            [listHBOch, listHBRch, listnameHbO, listnameHbR, zonelist] = findchinChannelList(NIRS, ChannelListfile,listgood);
+            alllabel = [alllabel,{PARCOMP(idComp).label}];
+            
+            topo = PARCOMP(idComp).topo;
+            A = nan(size(listHBOch,1),1);
+            idok = find(~isnan(listHBOch));
+            A(idok,1) = topo(listHBOch(idok));
+            alllabel = [alllabel,{PARCOMP(idComp).label}];
+            allbHbO = [allbHbO,A];
+            clipboard('copy', A);
+            clear A
+            
+            A = nan(size(listHBRch,1),1);
+            idok = find(~isnan(listHBRch));
+            A(idok,1) = topo(listHBRch(idok));
+            allbHbR = [allbHbR,A];
+            clipboard('copy', A);
+            clear A
+            ncomp = ncomp +1;
+        end
+    
+end
+
+
+msgbox(label);
