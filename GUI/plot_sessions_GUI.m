@@ -4987,7 +4987,7 @@ if idmodule < numel(handles.NIRS.Dt.fir.pp)
     msgbox('modification could be done only on the last manual step')
     return
 end
-%what to substract !
+%what to substract!
 [pathstr, name, ext] = fileparts(handles.NIRSpath{1});
 if strcmp(listmethod{idval},'Parafac')  %substractPARAFAC
     indt = [PMI{currentsub}.tmpPARAFAC.indt(1):PMI{currentsub}.tmpPARAFAC.indt(2)];%Time indice
