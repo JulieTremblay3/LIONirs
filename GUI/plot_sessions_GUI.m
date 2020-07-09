@@ -10725,7 +10725,7 @@ if strcmpi((PARCOMP(idComp).type),'Parafac') == 1
     Ac = A(:,ComponentToKeep); 
 %     Bc = B(:,ComponentToKeep); Cc = C(:,ComponentToKeep);
     clipboard('copy', Ac);
-elseif strcmpi((PARCOMP(idComp).type),'PCA') 
+elseif strcmpi((PARCOMP(idComp).type),'PCA') ==1
     %Detrent DATA segment for centrering
     indt = [PMI{currentsub}.tmpPCA.indt(1):PMI{currentsub}.tmpPCA.indt(2)];%Time indice
     intensnorm = d(indt,:);
@@ -10744,7 +10744,7 @@ elseif strcmpi((PARCOMP(idComp).type),'PCA')
     data(:,listgood) = data(:,listgood)- temp;
     allo = data(:,listgood);
     clipboard('copy', allo);
-elseif strcmpi((PARCOMP(idComp).type),'ICA')   %extract ICA Component
+elseif strcmpi((PARCOMP(idComp).type),'ICA')== 1   %extract ICA Component
    indt = [PMI{currentsub}.tmpICA.indt(1):PMI{currentsub}.tmpICA.indt(2)];%Time indice
    listgood = PMI{currentsub}.tmpICA.listgood;
    selected = PMI{currentsub}.tmpICA.selected;
@@ -10754,7 +10754,7 @@ elseif strcmpi((PARCOMP(idComp).type),'ICA')   %extract ICA Component
    clipboard('copy', Xm);
 
 
-elseif strcmpi((PARCOMP(idComp).type),'GLM')   %extract GLM Component
+elseif strcmpi((PARCOMP(idComp).type),'GLM') ==1  %extract GLM Component
    
     beta = PMI{currentsub}.tmpGLM.beta ;
 %     selected = PMI{currentsub}.tmpGLM.selected;
