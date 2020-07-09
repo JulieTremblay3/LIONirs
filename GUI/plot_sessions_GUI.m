@@ -10678,12 +10678,22 @@ function context_listbox_Correction_CopyData_Callback(hObject, eventdata, handle
 % hObject    handle to context_listbox_Correction_CopyData (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-idComp = get(get(handles.listbox_CorrectionDecomposition,'value'));
+idComp = get(handles.listbox_CorrectionDecomposition,'value');
 strComp = get(handles.listbox_CorrectionDecomposition,'string');
 label = strComp{idComp};
+[pathstr, name, ext] = fileparts(handles.NIRSpath{1});
+try
+    load(fullfile(pathstr,'SelectedFactors.mat'))
+catch
+    return
+end
+A = PARCOMP(idComp).topo;
+clipboard('copy', A);
+
+msgbox('the selected label is copied');
 
 msgbox(label);
-clear
+
 
 % --------------------------------------------------------------------
 function context_listbox_Component_CopyData_Callback(hObject, eventdata, handles)
@@ -10700,71 +10710,7 @@ try
 catch
     return
 end
+A = PARCOMP(idComp).topo;
+clipboard('copy', A);
 
-guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
-currentsub=1;
-PMI = get(guiHOMER,'UserData');
-cf = PMI{currentsub}.currentFile;
-d = PMI{currentsub}.data(cf).HRF.AvgC;
-
-if strcmpi((PARCOMP(idComp).type),'Parafac') == 1
-    indt = [PMI{currentsub}.tmpPARAFAC.indt(1):PMI{currentsub}.tmpPARAFAC.indt(2)];%Time indice
-    intensnorm = d(indt,:);
-    %Detrent DATA segment for centrering
-    PMI{currentsub}.tmpPARAFAC
-    X = 1:1:size(intensnorm,1);
-    Mb1 =  ((intensnorm(end,:)-intensnorm(1,:))./numel(X))';
-    Mb2 =  intensnorm(1,:)'; %offset
-    A = reshape(X,numel(X),1)*reshape( Mb1,1,numel(Mb1)) +ones(numel(X),1)*reshape( Mb2,1,numel(Mb2));
-%     spar = intensnorm - A;
-    A = PMI{currentsub}.tmpPARAFAC.Factors{1};
-%     B = PMI{currentsub}.tmpPARAFAC.Factors{2};
-%     C = PMI{currentsub}.tmpPARAFAC.Factors{3};
-%     listgood = PMI{currentsub}.tmpPARAFAC.listgood;
-    ComponentToKeep = PMI{1}.tmpPARAFAC.selected;
-    Ac = A(:,ComponentToKeep); 
-%     Bc = B(:,ComponentToKeep); Cc = C(:,ComponentToKeep);
-    clipboard('copy', Ac);
-elseif strcmpi((PARCOMP(idComp).type),'PCA') ==1
-    %Detrent DATA segment for centrering
-    indt = [PMI{currentsub}.tmpPCA.indt(1):PMI{currentsub}.tmpPCA.indt(2)];%Time indice
-    intensnorm = d(indt,:);
-    X = 1:1:size(intensnorm,1);
-    Mb1 =  ((intensnorm(end,:)-intensnorm(1,:))./numel(X))';
-    Mb2 =  intensnorm(1,:)'; %offset
-    A = reshape(X,numel(X),1)*reshape( Mb1,1,numel(Mb1)) +ones(numel(X),1)*reshape( Mb2,1,numel(Mb2));
-    spar = intensnorm - A;
-    listgood = PMI{currentsub}.tmpPCA.listgood;
-    lstSV = PMI{1}.tmpPCA.selected;
-    u =PMI{currentsub}.tmpPCA.u ;
-    s =PMI{currentsub}.tmpPCA.s ;
-    v =PMI{currentsub}.tmpPCA.v ;
-    temp = u(:,lstSV)*s(lstSV,lstSV)*v(:,lstSV)';
-    data = d(indt,:);
-    data(:,listgood) = data(:,listgood)- temp;
-    allo = data(:,listgood);
-    clipboard('copy', allo);
-elseif strcmpi((PARCOMP(idComp).type),'ICA')== 1   %extract ICA Component
-   indt = [PMI{currentsub}.tmpICA.indt(1):PMI{currentsub}.tmpICA.indt(2)];%Time indice
-   listgood = PMI{currentsub}.tmpICA.listgood;
-   selected = PMI{currentsub}.tmpICA.selected;
-   A =  PMI{currentsub}.tmpICA.Factors{1};
-   C = PMI{currentsub}.tmpICA.Factors{3};
-   Xm = (C(:,PMI{currentsub}.tmpICA.selected)*A(PMI{currentsub}.tmpICA.selected,:))';
-   clipboard('copy', Xm);
-
-
-elseif strcmpi((PARCOMP(idComp).type),'GLM') ==1  %extract GLM Component
-   
-    beta = PMI{currentsub}.tmpGLM.beta ;
-%     selected = PMI{currentsub}.tmpGLM.selected;
-    idreg = PMI{currentsub}.tmpGLM.idreg;
-%     Xm = PMI{1}.tmpGLM.AUX.data{idreg(selected)}*beta(selected,:);
-    label =  PMI{1}.tmpGLM.AUX.label{idreg(selected)};
-    clipboard('copy', label);
-    %save in a structure all apply correction
-    [pathstr, name, ext] = fileparts(handles.NIRSpath{1});
-end
-
-
-msgbox(label);
+msgbox('the selected label is copied');
