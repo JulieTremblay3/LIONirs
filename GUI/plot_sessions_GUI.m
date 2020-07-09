@@ -22,7 +22,7 @@ function varargout = plot_sessions_GUI(varargin)
 
 % Edit the above text to modify the response to help plot_sessions_GUI
 
-% Last Modified by GUIDE v2.5 08-Jul-2020 14:39:43
+% Last Modified by GUIDE v2.5 09-Jul-2020 12:50:34
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1260,7 +1260,7 @@ oldmodule = handles.oldmodule;
 %  handles.NIRS = NIRS.NIRS;
 %Verification pour voir si le manual setting à été sauvegarder
 if 0 %numel(handles.NIRS.Dt.fir.pp)==oldmodule
-    oldfile   = handles.oldfile;
+    oldfile = handles.oldfile;
     xname = handles.NIRS.Dt.fir.pp(oldmodule).p{oldfile};
     noise = logical(zeros(size(PMI{currentsub}.data(cf).HRF.AvgC)));
     mrk_type_arr = cellstr('bad_step');
@@ -9255,11 +9255,7 @@ elseif strcmp(listmethod{idval},'ICA')   %extract ICA Component
         end
     end
     set(handles.listbox_Component,'string',CORRlist);
-   
-   
-   
-   
-   
+  
 elseif strcmp(listmethod{idval},'GLM')   %extract GLM Component
     indt = [PMI{currentsub}.tmpGLM.indt(1):PMI{currentsub}.tmpGLM.indt(2)];%Time indice
     listgood = PMI{currentsub}.tmpGLM.listgood;
@@ -10705,88 +10701,69 @@ catch
     return
 end
 
-if ~isempty(findstr(upper(PARCOMP(idComp).label),upper(label)))
-    
-        if strcmp(upper(PARCOMP(idComp).type),'PARAFAC')
-            listgood=[PARCOMP(idComp).listgood;PARCOMP(idComp).listgood+NC/2];
-            ChannelListfile = fullfile(pathoutlist,ListDtp{filenb});
-            [listHBOch, listHBRch, listnameHbO, listnameHbR , zonelist]= findchinChannelList(NIRS, ChannelListfile,listgood);
-            % HBO parafac
-            k = PARCOMP(idComp).ComponentToKeep;
-            topo =  PARCOMP(idComp).FacB(:,k) * PARCOMP(idComp).FacC(1,k);
-            A = NaN(numel( listHBOch),1);
-            idok = find(~isnan(listHBOch));
-            A(idok,1) = topo(listHBOch(idok));
-            alllabel = [alllabel,{PARCOMP(idComp).label}];
-            allbHbO = [allbHbO,A];
-            
-            clipboard('copy', A);
-            save(fullfile(pathoutlist,['TopoHbO',labelout,PARCOMP(idComp).label,'.mat']),'A' ,'zonelist','srsfile' );
-            clear A
-            %HBR parafac
-            topo =  PARCOMP(idComp).FacB(:,k) * PARCOMP(idComp).FacC(2,k);
-            A = NaN(numel( listHBOch),1);
-            idok = find(~isnan(listHBOch));
-            A(idok,1) = topo(listHBOch(idok));
-            alllabel = [alllabel,{PARCOMP(idComp).label}];
-            allbHbR = [allbHbR,A];
-            clipboard('copy', A);
-            clear A
-            alllabel = [alllabel,{PARCOMP(idComp).label}];
-            ncomp = ncomp +1
-        elseif strcmp(upper(PARCOMP(idComp).type),'GLM')
-            listgood=PARCOMP(idComp).listgood;
-            [pathtxt,filetxt,ext] = fileparts(ListDtp{filenb});
-            if isempty(pathtxt)
-                ChannelListfile = fullfile(pathoutlist,ListDtp{filenb});
-            else
-                ChannelListfile = ListDtp{filenb};
-            end
-            [listHBOch, listHBRch, listnameHbO, listnameHbR, zonelist] = findchinChannelList(NIRS, ChannelListfile,listgood);
-            topo = PARCOMP(idComp).topo;
-            labelall = [labelall,{PARCOMP(idComp).label}];
-            
-            A = nan(size(listHBOch,1),1);
-            idok = find(~isnan(listHBOch));
-            A(idok,1) = topo(listHBOch(idok));
-            alllabel = [alllabel,{PARCOMP(idComp).label}];
-            allbHbO = [allbHbO,A];
-            clipboard('copy', A);
-            clear A
-            
-            A = nan(size(listHBRch,1),1);
-            idok = find(~isnan(listHBRch));
-            A(idok,1) = topo(listHBRch(idok));
-            allbHbR = [allbHbR,A];
-            clipboard('copy', A);
-            clear A
-            ncomp = ncomp +1;
-        
-        elseif strcmp(upper(PARCOMP(idComp).type),'AVG')
-            listgood = PARCOMP(idComp).listgood; %check canaux pour séparer.... 
-            listgood = PARCOMP(idComp).listgood;
-            ChannelListfile = fullfile(pathoutlist,ListDtp{filenb});
-            [listHBOch, listHBRch, listnameHbO, listnameHbR, zonelist] = findchinChannelList(NIRS, ChannelListfile,listgood);
-            alllabel = [alllabel,{PARCOMP(idComp).label}];
-            
-            topo = PARCOMP(idComp).topo;
-            A = nan(size(listHBOch,1),1);
-            idok = find(~isnan(listHBOch));
-            A(idok,1) = topo(listHBOch(idok));
-            alllabel = [alllabel,{PARCOMP(idComp).label}];
-            allbHbO = [allbHbO,A];
-            clipboard('copy', A);
-            clear A
-            
-            A = nan(size(listHBRch,1),1);
-            idok = find(~isnan(listHBRch));
-            A(idok,1) = topo(listHBRch(idok));
-            allbHbR = [allbHbR,A];
-            clipboard('copy', A);
-            clear A
-            ncomp = ncomp +1;
-        end
-    
+guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
+currentsub=1;
+PMI = get(guiHOMER,'UserData');
+cf = PMI{currentsub}.currentFile;
+d = PMI{currentsub}.data(cf).HRF.AvgC;
+
+if strcmpi((PARCOMP(idComp).type),'Parafac') == 1
+    indt = [PMI{currentsub}.tmpPARAFAC.indt(1):PMI{currentsub}.tmpPARAFAC.indt(2)];%Time indice
+    intensnorm = d(indt,:);
+    %Detrent DATA segment for centrering
+    PMI{currentsub}.tmpPARAFAC
+    X = 1:1:size(intensnorm,1);
+    Mb1 =  ((intensnorm(end,:)-intensnorm(1,:))./numel(X))';
+    Mb2 =  intensnorm(1,:)'; %offset
+    A = reshape(X,numel(X),1)*reshape( Mb1,1,numel(Mb1)) +ones(numel(X),1)*reshape( Mb2,1,numel(Mb2));
+%     spar = intensnorm - A;
+    A = PMI{currentsub}.tmpPARAFAC.Factors{1};
+%     B = PMI{currentsub}.tmpPARAFAC.Factors{2};
+%     C = PMI{currentsub}.tmpPARAFAC.Factors{3};
+%     listgood = PMI{currentsub}.tmpPARAFAC.listgood;
+    ComponentToKeep = PMI{1}.tmpPARAFAC.selected;
+    Ac = A(:,ComponentToKeep); 
+%     Bc = B(:,ComponentToKeep); Cc = C(:,ComponentToKeep);
+    clipboard('copy', Ac);
+elseif strcmpi((PARCOMP(idComp).type),'PCA') 
+    %Detrent DATA segment for centrering
+    indt = [PMI{currentsub}.tmpPCA.indt(1):PMI{currentsub}.tmpPCA.indt(2)];%Time indice
+    intensnorm = d(indt,:);
+    X = 1:1:size(intensnorm,1);
+    Mb1 =  ((intensnorm(end,:)-intensnorm(1,:))./numel(X))';
+    Mb2 =  intensnorm(1,:)'; %offset
+    A = reshape(X,numel(X),1)*reshape( Mb1,1,numel(Mb1)) +ones(numel(X),1)*reshape( Mb2,1,numel(Mb2));
+    spar = intensnorm - A;
+    listgood = PMI{currentsub}.tmpPCA.listgood;
+    lstSV = PMI{1}.tmpPCA.selected;
+    u =PMI{currentsub}.tmpPCA.u ;
+    s =PMI{currentsub}.tmpPCA.s ;
+    v =PMI{currentsub}.tmpPCA.v ;
+    temp = u(:,lstSV)*s(lstSV,lstSV)*v(:,lstSV)';
+    data = d(indt,:);
+    data(:,listgood) = data(:,listgood)- temp;
+    allo = data(:,listgood);
+    clipboard('copy', allo);
+elseif strcmpi((PARCOMP(idComp).type),'ICA')   %extract ICA Component
+   indt = [PMI{currentsub}.tmpICA.indt(1):PMI{currentsub}.tmpICA.indt(2)];%Time indice
+   listgood = PMI{currentsub}.tmpICA.listgood;
+   selected = PMI{currentsub}.tmpICA.selected;
+   A =  PMI{currentsub}.tmpICA.Factors{1};
+   C = PMI{currentsub}.tmpICA.Factors{3};
+   Xm = (C(:,PMI{currentsub}.tmpICA.selected)*A(PMI{currentsub}.tmpICA.selected,:))';
+   clipboard('copy', Xm);
+
+
+elseif strcmpi((PARCOMP(idComp).type),'GLM')   %extract GLM Component
+   
+    beta = PMI{currentsub}.tmpGLM.beta ;
+%     selected = PMI{currentsub}.tmpGLM.selected;
+    idreg = PMI{currentsub}.tmpGLM.idreg;
+%     Xm = PMI{1}.tmpGLM.AUX.data{idreg(selected)}*beta(selected,:);
+    label =  PMI{1}.tmpGLM.AUX.label{idreg(selected)};
+    clipboard('copy', label);
+    %save in a structure all apply correction
+    [pathstr, name, ext] = fileparts(handles.NIRSpath{1});
 end
 
 
