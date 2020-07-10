@@ -302,7 +302,7 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
             % ici group channel with the same noise latency
             figureon = m_extractcomponentfigure;
             
-%             figure;imagesc(noise')
+            figure;imagesc(noise')
             ind = find((sum(noise,2)./size(noise,2))>nbchminimum );
             inddiff = diff(ind);
             if isempty(ind)
@@ -357,7 +357,7 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                         spar = cat(3,spar(:,1:end/2),spar(:,end/2+1:end));
                         spartmp = spar(:,listgood,:);
                         listgood = find(MeasListActplotLst);
-                        if ~isempty(listgood)
+        
                             idwhile = 1;
                             nbPARAFAC = 1; %maximal number of iteration
                             while idwhile==1  %find(std(data(:,listgood,1)./mean(data(:,listgood,1))>0.1))
@@ -378,7 +378,7 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
 %                                 1
 %                             end
                             ComponentToKeep = 1;
-                             else 
+                             else
                                  for itry=1 %si pas vraiment de gain 1 seul essais pour sauver du temps 
                                      for icom = 1:job.c_extractcomponent.b_extractnoise_PARAFAC.i_extractnoise_nbPARAFAC  
                                           Nc = icom; %force le nombre de component a 2
@@ -394,7 +394,7 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                                             %if too many variance apply multiple PARAFAC 
                                             try
                                             [Factors,it,err,corcondia] = parafac(spartmp,Nc,opt,const,Oldload,fixMode,weights);
-                                            catch 
+                                            catch
                                                 1
                                             end
                                             Factorsall{itry,icom} = Factors;
@@ -479,9 +479,13 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                             
 %                             if 1 %minimal distance between wavelenght et maximum event amplitude
 %                                 [val,ComponentToKeep]=max([1-abs(C(1,:)-C(2,:)) + sum(A)]);
-%                             end                           
+%                             end
+                            try;
                             Ac = A(:,ComponentToKeep); Bc = B(:,ComponentToKeep); Cc = C(:,ComponentToKeep);
-                            [Xm]=nmodel(({Ac,Bc,Cc}));                           
+                            [Xm]=nmodel(({Ac,Bc,Cc}));
+                             catch;
+                            1
+                            end
                             data = cat(3,d(indt,1:end/2),d(indt,end/2+1:end));
                             data(:,listgood,:) = data(:,listgood,:)-Xm;
                             if 0 %figureon==1
@@ -554,8 +558,6 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                                 
                             save(fullfile(dirout,'SelectedFactors.mat'),'PARCOMP');
                             end
-                        end
-                    1
                     end
                 end
         end
