@@ -9114,6 +9114,7 @@ if strcmp(listmethod{idval},'Parafac') %get(handles.popupmethodselected,'value')
 %         PMI{currentsub}.data(cf).HRF.AvgC(indt,:) = reshape(data,[numel(indt),size(d,2)]);
     else
         msgbox('Press the run button before the component could be add to the list');
+        return
     end
 elseif strcmp(listmethod{idval},'PCA')  %extract PCA get(handles.radio_PCA,'value') %substract
     if isfield (PMI{currentsub}, 'tmpPCA')
@@ -9200,6 +9201,7 @@ elseif strcmp(listmethod{idval},'PCA')  %extract PCA get(handles.radio_PCA,'valu
         %PMI{currentsub}.data(cf).HRF.AvgC(indt,:) = data;
     else
         msgbox('Press the run button before the component could be add to the list');
+        return
     end
     
 elseif strcmp(listmethod{idval},'ICA')   %extract ICA Component
@@ -9267,6 +9269,7 @@ elseif strcmp(listmethod{idval},'ICA')   %extract ICA Component
         set(handles.listbox_Component,'string',CORRlist);
     else
         msgbox('Press the run button before the component could be add to the list');
+        return
     end
     
 elseif strcmp(listmethod{idval},'GLM')   %extract GLM Component
@@ -9342,15 +9345,14 @@ elseif strcmp(listmethod{idval},'GLM')   %extract GLM Component
         set(handles.listbox_Component,'string',CORRlist);
     else
         msgbox('Press the run button before the component could be add to the list')
+        return
     end
     
 elseif strcmp(listmethod{idval},'Offset Adjustment')
     msgbox('No offset ajustement could be add in the component list');
     return
 end
-if exist('PARCOMP','var')
-    save(fullfile(pathstr,'SelectedFactors.mat'),'PARCOMP');
-end
+
 
 % --- Executes on button press in radiobutton23.
 function radiobutton23_Callback(hObject, eventdata, handles)
