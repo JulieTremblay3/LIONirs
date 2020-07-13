@@ -10679,20 +10679,20 @@ function context_listbox_Correction_CopyData_Callback(hObject, eventdata, handle
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 idComp = get(handles.listbox_CorrectionDecomposition,'value');
-strComp = get(handles.listbox_CorrectionDecomposition,'string');
-label = strComp{idComp};
-[pathstr, name, ext] = fileparts(handles.NIRSpath{1});
+% strComp = get(handles.listbox_CorrectionDecomposition,'string');
+% label = strComp{idComp};
+[pathstr, ~, ~] = fileparts(handles.NIRSpath{1});
 try
     load(fullfile(pathstr,'SelectedFactors.mat'))
 catch
     return
 end
-A = PARCOMP(idComp).topo;
-clipboard('copy', A);
 
-msgbox('the selected label is copied');
+clipboard('copy', PARCOMP(idComp).topo);
 
-msgbox(label);
+msgbox('The data of the selected component is copied');
+
+
 
 
 % --------------------------------------------------------------------
@@ -10701,16 +10701,15 @@ function context_listbox_Component_CopyData_Callback(hObject, eventdata, handles
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 idComp = get(handles.listbox_Component,'value');
-strComp = get(handles.listbox_Component,'string');
-label = strComp{idComp};
+% strComp = get(handles.listbox_Component,'string');
+% label = strComp{idComp};
 
-[pathstr, name, ext] = fileparts(handles.NIRSpath{1});
+[pathstr, ~, ~] = fileparts(handles.NIRSpath{1});
 try
     load(fullfile(pathstr,'SelectedFactors.mat'))
 catch
     return
 end
-A = PARCOMP(idComp).topo;
-clipboard('copy', A);
+clipboard('copy', PARCOMP(idComp).topo);
 
-msgbox('the selected label is copied');
+msgbox('The data of the selected component is copied');
