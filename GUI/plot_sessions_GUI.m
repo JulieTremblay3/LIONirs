@@ -9096,11 +9096,11 @@ if strcmp(listmethod{idval},'Parafac') %get(handles.popupmethodselected,'value')
         PARCOMP(id+1).FacC = PMI{currentsub}.tmpPARAFAC.Factors{3};
         PARCOMP(id+1).ComponentToKeep = ComponentToKeep;
         labelid  = get(handles.edit_selectedlabel,'string');
-        PARCOMP(id+1).label= [labelid,'PARAFAC' sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}]
+        PARCOMP(id+1).label = [labelid,'PARAFAC' sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}]
         PARCOMP(id+1).type = 'PARAFAC';
         FacSpatial = PMI{currentsub}.tmpPARAFAC.Factors{2}
         selected = PMI{currentsub}.tmpPARAFAC.selected;
-        PARCOMP(id+1).topo = FacSpatial(:,selected);;
+        PARCOMP(id+1).topo = FacSpatial(:,selected);
         
         %ajoute a la fin et replace au centre
         PARCOMP = [PARCOMP(1,1:idcurrent-1),PARCOMP(1,id+1), PARCOMP(1,idcurrent:id)]
@@ -10710,6 +10710,9 @@ try
 catch
     return
 end
-clipboard('copy', PARCOMP(idComp).topo);
+format short
+A = PARCOMP(idComp).topo;
+B = mat2str(A)
+clipboard('copy', B);
 
 msgbox('The data of the selected component is copied');
