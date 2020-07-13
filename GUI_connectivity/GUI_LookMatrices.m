@@ -2065,6 +2065,5 @@ set(handles.edit_cmax,'string',[cmax]);
 guidata(handles.GUI_LookMat, handles);
 updateNetAllView(handles);
 
-msgbox('In progress')
 
 
