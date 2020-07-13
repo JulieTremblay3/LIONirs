@@ -2515,9 +2515,14 @@ function btn_CreateHoles_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 dcm_obj=datacursormode(handles.figure_MainWindow);
 c_info = getCursorInfo(dcm_obj);
+if isempty(c_info)
+    msgbox('First select a location using Data Cursor tool')
+    return
+end
+
 oHelmet = get_Helmet( handles.m_oProjectData );
 vHoles = get_vHoles(oHelmet);
-nbholes = numel(vHoles)
+nbholes = numel(vHoles);
 
 vHoles(nbholes+1).Type = 400;
 name =  Zonename;
@@ -2542,14 +2547,14 @@ T(4,2) =  Coord(2);
 T(4,3) =  Coord(3);
 
 vHoles(nbholes+1).Transformation = T;
-vHoles(nbholes+1).SkinDepth = 0
-vHoles(nbholes+1).TalSkin.x = 0
-vHoles(nbholes+1).TalSkin.y = 0
-vHoles(nbholes+1).TalSkin.z = 0
-vHoles(nbholes+1).CortexDepth = 0
-vHoles(nbholes+1).TalCortex.x = 0
-vHoles(nbholes+1).TalCortex.y = 0
-vHoles(nbholes+1).TalCortex.z = 0
+vHoles(nbholes+1).SkinDepth = 0;
+vHoles(nbholes+1).TalSkin.x = 0;
+vHoles(nbholes+1).TalSkin.y = 0;
+vHoles(nbholes+1).TalSkin.z = 0;
+vHoles(nbholes+1).CortexDepth = 0;
+vHoles(nbholes+1).TalCortex.x = 0;
+vHoles(nbholes+1).TalCortex.y = 0;
+vHoles(nbholes+1).TalCortex.z = 0;
 vHoles(nbholes+1).Neighbors.Nb = vHoles(end-1).Neighbors.Nb;
 vHoles(nbholes+1).Neighbors.v_Near = vHoles(end-1).Neighbors.v_Near;
 vHoles(nbholes+1).CanBeDet = 1;
@@ -2557,7 +2562,7 @@ vHoles(nbholes+1).CanBeSrs = 1;
 vHoles(nbholes+1).IsFromCompleteHelmet = 1;
 vHoles(nbholes+1).RegionID = 0; 
 
-sHelmetAxeDisp = get_HelmetAxeDisp(handles.m_oInterDlgComm)
+sHelmetAxeDisp = get_HelmetAxeDisp(handles.m_oInterDlgComm);
 sHelmetAxeDisp.v_bVisible(nbholes+1) = 1;
 sHelmetAxeDisp.v_bDisplayLabels(nbholes+1) = 1;
 handles.m_oInterDlgComm =  set_HelmetAxeDisp(handles.m_oInterDlgComm, sHelmetAxeDisp);
