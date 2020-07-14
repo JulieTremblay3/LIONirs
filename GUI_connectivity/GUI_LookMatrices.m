@@ -182,21 +182,19 @@ for isubject=2:size(info,1)
     catch
         disp(['ERROR loading' ,fullfile(info{isubject,1}, info{isubject,3})]);
   end
-        name = MAT.ZoneList{1};
-       if strcmp(name(1:2),'D0')
-          DATA{id}.System = 'NIRx';
-      else
-           DATA{id}.System = 'ISS Imagent';
-   %        DATA{id}.System = 'ISS' ;           
-      end  
-  
-  
-    names = fieldnames(zone);
-    for iname = 1:numel(names)
-        eval(['DATA{id}.zone.',names{iname},' =zone.',names{iname},';']);
-    end
-    list_subject{id} =DATA{id}.name;
-    groupeall = [groupeall; info{isubject,4}];
+  name = MAT.ZoneList{1};
+  if strcmp(name(1:2),'D0')
+      DATA{id}.System = 'NIRx';
+  else
+      DATA{id}.System = 'ISS Imagent';
+%       DATA{id}.System = 'ISS' ;           
+  end
+  names = fieldnames(zone);
+  for iname = 1:numel(names)
+      eval(['DATA{id}.zone.',names{iname},' =zone.',names{iname},';']);
+  end
+  list_subject{id} =DATA{id}.name;
+  groupeall = [groupeall; info{isubject,4}];
 end
 %avg zone groupe 
 idnew = size(info,1)-1; %placer les moyennes a la fin des sujets existants. 
@@ -207,45 +205,45 @@ for igroupe = 1:max(groupeall)
    idlabelall= DATA{idsubject(1)}.zone.label; %zone premier sujet du groupe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
    MATAVGALL = zeros(numel(idlabelall),numel(idlabelall),numel(idsubject));
    for isubject=1:numel(idsubject)
-        ML=DATA{idsubject(isubject)}.zone.ml;
+       ML=DATA{idsubject(isubject)}.zone.ml;
          
-        List=strvcat(DATA{idsubject(isubject)}.ZoneList);
-        MATAVG = zeros(numel(idlabelall));
-        MAT = DATA{idsubject(isubject)}.MAT;
-        idlist = [];
-        idlabel=[];
-        idzone =[];
-        labelzone = DATA{idsubject(isubject)}.zone.label;
-      
-        for adji = 1:numel(idlabelall)
-            for adjj = 1:numel(idlabelall)   
-                labelzone = idlabelall{adji};
-                x = strmatch({labelzone} ,idlabelall, 'exact');             
-                labelzone = idlabelall{adjj};
-                y = strmatch({labelzone} ,idlabelall, 'exact');
-                if isempty(x)|isempty(y)
-                    msgbox('problem zone in subject')
-                end
-                chzone = DATA{isubject}.zone.plotLst{x};
-                idlisti = [];
-                for ichzone = 1:numel(chzone);
-                    ich = chzone(ichzone);
-                    switch  DATA{id}.System
-                        case 'ISS Imagent'
-                            strDet = SDDet2strboxy_ISS(ML(ich,2));
-                            strSrs = SDPairs2strboxy_ISS(ML(ich,1));
-                            idch = strmatch([strDet, ' ',strSrs ],List,'exact');                       
-                        case 'NIRx'                          
-                            strDet = SDDet2strboxy(ML(ich,2));
-                            strSrs = SDPairs2strboxy(ML(ich,1));
-                            idch = strmatch([strDet, ' ',strSrs ],List,'exact');                                                            
-                        otherwise                            
-                            strDet = SDDet2strboxy_ISS(ML(ich,2));
-                            strSrs = SDPairs2strboxy_ISS(ML(ich,1));
-                            idch = strmatch([strDet, ' ',strSrs ],List,'exact');                          
-                    end
-                      idlisti = [idlisti, idch];
-                end
+       List=strvcat(DATA{idsubject(isubject)}.ZoneList);
+       MATAVG = zeros(numel(idlabelall));
+       MAT = DATA{idsubject(isubject)}.MAT;
+       idlist = [];
+       idlabel=[];
+       idzone =[];
+       labelzone = DATA{idsubject(isubject)}.zone.label;
+       
+       for adji = 1:numel(idlabelall)
+           for adjj = 1:numel(idlabelall
+               labelzone = idlabelall{adji};
+               x = strmatch({labelzone} ,idlabelall, 'exact');             
+               labelzone = idlabelall{adjj};
+               y = strmatch({labelzone} ,idlabelall, 'exact');
+               if isempty(x)|isempty(y)
+                   msgbox('problem zone in subject')
+               end
+               chzone = DATA{isubject}.zone.plotLst{x};
+               idlisti = [];
+               for ichzone = 1:numel(chzone);
+                   ich = chzone(ichzone);
+                   switch  DATA{id}.System
+                       case 'ISS Imagent'
+                           strDet = SDDet2strboxy_ISS(ML(ich,2));
+                           strSrs = SDPairs2strboxy_ISS(ML(ich,1));
+                           idch = strmatch([strDet, ' ',strSrs ],List,'exact');                       
+                       case 'NIRx'                          
+                           strDet = SDDet2strboxy(ML(ich,2));
+                           strSrs = SDPairs2strboxy(ML(ich,1));
+                           idch = strmatch([strDet, ' ',strSrs ],List,'exact');                                                            
+                       otherwise                            
+                           strDet = SDDet2strboxy_ISS(ML(ich,2));
+                           strSrs = SDPairs2strboxy_ISS(ML(ich,1));
+                           idch = strmatch([strDet, ' ',strSrs ],List,'exact');
+                   end
+                   idlisti = [idlisti, idch];
+               end
                 if numel(x)>1
                     x = x(1);
                     msgbox('Attention the zone are duplicated')
@@ -272,20 +270,20 @@ for igroupe = 1:max(groupeall)
                             idch = strmatch([strDet, ' ',strSrs ],List,'exact'); 
                     end
                     idlistj = [idlistj, idch];
-                end                       
-              if isempty(idlisti)|isempty(idlistj)  
-                   MATAVG(adji,adjj)=nan;
-              else
-                  try
-                  temp = MAT(idlisti, idlistj);
-                   MATAVG(adji,adjj)= nanmean(temp(:)); 
-                  catch
-                      1
-                  end
-              end         
-        end
- end
-    MATAVGALL(:,:,isubject) = MATAVG;
+                end
+                if isempty(idlisti)|isempty(idlistj)
+                    MATAVG(adji,adjj)=nan;
+                else
+                    try
+                        temp = MAT(idlisti, idlistj);
+                        MATAVG(adji,adjj)= nanmean(temp(:)); 
+                    catch
+                        1
+                    end
+                end
+           end
+       end
+       MATAVGALL(:,:,isubject) = MATAVG;
    end
        %Entrer les valeurs moyenne du groupe comme un sujet, les nouveaux canaux sont faux, 
        %il sont la pour l'uniformiter des données afin référer au zone.           

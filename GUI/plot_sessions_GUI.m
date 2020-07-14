@@ -10700,46 +10700,53 @@ function context_listbox_Component_CopyData_Callback(hObject, eventdata, handles
 % hObject    handle to context_listbox_Component_CopyData (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+global currentsub;
+
 idComp = get(handles.listbox_Component,'value');
 strComp = get(handles.listbox_Component,'string');
 label = strComp{idComp};
-global currentsub;
+str_topo = sprintf('%s\t %s\t %s\n', 'Detector', 'Source', label);
 
-[pathstr, ~, ~] = fileparts(handles.NIRSpath{1});
+[pathstr, name, ext] = fileparts(handles.NIRSpath{1});
 try
-    load(fullfile(pathstr,'SelectedFactors.mat'))
-%     load(fullfile(pathstr, ''
+    load(fullfile(pathstr,'SelectedFactors.mat'));
+    load(fullfile(pathstr, 'NIRS.mat'));
 catch
     return
 end
-% guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
-% PMI = get(guiHOMER,'UserData');
-% % cf = PMI{currentsub}.currentFil;
-% 
-% ML = PMI{currentsub}.data(1).MeasList;
-% switch  DATA{idComp}.System
-%     case 'ISS Imagent'
-%         strDet = SDDet2strboxy_ISS(ML(ich,2));
-%         strSrs = SDPairs2strboxy_ISS(ML(ich,1));
-%         idch = strmatch([strDet, ' ',strSrs ],List,'exact');                      
-%     case 'NIRx'                          
-%         strDet = SDDet2strboxy(ML(ich,2));
-%         strSrs = SDPairs2strboxy(ML(ich,1));
-%         idch = strmatch([strDet, ' ',strSrs ],List,'exact');                                                            
-%     otherwise                            
-%         strDet = SDDet2strboxy_ISS(ML(ich,2));
-%         strSrs = SDPairs2strboxy_ISS(ML(ich,1));
-%         idch = strmatch([strDet, ' ',strSrs ],List,'exact');                          
+guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
+PMI = get(guiHOMER,'UserData');
+% cf = PMI{currentsub}.currentFil;
+ML = PMI{currentsub}.data.MeasList;
+% dim = size(ML);
+topo = PARCOMP(idComp).topo;
+% if strcmpi((PARCOMP(idComp).type),'GLM')
+   i = numel(topo);
+% elseif strcmpi((PARCOMP(idComp).type),'Parafac')
+%     i = 53;
+% elseif strcmpi((PARCOMP(idComp).type),'PCA')
+%     i = 106;
 % end
 
-
-A = PARCOMP(idComp).topo;
-B = sprintf('%s\t %s\t %s\n', 'Detector', 'Source', label);
-
-for i = 1:numel(A)
-    B = [B,sprintf('%s\t %s\t %0.5g\n', 'a', 'b', A(1,i))];
+for j = 1:i 
+    switch  NIRS.Cf.dev.n
+        case 'ISS Imagent'
+            strDet = SDDet2strboxy_ISS(ML(j,2));
+            strSrs = SDPairs2strboxy_ISS(ML(j,1));
+%             idch = strmatch([strDet, ' ',strSrs ],List,'exact');                      
+        case 'NIRx'                          
+            strDet = SDDet2strboxy(ML(j,2));
+            strSrs = SDPairs2strboxy(ML(j,1));
+%             idch = strmatch([strDet, ' ',strSrs ],List,'exact');                                                            
+        otherwise                            
+            strDet = SDDet2strboxy_ISS(ML(j,2));
+            strSrs = SDPairs2strboxy_ISS(ML(j,1));
+%             idch = strmatch([strDet, ' ',strSrs ],List,'exact');                          
+    end
+    str_topo = [str_topo,sprintf('%s\t %s\t %0.5g\n', strDet, strSrs, topo(j))];
 end
 
-clipboard('copy', B);
+clipboard('copy', str_topo);
 
 msgbox('The data of the selected component is copied');
