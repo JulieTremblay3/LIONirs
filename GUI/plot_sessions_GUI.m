@@ -10708,6 +10708,7 @@ global currentsub;
 [pathstr, ~, ~] = fileparts(handles.NIRSpath{1});
 try
     load(fullfile(pathstr,'SelectedFactors.mat'))
+%     load(fullfile(pathstr, ''
 catch
     return
 end
@@ -10733,10 +10734,10 @@ end
 
 
 A = PARCOMP(idComp).topo;
+B = sprintf('%s\t %s\t %s\n', 'Detector', 'Source', label);
 
-B = sprintf('%0.5g\n', A(1,1));
-for i = 2:numel(A)
-    B = [B,sprintf('%0.5g\n', A(1,i))];
+for i = 1:numel(A)
+    B = [B,sprintf('%s\t %s\t %0.5g\n', 'a', 'b', A(1,i))];
 end
 
 clipboard('copy', B);
