@@ -10701,8 +10701,9 @@ function context_listbox_Component_CopyData_Callback(hObject, eventdata, handles
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 idComp = get(handles.listbox_Component,'value');
-% strComp = get(handles.listbox_Component,'string');
-% label = strComp{idComp};
+strComp = get(handles.listbox_Component,'string');
+label = strComp{idComp};
+global currentsub;
 
 [pathstr, ~, ~] = fileparts(handles.NIRSpath{1});
 try
@@ -10710,9 +10711,34 @@ try
 catch
     return
 end
-format short
+% guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
+% PMI = get(guiHOMER,'UserData');
+% % cf = PMI{currentsub}.currentFil;
+% 
+% ML = PMI{currentsub}.data(1).MeasList;
+% switch  DATA{idComp}.System
+%     case 'ISS Imagent'
+%         strDet = SDDet2strboxy_ISS(ML(ich,2));
+%         strSrs = SDPairs2strboxy_ISS(ML(ich,1));
+%         idch = strmatch([strDet, ' ',strSrs ],List,'exact');                      
+%     case 'NIRx'                          
+%         strDet = SDDet2strboxy(ML(ich,2));
+%         strSrs = SDPairs2strboxy(ML(ich,1));
+%         idch = strmatch([strDet, ' ',strSrs ],List,'exact');                                                            
+%     otherwise                            
+%         strDet = SDDet2strboxy_ISS(ML(ich,2));
+%         strSrs = SDPairs2strboxy_ISS(ML(ich,1));
+%         idch = strmatch([strDet, ' ',strSrs ],List,'exact');                          
+% end
+
+
 A = PARCOMP(idComp).topo;
-B = mat2str(A)
+
+B = sprintf('%0.5g\n', A(1,1));
+for i = 2:numel(A)
+    B = [B,sprintf('%0.5g\n', A(1,i))];
+end
+
 clipboard('copy', B);
 
 msgbox('The data of the selected component is copied');
