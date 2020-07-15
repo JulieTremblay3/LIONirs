@@ -4989,6 +4989,13 @@ if idmodule < numel(handles.NIRS.Dt.fir.pp)
 end
 %what to substract !
 [pathstr, name, ext] = fileparts(handles.NIRSpath{1});
+
+
+idval= get(handles.popupmethodselected,'value');
+if idval ~= 5
+    msgbox('To subtract a previously identified component, you must choose the option ''component'' on the menu.')
+    return
+end
 if strcmp(listmethod{idval},'Parafac')  %substractPARAFAC
     indt = [PMI{currentsub}.tmpPARAFAC.indt(1):PMI{currentsub}.tmpPARAFAC.indt(2)];%Time indice
     intensnorm = d(indt,:);
