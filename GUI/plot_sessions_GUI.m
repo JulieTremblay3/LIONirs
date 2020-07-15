@@ -4980,7 +4980,7 @@ currentsub=1;
 PMI = get(guiHOMER,'UserData');
 cf = PMI{currentsub}.currentFile;
 d = PMI{currentsub}.data(cf).HRF.AvgC;
-idval= get(handles.popupmethodselected,'val');
+idval = get(handles.popupmethodselected,'val');
 listmethod = get(handles.popupmethodselected,'string');
 idmodule = get(handles.popupmenu_module,'value');
 if idmodule < numel(handles.NIRS.Dt.fir.pp)
@@ -5052,7 +5052,7 @@ if strcmp(listmethod{idval},'Parafac')  %substractPARAFAC
         moduleall = get(handles.popupmenu_module,'string');
         PARCORR(id+1).modulestr = moduleall{get(handles.popupmenu_module, 'value')};
         PARCORR(id+1).listgood =  listgood;
-        PARCORR(id+1).indt = indt %indice de temps.
+        PARCORR(id+1).indt = indt; %indice de temps.
         PARCORR(id+1).data = data(:,listgood,:);
         PARCORR(id+1).Xm = Xm;
         PARCORR(id+1).FacA = PMI{currentsub}.tmpPARAFAC.Factors{1};
@@ -10678,17 +10678,55 @@ function context_listbox_Correction_CopyData_Callback(hObject, eventdata, handle
 % hObject    handle to context_listbox_Correction_CopyData (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+global currentsub;
+
 idComp = get(handles.listbox_CorrectionDecomposition,'value');
-% strComp = get(handles.listbox_CorrectionDecomposition,'string');
-% label = strComp{idComp};
+strComp = get(handles.listbox_CorrectionDecomposition,'string');
+label = strComp{idComp};
 [pathstr, ~, ~] = fileparts(handles.NIRSpath{1});
+str_topo = sprintf('%s\t %s\t %s\n', 'Detector', 'Source', label);
+
 try
     load(fullfile(pathstr,'SelectedFactors.mat'))
+    load(fullfile(pathstr, 'NIRS.mat'));
 catch
     return
 end
+guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
+PMI = get(guiHOMER,'UserData');
+ML = PMI{currentsub}.data.MeasList;
+topo = PARCOMP(idComp).topo;
 
-clipboard('copy', PARCOMP(idComp).topo);
+
+% if strcmpi((PARCOMP(idComp).type),'GLM')
+    ntopo = numel(topo);
+% elseif strcmpi((PARCOMP(idComp).type),'Parafac')
+%     ntopo = ;
+% elseif strcmpi((PARCOMP(idComp).type),'PCA')
+%     ntopo = ;
+% end
+
+for j = 1:ntopo
+    ichannel = PARCOMP(idComp).listgood(j);
+    switch  NIRS.Cf.dev.n
+        case 'ISS Imagent'
+            strDet = SDDet2strboxy_ISS(ML(ichannel,2));
+            strSrs = SDPairs2strboxy_ISS(ML(ichannel,1));
+                     
+        case 'NIRx'                          
+            strDet = SDDet2strboxy(ML(ichannel,2));
+            strSrs = SDPairs2strboxy(ML(ichannel,1));
+                                                                 
+        otherwise                            
+            strDet = SDDet2strboxy_ISS(ML(ichannel,2));
+            strSrs = SDPairs2strboxy_ISS(ML(ichannel,1));
+                       
+    end
+    str_topo = [str_topo,sprintf('%s\t %s\t %0.5g\n', strDet, strSrs, topo(j))]; 
+end
+
+clipboard('copy', str_topo);
 
 msgbox('The data of the selected component is copied');
 
@@ -10708,7 +10746,7 @@ strComp = get(handles.listbox_Component,'string');
 label = strComp{idComp};
 str_topo = sprintf('%s\t %s\t %s\n', 'Detector', 'Source', label);
 
-[pathstr, ~, ~] = fileparts(handles.NIRSpath{1});
+[pathstr, ~ , ~ ] = fileparts(handles.NIRSpath{1});
 try
     load(fullfile(pathstr,'SelectedFactors.mat'));
     load(fullfile(pathstr, 'NIRS.mat'));
@@ -10722,11 +10760,11 @@ topo = PARCOMP(idComp).topo;
 
 
 % if strcmpi((PARCOMP(idComp).type),'GLM')
-   ntopo = numel(topo);
+    ntopo = numel(topo);
 % elseif strcmpi((PARCOMP(idComp).type),'Parafac')
-%     ntopo = 53;
+%     ntopo = ;
 % elseif strcmpi((PARCOMP(idComp).type),'PCA')
-%     ntopo = 106;
+%     ntopo = ;
 % end
 
 for j = 1:ntopo
@@ -10735,15 +10773,15 @@ for j = 1:ntopo
         case 'ISS Imagent'
             strDet = SDDet2strboxy_ISS(ML(ichannel,2));
             strSrs = SDPairs2strboxy_ISS(ML(ichannel,1));
-%             idch = strmatch([strDet, ' ',strSrs ],ML,'exact');                      
+                     
         case 'NIRx'                          
             strDet = SDDet2strboxy(ML(ichannel,2));
             strSrs = SDPairs2strboxy(ML(ichannel,1));
-%             idch = strmatch([strDet, ' ',strSrs ],ML,'exact');                                                            
+                                                                 
         otherwise                            
             strDet = SDDet2strboxy_ISS(ML(ichannel,2));
             strSrs = SDPairs2strboxy_ISS(ML(ichannel,1));
-%             idch = strmatch([strDet, ' ',strSrs ],ML,'exact');                          
+                       
     end
     str_topo = [str_topo,sprintf('%s\t %s\t %0.5g\n', strDet, strSrs, topo(j))]; 
 end
