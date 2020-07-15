@@ -22,7 +22,7 @@ function varargout = plot_sessions_GUI(varargin)
 
 % Edit the above text to modify the response to help plot_sessions_GUI
 
-% Last Modified by GUIDE v2.5 09-Jul-2020 12:50:34
+% Last Modified by GUIDE v2.5 15-Jul-2020 15:37:14
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -4989,6 +4989,7 @@ if idmodule < numel(handles.NIRS.Dt.fir.pp)
 end
 %what to substract!
 [pathstr, name, ext] = fileparts(handles.NIRSpath{1});
+    
 if strcmp(listmethod{idval},'Parafac')  %substractPARAFAC
     indt = [PMI{currentsub}.tmpPARAFAC.indt(1):PMI{currentsub}.tmpPARAFAC.indt(2)];%Time indice
     intensnorm = d(indt,:);
