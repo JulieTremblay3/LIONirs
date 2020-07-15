@@ -10708,7 +10708,7 @@ strComp = get(handles.listbox_Component,'string');
 label = strComp{idComp};
 str_topo = sprintf('%s\t %s\t %s\n', 'Detector', 'Source', label);
 
-[pathstr, name, ext] = fileparts(handles.NIRSpath{1});
+[pathstr, ~, ~] = fileparts(handles.NIRSpath{1});
 try
     load(fullfile(pathstr,'SelectedFactors.mat'));
     load(fullfile(pathstr, 'NIRS.mat'));
@@ -10717,34 +10717,35 @@ catch
 end
 guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
 PMI = get(guiHOMER,'UserData');
-% cf = PMI{currentsub}.currentFil;
 ML = PMI{currentsub}.data.MeasList;
-% dim = size(ML);
 topo = PARCOMP(idComp).topo;
+
+
 % if strcmpi((PARCOMP(idComp).type),'GLM')
-   i = numel(topo);
+   ntopo = numel(topo);
 % elseif strcmpi((PARCOMP(idComp).type),'Parafac')
-%     i = 53;
+%     ntopo = 53;
 % elseif strcmpi((PARCOMP(idComp).type),'PCA')
-%     i = 106;
+%     ntopo = 106;
 % end
 
-for j = 1:i 
+for j = 1:ntopo
+    ichannel = PARCOMP(idComp).listgood(j);
     switch  NIRS.Cf.dev.n
         case 'ISS Imagent'
-            strDet = SDDet2strboxy_ISS(ML(j,2));
-            strSrs = SDPairs2strboxy_ISS(ML(j,1));
-%             idch = strmatch([strDet, ' ',strSrs ],List,'exact');                      
+            strDet = SDDet2strboxy_ISS(ML(ichannel,2));
+            strSrs = SDPairs2strboxy_ISS(ML(ichannel,1));
+%             idch = strmatch([strDet, ' ',strSrs ],ML,'exact');                      
         case 'NIRx'                          
-            strDet = SDDet2strboxy(ML(j,2));
-            strSrs = SDPairs2strboxy(ML(j,1));
-%             idch = strmatch([strDet, ' ',strSrs ],List,'exact');                                                            
+            strDet = SDDet2strboxy(ML(ichannel,2));
+            strSrs = SDPairs2strboxy(ML(ichannel,1));
+%             idch = strmatch([strDet, ' ',strSrs ],ML,'exact');                                                            
         otherwise                            
-            strDet = SDDet2strboxy_ISS(ML(j,2));
-            strSrs = SDPairs2strboxy_ISS(ML(j,1));
-%             idch = strmatch([strDet, ' ',strSrs ],List,'exact');                          
+            strDet = SDDet2strboxy_ISS(ML(ichannel,2));
+            strSrs = SDPairs2strboxy_ISS(ML(ichannel,1));
+%             idch = strmatch([strDet, ' ',strSrs ],ML,'exact');                          
     end
-    str_topo = [str_topo,sprintf('%s\t %s\t %0.5g\n', strDet, strSrs, topo(j))];
+    str_topo = [str_topo,sprintf('%s\t %s\t %0.5g\n', strDet, strSrs, topo(j))]; 
 end
 
 clipboard('copy', str_topo);

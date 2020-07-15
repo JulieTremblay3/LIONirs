@@ -204,19 +204,19 @@ for igroupe = 1:max(groupeall)
    if ~isempty(idsubject)
    idlabelall= DATA{idsubject(1)}.zone.label; %zone premier sujet du groupe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
    MATAVGALL = zeros(numel(idlabelall),numel(idlabelall),numel(idsubject));
-   for isubject=1:numel(idsubject)
-       ML=DATA{idsubject(isubject)}.zone.ml;
+   for isubject = 1:numel(idsubject)
+       ML = DATA{idsubject(isubject)}.zone.ml;
          
-       List=strvcat(DATA{idsubject(isubject)}.ZoneList);
+       List = strvcat(DATA{idsubject(isubject)}.ZoneList);
        MATAVG = zeros(numel(idlabelall));
        MAT = DATA{idsubject(isubject)}.MAT;
        idlist = [];
-       idlabel=[];
-       idzone =[];
+       idlabel = [];
+       idzone = [];
        labelzone = DATA{idsubject(isubject)}.zone.label;
        
        for adji = 1:numel(idlabelall)
-           for adjj = 1:numel(idlabelall
+           for adjj = 1:numel(idlabelall)
                labelzone = idlabelall{adji};
                x = strmatch({labelzone} ,idlabelall, 'exact');             
                labelzone = idlabelall{adjj};
