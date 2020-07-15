@@ -4989,6 +4989,13 @@ if idmodule < numel(handles.NIRS.Dt.fir.pp)
 end
 %what to substract !
 [pathstr, name, ext] = fileparts(handles.NIRSpath{1});
+
+
+idval= get(handles.popupmethodselected,'value');
+if idval ~= 5
+    msgbox('To subtract a previously identified component, you must choose the option ''component'' on the menu.')
+    return
+end
 if strcmp(listmethod{idval},'Parafac')  %substractPARAFAC
     indt = [PMI{currentsub}.tmpPARAFAC.indt(1):PMI{currentsub}.tmpPARAFAC.indt(2)];%Time indice
     intensnorm = d(indt,:);
@@ -9023,320 +9030,337 @@ idcurrent = get(handles.listbox_Component,'value');
 idval = get(handles.popupmethodselected,'value');
 listmethod = get(handles.popupmethodselected,'string');
 if strcmp(listmethod{idval},'Parafac') %get(handles.popupmethodselected,'value')==1  %extract PARAFAC
-    indt = [PMI{currentsub}.tmpPARAFAC.indt(1):PMI{currentsub}.tmpPARAFAC.indt(2)];%Time indice
-    intensnorm = d(indt,:);
-    %Detrent DATA segment for centrering
-    PMI{currentsub}.tmpPARAFAC
-    X = 1:1:size(intensnorm,1);
-    Mb1 =  ((intensnorm(end,:)-intensnorm(1,:))./numel(X))';
-    Mb2 =  intensnorm(1,:)'; %offset
-    A = reshape(X,numel(X),1)*reshape( Mb1,1,numel(Mb1)) +ones(numel(X),1)*reshape( Mb2,1,numel(Mb2));
-    spar = intensnorm - A;
-    A = PMI{currentsub}.tmpPARAFAC.Factors{1};
-    B = PMI{currentsub}.tmpPARAFAC.Factors{2};
-    C = PMI{currentsub}.tmpPARAFAC.Factors{3};
-    listgood = PMI{currentsub}.tmpPARAFAC.listgood;
-    ComponentToKeep = PMI{1}.tmpPARAFAC.selected;
-    Ac = A(:,ComponentToKeep); Bc = B(:,ComponentToKeep); Cc = C(:,ComponentToKeep);
-    % figure;plot(reshape(Xm,[numel(indt),size(d,2)]))
-    [Xm]=nmodel(({Ac,Bc,Cc}));
-    data = cat(3,d(indt,1:end/2),d(indt,end/2+1:end));
-    data(:,listgood,:) = data(:,listgood,:)-Xm;
-    %     if sum(data(:))==PMI{currentsub}.tmpPARAFAC.checksumd    %check sum protection
-    %         data(:,listgood,:) = data(:,listgood,:)-Xm;
-    %     else
-    %         msgbox('Please update the decomposition, this is not the one for the current data')
-    %         return
-    %     end
+    if isfield (PMI{currentsub}, 'tmpPARAFAC')
+        indt = [PMI{currentsub}.tmpPARAFAC.indt(1):PMI{currentsub}.tmpPARAFAC.indt(2)];%Time indice
+        intensnorm = d(indt,:);
+        %Detrent DATA segment for centrering
+        PMI{currentsub}.tmpPARAFAC
+        X = 1:1:size(intensnorm,1);
+        Mb1 =  ((intensnorm(end,:)-intensnorm(1,:))./numel(X))';
+        Mb2 =  intensnorm(1,:)'; %offset
+        A = reshape(X,numel(X),1)*reshape( Mb1,1,numel(Mb1)) +ones(numel(X),1)*reshape( Mb2,1,numel(Mb2));
+        spar = intensnorm - A;
+        A = PMI{currentsub}.tmpPARAFAC.Factors{1};
+        B = PMI{currentsub}.tmpPARAFAC.Factors{2};
+        C = PMI{currentsub}.tmpPARAFAC.Factors{3};
+        listgood = PMI{currentsub}.tmpPARAFAC.listgood;
+        ComponentToKeep = PMI{1}.tmpPARAFAC.selected;
+        Ac = A(:,ComponentToKeep); Bc = B(:,ComponentToKeep); Cc = C(:,ComponentToKeep);
+%         figure;plot(reshape(Xm,[numel(indt),size(d,2)]))
+        [Xm]=nmodel(({Ac,Bc,Cc}));
+        data = cat(3,d(indt,1:end/2),d(indt,end/2+1:end));
+        data(:,listgood,:) = data(:,listgood,:)-Xm;
+%         if sum(data(:))==PMI{currentsub}.tmpPARAFAC.checksumd    %check sum protection
+%             data(:,listgood,:) = data(:,listgood,:)-Xm;
+%         else
+%             msgbox('Please update the decomposition, this is not the one for the current data')
+%             return
+%         end
     %
     %save in a structure all apply correction
-    try
-        load(fullfile(pathstr,'SelectedFactors.mat'))
-        newfile = 0
-    catch
-        %donot exist create the stucture
-        PARCOMP.file= get(handles.popupmenu_file,'value');
-        fileall = get(handles.popupmenu_file,'string');
-        PARCOMP.filestr =  fileall{get(handles.popupmenu_file,'value')};
-        PARCOMP.module  =get(handles.popupmenu_module, 'value');
-        moduleall = get(handles.popupmenu_module,'string');
-        PARCOMP.modulestr = moduleall{get(handles.popupmenu_module, 'value')};
-        PARCOMP.listgood =  listgood
-        PARCOMP.indt = indt %indice de temps.
-        PARCOMP.data = data(:,listgood,:);
-        PARCOMP.Xm = Xm;
-        PARCOMP.FacA = PMI{currentsub}.tmpPARAFAC.Factors{1};
-        PARCOMP.FacB = PMI{currentsub}.tmpPARAFAC.Factors{2};
-        PARCOMP.FacC = PMI{currentsub}.tmpPARAFAC.Factors{3};
-        PARCOMP.ComponentToKeep = ComponentToKeep;
-        labelid  = get(handles.edit_selectedlabel,'string');
-        PARCOMP.label= [labelid,'PARAFAC' sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}];
-        PARCOMP.type = 'PARAFAC';
-        FacSpatial = PMI{currentsub}.tmpPARAFAC.Factors{2}
-        selected = PMI{currentsub}.tmpPARAFAC.selected;
-        PARCOMP.topo = FacSpatial(:,selected);
+        try
+            load(fullfile(pathstr,'SelectedFactors.mat'))
+            newfile = 0
+        catch
+            %donot exist create the stucture
+            PARCOMP.file= get(handles.popupmenu_file,'value');
+            fileall = get(handles.popupmenu_file,'string');
+            PARCOMP.filestr =  fileall{get(handles.popupmenu_file,'value')};
+            PARCOMP.module  =get(handles.popupmenu_module, 'value');
+            moduleall = get(handles.popupmenu_module,'string');
+            PARCOMP.modulestr = moduleall{get(handles.popupmenu_module, 'value')};
+            PARCOMP.listgood =  listgood
+            PARCOMP.indt = indt %indice de temps.
+            PARCOMP.data = data(:,listgood,:);
+            PARCOMP.Xm = Xm;
+            PARCOMP.FacA = PMI{currentsub}.tmpPARAFAC.Factors{1};
+            PARCOMP.FacB = PMI{currentsub}.tmpPARAFAC.Factors{2};
+            PARCOMP.FacC = PMI{currentsub}.tmpPARAFAC.Factors{3};
+            PARCOMP.ComponentToKeep = ComponentToKeep;
+            labelid  = get(handles.edit_selectedlabel,'string');
+            PARCOMP.label= [labelid,'PARAFAC' sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}];
+            PARCOMP.type = 'PARAFAC';
+            FacSpatial = PMI{currentsub}.tmpPARAFAC.Factors{2}
+            selected = PMI{currentsub}.tmpPARAFAC.selected;
+            PARCOMP.topo = FacSpatial(:,selected);
         
-        newfile = 1;
-    end
-    if newfile == 0
-        id = numel(PARCOMP);
+            newfile = 1;
+        end
+        if newfile == 0
+            id = numel(PARCOMP);
         
-        PARCOMP(id+1).file= get(handles.popupmenu_file,'value');
-        fileall = get(handles.popupmenu_file,'string');
-        PARCOMP(id+1).filestr =  fileall{get(handles.popupmenu_file,'value')};
-        PARCOMP(id+1).module  =get(handles.popupmenu_module, 'value');
-        moduleall = get(handles.popupmenu_module,'string');
-        PARCOMP(id+1).modulestr = moduleall{get(handles.popupmenu_module, 'value')};
-        PARCOMP(id+1).listgood =  listgood;
-        PARCOMP(id+1).indt = indt; %indice de temps.
-        PARCOMP(id+1).data = data(:,listgood,:);
-        PARCOMP(id+1).Xm = Xm;
-        PARCOMP(id+1).FacA = PMI{currentsub}.tmpPARAFAC.Factors{1};
-        PARCOMP(id+1).FacB = PMI{currentsub}.tmpPARAFAC.Factors{2};
-        PARCOMP(id+1).FacC = PMI{currentsub}.tmpPARAFAC.Factors{3};
-        PARCOMP(id+1).ComponentToKeep = ComponentToKeep;
-        labelid  = get(handles.edit_selectedlabel,'string');
-        PARCOMP(id+1).label= [labelid,'PARAFAC' sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}]
-        PARCOMP(id+1).type = 'PARAFAC';
-        FacSpatial = PMI{currentsub}.tmpPARAFAC.Factors{2}
-        selected = PMI{currentsub}.tmpPARAFAC.selected;
-        PARCOMP(id+1).topo = FacSpatial(:,selected);;
+            PARCOMP(id+1).file= get(handles.popupmenu_file,'value');
+            fileall = get(handles.popupmenu_file,'string');
+            PARCOMP(id+1).filestr =  fileall{get(handles.popupmenu_file,'value')};
+            PARCOMP(id+1).module  =get(handles.popupmenu_module, 'value');
+            moduleall = get(handles.popupmenu_module,'string');
+            PARCOMP(id+1).modulestr = moduleall{get(handles.popupmenu_module, 'value')};
+            PARCOMP(id+1).listgood =  listgood;
+            PARCOMP(id+1).indt = indt; %indice de temps.
+            PARCOMP(id+1).data = data(:,listgood,:);
+            PARCOMP(id+1).Xm = Xm;
+            PARCOMP(id+1).FacA = PMI{currentsub}.tmpPARAFAC.Factors{1};
+            PARCOMP(id+1).FacB = PMI{currentsub}.tmpPARAFAC.Factors{2};
+            PARCOMP(id+1).FacC = PMI{currentsub}.tmpPARAFAC.Factors{3};
+            PARCOMP(id+1).ComponentToKeep = ComponentToKeep;
+            labelid  = get(handles.edit_selectedlabel,'string');
+            PARCOMP(id+1).label= [labelid,'PARAFAC' sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}]
+            PARCOMP(id+1).type = 'PARAFAC';
+            FacSpatial = PMI{currentsub}.tmpPARAFAC.Factors{2}
+            selected = PMI{currentsub}.tmpPARAFAC.selected;
+            PARCOMP(id+1).topo = FacSpatial(:,selected);;
         
-        %ajoute a la fin et replace au centre
-        PARCOMP = [PARCOMP(1,1:idcurrent-1),PARCOMP(1,id+1), PARCOMP(1,idcurrent:id)]
+            %ajoute a la fin et replace au centre
+            PARCOMP = [PARCOMP(1,1:idcurrent-1),PARCOMP(1,id+1), PARCOMP(1,idcurrent:id)]
+        end
+        
+        for i=1:numel(PARCOMP)
+            CORRlist{i} = PARCOMP(i).label
+        end
+        set(handles.listbox_Component,'string',CORRlist)
+%         PMI{currentsub}.data(cf).HRF.AvgC(indt,:) = reshape(data,[numel(indt),size(d,2)]);
+    else
+        msgbox('Press the run button before the component could be add to the list');
+        return
     end
-    
-    for i=1:numel(PARCOMP)
-        CORRlist{i} = PARCOMP(i).label
-    end
-    set(handles.listbox_Component,'string',CORRlist)
-    % PMI{currentsub}.data(cf).HRF.AvgC(indt,:) = reshape(data,[numel(indt),size(d,2)]);
 elseif strcmp(listmethod{idval},'PCA')  %extract PCA get(handles.radio_PCA,'value') %substract
-    %Detrent DATA segment for centrering
-    indt = [PMI{currentsub}.tmpPCA.indt(1):PMI{currentsub}.tmpPCA.indt(2)];%Time indice
-    intensnorm = d(indt,:);
-    X = 1:1:size(intensnorm,1);
-    Mb1 =  ((intensnorm(end,:)-intensnorm(1,:))./numel(X))';
-    Mb2 =  intensnorm(1,:)'; %offset
-    A = reshape(X,numel(X),1)*reshape( Mb1,1,numel(Mb1)) +ones(numel(X),1)*reshape( Mb2,1,numel(Mb2));
-    spar = intensnorm - A;
-    listgood = PMI{currentsub}.tmpPCA.listgood;
-    lstSV = PMI{1}.tmpPCA.selected;
-    u =PMI{currentsub}.tmpPCA.u ;
-    s =PMI{currentsub}.tmpPCA.s ;
-    v =PMI{currentsub}.tmpPCA.v ;
-    temp = u(:,lstSV)*s(lstSV,lstSV)*v(:,lstSV)';
-    data = d(indt,:);
-    data(:,listgood) = data(:,listgood)- temp;
-    %    data = d(indt,:);
-    %     if sum( data(:) )==PMI{currentsub}.tmpPCA.checksumd    %check sum protection
-    %        data(:,listgood) = data(:,listgood)- temp;
-    %     else
-    %         msgbox('Please update the decomposition, this is not the one for the current data')
-    %         return
-    %     end
-    %
-    %save in a structure all apply correction
-    [pathstr, name, ext] = fileparts(handles.NIRSpath{1})
-    try
-        load(fullfile(pathstr,'SelectedFactors.mat'))
-        newfile = 0
-    catch
+    if isfield (PMI{currentsub}, 'tmpPCA')
+        %Detrent DATA segment for centrering
+        indt = [PMI{currentsub}.tmpPCA.indt(1):PMI{currentsub}.tmpPCA.indt(2)];%Time indice
+        intensnorm = d(indt,:);
+        X = 1:1:size(intensnorm,1);
+        Mb1 =  ((intensnorm(end,:)-intensnorm(1,:))./numel(X))';
+        Mb2 =  intensnorm(1,:)'; %offset
+        A = reshape(X,numel(X),1)*reshape( Mb1,1,numel(Mb1)) +ones(numel(X),1)*reshape( Mb2,1,numel(Mb2));
+        spar = intensnorm - A;
+        listgood = PMI{currentsub}.tmpPCA.listgood;
+        lstSV = PMI{1}.tmpPCA.selected;
+        u =PMI{currentsub}.tmpPCA.u ;
+        s =PMI{currentsub}.tmpPCA.s ;
+        v = PMI{currentsub}.tmpPCA.v ;
+        temp = u(:,lstSV)*s(lstSV,lstSV)*v(:,lstSV)';
+        data = d(indt,:);
+        data(:,listgood) = data(:,listgood)- temp;
+%         data = d(indt,:);
+%         if sum( data(:) )==PMI{currentsub}.tmpPCA.checksumd    %check sum protection
+%             data(:,listgood) = data(:,listgood)- temp;
+%         else
+%             msgbox('Please update the decomposition, this is not the one for the current data')
+%             return
+%         end
+%         
+        save in a structure all apply correction
+        [pathstr, name, ext] = fileparts(handles.NIRSpath{1})
+        try
+            load(fullfile(pathstr,'SelectedFactors.mat'))
+            newfile = 0
+        catch
         %donot exist create the stucture
-        PARCOMP.file= get(handles.popupmenu_file,'value');
-        fileall = get(handles.popupmenu_file,'string');
-        PARCOMP.filestr =  fileall{get(handles.popupmenu_file,'value')};
-        PARCOMP.module  =get(handles.popupmenu_module, 'value');
-        moduleall = get(handles.popupmenu_module,'string');
-        PARCOMP.modulestr = moduleall{get(handles.popupmenu_module, 'value')};
-        PARCOMP.listgood =  listgood
-        PARCOMP.indt = indt %indice de temps.
-        PARCOMP.data = data(:,listgood,:);
-        %PARCOMP.Xm = temp;
-        PARCOMP.u =  PMI{currentsub}.tmpPCA.u;
-        PARCOMP.s = PMI{currentsub}.tmpPCA.s;
-        PARCOMP.v = PMI{currentsub}.tmpPCA.v;
-        lstSV = PMI{1}.tmpPCA.selected;
-        PARCOMP.Xm = PARCOMP.u(:,lstSV)*PARCOMP.s(lstSV,lstSV)*PARCOMP.v(:,lstSV)';
-        PARCOMP.ComponentToKeep = PMI{1}.tmpPCA.selected;
-        labelid  = get(handles.edit_selectedlabel,'string');
-        PARCOMP.label= [labelid,'PCA' sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}];
-        PARCOMP.type = 'PCA';
-        PARCOMP.topo = s(lstSV,lstSV)*v(:,lstSV)';
-        newfile = 1;
-    end
-    if newfile == 0
-        id = numel(PARCOMP);
-        PARCOMP(id+1).file= get(handles.popupmenu_file,'value');
-        fileall = get(handles.popupmenu_file,'string');
-        PARCOMP(id+1).filestr =  fileall{get(handles.popupmenu_file,'value')};
-        PARCOMP(id+1).module  =get(handles.popupmenu_module, 'value');
-        moduleall = get(handles.popupmenu_module,'string');
-        PARCOMP(id+1).modulestr = moduleall{get(handles.popupmenu_module, 'value')};
-        PARCOMP(id+1).listgood =  listgood;
-        PARCOMP(id+1).indt = indt; %indice de temps.
-        PARCOMP(id+1).data = data(:,listgood,:);
-        PARCOMP(id+1).u =  PMI{currentsub}.tmpPCA.u;
-        PARCOMP(id+1).s = PMI{currentsub}.tmpPCA.s;
-        PARCOMP(id+1).v = PMI{currentsub}.tmpPCA.v;
-        PARCOMP(id+1).ComponentToKeep = PMI{1}.tmpPCA.selected;
-        lstSV = PMI{1}.tmpPCA.selected;
-        PARCOMP(id+1).Xm = PARCOMP(id+1).u(:,lstSV)*PARCOMP(id+1).s(lstSV,lstSV)*PARCOMP(id+1).v(:,lstSV)';
-        labelid  = get(handles.edit_selectedlabel,'string');
-        PARCOMP(id+1).label= [labelid,'PCA' sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}];
-        PARCOMP(id+1).type = 'PCA';
-        PARCOMP(id+1).topo = s(lstSV,lstSV)*v(:,lstSV)';
+            PARCOMP.file= get(handles.popupmenu_file,'value');
+            fileall = get(handles.popupmenu_file,'string');
+            PARCOMP.filestr =  fileall{get(handles.popupmenu_file,'value')};
+            PARCOMP.module  =get(handles.popupmenu_module, 'value');
+            moduleall = get(handles.popupmenu_module,'string');
+            PARCOMP.modulestr = moduleall{get(handles.popupmenu_module, 'value')};
+            PARCOMP.listgood =  listgood
+            PARCOMP.indt = indt %indice de temps.
+            PARCOMP.data = data(:,listgood,:);
+            %PARCOMP.Xm = temp;
+            PARCOMP.u =  PMI{currentsub}.tmpPCA.u;
+            PARCOMP.s = PMI{currentsub}.tmpPCA.s;
+            PARCOMP.v = PMI{currentsub}.tmpPCA.v;
+            lstSV = PMI{1}.tmpPCA.selected;
+            PARCOMP.Xm = PARCOMP.u(:,lstSV)*PARCOMP.s(lstSV,lstSV)*PARCOMP.v(:,lstSV)';
+            PARCOMP.ComponentToKeep = PMI{1}.tmpPCA.selected;
+            labelid  = get(handles.edit_selectedlabel,'string');
+            PARCOMP.label= [labelid,'PCA' sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}];
+            PARCOMP.type = 'PCA';
+            PARCOMP.topo = s(lstSV,lstSV)*v(:,lstSV)';
+            newfile = 1;
+        end
+        if newfile == 0
+            id = numel(PARCOMP);
+            PARCOMP(id+1).file= get(handles.popupmenu_file,'value');
+            fileall = get(handles.popupmenu_file,'string');
+            PARCOMP(id+1).filestr =  fileall{get(handles.popupmenu_file,'value')};
+            PARCOMP(id+1).module  =get(handles.popupmenu_module, 'value');
+            moduleall = get(handles.popupmenu_module,'string');
+            PARCOMP(id+1).modulestr = moduleall{get(handles.popupmenu_module, 'value')};
+            PARCOMP(id+1).listgood =  listgood;
+            PARCOMP(id+1).indt = indt; %indice de temps.
+            PARCOMP(id+1).data = data(:,listgood,:);
+            PARCOMP(id+1).u =  PMI{currentsub}.tmpPCA.u;
+            PARCOMP(id+1).s = PMI{currentsub}.tmpPCA.s;
+            PARCOMP(id+1).v = PMI{currentsub}.tmpPCA.v;
+            PARCOMP(id+1).ComponentToKeep = PMI{1}.tmpPCA.selected;
+            lstSV = PMI{1}.tmpPCA.selected;
+            PARCOMP(id+1).Xm = PARCOMP(id+1).u(:,lstSV)*PARCOMP(id+1).s(lstSV,lstSV)*PARCOMP(id+1).v(:,lstSV)';
+            labelid  = get(handles.edit_selectedlabel,'string');
+            PARCOMP(id+1).label= [labelid,'PCA' sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}];
+            PARCOMP(id+1).type = 'PCA';
+            PARCOMP(id+1).topo = s(lstSV,lstSV)*v(:,lstSV)';
+        end
+    
+        for i=1:numel(PARCOMP)
+            CORRlist{i} = PARCOMP(i).label;
+        end
+        set(handles.listbox_Component,'string',CORRlist);
+        %PMI{currentsub}.data(cf).HRF.AvgC(indt,:) = data;
+    else
+        msgbox('Press the run button before the component could be add to the list');
+        return
     end
     
-    for i=1:numel(PARCOMP)
-        CORRlist{i} = PARCOMP(i).label;
-    end
-    set(handles.listbox_Component,'string',CORRlist);
-    %PMI{currentsub}.data(cf).HRF.AvgC(indt,:) = data;
 elseif strcmp(listmethod{idval},'ICA')   %extract ICA Component
-   indt = [PMI{currentsub}.tmpICA.indt(1):PMI{currentsub}.tmpICA.indt(2)];%Time indice
-   listgood = PMI{currentsub}.tmpICA.listgood;
-   selected = PMI{currentsub}.tmpICA.selected;
-   A =  PMI{currentsub}.tmpICA.Factors{1};
-   C = PMI{currentsub}.tmpICA.Factors{3};
-   Xm = (C(:,PMI{currentsub}.tmpICA.selected)*A(PMI{currentsub}.tmpICA.selected,:))';
-    try
-        load(fullfile(pathstr,'SelectedFactors.mat'));
-        newfile = 0;
-    catch
-       %donot exist create the stucture
-        PARCOMP.file= get(handles.popupmenu_file,'value');
-        fileall = get(handles.popupmenu_file,'string');
-        PARCOMP.filestr =  fileall{get(handles.popupmenu_file,'value')};
-        PARCOMP.module  =get(handles.popupmenu_module, 'value');
-        moduleall = get(handles.popupmenu_module,'string');
-        PARCOMP.modulestr = moduleall{get(handles.popupmenu_module, 'value')};
-        PARCOMP.listgood =  listgood;
-        PARCOMP.Factors =  PMI{currentsub}.tmpICA.Factors;
-        PARCOMP.indt = indt; %indice de temps.
-        PARCOMP.data = PMI{currentsub}.tmpICA.spar ;    
-        PARCOMP.ComponentToKeep = PMI{currentsub}.tmpICA.selected;     
-        labelid  = get(handles.edit_selectedlabel,'string');
-        PARCOMP.Xm = Xm;
-        PARCOMP.label= [labelid,'ICA', sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}];
-        PARCOMP.type = 'ICA';
-        PARCOMP.topo =  C(:,PMI{currentsub}.tmpICA.selected);
-        newfile = 1;
-    end
-    if newfile == 0
-        id = numel(PARCOMP);
-        %donot exist create the stucture
-        PARCOMP(id+1).file= get(handles.popupmenu_file,'value');
-        fileall = get(handles.popupmenu_file,'string');
-        PARCOMP(id+1).filestr =  fileall{get(handles.popupmenu_file,'value')};
-        PARCOMP(id+1).module  =get(handles.popupmenu_module, 'value');
-        moduleall = get(handles.popupmenu_module,'string');
-        PARCOMP(id+1).modulestr = moduleall{get(handles.popupmenu_module, 'value')};
-        PARCOMP(id+1).listgood =  listgood;
-        PARCOMP(id+1).Factors =  PMI{currentsub}.tmpICA.Factors;
-        PARCOMP(id+1).indt = indt; %indice de temps.
-        PARCOMP(id+1).data = PMI{currentsub}.tmpICA.spar ;    
-        PARCOMP(id+1).ComponentToKeep = PMI{currentsub}.tmpICA.selected;
+    if isfield (PMI{currentsub}, 'tmpICA')
+        indt = [PMI{currentsub}.tmpICA.indt(1):PMI{currentsub}.tmpICA.indt(2)];%Time indice
+        listgood = PMI{currentsub}.tmpICA.listgood;
+        selected = PMI{currentsub}.tmpICA.selected;
         A =  PMI{currentsub}.tmpICA.Factors{1};
         C = PMI{currentsub}.tmpICA.Factors{3};
-        Xm = C(:,PMI{currentsub}.tmpICA.selected)*A(PMI{currentsub}.tmpICA.selected,:);
-        labelid  = get(handles.edit_selectedlabel,'string');
-        PARCOMP(id+1).Xm = Xm;
-        PARCOMP(id+1).label= [labelid,'ICA', sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}];
-        PARCOMP(id+1).type = 'ICA';
-        PARCOMP(id+1).topo =  C(:,PMI{currentsub}.tmpICA.selected);
-        newfile = 1;
-    end
-    for i=1:numel(PARCOMP)
-        if iscell( PARCOMP(i).label)
-            CORRlist{i} = cat(2,PARCOMP(i).label{:});
-        else
-            CORRlist{i} = PARCOMP(i).label;
+        Xm = (C(:,PMI{currentsub}.tmpICA.selected)*A(PMI{currentsub}.tmpICA.selected,:))';
+        try
+            load(fullfile(pathstr,'SelectedFactors.mat'));
+            newfile = 0;
+        catch
+            %donot exist create the stucture
+            PARCOMP.file= get(handles.popupmenu_file,'value');
+            fileall = get(handles.popupmenu_file,'string');
+            PARCOMP.filestr =  fileall{get(handles.popupmenu_file,'value')};
+            PARCOMP.module  =get(handles.popupmenu_module, 'value');
+            moduleall = get(handles.popupmenu_module,'string');
+            PARCOMP.modulestr = moduleall{get(handles.popupmenu_module, 'value')};
+            PARCOMP.listgood =  listgood;
+            PARCOMP.Factors =  PMI{currentsub}.tmpICA.Factors;
+            PARCOMP.indt = indt; %indice de temps.
+            PARCOMP.data = PMI{currentsub}.tmpICA.spar ;    
+            PARCOMP.ComponentToKeep = PMI{currentsub}.tmpICA.selected;     
+            labelid  = get(handles.edit_selectedlabel,'string');
+            PARCOMP.Xm = Xm;
+            PARCOMP.label= [labelid,'ICA', sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}];
+            PARCOMP.type = 'ICA';
+            PARCOMP.topo =  C(:,PMI{currentsub}.tmpICA.selected);
+            newfile = 1;
         end
+        if newfile == 0
+            id = numel(PARCOMP);
+            %donot exist create the stucture
+            PARCOMP(id+1).file= get(handles.popupmenu_file,'value');
+            fileall = get(handles.popupmenu_file,'string');
+            PARCOMP(id+1).filestr =  fileall{get(handles.popupmenu_file,'value')};
+            PARCOMP(id+1).module  =get(handles.popupmenu_module, 'value');
+            moduleall = get(handles.popupmenu_module,'string');
+            PARCOMP(id+1).modulestr = moduleall{get(handles.popupmenu_module, 'value')};
+            PARCOMP(id+1).listgood =  listgood;
+            PARCOMP(id+1).Factors =  PMI{currentsub}.tmpICA.Factors;
+            PARCOMP(id+1).indt = indt; %indice de temps.
+            PARCOMP(id+1).data = PMI{currentsub}.tmpICA.spar ;    
+            PARCOMP(id+1).ComponentToKeep = PMI{currentsub}.tmpICA.selected;
+            A =  PMI{currentsub}.tmpICA.Factors{1};
+            C = PMI{currentsub}.tmpICA.Factors{3};
+            Xm = C(:,PMI{currentsub}.tmpICA.selected)*A(PMI{currentsub}.tmpICA.selected,:);
+            labelid  = get(handles.edit_selectedlabel,'string');
+            PARCOMP(id+1).Xm = Xm;
+            PARCOMP(id+1).label= [labelid,'ICA', sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}];
+            PARCOMP(id+1).type = 'ICA';
+            PARCOMP(id+1).topo =  C(:,PMI{currentsub}.tmpICA.selected);
+            newfile = 1;
+        end
+        for i=1:numel(PARCOMP)
+            if iscell( PARCOMP(i).label)
+                CORRlist{i} = cat(2,PARCOMP(i).label{:});
+            else
+                CORRlist{i} = PARCOMP(i).label;
+            end
+        end
+        set(handles.listbox_Component,'string',CORRlist);
+    else
+        msgbox('Press the run button before the component could be add to the list');
+        return
     end
-    set(handles.listbox_Component,'string',CORRlist);
-   
-   
-   
-   
-   
+    
 elseif strcmp(listmethod{idval},'GLM')   %extract GLM Component
-    indt = [PMI{currentsub}.tmpGLM.indt(1):PMI{currentsub}.tmpGLM.indt(2)];%Time indice
-    listgood = PMI{currentsub}.tmpGLM.listgood;
-    lstSV = PMI{1}.tmpGLM.selected;
-    beta = PMI{currentsub}.tmpGLM.beta ;
-    selected = PMI{currentsub}.tmpGLM.selected;
-    idreg = PMI{currentsub}.tmpGLM.idreg;
-    Xm = PMI{1}.tmpGLM.AUX.data{idreg(selected)}*beta(selected,:);
-    label =  PMI{1}.tmpGLM.AUX.label{idreg(selected)};
+    if isfield (PMI{currentsub}, 'tmpGLM')      
+        indt = [PMI{currentsub}.tmpGLM.indt(1):PMI{currentsub}.tmpGLM.indt(2)];%Time indice
+        listgood = PMI{currentsub}.tmpGLM.listgood;
+        lstSV = PMI{1}.tmpGLM.selected;
+        beta = PMI{currentsub}.tmpGLM.beta ;
+        selected = PMI{currentsub}.tmpGLM.selected;
+        idreg = PMI{currentsub}.tmpGLM.idreg;
+        Xm = PMI{1}.tmpGLM.AUX.data{idreg(selected)}*beta(selected,:);
+        label =  PMI{1}.tmpGLM.AUX.label{idreg(selected)};
     
-    %save in a structure all apply correction
-    [pathstr, name, ext] = fileparts(handles.NIRSpath{1});
-    try
-        load(fullfile(pathstr,'SelectedFactors.mat'));
-        newfile = 0;
-    catch
-        %donot exist create the stucture
-        PARCOMP.file= get(handles.popupmenu_file,'value');
-        fileall = get(handles.popupmenu_file,'string');
-        PARCOMP.filestr =  fileall{get(handles.popupmenu_file,'value')};
-        PARCOMP.module  =get(handles.popupmenu_module, 'value');
-        moduleall = get(handles.popupmenu_module,'string');
-        PARCOMP.modulestr = moduleall{get(handles.popupmenu_module, 'value')};
-        PARCOMP.listgood =  listgood;
-        PARCOMP.beta =  PMI{1}.tmpGLM.beta;
-        PARCOMP.std =  PMI{1}.tmpGLM.std;
-        PARCOMP.AUX = PMI{1}.tmpGLM.AUX;
-        PARCOMP.indt = indt; %indice de temps.
-        PARCOMP.data = d(indt,listgood) ;%data(:,listgood,:);
-        PARCOMP.Xm = Xm;
-        PARCOMP.ComponentToKeep = PMI{1}.tmpGLM.selected;
-        PARCOMP.idreg = PMI{1}.tmpGLM.idreg;
-        labelid  = get(handles.edit_selectedlabel,'string');
-        PARCOMP.label= [labelid,'GLM',label , sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}];
-        PARCOMP.type = 'GLM';
-        PARCOMP.topo =  beta(selected,:);
-        newfile = 1;
-    end
-    if newfile == 0
-        id = numel(PARCOMP);
-        %donot exist create the stucture
-        PARCOMP(id+1).file= get(handles.popupmenu_file,'value');
-        fileall = get(handles.popupmenu_file,'string');
-        PARCOMP(id+1).filestr =  fileall{get(handles.popupmenu_file,'value')};
-        PARCOMP(id+1).module  =get(handles.popupmenu_module, 'value');
-        moduleall = get(handles.popupmenu_module,'string');
-        PARCOMP(id+1).modulestr = moduleall{get(handles.popupmenu_module, 'value')};
-        PARCOMP(id+1).listgood =  listgood;
-        PARCOMP(id+1).beta =  PMI{currentsub}.tmpGLM.beta;
-        PARCOMP(id+1).std =  PMI{currentsub}.tmpGLM.std;
-        PARCOMP(id+1).AUX = PMI{currentsub}.tmpGLM.AUX;
-        PARCOMP(id+1).indt = indt; %indice de temps.
-        PARCOMP(id+1).data = d(indt,listgood) ;%data(:,listgood,:);
-        PARCOMP(id+1).Xm = Xm;
-        PARCOMP(id+1).ComponentToKeep = PMI{1}.tmpGLM.selected;
-        PARCOMP(id+1).idreg = PMI{1}.tmpGLM.idreg;
-        labelid  = get(handles.edit_selectedlabel,'string');
-        PARCOMP(id+1).label= [labelid,'GLM',label , sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}];
-        PARCOMP(id+1).type = 'GLM';
-        PARCOMP(id+1).topo =  beta(selected,:);
-        newfile = 1;
-    end
-    for i=1:numel(PARCOMP)
-        if iscell( PARCOMP(i).label)
-            CORRlist{i} = cat(2,PARCOMP(i).label{:});
-        else
-            CORRlist{i} = PARCOMP(i).label;
+        %save in a structure all apply correction
+        [pathstr, name, ext] = fileparts(handles.NIRSpath{1});
+        try
+            load(fullfile(pathstr,'SelectedFactors.mat'));
+            newfile = 0;
+        catch
+            %donot exist create the stucture
+            PARCOMP.file= get(handles.popupmenu_file,'value');
+            fileall = get(handles.popupmenu_file,'string');
+            PARCOMP.filestr =  fileall{get(handles.popupmenu_file,'value')};
+            PARCOMP.module  =get(handles.popupmenu_module, 'value');
+            moduleall = get(handles.popupmenu_module,'string');
+            PARCOMP.modulestr = moduleall{get(handles.popupmenu_module, 'value')};
+            PARCOMP.listgood =  listgood;
+            PARCOMP.beta =  PMI{1}.tmpGLM.beta;
+            PARCOMP.std =  PMI{1}.tmpGLM.std;
+            PARCOMP.AUX = PMI{1}.tmpGLM.AUX;
+            PARCOMP.indt = indt; %indice de temps.
+            PARCOMP.data = d(indt,listgood) ;%data(:,listgood,:);
+            PARCOMP.Xm = Xm;
+            PARCOMP.ComponentToKeep = PMI{1}.tmpGLM.selected;
+            PARCOMP.idreg = PMI{1}.tmpGLM.idreg;
+            labelid  = get(handles.edit_selectedlabel,'string');
+            PARCOMP.label= [labelid,'GLM',label , sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}];
+            PARCOMP.type = 'GLM';
+            PARCOMP.topo =  beta(selected,:);
+            newfile = 1;
         end
+        if newfile == 0
+            id = numel(PARCOMP);
+            %donot exist create the stucture
+            PARCOMP(id+1).file= get(handles.popupmenu_file,'value');
+            fileall = get(handles.popupmenu_file,'string');
+            PARCOMP(id+1).filestr =  fileall{get(handles.popupmenu_file,'value')};
+            PARCOMP(id+1).module  =get(handles.popupmenu_module, 'value');
+            moduleall = get(handles.popupmenu_module,'string');
+            PARCOMP(id+1).modulestr = moduleall{get(handles.popupmenu_module, 'value')};
+            PARCOMP(id+1).listgood =  listgood;
+            PARCOMP(id+1).beta =  PMI{currentsub}.tmpGLM.beta;
+            PARCOMP(id+1).std =  PMI{currentsub}.tmpGLM.std;
+            PARCOMP(id+1).AUX = PMI{currentsub}.tmpGLM.AUX;
+            PARCOMP(id+1).indt = indt; %indice de temps.
+            PARCOMP(id+1).data = d(indt,listgood) ;%data(:,listgood,:);
+            PARCOMP(id+1).Xm = Xm;
+            PARCOMP(id+1).ComponentToKeep = PMI{1}.tmpGLM.selected;
+            PARCOMP(id+1).idreg = PMI{1}.tmpGLM.idreg;
+            labelid  = get(handles.edit_selectedlabel,'string');
+            PARCOMP(id+1).label= [labelid,'GLM',label , sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}];
+            PARCOMP(id+1).type = 'GLM';
+            PARCOMP(id+1).topo =  beta(selected,:);
+            newfile = 1;
+        end
+        for i=1:numel(PARCOMP)
+            if iscell( PARCOMP(i).label)
+                CORRlist{i} = cat(2,PARCOMP(i).label{:});
+            else
+                CORRlist{i} = PARCOMP(i).label;
+            end
+        end
+        set(handles.listbox_Component,'string',CORRlist);
+    else
+        msgbox('Press the run button before the component could be add to the list')
+        return
     end
-    set(handles.listbox_Component,'string',CORRlist);
     
-elseif strcmp(listmethod{idval},'Offset Adjustment')  
-    msgbox('No offset ajustement could be add in the component list')
+elseif strcmp(listmethod{idval},'Offset Adjustment')
+    msgbox('No offset ajustement could be add in the component list');
     return
 end
 
-save(fullfile(pathstr,'SelectedFactors.mat'),'PARCOMP');
+
 % --- Executes on button press in radiobutton23.
 function radiobutton23_Callback(hObject, eventdata, handles)
 % hObject    handle to radiobutton23 (see GCBO)
