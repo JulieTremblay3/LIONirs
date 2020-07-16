@@ -22,7 +22,7 @@ function varargout = plot_sessions_GUI(varargin)
 
 % Edit the above text to modify the response to help plot_sessions_GUI
 
-% Last Modified by GUIDE v2.5 07-Jul-2020 15:06:46
+% Last Modified by GUIDE v2.5 15-Jul-2020 15:37:14
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1260,7 +1260,7 @@ oldmodule = handles.oldmodule;
 %  handles.NIRS = NIRS.NIRS;
 %Verification pour voir si le manual setting à été sauvegarder
 if 0 %numel(handles.NIRS.Dt.fir.pp)==oldmodule
-    oldfile   = handles.oldfile;
+    oldfile = handles.oldfile;
     xname = handles.NIRS.Dt.fir.pp(oldmodule).p{oldfile};
     noise = logical(zeros(size(PMI{currentsub}.data(cf).HRF.AvgC)));
     mrk_type_arr = cellstr('bad_step');
@@ -4980,22 +4980,21 @@ currentsub=1;
 PMI = get(guiHOMER,'UserData');
 cf = PMI{currentsub}.currentFile;
 d = PMI{currentsub}.data(cf).HRF.AvgC;
-idval= get(handles.popupmethodselected,'val');
+idval = get(handles.popupmethodselected,'val');
 listmethod = get(handles.popupmethodselected,'string');
 idmodule = get(handles.popupmenu_module,'value');
 if idmodule < numel(handles.NIRS.Dt.fir.pp)
     msgbox('modification could be done only on the last manual step')
     return
 end
-%what to substract !
+%what to substract!
 [pathstr, name, ext] = fileparts(handles.NIRSpath{1});
-
-
-idval= get(handles.popupmethodselected,'value');
-if idval ~= 5
+ival= get(handles.popupmethodselected,'value');
+if ival ~= 5
     msgbox('To subtract a previously identified component, you must choose the option ''component'' on the menu.')
     return
 end
+
 if strcmp(listmethod{idval},'Parafac')  %substractPARAFAC
     indt = [PMI{currentsub}.tmpPARAFAC.indt(1):PMI{currentsub}.tmpPARAFAC.indt(2)];%Time indice
     intensnorm = d(indt,:);
@@ -5059,7 +5058,7 @@ if strcmp(listmethod{idval},'Parafac')  %substractPARAFAC
         moduleall = get(handles.popupmenu_module,'string');
         PARCORR(id+1).modulestr = moduleall{get(handles.popupmenu_module, 'value')};
         PARCORR(id+1).listgood =  listgood;
-        PARCORR(id+1).indt = indt %indice de temps.
+        PARCORR(id+1).indt = indt; %indice de temps.
         PARCORR(id+1).data = data(:,listgood,:);
         PARCORR(id+1).Xm = Xm;
         PARCORR(id+1).FacA = PMI{currentsub}.tmpPARAFAC.Factors{1};
@@ -9088,7 +9087,6 @@ if strcmp(listmethod{idval},'Parafac') %get(handles.popupmethodselected,'value')
         end
         if newfile == 0
             id = numel(PARCOMP);
-        
             PARCOMP(id+1).file= get(handles.popupmenu_file,'value');
             fileall = get(handles.popupmenu_file,'string');
             PARCOMP(id+1).filestr =  fileall{get(handles.popupmenu_file,'value')};
@@ -9109,6 +9107,7 @@ if strcmp(listmethod{idval},'Parafac') %get(handles.popupmethodselected,'value')
             FacSpatial = PMI{currentsub}.tmpPARAFAC.Factors{2}
             selected = PMI{currentsub}.tmpPARAFAC.selected;
             PARCOMP(id+1).topo = FacSpatial(:,selected);;
+
         
             %ajoute a la fin et replace au centre
             PARCOMP = [PARCOMP(1,1:idcurrent-1),PARCOMP(1,id+1), PARCOMP(1,idcurrent:id)]
@@ -9278,7 +9277,8 @@ elseif strcmp(listmethod{idval},'ICA')   %extract ICA Component
         msgbox('Press the run button before the component could be add to the list');
         return
     end
-    
+    set(handles.listbox_Component,'string',CORRlist);
+  
 elseif strcmp(listmethod{idval},'GLM')   %extract GLM Component
     if isfield (PMI{currentsub}, 'tmpGLM')      
         indt = [PMI{currentsub}.tmpGLM.indt(1):PMI{currentsub}.tmpGLM.indt(2)];%Time indice
@@ -10707,9 +10707,113 @@ function context_listbox_Correction_CopyData_Callback(hObject, eventdata, handle
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+global currentsub;
+
+idComp = get(handles.listbox_CorrectionDecomposition,'value');
+strComp = get(handles.listbox_CorrectionDecomposition,'string');
+label = strComp{idComp};
+[pathstr, ~, ~] = fileparts(handles.NIRSpath{1});
+str_topo = sprintf('%s\t %s\t %s\n', 'Detector', 'Source', label);
+
+try
+    load(fullfile(pathstr,'SelectedFactors.mat'))
+    load(fullfile(pathstr, 'NIRS.mat'));
+catch
+    return
+end
+guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
+PMI = get(guiHOMER,'UserData');
+ML = PMI{currentsub}.data.MeasList;
+topo = PARCOMP(idComp).topo;
+
+
+% if strcmpi((PARCOMP(idComp).type),'GLM')
+    ntopo = numel(topo);
+% elseif strcmpi((PARCOMP(idComp).type),'Parafac')
+%     ntopo = ;
+% elseif strcmpi((PARCOMP(idComp).type),'PCA')
+%     ntopo = ;
+% end
+
+for j = 1:ntopo
+    ichannel = PARCOMP(idComp).listgood(j);
+    switch  NIRS.Cf.dev.n
+        case 'ISS Imagent'
+            strDet = SDDet2strboxy_ISS(ML(ichannel,2));
+            strSrs = SDPairs2strboxy_ISS(ML(ichannel,1));
+                     
+        case 'NIRx'                          
+            strDet = SDDet2strboxy(ML(ichannel,2));
+            strSrs = SDPairs2strboxy(ML(ichannel,1));
+                                                                 
+        otherwise                            
+            strDet = SDDet2strboxy_ISS(ML(ichannel,2));
+            strSrs = SDPairs2strboxy_ISS(ML(ichannel,1));
+                       
+    end
+    str_topo = [str_topo,sprintf('%s\t %s\t %0.5g\n', strDet, strSrs, topo(j))]; 
+end
+
+clipboard('copy', str_topo);
+
+msgbox('The data of the selected component is copied');
+
+
+
 
 % --------------------------------------------------------------------
 function context_listbox_Component_CopyData_Callback(hObject, eventdata, handles)
 % hObject    handle to context_listbox_Component_CopyData (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+global currentsub;
+
+idComp = get(handles.listbox_Component,'value');
+strComp = get(handles.listbox_Component,'string');
+label = strComp{idComp};
+str_topo = sprintf('%s\t %s\t %s\n', 'Detector', 'Source', label);
+
+[pathstr, ~ , ~ ] = fileparts(handles.NIRSpath{1});
+try
+    load(fullfile(pathstr,'SelectedFactors.mat'));
+    load(fullfile(pathstr, 'NIRS.mat'));
+catch
+    return
+end
+guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
+PMI = get(guiHOMER,'UserData');
+ML = PMI{currentsub}.data.MeasList;
+topo = PARCOMP(idComp).topo;
+
+
+% if strcmpi((PARCOMP(idComp).type),'GLM')
+    ntopo = numel(topo);
+% elseif strcmpi((PARCOMP(idComp).type),'Parafac')
+%     ntopo = ;
+% elseif strcmpi((PARCOMP(idComp).type),'PCA')
+%     ntopo = ;
+% end
+
+for j = 1:ntopo
+    ichannel = PARCOMP(idComp).listgood(j);
+    switch  NIRS.Cf.dev.n
+        case 'ISS Imagent'
+            strDet = SDDet2strboxy_ISS(ML(ichannel,2));
+            strSrs = SDPairs2strboxy_ISS(ML(ichannel,1));
+                     
+        case 'NIRx'                          
+            strDet = SDDet2strboxy(ML(ichannel,2));
+            strSrs = SDPairs2strboxy(ML(ichannel,1));
+                                                                 
+        otherwise                            
+            strDet = SDDet2strboxy_ISS(ML(ichannel,2));
+            strSrs = SDPairs2strboxy_ISS(ML(ichannel,1));
+                       
+    end
+    str_topo = [str_topo,sprintf('%s\t %s\t %0.5g\n', strDet, strSrs, topo(j))]; 
+end
+
+clipboard('copy', str_topo);
+
+msgbox('The data of the selected component is copied');
