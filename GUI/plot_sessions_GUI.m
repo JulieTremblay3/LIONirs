@@ -4990,8 +4990,6 @@ end
 %what to substract !
 [pathstr, name, ext] = fileparts(handles.NIRSpath{1});
 
-
-idval= get(handles.popupmethodselected,'value');
 if idval ~= 5
     msgbox('To subtract a previously identified component, you must choose the option ''component'' on the menu.')
     return
