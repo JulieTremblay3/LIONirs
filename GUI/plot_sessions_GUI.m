@@ -10310,9 +10310,9 @@ function context_listbox_Component_rename_Callback(hObject, eventdata, handles)
 % hObject    handle to context_listbox_Component_rename (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-label = get(handles.listbox_Component,'string')
-id = get(handles.listbox_Component,'value')
-msgbox('FINISH CODE')
+label = get(handles.listbox_Component,'string');
+id = get(handles.listbox_Component,'value');
+msgbox('FINISH CODE');
 
 
 % --------------------------------------------------------------------
@@ -10378,9 +10378,9 @@ function context_listbox_Correction_rename_Callback(hObject, eventdata, handles)
 % hObject    handle to context_listbox_Correction_rename (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-label = get(handles.listbox_CorrectionDecomposition,'string')
-id = get(handles.listbox_CorrectionDecomposition,'value')
-msgbox('FINISH CODE')
+label = get(handles.listbox_CorrectionDecomposition,'string');
+id = get(handles.listbox_CorrectionDecomposition,'value');
+msgbox('FINISH CODE');
 
 
 % --------------------------------------------------------------------
@@ -10561,7 +10561,7 @@ cf = DOT{currentsub}.currentFile;
 num = get(handles.popupmenu_zone,'value');
 
 newname = Zonename(DOT{currentsub}.zone.label(num));
-DOT{currentsub}.zone.label(num) =  newname;
+DOT{currentsub}.zone.label(num) = newname;
 set(handles.popupmenu_zone,'string',DOT{currentsub}.zone.label);
 set(guiHOMER,'UserData',DOT);
 
@@ -10600,7 +10600,7 @@ DOT = get(guiHOMER,'UserData');
 cf = DOT{currentsub}.currentFile;
 num = get(handles.popupmenu_zone,'value');
 newcolor = uisetcolor([0,0,0]);
-DOT{currentsub}.zone.color(num,:) =  newcolor;
+DOT{currentsub}.zone.color(num,:) = newcolor;
 
 set(handles.radio_colorzone,'value',1);
 set(guiHOMER,'UserData',DOT);
@@ -10639,7 +10639,7 @@ function context_clearartifact_Callback(hObject, eventdata, handles)
     NChalf = numel(PMI{currentsub}.data(cf).MeasListAct)/2;
     plotLst = PMI{currentsub}.plotLst;
     plotLstAll = [];
-    for i=1:numel(plotLst)
+    for i = 1:numel(plotLst)
         chlist = plotLst(i);
         if isempty(find(chlist - NChalf < 1 ))
             plotLstAll = [plotLstAll,chlist, chlist-NChalf]; %add 830 nm channels
@@ -10651,9 +10651,9 @@ function context_clearartifact_Callback(hObject, eventdata, handles)
     posxstart = str2num(get(handles.edit_time_start,'string'));
     posxstop = str2num(get(handles.edit_time_stop,'string'));
     if isempty(posxstart)
-        indstart=1;
+        indstart = 1;
     else
-        indstart= find(posxstart>PMI{currentsub}.data(cf).HRF.tHRF);
+        indstart = find(posxstart>PMI{currentsub}.data(cf).HRF.tHRF);
     end
     if isempty(posxstop)
         indstop = numel(PMI{currentsub}.data(cf).HRF.tHRF);
@@ -10686,7 +10686,7 @@ idComp = get(handles.listbox_CorrectionDecomposition,'value');
 strComp = get(handles.listbox_CorrectionDecomposition,'string');
 label = strComp{idComp};
 [pathstr, ~, ~] = fileparts(handles.NIRSpath{1});
-str_topo = sprintf('%s\t %s\t %s\n', 'Detector', 'Source', label);
+strTopo = sprintf('%s\t %s\t %s\n', 'Detector', 'Source', label);
 
 try
     load(fullfile(pathstr,'SelectedFactors.mat'))
@@ -10724,10 +10724,10 @@ for j = 1:ntopo
             strSrs = SDPairs2strboxy_ISS(ML(ichannel,1));
                        
     end
-    str_topo = [str_topo,sprintf('%s\t %s\t %0.5g\n', strDet, strSrs, topo(j))]; 
+    strTopo = [strTopo,sprintf('%s\t %s\t %0.5g\n', strDet, strSrs, topo(j))]; 
 end
 
-clipboard('copy', str_topo);
+clipboard('copy', strTopo);
 
 msgbox('The data of the selected component is copied');
 
@@ -10745,7 +10745,7 @@ global currentsub;
 idComp = get(handles.listbox_Component,'value');
 strComp = get(handles.listbox_Component,'string');
 label = strComp{idComp};
-str_topo = sprintf('%s\t %s\t %s\n', 'Detector', 'Source', label);
+strTopo = sprintf('%s\t %s\t %s\n', 'Detector', 'Source', label);
 
 [pathstr, ~ , ~ ] = fileparts(handles.NIRSpath{1});
 try
@@ -10784,9 +10784,9 @@ for j = 1:ntopo
             strSrs = SDPairs2strboxy_ISS(ML(ichannel,1));
                        
     end
-    str_topo = [str_topo,sprintf('%s\t %s\t %0.5g\n', strDet, strSrs, topo(j))]; 
+    strTopo = [strTopo,sprintf('%s\t %s\t %0.5g\n', strDet, strSrs, topo(j))]; 
 end
 
-clipboard('copy', str_topo);
+clipboard('copy', strTopo);
 
 msgbox('The data of the selected component is copied');
