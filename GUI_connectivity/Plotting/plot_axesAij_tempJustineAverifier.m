@@ -1,4 +1,4 @@
-function handles=plot_axesAij(varargin)
+function handles=plot_axesAij_tempJustineAVerifier(varargin)
 %AFFICHAGE DES MATRICES DE CONNECTIVITE PAR ZONE DANS L'INTERFACE
 % varargin1 handles
 % varargin2 newfigure
@@ -14,8 +14,8 @@ end
 axis ij
 DATA = get(handles.GUI_LookMat,'UserData');
 id = get(handles.popup_listsujet, 'value');
-cmax = str2num(get(handles.edit_cmax,'string'));
-cmin = str2num(get(handles.edit_cmin,'string'));
+cmax = str2double(get(handles.edit_cmax,'string'));
+cmin = str2double(get(handles.edit_cmin,'string'));
 MAT = DATA{id}.MAT;
 %Ordoner en ordre de zone
 if get(handles.radio_fisher,'value')
@@ -35,15 +35,15 @@ for izone = 1:numel(DATA{id}.zone.plotLst)
             case 'ISS Imagent'
                 strDet = SDDet2strboxy_ISS(ML(ich,2));
                 strSrs = SDPairs2strboxy_ISS(ML(ich,1));
-                idch = strmatch([strDet, ' ',strSrs ],List,'exact');
+                idch = strcmp([strDet, ' ',strSrs ],List);
             case 'NIRx'
                 strDet = SDDet2strboxy(ML(ich,2));
                 strSrs = SDPairs2strboxy(ML(ich,1));
-                idch = strmatch([strDet, ' ',strSrs ],List,'exact');
+                idch = strcmp([strDet, ' ',strSrs ],List);
             otherwise
                 strDet = SDDet2strboxy_ISS(ML(ich,2));
                 strSrs = SDPairs2strboxy_ISS(ML(ich,1));
-                idch = strmatch([strDet, ' ',strSrs ],List,'exact');
+                idch = strcmp([strDet, ' ',strSrs ],List);
         end
         idlist = [idlist, idch];
         if ichzone==1
@@ -66,9 +66,9 @@ if get(handles.popupmenu_view,'value')==1%view zone
     izonebelong = [];
     for ilistzone = 1:numel(listok)
         for izone = 1:numel(DATA{id}.zone.plotLst)
-            chzone = DATA{id}.zone.plotLst{izone};
+%             chzone = DATA{id}.zone.plotLst{izone};
             labelzone = DATA{id}.zone.label{izone};
-            x = strmatch({labelzone} , {listok{ilistzone}}, 'exact');
+            x = strcmp({labelzone} , {listok(ilistzone)});
             if ~isempty(x)
 %                 for ichzone = 1:numel(chzone)
 %                     ich = chzone(ichzone);
@@ -94,7 +94,7 @@ if get(handles.popupmenu_view,'value')==1%view zone
    
     %AFFICHAGE THRESHOLD 
     if ~isempty(idlist)
-        tr = str2num(get(handles.edit_threshold,'string'));
+        tr = str2double(get(handles.edit_threshold,'string'));
         if isempty(tr)
             tr = 0;
         end
@@ -153,7 +153,7 @@ if get(handles.popupmenu_view,'value')==1%view zone
         figure;
         for id=1:size(MATtrial,3)
             subplot(4,lar,id);
-            tr = str2num(get(handles.edit_threshold,'string'));
+            tr = str2double(get(handles.edit_threshold,'string'));
             idtr = find(abs(MATtrial)<tr);
            % MATtrial(idtr)=nan;
             MATtrial(idtr)=0;
@@ -174,26 +174,26 @@ if get(handles.popupmenu_view,'value')==1%view zone
 elseif  get(handles.popupmenu_view,'value')==2%view avg zone
     listok = get(handles.listbox_selectedzone,'string');
     MATAVG = zeros(numel(listok));
-    idlist = [];
-    idlabel=[];
-    idzone =[];
+%     idlist = [];
+%     idlabel=[];
+%     idzone =[];
     for adji = 1:numel(listok)
         for adjj = 1:numel(listok)            
             labelzone = listok{adji};
-            x = strmatch({labelzone} ,idlabelall, 'exact');            
+            x = strcmp({labelzone} ,idlabelall);            
             labelzone = listok{adjj};
-            y = strmatch({labelzone} ,idlabelall, 'exact');
-            if isempty(x)|isempty(y)
+            y = strcmp({labelzone} ,idlabelall);
+            if isempty(x)||isempty(y)
                 msgbox('problem zone in subject');
             end
             chzone = DATA{id}.zone.plotLst{x};
             idlisti = [];
-            for ichzone = 1:numel(chzone);
+            for ichzone = 1:numel(chzone)
                 ich = chzone(ichzone);
                 if strcmp(DATA{id}.System,'ISS')
                     strDet = SDDet2strboxy_ISS(ML(ich,2));
                     strSrs = SDPairs2strboxy_ISS(ML(ich,1));
-                    idch = strmatch([strDet, ' ',strSrs ],List,'exact');
+                    idch = strcmp([strDet, ' ',strSrs ],List);
                 end
                 idlisti = [idlisti, idch];
             end
@@ -205,11 +205,11 @@ elseif  get(handles.popupmenu_view,'value')==2%view avg zone
                  if strcmp(DATA{id}.System,'ISS')
                     strDet = SDDet2strboxy_ISS(ML(ich,2));
                     strSrs = SDPairs2strboxy_ISS(ML(ich,1));
-                    idch = strmatch([strDet, ' ',strSrs ],List,'exact');
+                    idch = strcmp([strDet, ' ',strSrs ],List);
                  end
                 idlistj = [idlistj, idch];
             end
-            if isempty(idlisti)|isempty(idlistj)
+            if isempty(idlisti)||isempty(idlistj)
                 MATAVG(adji,adjj)=nan;
             else
                 temp = MAT(idlisti, idlistj);
@@ -218,7 +218,7 @@ elseif  get(handles.popupmenu_view,'value')==2%view avg zone
             
         end
     end
-    tr = str2num(get(handles.edit_threshold,'string'));
+    tr = str2double(get(handles.edit_threshold,'string'));
     idtr = find(abs(MATAVG)<tr);
     MATAVG(idtr)=0;
     h = imagesc(MATAVG);

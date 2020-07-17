@@ -10716,7 +10716,7 @@ label = strComp{idComp};
 strTopo = sprintf('%s\t %s\t %s\n', 'Detector', 'Source', label);
 
 try
-    load(fullfile(pathstr,'SelectedFactors.mat'))
+    load(fullfile(pathstr,'CorrectionApply.mat'))
     load(fullfile(pathstr, 'NIRS.mat'));
 catch
     return
@@ -10724,7 +10724,7 @@ end
 guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
 PMI = get(guiHOMER,'UserData');
 ML = PMI{currentsub}.data.MeasList;
-topo = PARCOMP(idComp).topo;
+topo = PARCORR(idComp).topo;
 
 
 % if strcmpi((PARCOMP(idComp).type),'GLM')
@@ -10736,7 +10736,7 @@ topo = PARCOMP(idComp).topo;
 % end
 
 for j = 1:ntopo
-    ichannel = PARCOMP(idComp).listgood(j);
+    ichannel = PARCORR(idComp).listgood(j);
     switch  NIRS.Cf.dev.n
         case 'ISS Imagent'
             strDet = SDDet2strboxy_ISS(ML(ichannel,2));
@@ -10756,7 +10756,7 @@ end
 
 clipboard('copy', strTopo);
 
-msgbox('The data of the selected component is copied');
+msgbox('The data of the selected component is copied in the clipboard');
 
 
 
@@ -10816,4 +10816,4 @@ end
 
 clipboard('copy', strTopo);
 
-msgbox('The data of the selected component is copied');
+msgbox('The data of the selected component is copied in the clipboard');
