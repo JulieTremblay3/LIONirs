@@ -741,7 +741,13 @@ m_trigfile.ufilter = 'trig.m$';
 m_trigfile.num     = [1 Inf];     % Number of inputs required 
 m_trigfile.help    = {' Open ManualTrig file. The manual trig is a .m Matlab script that defines the new TrigValue=X',...
     'an integer used for the trigger identification and the timingfile{1}=[15,30]; which indicate the timing of the'...
-    'trig event in seconds for the file 1. As the NIRS.mat structure could contain one or many files you must define a timingfile for each of the files present in your data. If as example the file 2 does not have any trig events defined the timingfile as empty value : timingfile{2} = [ ];.  Be aware that .m files names do not support space or accent in the name definition. Example :TrigValue = 3;timingfile{1} = [15, 30, 60];timingfile{2} = [ ];timingfile{3} = [15, 30, 60];timingfile{4} = [];'}; 
+    'trig event in seconds for the file 1. As the NIRS.mat structure could contain one or many files you must define a timingfile for each of the files present in your data. If as example the file 2 does not have any trig events defined the timingfile as empty value: timingfile{2} = [ ];.  Be aware that .m files names do not support space or accent in the name definition. ',...
+    'Example: ',...
+    'TrigValue = 3;',...
+    'timingfile{1} = [15, 30, 60];',...
+    'timingfile{2} = [ ];',...
+    'timingfile{3} = [15, 30, 60];',...
+    'timingfile{4} = [];'}; 
 
 
 E_manualtrig    = cfg_exbranch;
@@ -798,7 +804,7 @@ f_nirsmatinfo.tag     = 'f_nirsmatinfo';       %file names
 f_nirsmatinfo.filter  = {'xlsx','xls','txt'};
 f_nirsmatinfo.ufilter = '.*';    
 f_nirsmatinfo.num     = [1 Inf];     % Number of inputs required 
-f_nirsmatinfo.help    = {'Create the list of subject to group in a new forder example : ./GrandAverage/List.xlsx. The excel file must have 2 columns, first, the NIRS.mat subject location and second the channel list order to respect or zone to use. The result will kept the same helmet of the first subject in the list.'}; 
+f_nirsmatinfo.help    = {'Create the list of subject to group in a new forder example: ./GrandAverage/List.xlsx. The excel file must have 2 columns, first, the NIRS.mat subject location and second the channel list order to respect or zone to use. The result will kept the same helmet of the first subject in the list.'}; 
 
 m_Concatenate_Exclude      = cfg_menu;
 m_Concatenate_Exclude.tag  = 'm_Concatenate_Exclude';
@@ -806,7 +812,9 @@ m_Concatenate_Exclude.name = 'Set exclude channel to NAN';
 m_Concatenate_Exclude.labels = {'Exclude','Keep'};
 m_Concatenate_Exclude.values = {0,1};
 m_Concatenate_Exclude.val  = {0};
-m_Concatenate_Exclude.help = {'Set exclude channel to NAN, Exclude: rejected channel will be set to NAN. Keep: no special process concerning the rejected channels will be applied.'};
+m_Concatenate_Exclude.help = {'Set exclude channel to NAN,',...
+    'Exclude: rejected channel will be set to NAN. ',...
+    'Keep: no special process concerning the rejected channels will be applied.'};
 
 m_Concatenate_Normalized      = cfg_menu;
 m_Concatenate_Normalized.tag  = 'm_Concatenate_Normalized';
@@ -816,8 +824,8 @@ m_Concatenate_Normalized.values = {0,1,2};
 m_Concatenate_Normalized.val  = {0};
 m_Concatenate_Normalized.help = {'Apply a normalization to reduce individual subject  variability. Only apply using the channel list',...
     'No normalization : do not apply any normalization. ',...
-    'Min-Max Normalization : apply min max normalisation fixing boundary between 0 and 1.',... 
-    'Z-score Normalization : apply z-score normalization.',... 
+    'Min-Max Normalization: apply min max normalisation fixing boundary between 0 and 1.',... 
+    'Z-score Normalization: apply z-score normalization.',... 
     'Moeller, J., 2015. A word on standardization in longitudinal studies: don’t. Front Psychol 6. https://doi.org/10.3389/fpsyg.2015.01389'};
 
 E_Concatenate_nirsmat    = cfg_exbranch;
@@ -990,7 +998,7 @@ movingaverage_nbpoint.tag     = 'movingaverage_nbpoint';
 movingaverage_nbpoint.strtype = 'r';
 movingaverage_nbpoint.num     = [1 1];
 movingaverage_nbpoint.val    =  {1}; 
-movingaverage_nbpoint.help    = {'Defines the duration (sec) of the time interval (step) to calculate moving average M1 and M2. : Xn to Xn+step. Depending on the smoothing the user wants to apply, i.e. how sensitive detection of the signal’s variation should be, a higher or lower value should be indicated.'};
+movingaverage_nbpoint.help    = {'Defines the duration (sec) of the time interval (step) to calculate moving average M1 and M2: Xn to Xn+step. Depending on the smoothing the user wants to apply, i.e. how sensitive detection of the signal’s variation should be, a higher or lower value should be indicated.'};
 
 
 printreportthreshold  = cfg_menu;
@@ -1005,7 +1013,7 @@ b_meandiff         = cfg_branch;
 b_meandiff.tag     = 'b_meandiff';
 b_meandiff.name    = 'Artifact detection using moving average';
 b_meandiff.val     = {m_meandiff thresholdstep  movingaverage_nbpoint too_small_step_dur printreportthreshold};
-b_meandiff.help    = {'Moving average allows to identify discontinuity or strong perturbations in the signal. It is a criteria based on the signal’s mean variation for two subsequent time intervals. : M1 from Xn to Xn+step and M2 from Xn+1 to Xn+step+1. The step is defined by the user and defines the period of time for the moving average time windows. Changes of light intensity between M1 and M2 are then specified as the difference (D) between both means: D = M2-M1. Difference D is transferred into z-scores normalized over the entire dataset to determine which periods have increased signal variations. The threshold, i.e. the z-score above which abnormal variations in the signal are identified as artifact intervals, is to be defined by the user. '}';
+b_meandiff.help    = {'Moving average allows to identify discontinuity or strong perturbations in the signal. It is a criteria based on the signal’s mean variation for two subsequent time intervals: M1 from Xn to Xn+step and M2 from Xn+1 to Xn+step+1. The step is defined by the user and defines the period of time for the moving average time windows. Changes of light intensity between M1 and M2 are then specified as the difference (D) between both means: D = M2-M1. Difference D is transferred into z-scores normalized over the entire dataset to determine which periods have increased signal variations. The threshold, i.e. the z-score above which abnormal variations in the signal are identified as artifact intervals, is to be defined by the user. '}';
 
 m_min_subinterval        = cfg_menu;
 m_min_subinterval.tag    = 'm_min_subinterval';
@@ -1049,7 +1057,7 @@ b_corr        = cfg_branch;
 b_corr.tag     = 'b_corr';
 b_corr.name    = 'Correlation between channels for artifact interval';
 b_corr.val     = {m_corr corr_thr};
-b_corr.help    = {'Finally, artifact detection is based on a correlation coefficient between channels. It determines the Pearson’s correlation coefficient threshold of channels to be considered as being affected by the same event. For each artifact interval that has previously been detected, channels that have a correlation equal or above the threshold with the time course of this artifact, are detected as well. This means that it asks for each artifact to find the channels showing the same signature, but have not been  detected based on the previous criteria.'}';
+b_corr.help    = {'Artifact detection is based on a correlation coefficient between channels. It determines the Pearson’s correlation coefficient threshold of channels to be considered as being affected by the same event. For each artifact interval that has previously been detected, channels that have a correlation equal or above the threshold with the time course of this artifact, are detected as well. This means that it asks for each artifact to find the channels showing the same signature, but have not been  detected based on the previous criteria.'}';
 
 m_minpourcentagebad       = cfg_menu;
 m_minpourcentagebad.tag  = 'm_minpourcentagebad';
@@ -1071,9 +1079,9 @@ b_minpourcentagebad         = cfg_branch;
 b_minpourcentagebad.tag     = 'b_minpourcentagebad';
 b_minpourcentagebad.name    = 'Minimal percentage of bad channels to be mark as artefact';
 b_minpourcentagebad.val     = {m_minpourcentagebad minpourcentagebad};
-b_minpourcentagebad.help    = {'In some case the signal is clean and very few channels are detect as artefact.',...
+b_minpourcentagebad.help    = {'In some case, the signal is clean and very few channels are detect as artefact.',...
     'They are few chance that is due to a movement due to the impact on a so low number of channels.',...
-    'You may chose to restore if less than 10% of the channels are detected as noisy for this period of time'};
+    'You may chose to restore if less than 10% of the channels are detected as noisy for this period of time.'};
 
 
 % Executable Branch
@@ -1107,7 +1115,7 @@ i_Freq_cardiac.tag     = 'i_Freq_cardiac';
 i_Freq_cardiac.strtype = 'r';       
 i_Freq_cardiac.num     = [1 inf];     
 i_Freq_cardiac.val     = {[0.8,2.3]};
-i_Freq_cardiac.help    = {'Enter the range to dectect the cardiac peak, the peak value between this interval, if you are outside of the range of the peak please adjust these values, Normal cardiac pulse will be around 1 hz in adult population and 2hz in babies'}; 
+i_Freq_cardiac.help    = {'Enter the range to detect the cardiac peak, the peak value between this interval, if you are outside of the range of the peak please adjust these values, normal cardiac pulse will be around 1 Hz in adult population and 2 Hz in babies'}; 
 
 %Input Frequency
 i_COHTRESHOLD_cardiac          = cfg_entry; 
