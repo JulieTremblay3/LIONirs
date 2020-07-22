@@ -17,7 +17,7 @@ E_IOMTG.name    = 'Montage configuration (.prj)';
 E_IOMTG.tag     = 'E_IOMTG';
 E_IOMTG.val     = {};
 E_IOMTG.prog    = @nirs_run_E_IOMTG;
-E_IOMTG.help    = {'Use to create project configuration file using source and detector position'};
+E_IOMTG.help    = {'Use to create project configuration file using source and detector position.'};
 
 
 %General entry use by any modules
@@ -130,7 +130,7 @@ inputBOXY.name    = 'Select BOXY files';   % The displayed name
 inputBOXY.tag     = 'inputBOXY';              %file names
 inputBOXY.ufilter = '.0*';                 %files are labeled with extension .001, .002, .003, etc. 
 inputBOXY.num     = [1 Inf];               % Number of inputs required 
-inputBOXY.help    = {'Select raw BOXY data files for this subject record with and ISS imagent system (MUX32)'}; 
+inputBOXY.help    = {'Select raw BOXY data files for this subject record with and ISS imagent system (MUX32).'}; 
 
 age1         = cfg_entry;
 age1.name    = 'Subject age';
@@ -138,7 +138,9 @@ age1.tag     = 'age1';
 age1.strtype = 'r';
 age1.num     = [1 Inf];
 age1.val     = {25};
-age1.help    = {'Age of the subject. Used to caculate DPF to HbO/HbR conversion (Duncan et al 1995.) Only for 690,830,744,807 nm wavelenght;'};
+age1.help    = {'Age of the subject.',...
+    'Used to caculate DPF to HbO/HbR conversion (Duncan et al 1995).',...
+    'Only for 690,830,744,807 nm wavelenght.'};
 
 raw_onset_files         = cfg_files;  
 raw_onset_files.name    = 'Select onset files'; % The displayed name
@@ -177,7 +179,8 @@ output_path.tag     = 'output_path';
 output_path.strtype = 's';
 output_path.num     = [1 Inf];     
 output_path.val     = {'c:/Data/Analysed/C01'}; 
-output_path.help    = {'Path for .nir output files: should be something like ..\dataSPM\ (omit backslashes)'}; 
+output_path.help    = {'Path for .nir output files.',...
+    'Should be something like ..\dataSPM\ (omit backslashes).'}; 
 
 config_path         = cfg_branch;
 config_path.tag     = 'config_path';
@@ -341,7 +344,7 @@ STD_menu.name   = 'Apply option';
 STD_menu.labels = {'Segment','Whole block'};
 STD_menu.values = {1,2}; 
 STD_menu.val    = {1};
-STD_menu.help   = {'Look on different segment std deviation or whole block, segment will keep the channel if only a small part are lost'}';
+STD_menu.help   = {'Look on different segment std deviation or whole block, segment will keep the channel if only a small part are lost.'}';
 
 STD_amp_choice         = cfg_branch;
 STD_amp_choice.tag     = 'STD_amp_choice';
@@ -363,13 +366,13 @@ DC_amp.name     = 'DC amplitude';
 DC_amp.strtype  = 'r';       
 DC_amp.num      = [1 1];     
 DC_amp.val      = {100};
-DC_amp.help     = {'Remove channel with DC intensity lower than a DC amplitude value'}';
+DC_amp.help     = {'Remove channel with DC intensity lower than a DC amplitude value.'}';
 
 DC_amp_choice         = cfg_branch;
 DC_amp_choice.tag     = 'DC_amp_choice';
 DC_amp_choice.name    = 'DC intensity criteria';
 DC_amp_choice.val     = {DC_enable DC_amp};
-DC_amp_choice.help    = {'Criteria to reject noisy channels based on DC amplitude'};
+DC_amp_choice.help    = {'Criteria to reject noisy channels based on DC amplitude.'};
 
 
 
@@ -402,7 +405,7 @@ inputrawhomer.name    = 'Select .nirs'; % The displayed name
 inputrawhomer.tag     = 'inputrawhomer';    %file names
 inputrawhomer.ufilter = '.nirs';    %
 inputrawhomer.num     = [1 Inf];     % Number of inputs required 
-inputrawhomer.help    = {'Select raw .nirs file (HOMER FORMAT)'}; 
+inputrawhomer.help    = {'Select raw .nirs file (HOMER FORMAT).'}; 
 
 
 
@@ -424,7 +427,7 @@ E_rawhomer.tag  = 'E_rawhomer';
 E_rawhomer.val  = {inputrawhomer,age1, prjfile,output_path ,m_inputrawhomer};   
 E_rawhomer.prog = @nirs_run_readhomerfile;  
 E_rawhomer.vout = @nirs_cfg_vout_readhomerfile;
-E_rawhomer.help = {'Select raw .nirs data files. Matlab structure containing field : ''d'' (raw data sample x channel), ''ml''(channel used sources, detector, weight wavelength), ''t'' (Time vector), . data, ml,  S vector will be used as aux trigger 1'};
+E_rawhomer.help = {'Select raw .nirs data files. Matlab structure containing field: ''d'' (raw data sample x channel), ''ml''(channel used sources, detector, weight wavelength), ''t'' (Time vector), data, ml, S vector will be used as aux trigger 1.'};
 
 function vout = nirs_cfg_vout_readhomerfile(job)
     vout = cfg_dep;                    
@@ -441,7 +444,7 @@ inputNIRxscout.name    = 'Select NIRx NIRScout data'; % The displayed name
 inputNIRxscout.tag     = 'inputNIRxscout';    %file names
 inputNIRxscout.ufilter = '.hdr';    %
 inputNIRxscout.num     = [1 Inf];     % Number of inputs required 
-inputNIRxscout.help    = {'Select raw NIRSCOUT recorded data'}; 
+inputNIRxscout.help    = {'Select raw NIRSCOUT recorded data.'}; 
 
 
 b_foldername_NIRxscout         = cfg_branch;        %to remove 
@@ -455,7 +458,8 @@ e_manualname_NIRxscout.name    = 'Name';
 e_manualname_NIRxscout.tag     = 'e_manualname_NIRxscout';       
 e_manualname_NIRxscout.strtype = 's';
 e_manualname_NIRxscout.num     = [0 Inf];     
-e_manualname_NIRxscout.help    = {'Specify data file name, if several file separate the name by a comma as example : file01, file02.'}'; 
+e_manualname_NIRxscout.help    = {'Specify data file name, if several file separate the name by a comma.',...
+    'As example: file01, file02.'}'; 
 
 
 b_manualname_NIRxscout         = cfg_branch;        %to remove 
@@ -469,7 +473,7 @@ b_defaultname_NIRxscout         = cfg_branch;        %to remove
 b_defaultname_NIRxscout.tag     = 'b_defaultname_NIRxscout';
 b_defaultname_NIRxscout.name    = 'Default'; 
 b_defaultname_NIRxscout.val     = {};
-b_defaultname_NIRxscout.help    = {'Use default recording name of the raw file'}';
+b_defaultname_NIRxscout.help    = {'Use default recording name of the raw file.'}';
         
 %Common to most modules: for creating a new directory and copying NIRS.mat
 % That the default option is false
@@ -501,20 +505,20 @@ e_shortdistancesrs.tag     = 'e_shortdistancesrs';
 e_shortdistancesrs.strtype = 'r';
 e_shortdistancesrs.num     = [1 Inf];
 e_shortdistancesrs.val     = {[1,2,3,4,5,6,7,8]}; 
-e_shortdistancesrs.help    = {'Identify the short distance localization on the helmet, as example if the probe are place in source 1 and source to write 1,2'};
+e_shortdistancesrs.help    = {'Identify the short distance localization on the helmet, as an example if the probes are placed in source 1 and source 2, write 1,2.'};
 
 b_shortdistanceavailable         = cfg_branch;
 b_shortdistanceavailable.tag     = 'b_shortdistanceavailable';
 b_shortdistanceavailable.name    = 'Yes';
 b_shortdistanceavailable.val     = {e_shortdistancesrs e_shortdistancedet};
-b_shortdistanceavailable.help    = {'Short distance are available in the recording (det 16 will be associate)'}';
+b_shortdistanceavailable.help    = {'Short distance are available in the recording (det 16 will be associate).'}';
 
 c_shortdistance         = cfg_choice;
 c_shortdistance.tag     = 'c_shortdistance';
 c_shortdistance.name    = 'Short distance probe';
 c_shortdistance.values  = {b_shortdistanceavailable, b_shortdistunavailable};
 c_shortdistance.val     = {b_shortdistanceavailable};
-c_shortdistance.help    = {''}';
+c_shortdistance.help    = {'NIRx provides a short distance probe with multiple short distances placed in the source location. If you use the probe to indicate the source number, you insert the probe. A zone file will be created to associate the short distance channels to the closest channels. They could be used as a regressor in the GLM. Use the zone as a regressor in the Component extract list.'};
 
 % Executable Branch
 E_readNIRxscout      = cfg_exbranch;      
@@ -523,7 +527,7 @@ E_readNIRxscout.tag  = 'E_readNIRxscout';
 E_readNIRxscout.val  = {inputNIRxscout,age1,prjfile,output_path,c_nameconvention_NIRxscout,STD_amp_choice, DC_amp_choice,distmin, distmax,c_shortdistance};   
 E_readNIRxscout.prog = @nirs_run_readNIRxscout;  
 E_readNIRxscout.vout = @nirs_cfg_vout_readNIRxscout;
-E_readNIRxscout.help = {'Select NIRSCOUT raw data from NIRx'};
+E_readNIRxscout.help = {'Select NIRSCOUT raw data from NIRx.'};
 
 function vout = nirs_cfg_vout_readNIRxscout(job)
     vout = cfg_dep;                    
@@ -538,7 +542,7 @@ inputSNIRF.name    = 'Select .snirf data'; % The displayed name
 inputSNIRF.tag     = 'inputSNIRF';    %file names
 inputSNIRF.ufilter = '.snirf';    %
 inputSNIRF.num     = [1 Inf];     % Number of inputs required 
-inputSNIRF.help    = {'Select .snirf file record data'}; 
+inputSNIRF.help    = {'Select .snirf file record data.'}; 
 
 % Folder selector.
 output_path_SNIRF         = cfg_entry; %path
@@ -560,15 +564,15 @@ b_createProject         = cfg_branch; % Is an empty branch.
 b_createProject.tag     = 'b_createProject';
 b_createProject.name    = 'Create .prj';
 b_createProject.val     = {};
-b_createProject.help    = {'Create a new project file from the SNIRF file'};
+b_createProject.help    = {'Create a new project file from the SNIRF file.'};
 
 % Create an option on wether a project file should be created or imported.
 c_createImportProjectSnirf          = cfg_choice;
 c_createImportProjectSnirf.tag      = 'c_createImportProjectSnirf';
-c_createImportProjectSnirf.name     = 'Create or import a project file?';
+c_createImportProjectSnirf.name     = 'Create or import a project file';
 c_createImportProjectSnirf.values   = {b_importProject, b_createProject};
 c_createImportProjectSnirf.val      = {b_importProject};
-c_createImportProjectSnirf.help     = {''}';
+c_createImportProjectSnirf.help     = {'Choose whether you want to import a project or create a new one'}';
 
 % Executable Branch -- Create the drop down menu branch necessary to read .snirf file.
 E_readSNIRF      = cfg_exbranch;      
@@ -591,28 +595,28 @@ b_importProject         = cfg_branch; % Contains the project file selector.
 b_importProject.tag     = 'b_importProject';
 b_importProject.name    = 'Import .prj';
 b_importProject.val     = {prjfile};
-b_importProject.help    = {'Import an already existing project file'};
+b_importProject.help    = {'Import a project file that already exists'};
 
 % Folder selector.
 e_MultimodalPath          = cfg_files; %path
-e_MultimodalPath.name     = '';
+e_MultimodalPath.name     = 'Select the new folder';
 e_MultimodalPath.tag      = 'e_MultimodalPath';
 e_MultimodalPath.filter   = {'dir'};
 e_MultimodalPath.ufilter  = '.*';    %
 e_MultimodalPath.num      = [1 1];     % Number of inputs required 
-e_MultimodalPath.help     = {'New folder used for multimodal files EEG, AUX, Video, Audio. If the location of the multimodal files has changed, enter the new directory location. This function expects all the multimodal files in the same folder. For a more specific adjustment use the Display GUI menu Setting/Multimodal files to define a new location.'};
+e_MultimodalPath.help     = {'New folder used for multimodal files such as EEG, AUX, Video or Audio. If the location of the multimodal files has changed, enter the new directory location. This function expects all the multimodal files in the same folder. For a more specific adjustment use the Display GUI menu Setting/Multimodal files to define a new location.'};
 
 b_MultimodalPath_yes        = cfg_branch; % Is an empty branch.
 b_MultimodalPath_yes.tag    = 'b_MultimodalPath_yes';
 b_MultimodalPath_yes.name   = 'New folder';
 b_MultimodalPath_yes.val    = {e_MultimodalPath};
-b_MultimodalPath_yes.help   = {'Folder ajustment for multimodal data'};
+b_MultimodalPath_yes.help   = {'Folder adjustment for multimodal data.'};
 
 b_MultimodalPath_no         = cfg_branch; % Is an empty branch.
 b_MultimodalPath_no.tag     = 'b_MultimodalPath_no';
 b_MultimodalPath_no.name    = 'No adjustement';
 b_MultimodalPath_no.val     = {};
-b_MultimodalPath_no.help    = {'No path ajustment for multimodal data'};
+b_MultimodalPath_no.help    = {'No path adjustment for multimodal data.'};
 
 % Choice to edit multimodal path
 c_MultimodalPath          = cfg_choice;
@@ -629,9 +633,9 @@ E_NIRSmatdiradjust.tag  = 'E_NIRSmatdiradjust';
 E_NIRSmatdiradjust.val  = {NIRSmat,c_MultimodalPath};   
 E_NIRSmatdiradjust.prog = @nirs_run_NIRSmatdiradjust;  
 E_NIRSmatdiradjust.vout = @nirs_cfg_vout_readNIRxscout;
-E_NIRSmatdiradjust.help = {'NIRS.mat structure contain the information about all the localisation of the data file on the hard drive.',...
-    'this function will modify all the subdirectory of the data file at the actuel localisation  of NIRS.mat.',...
-    'Be carefull, it is not yet test for path when the dir contain many time the same name'};
+E_NIRSmatdiradjust.help = {'NIRS.mat structure contains the information about all the localizations of the data files on the hard drive.',...
+    'This function will modify all the subdirectories of the data files at the actuel localization  of the NIRS.mat.',...
+    'Be careful, it is not yet tested for path that the dir contain the same name many times.'};
 
 function vout = nirs_cfg_vout_NIRSmatdiradjust(job)
     vout = cfg_dep;                    
@@ -647,7 +651,7 @@ e_NIRSmatdirnewbranch.tag     = 'e_NIRSmatdirnewbranch';
 e_NIRSmatdirnewbranch.strtype = 's';
 e_NIRSmatdirnewbranch.num     = [1 Inf];     
 e_NIRSmatdirnewbranch.val     = {'Branch'}; 
-e_NIRSmatdirnewbranch.help    = {'A copy of the last step will be create to create a new branch of analysis'}; 
+e_NIRSmatdirnewbranch.help    = {'A copy of the last step will be create to create a new branch of analysis.'}; 
 
 
 m_newbranchcomponent         = cfg_menu; 
@@ -656,7 +660,7 @@ m_newbranchcomponent.tag     = 'm_newbranchcomponent';
 m_newbranchcomponent.labels  = {'Keep', 'Clear' };
 m_newbranchcomponent.values  = {1,0};
 m_newbranchcomponent.val     = {1}; 
-m_newbranchcomponent.help    = {'When you create a new branch you could keep the component from the previous operation tree or clear them to restart in the new branch'};
+m_newbranchcomponent.help    = {'When you create a new branch, you could keep the component from the previous operation tree or clear them to restart in the new branch.'};
 
 E_NIRSmatcreatenewbranch      = cfg_exbranch;      
 E_NIRSmatcreatenewbranch.name = 'New branch';            
@@ -664,8 +668,8 @@ E_NIRSmatcreatenewbranch.tag  = 'E_NIRSmatcreatenewbranch';
 E_NIRSmatcreatenewbranch.val  = {NIRSmat,e_NIRSmatdirnewbranch,m_newbranchcomponent};   
 E_NIRSmatcreatenewbranch.prog = @nirs_run_NIRSmatcreatenewbranch;  
 E_NIRSmatcreatenewbranch.vout = @nirs_cfg_vout_NIRSmatcreatenewbranch;
-E_NIRSmatcreatenewbranch.help = {'NIRS.mat structure contain the information about all the localisation of the data file on the hard drive.',...
-    'this function will create a copy of the NIRS.mat structure to create a new independant branch of analysis'};
+E_NIRSmatcreatenewbranch.help = {'NIRS.mat structure contains the information about all the localizations of the data files on the hard drive.',...
+    'This function will create a copy of the NIRS.mat structure to create a new independant branch of analysis.'};
 
 function vout = nirs_cfg_vout_NIRSmatcreatenewbranch(job)
     vout = cfg_dep;                    
@@ -1600,8 +1604,7 @@ NIRSsession.tag     = 'NIRSsession';
 NIRSsession.strtype = 's';
 NIRSsession.num     = [1 inf];
 NIRSsession.val     = {'end'};
-NIRSsession.help    = {'Session number, or module in the processing NIRS file.'};
-
+NIRSsession.help    = {'Enter the session number or the module in the processing NIRS file.'};
 
 NIRSname         = cfg_entry;
 NIRSname.name    = 'File output';
@@ -1609,20 +1612,20 @@ NIRSname.tag     = 'FileOutput';
 NIRSname.strtype = 's';
 NIRSname.num     = [1 inf];
 NIRSname.val     = {'name'};
-NIRSname.help    = {'OutputName only use to name concatenate file else initial name will be kept'};
+NIRSname.help    = {'OutputName only use to name concatenate file, else initial name will be kept.'};
 
 
 NIRS_export_Concatenatefile         = cfg_branch;
 NIRS_export_Concatenatefile.tag     = 'NIRS_export_Concatenatefile';
 NIRS_export_Concatenatefile.name    = 'Concatenate file';
 NIRS_export_Concatenatefile.val     = {NIRSname};
-NIRS_export_Concatenatefile.help    = {'Export nirs file with all segment one after the other.'}';
+NIRS_export_Concatenatefile.help    = {'Export .nirs file with all segments one after the other.'}';
 
 NIRS_export_Separatefile         = cfg_branch;
 NIRS_export_Separatefile.tag     = 'NIRS_export_Separatefile';
 NIRS_export_Separatefile.name    = 'Separate file';
 NIRS_export_Separatefile.val     = {};
-NIRS_export_Separatefile.help    = {'Export each file in a separe .nirs file'}';
+NIRS_export_Separatefile.help    = {'Export each file in a separe .nirs file. The output file is located in the same folder of the NIRS.mat file.'}';
 
 %to be delete
 NIRS_exportoption         = cfg_menu;
@@ -1649,7 +1652,7 @@ E_writeNIRS.tag  = 'WriteNIRS';
 E_writeNIRS.val  = {NIRSsession,NIRSmat,c_NIRS_exportoption};
 E_writeNIRS.prog = @nirs_run_writenirs;
 E_writeNIRS.vout = @nirs_cfg_vout_writenirs;
-E_writeNIRS.help = {'Write in .nirs format for Homer'};
+E_writeNIRS.help = {'Write in .nirs format for Homer.'};
 
 function vout = nirs_cfg_vout_writenirs(job)
     vout = cfg_dep;                    
@@ -1693,7 +1696,7 @@ NIR_FileIn.tag     = 'NIR_FileIn';       %file names
 NIR_FileIn.filter  = 'nir';
 NIR_FileIn.ufilter = '.nir$';    
 NIR_FileIn.num     = [1 Inf];     % Number of inputs required 
-NIR_FileIn.help    = {'Select a .NIR file to extract a smaller time segment and create a new .NIR file'}; 
+NIR_FileIn.help    = {'Select a .NIR file to extract a smaller time segment and create a new .NIR file.'}; 
 
 
 NIR_START_TIME         = cfg_entry;
@@ -1702,7 +1705,7 @@ NIR_START_TIME.tag     = 'NIR_START_TIME';
 NIR_START_TIME.strtype = 'r';
 NIR_START_TIME.num     = [1 1];
 NIR_START_TIME.val     = {0};
-NIR_START_TIME.help    = {'Time start selection'};
+NIR_START_TIME.help    = {'Time start selection.'};
 
 NIR_STOP_TIME         = cfg_entry;
 NIR_STOP_TIME.name    = 'Time stop';
@@ -1710,7 +1713,7 @@ NIR_STOP_TIME.tag     = 'NIR_STOP_TIME';
 NIR_STOP_TIME.strtype = 'r';
 NIR_STOP_TIME.num     = [1 1];
 NIR_STOP_TIME.val     = {0};
-NIR_STOP_TIME.help    = {'Time end of the selection'};
+NIR_STOP_TIME.help    = {'Time end of the selection.'};
 
 
 % Executable Branch
@@ -1720,7 +1723,7 @@ E_NIR_segment.tag  = 'Write_NIR_segment';
 E_NIR_segment.val  = {NIRSmat, NIR_FileIn, NIR_START_TIME,NIR_STOP_TIME};
 E_NIR_segment.prog = @nirs_run_E_NIR_segment;
 E_NIR_segment.vout = @nirs_run_vout_E_NIR_segment;
-E_NIR_segment.help = {'Use a nir file to write a smaller segment, can be use to specify only the baseline for the PCA artifact for example.'};
+E_NIR_segment.help = {'Use a .NIR file to write a smaller segment, can be use to specify only the baseline for the PCA artifact for example.'};
 
 function vout = nirs_run_vout_E_NIR_segment(job)
     vout            = cfg_dep;                    
@@ -1738,7 +1741,7 @@ SNIRFname.name    = 'Output filename';
 SNIRFname.tag     = 'FileOutput';       
 SNIRFname.strtype = 's';
 SNIRFname.num     = [1 inf];
-SNIRFname.help    = {'Used to name the resulting output SNIRF file'};
+SNIRFname.help    = {'Used to name the resulting output SNIRF file.'};
 
 SNIRF_outpath         = cfg_entry; %path
 SNIRF_outpath.name    = 'Folder path for output SNIRF file';
@@ -1746,7 +1749,8 @@ SNIRF_outpath.tag     = 'SNIRF_outpath';
 SNIRF_outpath.strtype = 's';
 SNIRF_outpath.num     = [1 Inf];     
 SNIRF_outpath.val     = {'C:\data\'}; 
-SNIRF_outpath.help    = {'The path of the folder in which the SNIRF file is going to be created. Ex: C:\data\user1\SNIRFfolder\'}; 
+SNIRF_outpath.help    = {'The path of the folder in which the SNIRF file is going to be created.',...
+    'Ex: C:\data\user1\SNIRFfolder\'}; 
 
 f_SNIRFfile         = cfg_files;
 f_SNIRFfile.name    = 'Select existing SNIRF file'; 
@@ -1765,13 +1769,14 @@ B_SNIRFCreate       = cfg_branch;
 B_SNIRFCreate.name  = 'Create a new SNIRF file';
 B_SNIRFCreate.tag   = 'B_SNIRFCreate';
 B_SNIRFCreate.val   = {SNIRFname SNIRF_outpath};
+B_SNIRFCreate.help  = {'Export the data to a new SNIRF file.'};
 
 B_SNIRFExportLocation         = cfg_choice;
 B_SNIRFExportLocation.tag     = 'B_SNIRFExportLocation';
 B_SNIRFExportLocation.name    = 'Choose SNIRF export type';
 B_SNIRFExportLocation.val     = {B_SNIRFCreate};
 B_SNIRFExportLocation.values  = {B_SNIRFCreate  B_SNIRFAppend};
-B_SNIRFExportLocation.help    = {'Choose whether you want to export your data to a new SNIRF file or append it to an existing SNIRF file'};
+B_SNIRFExportLocation.help    = {'Choose whether you want to export your data to a new SNIRF file or append it to an existing SNIRF file.'};
 
 % Executable Branch
 E_writeSNIRF      = cfg_exbranch;
@@ -1780,7 +1785,7 @@ E_writeSNIRF.tag  = 'E_writeSNIRF';
 E_writeSNIRF.val  = {NIRSmat,B_SNIRFExportLocation};
 E_writeSNIRF.prog = @nirs_run_writeSNIRF;
 E_writeSNIRF.vout = @nirs_cfg_vout_writeSNIRF;
-E_writeSNIRF.help = {'Write session in Shared Near Infrared File Format Specification to export the data',...
+E_writeSNIRF.help = {'Write session in Shared Near Infrared File Format Specification to export the data.',...
     'This will produce data format .snirf' };
 
 function vout = nirs_cfg_vout_writeSNIRF(job)
@@ -2082,7 +2087,7 @@ E_viewNIRS.tag  = 'E_viewNIRS';
 E_viewNIRS.val  = {NIRSmat};
 E_viewNIRS.prog = @nirs_run_E_viewNIRS;
 E_viewNIRS.vout = @nirs_cfg_vout_E_viewNIRS;
-E_viewNIRS.help = {'Display NIRS.mat gui.'};
+E_viewNIRS.help = {'Display NIRS.mat GUI.'};
 
 function vout = nirs_cfg_vout_E_viewNIRS(~)
     vout            = cfg_dep;                    
@@ -2563,7 +2568,7 @@ EEG_files.name    = 'EEG_files'; % The displayed name
 EEG_files.tag     = 'EEG_files';          
 EEG_files.num     = [0 Inf];     % Number of inputs required 
 EEG_files.val{1}  = {''};
-EEG_files.help    = {'Open EEG files '}; % help text displayed
+EEG_files.help    = {'Open EEG files.'}; % help text displayed
 
 %%%%%%MODULE 6
 % Executable Branch
@@ -2573,9 +2578,9 @@ E_readEEG.tag  = 'E_readEEG';
 E_readEEG.val  = {NIRSmat,EEG_files};   
 E_readEEG.prog = @nirs_run_readEEG;  
 E_readEEG.vout = @nirs_cfg_vout_readEEG;
-E_readEEG.help = {'Read simulteneaous EEG data; Note trig must be syncrhonised with the NIRS',... 
-    'Use before the normalisation step the bloc will be cut and associate to the trig in nirs data.',...
-    'Use after the normalisation step you will need to match the blocs to the nirs data manually.'};
+E_readEEG.help = {'Read simultaneous EEG data; Note trig must be synchronized with the NIRS.',... 
+    'Use before the normalization step the block will be cut and associate to the trig in nirs data.',...
+    'Use after the normalization step you will need to match the blocks to the nirs data manually.'};
 
 
 %make NIRS.mat available as a dependency
@@ -2594,7 +2599,8 @@ e_readEEGMarker_Marker.tag     = 'e_readEEGMarker_Marker';
 e_readEEGMarker_Marker.strtype = 's';
 e_readEEGMarker_Marker.num     = [1 Inf];     
 e_readEEGMarker_Marker.val     = {'MARKER1:1,MARKER2:2,MARKER3:3'}; 
-e_readEEGMarker_Marker.help    = {'Write the marker to import use the exact label as example: MARKER1:1,MARKER2=2,MARKER3=3'}; 
+e_readEEGMarker_Marker.help    = {'Write the marker to import use the exact label',...
+    'As an example: MARKER1:1,MARKER2=2,MARKER3=3'}; 
 
 
 E_readEEGMarker      = cfg_exbranch;      
@@ -2603,7 +2609,7 @@ E_readEEGMarker.tag  = 'E_readEEG';
 E_readEEGMarker.val  = {NIRSmat, e_readEEGMarker_Marker};   
 E_readEEGMarker.prog = @nirs_run_readEEGMarker;  
 E_readEEGMarker.vout = @nirs_cfg_vout_readEEGMarker;
-E_readEEGMarker.help = {''};
+E_readEEGMarker.help = {'Import EEG markers as fNIRS triggers. fNIRS uses trigger information (i.e. integer value) to identify the event. The toolbox uses trigger information  segmentation, to model a hemodynamic response or to average fNIRS data.'};
 
 
 %make NIRS.mat available as a dependency
@@ -2623,7 +2629,8 @@ Video_files.name    = 'Video files'; % The displayed name
 Video_files.tag     = 'Video_files';          
 Video_files.num     = [0 Inf];     % Number of inputs required 
 Video_files.val{1}  = {''};
-Video_files.help    = {'Open Video or Audio files, issue with 32 bit codec need 32 bit matlab version '}; % help text displayed
+Video_files.help    = {'Open Video or Audio files.',...
+'The issue with 32 bit codec is that it needs 32 bits Matlab version.'}; % help text displayed
 
 
 video_files_sync         = cfg_menu;
@@ -2632,8 +2639,7 @@ video_files_sync.tag     = 'video_files_sync';
 video_files_sync.labels  = {'EEG ','NIRS ','AUX '};
 video_files_sync.values  = {0,1,2};
 video_files_sync.val     = {0};
-video_files_sync.help    = {'Video is record silmultaneously to EEG or NIRS data recording, if they have a delay please edit the video to removing exceeding part at the beginning.'};
-
+video_files_sync.help    = {'Video is recording simultaneously to EEG or NIRS data recording, if they have a delay please edit the video to removing exceeding part at the beginning.'};
 
 
 b_videooffset_no         = cfg_branch;
@@ -2661,7 +2667,7 @@ c_videooffset.tag    = 'c_videooffset';
 c_videooffset.name   = 'Offset';
 c_videooffset.values = {b_videooffset_yes, b_videooffset_no};
 c_videooffset.val    = {b_videooffset_no};
-c_videooffset.help   = {'Do you have lag between Video and Ref Synchronisation trigger ?'}';
+c_videooffset.help   = {'Is there is lag between Video and Ref Synchronisation trigger, select ''yes''. Otherwise, seelct ''No'''}';
 
 %%%%%%MODULE 6
 % Executable Branch
@@ -2671,7 +2677,7 @@ E_readVideo.tag  = 'E_readVideo';
 E_readVideo.val  = {NIRSmat,Video_files,video_files_sync,c_videooffset};   
 E_readVideo.prog = @nirs_run_readVideo;  
 E_readVideo.vout = @nirs_cfg_vout_readVideo;
-E_readVideo.help = {'Read simulteneaous video data, The synchronisation could be done using EEG trig, off'};
+E_readVideo.help = {'Read simultaneous video data, the synchronization could be done using EEG trig, off'};
 
 
 %make NIRS.mat available as a dependency
@@ -2735,7 +2741,7 @@ E_readAudio.tag  = 'E_readAudio';
 E_readAudio.val  = {NIRSmat,Audio_files,Audio_files_sync,c_Audiooffset};   
 E_readAudio.prog = @nirs_run_readAudio;  
 E_readAudio.vout = @nirs_cfg_vout_readAudio;
-E_readAudio.help = {'Read simulteneaous audio data, The synchronisation could be done using EEG AUX or NIRS trig, off'};
+E_readAudio.help = {'Read simultaneous audio data, The synchronisation could be done using EEG AUX or NIRS trig, off'};
 
 %make NIRS.mat available as a dependency
 function vout = nirs_cfg_vout_readAudio(job)
@@ -2752,7 +2758,7 @@ AUX_files.name    = 'AUX_files'; % The displayed name
 AUX_files.tag     = 'AUX_files';          
 AUX_files.num     = [0 Inf];     % Number of inputs required 
 AUX_files.val{1}  = {''};
-AUX_files.help    = {'Open AUX files '}; % help text displayed
+AUX_files.help    = {'Open AUX files. '}; % help text displayed
 
 %%%%%%MODULE 6
 % Executable Branch
@@ -2762,9 +2768,10 @@ E_readAUX.tag  = 'E_readAUX';
 E_readAUX.val  = {NIRSmat,AUX_files};   
 E_readAUX.prog = @nirs_run_readAUX;  
 E_readAUX.vout = @nirs_cfg_vout_readAUX;
-E_readAUX.help = {'Read simulteneaous AUX data; Note trig must be syncrhonised with the NIRS',... 
-    'Use before the normalisation step the bloc will be cut and associate to the trig in nirs data.',...
-    'Use after the normalisation step you will need to match the blocs to the nirs data manually.'};
+E_readAUX.help = {'Read simultaneous AUX data; Note trig must be synchronized with the NIRS',... 
+    'Use before the normalization step the block will be cut and associate to the trig in nirs data.',...
+    'Use after the normalization step you will need to match the blocks to the nirs data manually.'};
+
 
 
 %make NIRS.mat available as a dependency
@@ -2789,7 +2796,7 @@ e_TimetoPeak1.tag     = 'e_TimetoPeak1';
 e_TimetoPeak1.strtype = 'r';       
 e_TimetoPeak1.num     = [1 inf];     
 e_TimetoPeak1.val     = {[5.4]};
-e_TimetoPeak1.help    = {'Time to peak of the first gamma density'}; 
+e_TimetoPeak1.help    = {'Time to peak of the first gamma density.'}; 
 
 
 %General entry use by any modules
@@ -2869,7 +2876,7 @@ b_HRFtriggeronset        = cfg_branch;
 b_HRFtriggeronset.tag    = 'b_HRFtriggeronset';
 b_HRFtriggeronset.name   = 'HRF trigger onset';
 b_HRFtriggeronset.val    = {e_HRFtrigger, e_HRFduration e_HRFlabel e_TimetoPeak1, e_FWHM1,e_TimetoPeak2,e_FWHM2,e_DIP,e_AUXdir };
-b_HRFtriggeronset.help   = {'Model HRF response using trigger onset and user define fix duration'};
+b_HRFtriggeronset.help   = {'Model HRF response using trigger onset and user define fix duration.'};
 
 c_createAUXauto         = cfg_choice;
 c_createAUXauto.tag     = 'c_createAUXauto';
@@ -2885,9 +2892,10 @@ E_createAUXauto.tag  = 'E_createAUXauto';
 E_createAUXauto.val  = {NIRSmat,m_replaceaux,c_createAUXauto};   
 E_createAUXauto.prog = @nirs_run_createAUXauto;  
 E_createAUXauto.vout = @nirs_cfg_vout_createAUXauto;
-E_createAUXauto.help = {'Read simulteneaous AUX data; Note trig must be syncrhonised with the NIRS',... 
-    'Use before the normalisation step the bloc will be cut and associate to the trig in nirs data.',...
-    'Use after the normalisation step you will need to match the blocs to the nirs data manually.'};
+E_createAUXauto.help = {'Read simultaneous AUX data; Note trig must be synchronized with the NIRS',... 
+    'Use before the normalization step the block will be cut and associate to the trig in nirs data.',...
+    'Use after the normalization step you will need to match the blocks to the nirs data manually.'};
+
 
 
 %make NIRS.mat available as a dependency
@@ -2906,7 +2914,7 @@ E_createAUX.name = 'Use GUI_AUXedit' ;
 E_createAUX.tag  = 'E_createAUX'; 
 E_createAUX.val  = {};   
 E_createAUX.prog = @nirs_run_GUIAUXEDIT;  
-E_createAUX.help = {''};
+E_createAUX.help = {'This is a utilitary GUI to create auxiliary information for GLM regression or visualization.'};
 
 
 
@@ -3152,7 +3160,7 @@ I_chcorrlist_type.values  = {b_Pearson, b_Hilbert,b_crossspectrum};%,b_Granger,b
 % I_chcorrlist_type.labels = {'Pearson', 'Pearson with zscore','Hilbert phase joint probability', 'Granger','Phase ISS','Analyzer Correlation/Autocorrelation'};
 % I_chcorrlist_type.values = {1 2 3 4 5 6};
 % I_chcorrlist_type.def  = {1};
-% I_chcorrlist_type.help = {'Use pearson connectivity matrix, an average on all bloc'};
+% I_chcorrlist_type.help = {'Use pearson connectivity matrix, an average on all blocks'};
 %     
 I_chcorrlistoutpath         = cfg_entry; %path
 I_chcorrlistoutpath.name    = 'Path connectivity matrix';
@@ -3196,7 +3204,7 @@ E_createseedlist.tag  = 'E_createseedlist';
 E_createseedlist.val  = {NIRSmat};   
 E_createseedlist.prog = @nirs_run_createseedlist;  
 E_createseedlist.vout = @nirs_cfg_vout_createseedlist;
-E_createseedlist.help = {'Create a list of channel present in the NIRS file; this list could be used as seed for this helmet'};
+E_createseedlist.help = {'Create a list of channels present in the NIRS file; this list could be used as seed for this helmet.'};
 
 %make NIRS.mat available as a dependency
 function vout = nirs_cfg_vout_createseedlist(job)
@@ -3238,7 +3246,7 @@ m_zonematformat.name      = 'Label format';
 m_zonematformat.labels    = {'NIRx', 'ISS'};
 m_zonematformat.values    = {1,2};
 m_zonematformat.val       = {1};
-m_zonematformat.help      = {'Write the list of detector source according to NIRx label D01 S1 for detector D01 and source S1) or according to ISS label A a1b2 for detector A and source a1b2'};
+m_zonematformat.help      = {'Write the list of detector source according to NIRx label D01 S1 for detector D01 and source S1 or according to ISS label A a1b2 for detector A and source a1b2.'};
 
 %General entry use by any modules
 zonemat         = cfg_files; 
@@ -3255,7 +3263,7 @@ E_zone2channellist.name = 'Transfert .zone into a .txt list' ;
 E_zone2channellist.tag  = 'E_zone2channellist'; 
 E_zone2channellist.val  = {zonemat, m_zonematformat};   
 E_zone2channellist.prog = @nirs_run_E_zone2channellist;  
-E_zone2channellist.help = {'Create a list with the label, RBG color and the channel of the zone.'};
+E_zone2channellist.help = {'Create a list with the labels, RBG color and the channel of the zone.'};
 
 %General entry use by any modules
 zonetxt         = cfg_files; 
@@ -3264,7 +3272,7 @@ zonetxt.tag     = 'zonetxt';
 zonetxt.filter  = 'txt';
 zonetxt.ufilter = '.txt$';    
 zonetxt.num     = [1 Inf];     % Number of inputs required 
-zonetxt.help    = {'Select txt list that contain zonelabel  to create channel list for verifaction, zone label as well as detector source combinaison will be list'}; % help text displayed
+zonetxt.help    = {'Select .txt list that contain zonelabel  to create channel list for verifaction, zone label as well as detector source combinaison will be list'}; % help text displayed
 
 % Executable Branch
 E_channellist2zone      = cfg_exbranch;      
@@ -3273,8 +3281,8 @@ E_channellist2zone.tag  = 'E_channellist2zone';
 E_channellist2zone.val  = {NIRSmat,zonetxt, m_zonematformat};   
 E_channellist2zone.prog = @nirs_run_E_channellist2zone;  
 E_channellist2zone.vout = @nirs_cfg_vout_channellist2zone;
-E_channellist2zone.help = {'Create a zone using list of detector and source belonging to this zone, use Label: zonename ;  RGBcolor: 255 0 0 ;  then a line for each Detector Source combinaison D01 E1.',...
-    'The zone will be create at the NIRS.mat location to be associate to this subject'};
+E_channellist2zone.help = {'Create a zone using list of detectors and sources belonging to this zone, use Label: zonename ;  RGBcolor: 255 0 0 ;  then a line for each Detector Source combinaison D01 E1.',...
+    'The zone will be create at the NIRS.mat location to be associate to this subject.'};
 
 %make NIRS.mat available as a dependency
 function vout = nirs_cfg_vout_channellist2zone(job)
@@ -3432,7 +3440,7 @@ M_createMTG        = cfg_choice;
 M_createMTG.name   = '3dMTG';
 M_createMTG.tag    = 'M_createMTG';
 M_createMTG.values = {E_IOMTG}; 
-M_createMTG.help   = {'Use to create the montage configuration file'};
+M_createMTG.help   = {'Use to create the montage configuration file.'};
 
 M_readMultimodal        = cfg_choice; 
 M_readMultimodal.name   = 'Read Multimodal';
