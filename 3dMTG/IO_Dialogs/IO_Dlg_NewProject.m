@@ -73,11 +73,11 @@ function IO_Dlg_NewProject_OpeningFcn(hObject, eventdata, handles, varargin)
     axis image;
 	axis off;
     
-    axes(handles.axe_ELP_Subject_Icon);
-    matpix = imread( 'ELP_Subject_Icon.bmp' );
-    image( matpix  ); 
-    axis image;
-	axis off;
+%     axes(handles.axe_ELP_Subject_Icon);
+%     matpix = imread( 'ELP_Subject_Icon.bmp' );
+%     image( matpix  ); 
+%     axis image;
+% 	axis off;
     
     axes(handles.axe_Mtg_Icon);
     matpix = imread( 'Export_MTG_Icon.bmp' );

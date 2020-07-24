@@ -57,8 +57,44 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 ind_dur_ch = [];
                 
                                  
-                
+                %load noise to exclure from zscore mean and std calculation
                 [pathstr, name, ext] = fileparts(NIRS.Dt.fir.pp(lst).p{f});
+                                            %exclure already marked artefact from mean_diff
+                            %to get zscore without artefact.     
+                            vmrk_path = fullfile(pathstr,[name,'.vmrk'])
+                            noise = logical(zeros(size(d')));
+                            mrk_type_arr = cellstr('bad_step');
+                            mrks = [];
+                            ind = [];
+                            dur = [];
+                            [ind_dur_ch] = read_vmrk_find(vmrk_path,mrk_type_arr);
+                            if ~isempty(ind_dur_ch)
+                                maxpoint  = ind_dur_ch(:,1)+ind_dur_ch(:,2);
+                                badind = find(maxpoint>size(noise,1));
+                                if ~isempty(badind)
+                                    disp(['Warning file ' vmrk_path ' marker : ' num2str(badind') ' are out of range'])
+                                    ind_dur_ch(badind,2)=size(noise,1)- ind_dur_ch(badind,1);
+                                end
+                                for Idx = 1:size(noise,2)
+                                    mrks = find(ind_dur_ch(:,3)==Idx);
+                                    ind = ind_dur_ch(mrks,1);
+                                    indf = ind + ind_dur_ch(mrks,2) - 1;
+                                    if ~isempty(ind)
+                                        try
+                                            for i = 1:numel(ind)
+                                                noise((ind(i):indf(i)),Idx) = 1;
+                                            end
+                                        catch
+                                            msgbox('Noise reading problem')
+                                        end
+                                    end
+                                end
+                            end  
+                            noisestep = [ zeros(step,size(noise,2));noise(1:end-step,:)];
+                            
+                
+                
+               
                 if job.PrintReport
                     if  ~isdir([dirmat,filesep,'ArtifactDetection_Report',filesep])
                         mkdir([dirmat,filesep,'ArtifactDetection_Report',filesep,'EachCh',filesep,name]);
@@ -66,29 +102,60 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 end 
                 threshold_all = zeros(NC,1);
                 %TEST 1 diff mean roll average
-                for Idx = 1:NC %Loop over all channels except noisy one    
-                    if NIRS.Cf.H.C.ok(Idx, f)==1                                 
+                                      
                         meantot = [];
                         mean_diff = [];
                         stepmat_temp = stepmat(Idx,:); %Remember already found steps to avoid passing through correlation again               
-                        if difference_of_means %Moving window average
-                           
+                        if difference_of_means %Moving window average                           
                             %Etape 1 Moving window average moyenne tournante
                             for i = 1:step %first point all same value
-                                meantot(i) = mean(d(Idx,1:step));
+                                tmp(i) = mean(d(Idx,1:step));
+                                meantot(:,i) = mean(d(:,1:step),2);
                             end
                             for i = 1+step:samp_length-step %window between
-                                meantot(i) = mean(d(Idx,i-step:i+step));
+                                tmp(i) = mean(d(Idx,i-step:i+step));
+                                meantot(:,i) = mean(d(:,i-step:i+step),2);
                             end
                             for i = samp_length-step:(samp_length+1) %end of the window all same value
-                               meantot(i) = mean(d(Idx,samp_length-step:samp_length)); 
+                               tmp(i)   = mean(d(Idx,samp_length-step:samp_length));                        
+                               meantot(:,i) = mean(d(:,samp_length-step:samp_length),2); 
                             end 
-                            mean_diff = diff(meantot); 
-
-                            zsc = zscore(mean_diff);      
+                            %test si zscore commun a tout les canaux...
+                            %yeurk bad idea proven
+%                             mean_diffall = diff(meantot');
+%                             figure;plot(mean_diffall)
+%                             tmp = zscore(mean_diffall(:))
+%                             figure;plot(reshape(tmp,size(mean_diffall)))
+                  for Idx = 1:NC %Loop over all channels except noisy one    
+                    if NIRS.Cf.H.C.ok(Idx, f)==1        
+                            mean_diff = diff(meantot(Idx,:)); 
+                           %  mean_diffall(:,Idx) =mean_diff;  
+                            if 0 %use zscore whole recording
+                            figure;
+                            subplot(2,1,1);
+                            plot(mean_diff);
+                            subplot(2,1,2);
+                            imagesc((noisestep)');
+                            nandiff = ones(size(mean_diff));
+                            nandiff(find(noisestep(:,Idx)))=nan;
+                            mean_diffnan= mean_diff.*nandiff;
+                            zsc = (mean_diff - nanmean(mean_diffnan))/nanstd(mean_diffnan);     
+                            zscini = zscore(mean_diff);
+                            figure;hold on;
+                            plot(zscini,'r','displayname','zscore without nan');
+                            plot(zsc,'b','displayname','zscore with nan');
+                            elseif 1 %use zscore whole recording
+                                zsc = zscore(mean_diff);
+                            elseif 0
+                                nandiff = ones(size(mean_diff));
+                                nandiff(find(noisestep(:,Idx)))=nan;
+                                mean_diffnan= mean_diff.*nandiff;
+                                zsc = (mean_diff - nanmean(mean_diffnan))/nanstd(mean_diffnan);     
+                            end
                             mean_diff = zsc;
                             ind = find(abs(zsc) >thr_ind); 
                             threshold = thr_ind;
+                            %ajout
 
                             %Etape 3 Garder les intervals de plus de
                             %indconsecutifthreshold point consecutif
@@ -166,6 +233,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                     end
                     end
                 end
+             
                 if difference_of_means
                 if job.PrintReport
                     hsummary = figure;

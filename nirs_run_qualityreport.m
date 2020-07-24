@@ -61,6 +61,8 @@ for filenb=1:size(job.NIRSmat,1) %JT
      xlsout{idrow,3} = num2str( 1/fs*size(d,2));
      xlsout{idrow,4} = num2str( sum(noise(:))/numel(noise(:)));
      tmp  = sum(noise,2)>0;
+     tmp(1) = 0;
+     %figure;plot(tmp)
      xlsout{idrow,5} = sum((tmp(2:end)-tmp(1:end-1))==1); 
     % sum((noise(2:end)- corrindice(1:end-1))==1)
      try

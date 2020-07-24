@@ -2613,7 +2613,7 @@ e_readEEGMarker_Marker.help    = {'Write the markers to import; use the exact la
 
 E_readEEGMarker      = cfg_exbranch;      
 E_readEEGMarker.name = 'Import EEG marker' ;            
-E_readEEGMarker.tag  = 'E_readEEG'; 
+E_readEEGMarker.tag  = 'E_readEEGMarker'; 
 E_readEEGMarker.val  = {NIRSmat, e_readEEGMarker_Marker};   
 E_readEEGMarker.prog = @nirs_run_readEEGMarker;  
 E_readEEGMarker.vout = @nirs_cfg_vout_readEEGMarker;

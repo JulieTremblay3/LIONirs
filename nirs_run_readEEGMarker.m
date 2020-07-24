@@ -7,8 +7,12 @@ fs = NIRS.Cf.dev.fs;
 
 for ifile =1:numel( NIRS.Dt.EEG.pp(end).p)
     nameEEG = NIRS.Dt.EEG.pp(end).p{ifile};
-    offset = NIRS.Dt.EEG.pp(end).sync_timesec{ifile};    
-    
+    if isfield(NIRS.Dt.EEG.pp(end),'sync_timesec')
+        offset = NIRS.Dt.EEG.pp(end).sync_timesec{ifile};    
+    else
+        msgbox('Please first perform segmentation to ensure synchronization between fNIRS and EEG')
+        return
+    end
     d = fopen_NIR(rDtp{ifile,1},NC);
     timeNIRS = 1/fs:1/fs:1/fs*(size(d,2));
     clear d;
