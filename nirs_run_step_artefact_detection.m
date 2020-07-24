@@ -105,19 +105,18 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                                       
                         meantot = [];
                         mean_diff = [];
-                        stepmat_temp = stepmat(Idx,:); %Remember already found steps to avoid passing through correlation again               
                         if difference_of_means %Moving window average                           
                             %Etape 1 Moving window average moyenne tournante
                             for i = 1:step %first point all same value
-                                tmp(i) = mean(d(Idx,1:step));
+                               % tmp(i) = mean(d(Idx,1:step));
                                 meantot(:,i) = mean(d(:,1:step),2);
                             end
                             for i = 1+step:samp_length-step %window between
-                                tmp(i) = mean(d(Idx,i-step:i+step));
+                                %tmp(i) = mean(d(Idx,i-step:i+step));
                                 meantot(:,i) = mean(d(:,i-step:i+step),2);
                             end
                             for i = samp_length-step:(samp_length+1) %end of the window all same value
-                               tmp(i)   = mean(d(Idx,samp_length-step:samp_length));                        
+                               %tmp(i)   = mean(d(Idx,samp_length-step:samp_length));                        
                                meantot(:,i) = mean(d(:,samp_length-step:samp_length),2); 
                             end 
                             %test si zscore commun a tout les canaux...
@@ -127,6 +126,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
 %                             tmp = zscore(mean_diffall(:))
 %                             figure;plot(reshape(tmp,size(mean_diffall)))
                   for Idx = 1:NC %Loop over all channels except noisy one    
+                       stepmat_temp = stepmat(Idx,:); %Remember already found steps to avoid passing through correlation again              
                     if NIRS.Cf.H.C.ok(Idx, f)==1        
                             mean_diff = diff(meantot(Idx,:)); 
                            %  mean_diffall(:,Idx) =mean_diff;  
@@ -144,9 +144,9 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                             figure;hold on;
                             plot(zscini,'r','displayname','zscore without nan');
                             plot(zsc,'b','displayname','zscore with nan');
-                            elseif 1 %use zscore whole recording
+                            elseif job.b_meandiff.m_thresholdstepzscore ==1 %use all-time point
                                 zsc = zscore(mean_diff);
-                            elseif 0
+                            elseif job.b_meandiff.m_thresholdstepzscore ==0 %use valid time point
                                 nandiff = ones(size(mean_diff));
                                 nandiff(find(noisestep(:,Idx)))=nan;
                                 mean_diffnan= mean_diff.*nandiff;
