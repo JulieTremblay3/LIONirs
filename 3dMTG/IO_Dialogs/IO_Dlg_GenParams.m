@@ -60,7 +60,22 @@ function IO_Dlg_GenParams_OpeningFcn(hObject, eventdata, handles, varargin)
     else
         oHelmet = varargin{1};
     end
-    
+     sMtg = get_Mtg(oHelmet);
+     if strcmp(sMtg.Gen_Params.AcqSystem,'NIRx')
+        set(handles.popup_AcqSystem,'value',2)
+            set(handles.txt_NbSrcDisp,'string','64')
+    set(handles.txt_NbSrcDisp,'enable','off')
+    set(handles.txt_NbDetDisp,'string','32')
+    set(handles.txt_NbDetDisp,'enable','off')
+    set(handles.txt_NbBanks,'string','4')
+    set(handles.txt_NbBanks,'enable','off')
+    set(handles.txt_NbSrcPerBank,'string','16')
+    set(handles.txt_NbSrcPerBank,'enable','off')
+    set(handles.txt_NbSrcHole,'string','2')
+    set(handles.txt_NbSrcHole,'enable','off')
+     else
+        set(handles.popup_AcqSystem,'value',1)
+     end
     % Choose default command line output for IO_Dlg_DisplayOptions
     handles.output = oHelmet;
     
