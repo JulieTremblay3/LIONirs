@@ -140,7 +140,7 @@ age1.num     = [1 Inf];
 age1.val     = {25};
 age1.help    = {'Age of the subject.',...
     'Used to calculate DPF to HbO/HbR conversion (Duncan et al 1995).',...
-    'Only for wavelengths of 690,830,744,807 nm wavelength.'};
+    'Only for wavelengths of 690,830,744,807 nm.'};
 
 raw_onset_files         = cfg_files;  
 raw_onset_files.name    = 'Select onset files'; % The displayed name
@@ -427,7 +427,7 @@ E_rawhomer.tag  = 'E_rawhomer';
 E_rawhomer.val  = {inputrawhomer,age1, prjfile,output_path ,m_inputrawhomer};   
 E_rawhomer.prog = @nirs_run_readhomerfile;  
 E_rawhomer.vout = @nirs_cfg_vout_readhomerfile;
-E_rawhomer.help = {'Select raw .nirs data files. Matlab structure containing fields: ''d'' (raw data sample x channel), ''ml''(channel used sources, detector, weight wavelength), ''t'' (Time vector), data, ml, S vector will be used as aux trigger 1.'};
+E_rawhomer.help = {'Select raw .nirs data files. Matlab structure containing fields: ''d'' (raw data sample x channel), ''ml''(channel used sources, detector, weight wavelength), ''t'' (Time vector), data, ml, S vector will be used as AUX trigger 1.'};
 
 function vout = nirs_cfg_vout_readhomerfile(job)
     vout = cfg_dep;                    
@@ -551,14 +551,14 @@ output_path_SNIRF.tag     = 'output_path_SNIRF';
 output_path_SNIRF.strtype = 's';
 output_path_SNIRF.num     = [1 Inf];
 output_path_SNIRF.val     = {nirOutputDefaultPath};
-output_path_SNIRF.help    = {'Path for the output folder where the .nir, .mat, .prj, etc. will be created'};
+output_path_SNIRF.help    = {'Path for the output folder where the .nir, .mat, .prj, etc. will be created.'};
 
 % Create the two branch required.
 b_importProject         = cfg_branch; % Contains the project file selector.
 b_importProject.tag     = 'b_importProject';
 b_importProject.name    = 'Import .prj';
 b_importProject.val     = {prjfile};
-b_importProject.help    = {'Import an already existing project file'};
+b_importProject.help    = {'Import an already existing project file.'};
 
 b_createProject         = cfg_branch; % Is an empty branch.
 b_createProject.tag     = 'b_createProject';
@@ -572,7 +572,7 @@ c_createImportProjectSnirf.tag      = 'c_createImportProjectSnirf';
 c_createImportProjectSnirf.name     = 'Create or import a project file';
 c_createImportProjectSnirf.values   = {b_importProject, b_createProject};
 c_createImportProjectSnirf.val      = {b_importProject};
-c_createImportProjectSnirf.help     = {'Choose whether you want to import a project or create a new one'}';
+c_createImportProjectSnirf.help     = {'Choose whether you want to import a project or create a new one.'}';
 
 % Executable Branch -- Create the drop down menu branch necessary to read .snirf file.
 E_readSNIRF      = cfg_exbranch;      
@@ -944,8 +944,8 @@ E_normalization.tag  = 'normalization';
 E_normalization.val  = {NIRSmat DelPreviousData c_normtype};
 E_normalization.prog = @nirs_run_normalize;
 E_normalization.vout = @nirs_cfg_vout_normalize;
-E_normalization.help = {'Normalize raw data, transfer optical intensity in delta optical density',...
-    'dOD  = log(I/Io)'};
+E_normalization.help = {'Normalize raw data, transfer optical intensity in delta optical density;',...
+    'dOD  = log(I/Io).'};
 %make NIRS.mat available as a dependency
 function vout = nirs_cfg_vout_normalize(job)
 vout = cfg_dep;                    
@@ -1001,7 +1001,7 @@ thresholdstep.val     = {3};
 thresholdstep.help    = {'The difference (D) between M1 and M2 over time is converted into a standardized z-score distribution. A z-score threshold determines which variations in the moving average difference of two subsequent intervals are considered abnormal, thus represent artifacts. Depending on the value defined by the user,  variations higher than this z-score identified.'};
    
 too_small_step_dur         = cfg_entry;
-too_small_step_dur.name    = 'Ignored interval shorter than x seconde:';
+too_small_step_dur.name    = 'Ignored interval shorter than x second';
 too_small_step_dur.tag     = 'too_small_step_dur';
 too_small_step_dur.strtype = 'r';
 too_small_step_dur.num     = [1 1];
@@ -1764,12 +1764,13 @@ f_SNIRFfile.tag     = 'f_SNIRFfile';       %file names
 f_SNIRFfile.filter  = 'snirf';
 f_SNIRFfile.ufilter = '.snirf$';    
 f_SNIRFfile.num     = [1 1];     % Number of inputs required 
-f_SNIRFfile.help    = {'Select the SNIRF file to which you want to append your data'}; 
+f_SNIRFfile.help    = {'Select the SNIRF file to which you want to append your data.'}; 
 
 B_SNIRFAppend       = cfg_branch;
 B_SNIRFAppend.name  = 'Append to an existing SNIRF file';
 B_SNIRFAppend.tag   = 'B_SNIRFAppend';
 B_SNIRFAppend.val   = {f_SNIRFfile};
+B_SNIRFAppend.help   = {'To append the data to an existing file.'};
 
 B_SNIRFCreate       = cfg_branch;
 B_SNIRFCreate.name  = 'Create a new SNIRF file';
@@ -2174,13 +2175,13 @@ m_extractcomponent_physzone.name   = 'Use ';
 m_extractcomponent_physzone.labels = {'Mean' ,'PCA'};
 m_extractcomponent_physzone.values = {0,1};
 m_extractcomponent_physzone.val    = {0}; 
-m_extractcomponent_physzone.help   = {'Use the mean or the first principal component of the regressor zone; useful when the regressor zone contains many channels'};
+m_extractcomponent_physzone.help   = {'Use the mean or the first principal component of the regressor zone; useful when the regressor zone contains many channels.'};
 
 b_extractcomponent_phys      = cfg_branch;
 b_extractcomponent_phys.tag  = 'b_extractcomponent_phys';
 b_extractcomponent_phys.name = 'Identify physiology regression';
 b_extractcomponent_phys.val  = {NIRSmat,  f_extractcomponent_physzone ,m_extractcomponent_physzone};
-b_extractcomponent_phys.help = {'Apply subtraction of the short distance physiology as describe in Saager and Berger 2008, https://doi.org/10.1117/1.2940587',...
+b_extractcomponent_phys.help = {'Apply subtraction of the short distance physiology as describe in Saager and Berger 2008, https://doi.org/10.1117/1.2940587.',...
                                     'One signal was scaled to fit the other in a least-squares LS sense the scale estimation is saved as (SHORTGLM) component and must be subtracted.'};
 
 f_extractcomponent_glmlist         = cfg_files;
@@ -2201,7 +2202,7 @@ b_extractcomponent_glm          = cfg_branch;
 b_extractcomponent_glm.tag      = 'b_extractcomponent_glm';
 b_extractcomponent_glm.name     = 'Identify GLM';
 b_extractcomponent_glm.val      = {f_extractcomponent_glmlist};
-b_extractcomponent_glm.help     = {'Apply multiple linear regressions (regress.m)'};
+b_extractcomponent_glm.help     = {'Apply multiple linear regressions (regress.m).'};
 
 
 f_extractcomponent_PARAFAClist         = cfg_files;
@@ -2311,7 +2312,7 @@ i_substractcomponent_label.tag     = 'i_substractcomponent_label';
 i_substractcomponent_label.strtype = 's';
 i_substractcomponent_label.num     = [1 inf];
 i_substractcomponent_label.val     = {'MVTPARAFAC'}; 
-i_substractcomponent_label.help    = {'Identify the label of the component you want to substract,as example MVTPARAFAC MVTPCA for the automatic detection.'};
+i_substractcomponent_label.help    = {'Identify the label of the component you want to subtract, as an example MVTPARAFAC MVTPCA for the automatic detection.'};
 
 % Executable Branch
 E_substractcomponent      = cfg_exbranch;
@@ -2586,8 +2587,8 @@ E_readEEG.val  = {NIRSmat,EEG_files};
 E_readEEG.prog = @nirs_run_readEEG;  
 E_readEEG.vout = @nirs_cfg_vout_readEEG;
 E_readEEG.help = {'Read simultaneous EEG data; Note trig must be synchronized with the NIRS.',... 
-    'Use before the normalization step the block will be cut and associate to the trig in nirs data.',...
-    'Use after the normalization step you will need to match the blocks to the nirs data manually.'};
+    'If it is used before the normalization step, the block will be cut and associate to the trig in nirs data.',...
+    'If it is used after the normalization step, you will need to match the blocks to the nirs data manually.'};
 
 
 %make NIRS.mat available as a dependency
@@ -2606,7 +2607,7 @@ e_readEEGMarker_Marker.tag     = 'e_readEEGMarker_Marker';
 e_readEEGMarker_Marker.strtype = 's';
 e_readEEGMarker_Marker.num     = [1 Inf];     
 e_readEEGMarker_Marker.val     = {'MARKER1:1,MARKER2:2,MARKER3:3'}; 
-e_readEEGMarker_Marker.help    = {'Write the marker to import use the exact label',...
+e_readEEGMarker_Marker.help    = {'Write the markers to import; use the exact label.',...
     'As an example: MARKER1:1,MARKER2=2,MARKER3=3'}; 
 
 
@@ -2646,28 +2647,28 @@ video_files_sync.tag     = 'video_files_sync';
 video_files_sync.labels  = {'EEG ','NIRS ','AUX '};
 video_files_sync.values  = {0,1,2};
 video_files_sync.val     = {0};
-video_files_sync.help    = {'Video is recording simultaneously to EEG or NIRS data recording, if they have a delay please edit the video to removing exceeding part at the beginning.'};
+video_files_sync.help    = {'Video is recording simultaneously to EEG or NIRS data recording, if there is a delay please edit the video to removing exceeding part at the beginning.'};
 
 
 b_videooffset_no         = cfg_branch;
 b_videooffset_no.tag     = 'b_videooffset_no';
 b_videooffset_no.name    = 'No';
 b_videooffset_no.val     = {};
-b_videooffset_no.help    = {'The video start is synchronize with the triggers'}';
+b_videooffset_no.help    = {'The start of video is synchronized with the triggers.'}';
 
 i_videooffset_yes         = cfg_entry;
-i_videooffset_yes.name    = 'Lag(seconde) = Video - Ref';
+i_videooffset_yes.name    = 'Lag(second) = Video - Ref';
 i_videooffset_yes.tag     = 'i_videooffset';       
 i_videooffset_yes.strtype = 'r';
 i_videooffset_yes.num     = [1 inf];
 i_videooffset_yes.val     = {0}; 
-i_videooffset_yes.help    = {'As an example if the in video the event occur at 5 seconde and the trig in EEG happen at 10 you should adjust the lag to -5 as AUDIO(5)- EEG(10)=LAG(-5)'};
+i_videooffset_yes.help    = {'As an example if the in video the event occur at 5 seconds and the trig in EEG happen at 10 you should adjust the lag to -5 as AUDIO(5)- EEG(10)=LAG(-5)'};
 
 b_videooffset_yes         = cfg_branch;
 b_videooffset_yes.tag     = 'b_videooffset_yes';
 b_videooffset_yes.name    = 'Yes';
 b_videooffset_yes.val     = {i_videooffset_yes};
-b_videooffset_yes.help    = {'They have a delay between the video and the trigger if the video starts after, use a positive value, if the video starts before, use a negative value'}';
+b_videooffset_yes.help    = {'There is a delay between the video and the trigger. If the video starts after, use a positive value, if the video starts before, use a negative value'}';
 
 c_videooffset        = cfg_choice;
 c_videooffset.tag    = 'c_videooffset';
@@ -2720,7 +2721,7 @@ b_Audiooffset_no.val     = {};
 b_Audiooffset_no.help    = {'The Audio start is synchronise with the triggers'}';
 
 i_Audiooffset         = cfg_entry;
-i_Audiooffset.name    = 'Lag(seconde) = Audio - Ref';
+i_Audiooffset.name    = 'Lag(second) = Audio - Ref';
 i_Audiooffset.tag     = 'i_Audiooffset';       
 i_Audiooffset.strtype = 'r';
 i_Audiooffset.num     = [1 inf];
@@ -2776,8 +2777,8 @@ E_readAUX.val  = {NIRSmat,AUX_files};
 E_readAUX.prog = @nirs_run_readAUX;  
 E_readAUX.vout = @nirs_cfg_vout_readAUX;
 E_readAUX.help = {'Read simultaneous AUX data; Note trig must be synchronized with the NIRS',... 
-    'Use before the normalization step the block will be cut and associate to the trig in nirs data.',...
-    'Use after the normalization step you will need to match the blocks to the nirs data manually.'};
+    'If it is used before the normalization step, the block will be cut and associate to the trig in nirs data.',...
+    'If it is used after the normalization step, you will need to match the blocks to the nirs data manually.'};
 
 
 
@@ -2795,7 +2796,8 @@ m_replaceaux.name     = 'Option';
 m_replaceaux.labels   = {'Replace aux','Add aux'}; 
 m_replaceaux.values   = {0,1};
 m_replaceaux.val      = {0};
-m_replaceaux.help     = {'Replace aux will erase any reference to previous aux file, add aux will add the new hrf as an additional auxiliary file please do not use the same name if you want to add a new one.'};
+m_replaceaux.help     = {'Replace aux will erase any reference to previous aux file, add aux will add the new hrf as an additional auxiliary file.',...
+    'Please do not use the same name if you want to add a new one.'};
 
 e_TimetoPeak1         = cfg_entry; 
 e_TimetoPeak1.name    = 'Time to peak of the first gamma density'; 
@@ -2815,7 +2817,7 @@ e_AUXdir.ufilter = '.*';
 e_AUXdir.dir = '';
 e_AUXdir.num = [1 1];  % Number of inputs required 
 e_AUXdir.check = [];
-e_AUXdir.help    = {'Auxiliary output folder'}; % help text displayed
+e_AUXdir.help    = {'Auxiliary output folder.'}; % help text displayed
 
 
 e_FWHM1         = cfg_entry; 
@@ -2899,9 +2901,9 @@ E_createAUXauto.tag  = 'E_createAUXauto';
 E_createAUXauto.val  = {NIRSmat,m_replaceaux,c_createAUXauto};   
 E_createAUXauto.prog = @nirs_run_createAUXauto;  
 E_createAUXauto.vout = @nirs_cfg_vout_createAUXauto;
-E_createAUXauto.help = {'Read simultaneous AUX data; Note trig must be synchronized with the NIRS',... 
-    'Use before the normalization step the block will be cut and associate to the trig in nirs data.',...
-    'Use after the normalization step you will need to match the blocks to the nirs data manually.'};
+E_createAUXauto.help = {'Read simultaneous AUX data; Note trig must be synchronized with the NIRS.',... 
+    'If it is used before the normalization step, the block will be cut and associate to the trig in nirs data.',...
+    'If it is used after the normalization step, you will need to match the blocks to the nirs data manually.'};
 
 
 
@@ -3122,7 +3124,7 @@ b_Hilbert.tag    = 'b_Hilbert';
 b_Hilbert.name   = 'Hilbert join phase probability';
 b_Hilbert.val    = {c_Hilbert};
 b_Hilbert.help   = {'See B. Molavi et al., “Analyzing the resting state functional connectivity in the human language system using near infrared spectroscopy.”, Front. Hum. Neurosci. 7(January), 921 (2013) [doi:10.3389/fnhum.2013.00921].',...
-                    'Use fonction from the CircStat2012a toolbox' };
+                    'Use function from the CircStat2012a toolbox.' };
 
 
 
@@ -3364,7 +3366,7 @@ e_TtestOneSampleGR2.tag     = 'e_TtestOneSampleGR2';
 e_TtestOneSampleGR2.strtype = 'r';
 e_TtestOneSampleGR2.num     = [1 Inf];     
 e_TtestOneSampleGR2.val     = {2}; 
-e_TtestOneSampleGR2.help    = {['Enter the second group compared (refer to group value in the xls file)']}; 
+e_TtestOneSampleGR2.help    = {['Enter the second group compared (refer to group value in the xls file).']}; 
 
 e_npermutation         =  cfg_entry;
 e_npermutation.name    = 'Nb permutations';
@@ -3372,7 +3374,7 @@ e_npermutation.tag     = 'e_npermutation';
 e_npermutation.strtype = 's';
 e_npermutation.num     = [0 inf];
 e_npermutation.val     = {'500'};
-e_npermutation.help    = {'Define the number of non parametric permutations to use'};
+e_npermutation.help    = {'Define the number of non parametric permutations to use.'};
 
 
 b_PermutationTest = cfg_branch;
@@ -3385,7 +3387,7 @@ b_exportNBSformat        = cfg_branch;
 b_exportNBSformat.tag    = 'b_exportNBSformat';
 b_exportNBSformat.name   = 'Export NBS format' ;
 b_exportNBSformat.val    = {};
-b_exportNBSformat.help   = {'Export to NBS network based statistic format. A Zalesky(2010) [doi: 10.1016/j.neuroimage.2010.06.041] '};
+b_exportNBSformat.help   = {'Export to NBS network based statistic format. A Zalesky(2010) [doi: 10.1016/j.neuroimage.2010.06.041]. '};
 
 
 b_Covariable_Mat         =  cfg_entry;
@@ -3394,20 +3396,20 @@ b_Covariable_Mat.tag     = 'b_Covariable_Mat';
 b_Covariable_Mat.strtype = 's';
 b_Covariable_Mat.num     = [0 inf];
 b_Covariable_Mat.val     = {'Name column'};
-b_Covariable_Mat.help    = {'Use the exact column title to reconize which covariable to correlate with the connectivity scores. Separate by a comma when they are many covariables to explore'};
+b_Covariable_Mat.help    = {'Use the exact column title to reconize which covariable to correlate with the connectivity scores. Separate by a comma when they are many covariables to explore.'};
 
 
 b_PearsonCorr_Mat        = cfg_branch;
 b_PearsonCorr_Mat.tag    = 'b_PearsonCorr_Mat';
 b_PearsonCorr_Mat.name   = 'Pearson correlation' ;
 b_PearsonCorr_Mat.val    = {b_Covariable_Mat};
-b_PearsonCorr_Mat.help   = {'Compute the pearson correlation coefficient between connectivity score and one covariable in the excel file'};
+b_PearsonCorr_Mat.help   = {'Compute the pearson correlation coefficient between connectivity score and one covariable in the excel file.'};
 
 b_GLM_Mat        = cfg_branch;
 b_GLM_Mat.tag    = 'b_GLM_Mat';
 b_GLM_Mat.name   = 'GLM' ;
 b_GLM_Mat.val    = {b_Covariable_Mat};
-b_GLM_Mat.help   = {'Apply the general linear model, specify covariable as regressor y=b1*x1+b2*x2+...+c, do not forget to include a covariable for the constant'};
+b_GLM_Mat.help   = {'Apply the general linear model, specify covariable as regressor y=b1*x1+b2*x2+...+c, do not forget to include a covariable for the constant.'};
 
 
 c_statmatrix         = cfg_choice;
@@ -3509,14 +3511,14 @@ M_Connectivity        = cfg_choice;
 M_Connectivity.name   = 'Connectivity';
 M_Connectivity.tag    = 'M_Connectivity';
 M_Connectivity.values = { E_chcorrMat E_GUI_lookmatrices E_statmatrix}; %
-M_Connectivity.help   = {'Connectivity fonction.'};
+M_Connectivity.help   = {'Connectivity function.'};
 
 %Module Utility
 M_Utility        = cfg_choice; 
 M_Utility.name   = 'Utility NIRSmat';
 M_Utility.tag    = 'M_Utility';
 M_Utility.values = {E_NIRSmatdiradjust, E_NIRSmatcreatenewbranch  E_createseedlist E_qualityreport E_zone2channellist E_channellist2zone E_viewNIRS M_datawritenirs}; %
-M_Utility.help   = {'Utility on NIRSmat fonction.'};
+M_Utility.help   = {'Utility on NIRSmat function.'};
 
 nirsHSJ        = cfg_choice;
 nirsHSJ.name   = 'LIONirs';
