@@ -10847,8 +10847,12 @@ for f=1:size(rDtp,1)
     dim_noise = size(PMI{currentsub}.data(1).HRF.noise);
     perc_artifactedChannel = sum((PMI{currentsub}.data(1).HRF.noise')/size(PMI{currentsub}.data(1).HRF.noise',1)*100);
     perc_artifactPerChannel = sum((PMI{currentsub}.data(1).HRF.noise)/size(PMI{currentsub}.data(1).HRF.noise,1)*100);
-       
-    figure; 
+    
+    if sum((PMI{currentsub}.data(1).HRF.noise)) == 0
+        msgbox('The data is not artifacted. The noise report may be insignificant', 'Noise Report');
+    end
+    
+    figure;
     subplot(5,5,[1:3,6:8,11:13]);
     imagesc(time,1:size(d,1),PMI{currentsub}.data(1).HRF.noise');
     ylabel('Channel id number','fontsize', 8);
