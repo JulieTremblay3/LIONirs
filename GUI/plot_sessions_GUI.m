@@ -10851,44 +10851,37 @@ for f=1:size(rDtp,1)
     time = 1/NIRS.Cf.dev.fs:1/NIRS.Cf.dev.fs:samp_length*1/NIRS.Cf.dev.fs;
     dim = size(time);
     dim2 = size(PMI{currentsub}.data(1).HRF.noise);
-    perc_criterion1 = sum((PMI{currentsub}.data(1).HRF.noise')/size(PMI{currentsub}.data(1).HRF.noise',1)*100);
-    perc_criterion2 = sum((PMI{currentsub}.data(1).HRF.noise)/size(PMI{currentsub}.data(1).HRF.noise,1)*100);
-%    plot(time, sum(stepmat)/size(stepmat,1)*100)
-%     artifact = [];
-%         for i = 1:146
-%             artifact_temp = 0;
-%             for j = 1:dim(2)
-%                 if PMI{currentsub}.data(1).HRF.noise(j,i) == 1
-%                     artifact_temp = artifact_temp + 1;
-%         
-%         
-%                 end
-%                 artifact(i) = artifact_temp;
-%             end
-%          
-%     
-%     
-%         end
+    perc_artifactedChannel = sum((PMI{currentsub}.data(1).HRF.noise')/size(PMI{currentsub}.data(1).HRF.noise',1)*100);
+    perc_artifactPerChannel = sum((PMI{currentsub}.data(1).HRF.noise)/size(PMI{currentsub}.data(1).HRF.noise,1)*100);
+    
+    
+    
+    figure; 
+    subplot(5,5,[1:3,6:8,11:13]);
+    imagesc(PMI{currentsub}.data(1).HRF.noise');
+    ylabel('Channel id number','fontsize', 8);
+    title('Channels in function of time','fontsize', 10);
+    set(gca,'fontsize',8);
+
+    subplot(5,5,[4:5,9:10,14:15]);
+    x = linspace(dim2(2),1,dim2(2));
+    plot(perc_artifactPerChannel,x);
+    set(gca,'Ydir','reverse');
+    set(gca,'fontsize',8);
+    xlabel('Percentage of artifacted time (%)','fontsize',8);
+    title('Channels in function of the percentage of artifacted time','fontsize', 10);
+    ylim([1,dim2(2)]);
+
+    subplot(5,5,[16:18,21:23]);
+    y = linspace(0,dim(2),dim(2));
+    plot(y,perc_artifactedChannel);
+    ylabel('Percentage of artifacted channels (%)','fontsize', 8);
+    xlabel('Time (s)','fontsize', 8)
+    title({' ';'';'Percentage of artifacted channels in function of time'},'fontsize', 10);
+    xlim([1,dim(2)]);
+    set(gca,'fontsize',8)
+
 end
-% 
-% 
-% pourcentage = (artifact./dim(2)).* 100;
-
-figure; 
-subplot(5,5,[1:3,6:8,11:13])
-imagesc(PMI{currentsub}.data(1).HRF.noise');
-
-subplot(5,5,[16:18,21:23])
-x = linspace(1,dim2(2),dim2(2));
-plot(x,perc_criterion2);
-
-subplot(5,5,[4:5,9:10,19:20,24:25])
-plot(perc_criterion1);
-% ylabel('Channels')
-% xlabel('Artifacted time (%)')
-% title('Percentage of artifacted time in function of channels')
-xlim([1,5102])
-% ylim([1,dim2(2)])
 
 
 
