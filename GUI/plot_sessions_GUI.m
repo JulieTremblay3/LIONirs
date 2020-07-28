@@ -10861,9 +10861,10 @@ for f=1:size(rDtp,1)
     plot(perc_artifactPerChannel,channel);
     set(gca,'Ydir','reverse');
     set(gca,'fontsize',8);
-    xlabel('Percentage of artifacted time (%)','fontsize',8);
+    xlabel('Percentage of artifacted time (%)','fontsize',8);    
     title('Channels in function of the percentage of artifacted time','fontsize', 10);
     ylim([1,dim_noise(2)]);
+    xlim([0,100]);
 
     subplot(5,5,[16:18,21:23]);
     plot(time,perc_artifactedChannel);
@@ -10871,5 +10872,6 @@ for f=1:size(rDtp,1)
     xlabel('Time (s)','fontsize', 8)
     title({'Percentage of artifacted channels in function of time'},'fontsize', 10);
     xlim([1,time(dim_time(2))]);
+    ylim([0,100]);
     set(gca,'fontsize',8)
 end
