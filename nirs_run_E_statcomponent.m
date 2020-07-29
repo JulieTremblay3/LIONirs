@@ -8,8 +8,8 @@ if isfield(job.c_statcomponent,'b_TtestOneSample')
         AllC = [AllC,A];
     end
     A = A';
-
-     for ich=1:size(AllC,1)
+    
+    for ich=1:size(AllC,1)
        % [h,p,ci,stats] = ttest(AllC(ich,:)); %do not suport nan 
         tval(ich) =  nanmean(AllC(ich,:))./        (nanstd(AllC(ich,:)./sqrt(sum(~isnan(AllC(ich,:))))));
         df = sum(~isnan(AllC(ich,:)))-1;
@@ -52,123 +52,119 @@ if isfield(job.c_statcomponent,'b_TtestOneSample')
      
 elseif isfield(job.c_statcomponent,'b_TtestUnpaired')
     
-    
-    
-        if job.c_statcomponent.b_TtestUnpaired.m_TtestOneSample == 1
-            option = 'twotail';
-        elseif job.c_statcomponent.b_TtestUnpaired.m_TtestOneSample == 2  
-            option = 'lefttail';
-        elseif job.c_statcomponent.b_TtestUnpaired.m_TtestOneSample == 3
-            option = 'righttail';
-        end
-    
-      AllG1 = [];
+    if job.c_statcomponent.b_TtestUnpaired.m_TtestOneSample == 1
+        option = 'twotail';
+    elseif job.c_statcomponent.b_TtestUnpaired.m_TtestOneSample == 2  
+        option = 'lefttail';
+    elseif job.c_statcomponent.b_TtestUnpaired.m_TtestOneSample == 3
+        option = 'righttail';
+    end
+    AllG1 = [];
     for i=1:numel(job.c_statcomponent.b_TtestUnpaired.f_componentG1)
         load(job.c_statcomponent.b_TtestUnpaired.f_componentG1{i},'-mat');
         [dir1,file1,ext1]=fileparts(job.c_statcomponent.b_TtestUnpaired.f_componentG1{i});
         AllG1 = [AllG1,A];
     end 
     
-     AllG2 = [];
+    AllG2 = [];
     for i=1:numel(job.c_statcomponent.b_TtestUnpaired.f_componentG2)
         load(job.c_statcomponent.b_TtestUnpaired.f_componentG2{i},'-mat');
         [dir1,file1,ext1]=fileparts(job.c_statcomponent.b_TtestUnpaired.f_componentG2{i});
         AllG2 = [AllG2,A];
     end
     
-     for ich=1:size(AllG1,1)
+    for ich=1:size(AllG1,1)
         stats = testt(AllG1(ich,:),AllG2(ich,:)); %do not suport nan 
         tval(ich) =   stats.tvalue;
         df = stats.tdf;
         pval(ich)=stats.tpvalue;      
         mval(ich) =  nanmean(AllG1(ich,:)) - nanmean(AllG2(ich,:));
-     end
-     dir1 = job.e_STATCOMPPath{1};
-     A = nanmean(AllG1);
-     save(fullfile(dir1,['TWOSAMPLE_Mean G1 n=',num2str(df+1),'.mat']),'A','zonelist','option')
-     A = nanmean(AllG2);
-     save(fullfile(dir1,['TWOSAMPLE_Mean G2 n=',num2str(df+1),'.mat']),'A','zonelist','option')
+    end
+    dir1 = job.e_STATCOMPPath{1};
+    A = nanmean(AllG1);
+    save(fullfile(dir1,['TWOSAMPLE_Mean G1 n=',num2str(df+1),'.mat']),'A','zonelist','option')
+    A = nanmean(AllG2);
+    save(fullfile(dir1,['TWOSAMPLE_Mean G2 n=',num2str(df+1),'.mat']),'A','zonelist','option')
      
      
-     A = mval;
-     save(fullfile(dir1,['TWOSAMPLE_Mean G1-G2 n=',num2str(df+1),'.mat']),'A','zonelist','option')
-
-     A = tval;
-     save(fullfile(dir1,['TWOSAMPLE_Tmap n=',num2str(df+1),'.mat']),'A','zonelist','option')
-     
-     A = tval.*double(pval<0.05);
-     save(fullfile(dir1,['TWOSAMPLE_Tmap_05unc.mat']), 'A','zonelist','option')
-     A = mval.*double(pval<0.05);
-     save(fullfile(dir1,['TWOSAMPLE__mean05unc.mat']),'A','zonelist','option')
-     
-     A = mval.*double(pval<0.01);
-     save(fullfile(dir1,['TWOSAMPLE__mean01unc.mat']),'A','zonelist','option')
-     A = mval.*double(pval<0.001);
-     save(fullfile(dir1,['TWOSAMPLE__mean001unc.mat']),'A','zonelist','option')
+    A = mval;
+    save(fullfile(dir1,['TWOSAMPLE_Mean G1-G2 n=',num2str(df+1),'.mat']),'A','zonelist','option')
+    A = tval;
+    save(fullfile(dir1,['TWOSAMPLE_Tmap n=',num2str(df+1),'.mat']),'A','zonelist','option')
     
-     
-     [FDR,Q] = mafdr(pval);         
-     A = mval.*double(Q<0.05);
-     save(fullfile(dir1,['TWOSAMPLE__mean05fdr.mat']),'A','zonelist','option')
+    A = tval.*double(pval<0.05);
+    save(fullfile(dir1,['TWOSAMPLE_Tmap_05unc.mat']), 'A','zonelist','option')
+    A = mval.*double(pval<0.05);
+    save(fullfile(dir1,['TWOSAMPLE__mean05unc.mat']),'A','zonelist','option')
+    
+    A = mval.*double(pval<0.01);
+    save(fullfile(dir1,['TWOSAMPLE__mean01unc.mat']),'A','zonelist','option')
+    A = mval.*double(pval<0.001);
+    save(fullfile(dir1,['TWOSAMPLE__mean001unc.mat']),'A','zonelist','option')
+         
+    [FDR,Q] = mafdr(pval);         
+    A = mval.*double(Q<0.05);
+    save(fullfile(dir1,['TWOSAMPLE__mean05fdr.mat']),'A','zonelist','option')
     [FDR,Q] = mafdr(pval);
-     A = mval.*double(Q<0.01);
-     save(fullfile(dir1,['TWOSAMPLE__mean01fdr.mat']),'A','zonelist','option')
+    A = mval.*double(Q<0.01);
+    save(fullfile(dir1,['TWOSAMPLE__mean01fdr.mat']),'A','zonelist','option')
     [FDR,Q] = mafdr(pval);
-     A = mval.*double(Q<0.001);
-     save(fullfile(dir1,['TWOSAMPLE_mean001fdr.mat']),'A','zonelist','option')
-     
-elseif isfield(job.c_statcomponent,'c_ANOVAN') 
+    A = mval.*double(Q<0.001);
+    save(fullfile(dir1,['TWOSAMPLE_mean001fdr.mat']),'A','zonelist','option')
+
+
+elseif isfield(job.c_statcomponent,'c_ANOVAN')
     if isfield(job.c_statcomponent.c_ANOVAN,'b_ANOVAN') %by channel     
-     [filepath,name,ext] = fileparts(job.c_statcomponent.c_ANOVAN.b_ANOVAN.f_anovan{1});
+        [filepath,name,ext] = fileparts(job.c_statcomponent.c_ANOVAN.b_ANOVAN.f_anovan{1});
      if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
-            [num,txt,raw] = xlsread(job.c_statcomponent.c_ANOVAN.b_ANOVAN.f_anovan{1});
+        [num,txt,raw] = xlsread(job.c_statcomponent.c_ANOVAN.b_ANOVAN.f_anovan{1});
      elseif  strcmp(ext,'.txt')
-          [num,txt,raw] = readtxtfile_asxlsread(job.c_statcomponent.c_ANOVAN.b_ANOVAN.f_anovan{1});
+        [num,txt,raw] = readtxtfile_asxlsread(job.c_statcomponent.c_ANOVAN.b_ANOVAN.f_anovan{1});
      end
      
      %Case anovan each ch save each average and pval add fdr correction! 
      %load the observation if 
     [pathstr, name, ext]=fileparts(raw{2,3});
-     AllCOM = [];
-     for i=2:size(raw,1)         
-      tmp= load(fullfile(raw{i,1},raw{i,2}),'-mat');      
-         fid = fopen(fullfile(raw{i,1},raw{i,3}));
-         chlist = textscan(fid, '%s%s');
-         fclose(fid); 
-         %find zone list index
-         srs = chlist{1};
-         det = chlist{2};
-         idactual = [];
-        for ichlist = 1:numel(chlist{1})       
-           id= strmatch([srs{ichlist},' ', det{ichlist}],tmp.zonelist,'exact');
-           if ~isempty(id)
-               idactual =  [idactual,id];
-           end
+    AllCOM = [];
+    for i=2:size(raw,1)
+        tmp= load(fullfile(raw{i,1},raw{i,2}),'-mat');      
+        fid = fopen(fullfile(raw{i,1},raw{i,3}));
+        chlist = textscan(fid, '%s%s');
+        fclose(fid); 
+        %find zone list index
+        srs = chlist{1};
+        det = chlist{2};
+        idactual = [];
+        for ichlist = 1:numel(chlist{1})
+            id= strmatch([srs{ichlist},' ', det{ichlist}],tmp.zonelist,'exact');
+            if ~isempty(id)
+                idactual =  [idactual,id];
+            end
         end
         AllCOM = [AllCOM,tmp.A(idactual)];
-     end
+    end
      
-     zonelist = tmp.zonelist(idactual);
+    zonelist = tmp.zonelist(idactual);
      
      
-     groupcell =raw(2:end, 4:end);
-     name = raw(1, 4:end);%conditioni  could be a number or a zone label to identify region if zone ! 
-      for i = 1:size(groupcell ,2)
+    groupcell =raw(2:end, 4:end);
+    name = raw(1, 4:end);%conditioni  could be a number or a zone label to identify region if zone ! 
+    for i = 1:size(groupcell ,2)
         groupedef{i}=( groupcell(:,i));
-      end
+    end
     
-
-    dir1 = job.e_STATCOMPPath{1}; 
-      if ~isdir(fullfile(dir1,'ch'))
-            mkdir(fullfile(dir1,'ch'))
-      end
-    for ich = 1:size(AllCOM,1)         
-         y =  AllCOM(ich,:);          
-         [p,tbl,stats,terms] = anovan(y',groupedef,'model','interaction','varnames',name,'display','off' );
-         for idim = 1:numel(p)
+    
+    dir1 = job.e_STATCOMPPath{1};
+    if ~isdir(fullfile(dir1,'ch'))
+        mkdir(fullfile(dir1,'ch'))
+    end
+    for ich = 1:size(AllCOM,1)
+        y =  AllCOM(ich,:);          
+        [p,tbl,stats,terms] = anovan(y',groupedef,'model','interaction','varnames',name,'display','off' );
+        for idim = 1:numel(p)
             pval(ich,idim)=p(idim);
             Fval(ich,idim)=tbl{idim+1,6};
-          %  mult  = multcompare(stats,'display','off');
+%             mult  = multcompare(stats,'display','off');
             [mult,m,h,gnames]  = multcompare(stats,'dimension',[1:size(terms,2)],'display','off');
             GRFac1 = [];
             for igname = 1:size(gnames,1)
@@ -181,23 +177,23 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
             for i=1:size(terms,2)
                 GRFac1 = [GRFac1;stats.grpnames{i}];
             end
-           % eval(stats.grpnames{1})
+%             eval(stats.grpnames{1})
             for icomp = 1:size(mult,1)
 %                eval( ['p',GRFac1{mult(icomp ,1)},'_',GRFac1{mult(icomp,2)},'(',num2str(ich),',',num2str(idim),')','=',num2str(mult(icomp,6)),';'])
 %                eval( ['mdiff',GRFac1{mult(icomp ,1)},'_',GRFac1{mult(icomp,2)},'(',num2str(ich),',',num2str(idim),')','=',num2str(mult(icomp,4)),';'])
 %               c1 = gnames{mult(icomp,1)}
 %               c2 = gnames{mult(icomp,2)}
-                eval( ['p',gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},'(',num2str(ich),',',num2str(idim),')','=',num2str(mult(icomp,6)),';']);
+               eval( ['p',gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},'(',num2str(ich),',',num2str(idim),')','=',num2str(mult(icomp,6)),';']);
                eval( ['mdiff',gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},'(',num2str(ich),',',num2str(idim),')','=',num2str(mult(icomp,4)),';']);
 
             end
-         end 
-       save(fullfile([dir1,filesep,'ch'],[ zonelist{ich},'stats.mat']), 'stats','terms','p','tbl')
-        % results = multcompare(stats,'Dimension',[1 2]);
-    end 
+        end
+        save(fullfile([dir1,filesep,'ch'],[ zonelist{ich},'stats.mat']), 'stats','terms','p','tbl')
+%         results = multcompare(stats,'Dimension',[1 2]);
+    end
     [FDR,Q] = mafdr(pval(:));
     FDR = reshape(FDR, size(pval));
-
+    
     for idim = 1:size(pval,2)
         A = double( pval(:,idim)<0.05);
         factor = name(find(terms(idim,:)));
@@ -206,43 +202,42 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
             label = [label,factor{ifactor}];
         end
         save(fullfile( dir1,['anovan_p0.05 ',label,'.mat']),'A','zonelist'); 
-         A = double(1- pval(:,idim));
+        A = double(1- pval(:,idim));
         save(fullfile( dir1,['anovan_1-p',label,'.mat']),'A','zonelist'); 
-         A = double( Fval(:,idim));
+        A = double( Fval(:,idim));
         save(fullfile( dir1,['anovan_F ',label,'.mat']),'A','zonelist'); 
-          A = double(FDR(:,idim)<0.05);
+        A = double(FDR(:,idim)<0.05);
         save(fullfile( dir1,['anovan_FDRq0.05 ',label,'.mat']),'A','zonelist') ;
-         A = double(1- FDR(:,idim));
+        A = double(1- FDR(:,idim));
         save(fullfile( dir1,['anovan_FDR1-q ',label,'.mat']),'A','zonelist'); 
         for icomp = 1:size(mult,1)
             eval(['A = p',gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},';']);           
             fileout =fullfile(dir1,['posthoc p ',gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},'.mat']);
             save(fileout,'A','zonelist'); 
-             eval(['A = mdiff',gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},';']);               
+            eval(['A = mdiff',gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},';']);               
             fileout =fullfile(dir1,['posthoc mdiff ',gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},'.mat']);
             save(fileout,'A','zonelist');
             eval(['ptmp = p',gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},';']);  
             A = A.*(ptmp<0.05);
             fileout =fullfile(dir1,['posthoc mdiffp05 ',gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},'.mat']);
-            save(fileout,'A','zonelist');  
-       end
-    end 
+            save(fileout,'A','zonelist');
+        end
+    end
     elseif  isfield(job.c_statcomponent.c_ANOVAN,'b_ANOVANzone')
       
-     [filepath,name,ext] = fileparts(job.c_statcomponent.c_ANOVAN.b_ANOVANzone.f_anovan{1});
-     if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
+    [filepath,name,ext] = fileparts(job.c_statcomponent.c_ANOVAN.b_ANOVANzone.f_anovan{1});
+    if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
          [num,txt,raw] = xlsread(job.c_statcomponent.c_ANOVAN.b_ANOVANzone.f_anovan{1});
-     elseif  strcmp(ext,'.txt')
+    elseif  strcmp(ext,'.txt')
          [num,txt,raw] = readtxtfile_asxlsread(job.c_statcomponent.c_ANOVAN.b_ANOVANzone.f_anovan{1});
-     end
+    end
      
      %Case anovan each ch save each average and pval add fdr correction! 
      %load the observation if 
     [pathstr, name, ext]=fileparts(raw{2,3});
-     AllCOM = [];
-   
+    AllCOM = [];
     
-     for i=2:size(raw,1)         
+    for i=2:size(raw,1)         
       tmp= load(fullfile(raw{i,1},raw{i,2}),'-mat');       
       try
           zone = load(fullfile(raw{i,1},raw{i,3}),'-mat'); 
@@ -276,9 +271,9 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
          for idim = 1:numel(p)
             pval(ich,idim)=p(idim);
             Fval(ich,idim)=tbl{idim+1,6};
-         end 
-       save(fullfile(dir1,['anovan', 'REGION','stat.mat']), 'stats','terms','p','tbl');
-%        results = multcompare(stats,'Dimension',[1 2]);
+         end
+         save(fullfile(dir1,['anovan', 'REGION','stat.mat']), 'stats','terms','p','tbl');
+%          results = multcompare(stats,'Dimension',[1 2]);
     end
     lastcol = [{'Val'};num2cell(y')]
     tmp = [raw,lastcol]
