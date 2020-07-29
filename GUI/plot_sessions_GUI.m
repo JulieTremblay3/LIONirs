@@ -10825,13 +10825,57 @@ function context_reportnoise_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-
+[pathstr, ~ , ~ ] = fileparts(handles.NIRSpath{1});
+try
+    load(fullfile(pathstr, 'NIRS.mat'));
+catch
+    return
+end
 
 guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
 currentsub=1;
 PMI = get(guiHOMER,'UserData');
+lst = length(NIRS.Dt.fir.pp);
+rDtp = NIRS.Dt.fir.pp(lst).p; % path for files to be processed
+NC = NIRS.Cf.H.C.N;  
 
-figure; 
-subplot(5,5,[1:4,6:9,11:14,16:19])
+for f=1:size(rDtp,1)
+    d = fopen_NIR(rDtp{f,1},NC);           
+    samp_length = size(d,2);
+    time = 1/NIRS.Cf.dev.fs:1/NIRS.Cf.dev.fs:samp_length*1/NIRS.Cf.dev.fs;
+    dim_time = size(time);
+    dim_noise = size(PMI{currentsub}.data(1).HRF.noise);
+    perc_artifactedChannel = sum((PMI{currentsub}.data(1).HRF.noise')/size(PMI{currentsub}.data(1).HRF.noise',1)*100);
+    perc_artifactPerChannel = sum((PMI{currentsub}.data(1).HRF.noise)/size(PMI{currentsub}.data(1).HRF.noise,1)*100);
+    
+    if sum((PMI{currentsub}.data(1).HRF.noise)) == 0
+        msgbox('The data is not artifacted. The noise report may be insignificant', 'Noise Report');
+    end
+    
+    figure;
+    subplot(5,5,[1:3,6:8,11:13]);
+    imagesc(time,1:size(d,1),PMI{currentsub}.data(1).HRF.noise');
+    ylabel('Channel id number','fontsize', 8);
+    title('Channels in function of time','fontsize', 10);
+    set(gca,'fontsize',8);
+    xlim([0,time(dim_time(2))]);
 
-imagesc(PMI{currentsub}.data(1).HRF.noise')
+    subplot(5,5,[4:5,9:10,14:15]);
+    channel = linspace(dim_noise(2),1,dim_noise(2));
+    plot(perc_artifactPerChannel,channel);
+    set(gca,'Ydir','reverse');
+    set(gca,'fontsize',8);
+    xlabel('Percentage of artifacted time (%)','fontsize',8);    
+    title('Channels in function of the percentage of artifacted time','fontsize', 10);
+    ylim([1,dim_noise(2)]);
+    xlim([0,100]);
+
+    subplot(5,5,[16:18,21:23]);
+    plot(time,perc_artifactedChannel);
+    ylabel('Percentage of artifacted channels (%)','fontsize', 8);
+    xlabel('Time (s)','fontsize', 8)
+    title({'Percentage of artifacted channels in function of time'},'fontsize', 10);
+    xlim([1,time(dim_time(2))]);
+    ylim([0,100]);
+    set(gca,'fontsize',8)
+end
