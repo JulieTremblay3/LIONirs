@@ -42,10 +42,10 @@ if isfield(job.c_statcomponent,'b_TtestOneSample')
      [FDR,Q] = mafdr(pval);         
      A = mval.*double(Q<0.05);
      save(fullfile(dir1,['ONESAMPLE__mean05fdr.mat']),'A','zonelist','option')
-    [FDR,Q] = mafdr(pval);
+     [FDR,Q] = mafdr(pval);
      A = mval.*double(Q<0.01);
      save(fullfile(dir1,['ONESAMPLE__mean01fdr.mat']),'A','zonelist','option')
-    [FDR,Q] = mafdr(pval);
+     [FDR,Q] = mafdr(pval);
      A = mval.*double(Q<0.001);
      save(fullfile(dir1,['ONESAMPLE__mean001fdr.mat']),'A','zonelist','option')
 
@@ -60,24 +60,58 @@ elseif isfield(job.c_statcomponent,'b_TtestUnpaired')
         option = 'righttail';
     end
     AllG1 = [];
-    for i=1:numel(job.c_statcomponent.b_TtestUnpaired.f_componentG1)
+    for i = 1:numel(job.c_statcomponent.b_TtestUnpaired.f_componentG1)
         load(job.c_statcomponent.b_TtestUnpaired.f_componentG1{i},'-mat');
         [dir1,file1,ext1]=fileparts(job.c_statcomponent.b_TtestUnpaired.f_componentG1{i});
         AllG1 = [AllG1,A];
     end 
     
     AllG2 = [];
-    for i=1:numel(job.c_statcomponent.b_TtestUnpaired.f_componentG2)
+    for i = 1:numel(job.c_statcomponent.b_TtestUnpaired.f_componentG2)
         load(job.c_statcomponent.b_TtestUnpaired.f_componentG2{i},'-mat');
         [dir1,file1,ext1]=fileparts(job.c_statcomponent.b_TtestUnpaired.f_componentG2{i});
         AllG2 = [AllG2,A];
     end
     
-    for ich=1:size(AllG1,1)
-        stats = testt(AllG1(ich,:),AllG2(ich,:)); %do not suport nan 
+    for ich = 1:size(AllG1,1)
+        stats       = testt(AllG1(ich,:),AllG2(ich,:)); %do not suport nan 
+        tval(ich)   = stats.tvalue;
+        df          = stats.tdf;
+        pval(ich)   = stats.tpvalue;      
+        mval(ich)   = nanmean(AllG1(ich,:)) - nanmean(AllG2(ich,:));
+    end
+elseif isfield(job.c_statcomponent,'b_Ttestpaired')
+    
+    if job.c_statcomponent.b_Ttestpaired.m_TtestOneSample == 1
+        option = 'twotail';
+        tail = 2;
+    elseif job.c_statcomponent.b_Ttestpaired.m_TtestOneSample == 2  
+        option = 'lefttail';
+        tail = 1;
+    elseif job.c_statcomponent.b_Ttestpaired.m_TtestOneSample == 3
+        option = 'righttail';
+        tail = 1;
+    end
+    AllG1 = [];
+    for i = 1:numel(job.c_statcomponent.b_Ttestpaired.f_componentG1)
+        load(job.c_statcomponent.b_Ttestpaired.f_componentG1{i},'-mat');
+        [dir1, file1, ext1] = fileparts(job.c_statcomponent.b_Ttestpaired.f_componentG1{i});
+        AllG1 = [AllG1, A];
+    end 
+    
+    AllG2 = [];
+    for i = 1:numel(job.c_statcomponent.b_Ttestpaired.f_componentG2)
+        load(job.c_statcomponent.b_Ttestpaired.f_componentG2{i},'-mat');
+        [dir1, file1, ext1]=fileparts(job.c_statcomponent.b_Ttestpaired.f_componentG2{i});
+        AllG2 = [AllG2, A];
+    end
+ 
+    for ich = 1:size(AllG1,1)
+        stats = testt(AllG1(ich,:),AllG2(ich,:),1, 0.05,tail); %do not suport nan 
+     
         tval(ich) =   stats.tvalue;
         df = stats.tdf;
-        pval(ich)=stats.tpvalue;      
+        pval(ich) = stats.tpvalue;      
         mval(ich) =  nanmean(AllG1(ich,:)) - nanmean(AllG2(ich,:));
     end
     dir1 = job.e_STATCOMPPath{1};
@@ -111,7 +145,6 @@ elseif isfield(job.c_statcomponent,'b_TtestUnpaired')
     [FDR,Q] = mafdr(pval);
     A = mval.*double(Q<0.001);
     save(fullfile(dir1,['TWOSAMPLE_mean001fdr.mat']),'A','zonelist','option')
-
 
 elseif isfield(job.c_statcomponent,'c_ANOVAN')
     if isfield(job.c_statcomponent.c_ANOVAN,'b_ANOVAN') %by channel     
