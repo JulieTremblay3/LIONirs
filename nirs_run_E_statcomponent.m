@@ -123,7 +123,7 @@ elseif isfield(job.c_statcomponent,'b_TtestUnpaired')
     save(fullfile(dir1,['TWOSAMPLE_mean001fdr.mat']),'A','zonelist','option')
      
 elseif isfield(job.c_statcomponent,'b_Ttestpaired')
-    
+    paired = 1;
     if job.c_statcomponent.b_Ttestpaired.m_TtestOneSample == 1
         option = 'twotail';
         tail = 2;
@@ -149,7 +149,7 @@ elseif isfield(job.c_statcomponent,'b_Ttestpaired')
     end
  
     for ich = 1:size(AllG1,1)
-        stats       = testt(AllG1(ich,:),AllG2(ich,:),1, 0.05,tail); %do not suport nan 
+        stats       = testt(AllG1(ich,:),AllG2(ich,:), paired, 0.05,tail); 
         tval(ich)   = stats.tvalue;
         df          = stats.tdf;
         pval(ich)   = stats.tpvalue;      
