@@ -173,7 +173,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                     listtmp(idbad)=[];
                 end
                 if numel(listtmp) > 0
-                    %figure;plot(d1(listtmp,:)')
+                    figure;plot(d1(listtmp,:)')
                     data(i_zone,:) = nanmean(d1(listtmp,:),1);
                     %figure;plot(nanmean(d1(listtmp,:))')
                     data(i_zone + numel(ZoneList),:) = nanmean(d1(listtmp+numel(ZoneList),:),1);

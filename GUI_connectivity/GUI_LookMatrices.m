@@ -1687,6 +1687,7 @@ if get(handles.popupmenu_linkoption,'value')==1 %Connectogram
 elseif get(handles.popupmenu_linkoption,'value')==2 %notting
     set(handles.edit_linkSettingmapConnectogram,'visible','off')
     set(handles.edit_linkSettingmap2dmap,'visible','off')
+    axes(handles.axes_viewlink);cla
 elseif get(handles.popupmenu_linkoption,'value')==3
     set(handles.edit_linkSettingmapConnectogram,'visible','off')
     set(handles.edit_linkSettingmap2dmap,'visible','on')   

@@ -288,7 +288,7 @@ if avtype==1 %save data file for average over many files
                     hold on
                     bar(minz);
                     xlabel('Channel number')
-                    ylabel('Extrem value zscore')
+                    ylabel('Extreme value zscore')
                     subplot(2,1,2);
                     bar(nbtrialrejected);
                     xlabel('Channel number')
@@ -302,11 +302,13 @@ if avtype==1 %save data file for average over many files
                         filereport = fullfile(dir2,['Report_Reject_trial_zscore_',num2str(zthresh)]);
 %                    end
                     saveas(hreport,[filereport,'.jpg'],'jpg');  
-                    saveas(hreport,[filereport,'.fig'],'jpg');   
+                    saveas(hreport,[filereport,'.fig'],'fig');   
                 end
                 close(hreport)
-    end
-  
+        end
+    
+        
+        
     if size(A,3)>1
         av = nanmean(A,3);   
         stdav = nanstd(A,0,3);
@@ -389,7 +391,7 @@ if avtype==1 %save data file for average over many files
 %    end 
     title(['Channel with nb Trial >= ', num2str(job.choiceave.badchannelratio*100), '% are keeped (green one are rejected)' ])
     saveas(hnbtrial,[filereport,'.jpg'],'jpg');  
-    saveas(hnbtrial,[filereport,'.fig'],'jpg');  
+    saveas(hnbtrial,[filereport,'.fig'],'fig');  
     close(hnbtrial)
     
 %     figure;plot(tval')

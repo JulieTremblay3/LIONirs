@@ -306,7 +306,7 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
                     if ~isempty(idnan)
                         tmppb1(idnan)=[];
                     end
-                    if Toij(i,j)==0
+                    if Toij(i,j)==0 
                     [FSupSup,FSupDeriv,FSupTime,pij,tij] = TestPermut2Grupos(ESTAD,INDEP,tmpcb1,tmppb1,NPERM);
                     %apply symetric
                     ncb1(i,j) = numel(tmpcb1);
