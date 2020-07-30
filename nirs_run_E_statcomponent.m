@@ -77,7 +77,7 @@ elseif isfield(job.c_statcomponent,'b_TtestUnpaired')
     end
     
     for ich = 1:size(AllG1,1)
-        stats       = testt(AllG1(ich,:),AllG2(ich,:),tail); %do not suport nan 
+        stats       = testt(AllG1(ich,:),AllG2(ich,:)); %do not suport nan 
         tval(ich)   = stats.tvalue;
         df          = stats.tdf;
         pval(ich)   = stats.tpvalue;      
@@ -124,6 +124,7 @@ elseif isfield(job.c_statcomponent,'b_TtestUnpaired')
      
 elseif isfield(job.c_statcomponent,'b_Ttestpaired')
     paired = 1;
+    alpha = 0.05;
     if job.c_statcomponent.b_Ttestpaired.m_TtestOneSample == 1
         option = 'twotail';
         tail = 2;
@@ -149,7 +150,7 @@ elseif isfield(job.c_statcomponent,'b_Ttestpaired')
     end
  
     for ich = 1:size(AllG1,1)
-        stats       = testt(AllG1(ich,:),AllG2(ich,:), paired, 0.05,tail); 
+        stats       = testt(AllG1(ich,:),AllG2(ich,:), paired, alpha, tail); 
         tval(ich)   = stats.tvalue;
         df          = stats.tdf;
         pval(ich)   = stats.tpvalue;      

@@ -2522,7 +2522,7 @@ b_Ttestpaired        = cfg_branch;
 b_Ttestpaired.tag    = 'b_Ttestpaired';
 b_Ttestpaired.name   = 'Paired t-test' ;
 b_Ttestpaired.val    = {f_componentG1,f_componentG2,m_TtestOneSample};
-b_Ttestpaired.help   = {'The implementation a paired t-test.'};
+b_Ttestpaired.help   = {'The implementation a paired t-test. To make sure that the test is relevant, the two groups need to be paired data, which means the data can be naturally matched between the two groups.'};
 
 
 f_anovan         = cfg_files;
