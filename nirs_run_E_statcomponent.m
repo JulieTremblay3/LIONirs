@@ -63,8 +63,19 @@ elseif isfield(job.c_statcomponent,'b_TtestUnpaired')
         
     end
     
-    AllG1 = [];
-
+   AllG1 = [];
+    for i = 1:numel(job.c_statcomponent.b_TtestUnpaired.f_componentG1)
+        load(job.c_statcomponent.b_TtestUnpaired.f_componentG1{i},'-mat');
+        [dir1, file1, ext1] = fileparts(job.c_statcomponent.b_TtestUnpaired.f_componentG1{i});
+        AllG1 = [AllG1, A];
+    end 
+    
+    AllG2 = [];
+    for i = 1:numel(job.c_statcomponent.b_TtestUnpaired.f_componentG2)
+        load(job.c_statcomponent.b_TtestUnpaired.f_componentG2{i},'-mat');
+        [dir1, file1, ext1]=fileparts(job.c_statcomponent.b_TtestUnpaired.f_componentG2{i});
+        AllG2 = [AllG2, A];
+    end
     
     for ich = 1:size(AllG1,1)
         stats       = testt(AllG1(ich,:),AllG2(ich,:)); %do not suport nan 
