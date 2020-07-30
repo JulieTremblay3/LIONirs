@@ -2471,10 +2471,10 @@ e_STATCOMPPath.help     = {'Result of the statistic will be saved in this folder
 m_TtestOneSample        = cfg_menu;
 m_TtestOneSample.tag    = 'm_TtestOneSample';
 m_TtestOneSample.name   = 'Use ';
-m_TtestOneSample.labels = {'2 tails','1 tail left (neg) ' ,'1 tail right (pos) ' };
+m_TtestOneSample.labels = {'2-tailed','1-tailed left (neg) ' ,'1-tailed right (pos) ' };
 m_TtestOneSample.values = {1,2,3};
 m_TtestOneSample.val    = {1}; 
-m_TtestOneSample.help   = {'Use 2 tails or one tail assumption.'};
+m_TtestOneSample.help   = {'Use 2-tailed or one-tailed assumption.'};
 
 
 f_component         = cfg_files;
@@ -2518,6 +2518,13 @@ b_TtestUnpaired.name   = 'Unpaired t-test' ;
 b_TtestUnpaired.val    = {f_componentG1,f_componentG2,m_TtestOneSample};
 b_TtestUnpaired.help   = {'The implementation an unpaired t-test.'};
 
+b_Ttestpaired        = cfg_branch;
+b_Ttestpaired.tag    = 'b_Ttestpaired';
+b_Ttestpaired.name   = 'Paired t-test' ;
+b_Ttestpaired.val    = {f_componentG1,f_componentG2,m_TtestOneSample};
+b_Ttestpaired.help   = {'The implementation a paired t-test. To make sure that the test is relevant, the two groups need to be paired data, which means the data can be naturally matched between the two groups.'};
+
+
 f_anovan         = cfg_files;
 f_anovan.name    = 'Group identification'; 
 f_anovan.tag     = 'f_anovan';       %file names
@@ -2560,9 +2567,9 @@ c_ANOVAN.help    = {'N-way analysis of variance, the anova could be performed by
 c_statcomponent         = cfg_choice; 
 c_statcomponent.tag     = 'c_statcomponent';
 c_statcomponent.name    = 'Choose the statistical test';
-c_statcomponent.values  = {b_TtestOneSample, b_TtestUnpaired,c_ANOVAN};
+c_statcomponent.values  = {b_TtestOneSample, b_TtestUnpaired,c_ANOVAN, b_Ttestpaired};
 c_statcomponent.val     = {b_TtestOneSample}; %Default option
-c_statcomponent.help    = {'Three statistical tests are available: One sample t-test, Unpaired t-test, and Anovan. The first step is to choose which test you want to perform.'};
+c_statcomponent.help    = {'Four statistical tests are available: One sample t-test, Unpaired t-test, Paired t-test, and Anovan. The first step is to choose which test you want to perform.'};
 
 E_statcomponent      = cfg_exbranch;
 E_statcomponent.name = 'Stats components';
@@ -3341,10 +3348,10 @@ m_nodeunit.help      = {'Apply the statistics on each node. Define nodes as each
 m_TtestOneSample_matrix        = cfg_menu;
 m_TtestOneSample_matrix.tag    = 'm_TtestOneSample_matrix';
 m_TtestOneSample_matrix.name   = 'Use ';
-m_TtestOneSample_matrix.labels = {'2 tails','1 tail left (neg)' ,'1 tail right (pos)' };
+m_TtestOneSample_matrix.labels = {'2-tailed','1-tailed left (neg)' ,'1-tailed right (pos)' };
 m_TtestOneSample_matrix.values = {1,2,3};
 m_TtestOneSample_matrix.val    = {3}; 
-m_TtestOneSample_matrix.help   = {'Use one tail or two tails t-test.'};
+m_TtestOneSample_matrix.help   = {'Use one-tailed or two-tailed t-test.'};
 
 f_matrix         = cfg_files;
 f_matrix.name    = 'Enter list connectivity matrix'; 
