@@ -6,7 +6,7 @@ function out = nirs_run_average(job)
 %                 0 -> average over mutliple subjects %to check
 
 prefix = 'AVE'; %for "averaged"
-DelPreviousData  = job.DelPreviousData;
+DelPreviousData = job.DelPreviousData;
 % 
 % if isfield(job.NewDirCopyNIRSTRUE,'CreateNIRSCopy')
 %     NewNIRSdir = job.NewDirCopyNIRSTRUE.CreateNIRSCopy.NewNIRSdir;
@@ -23,6 +23,7 @@ avtype = job.choiceave.avtype;
 nirsformat = job.savenirs;
 badintervalratio = job.choiceave.badintervalratio;
 helpmemoryprob = 0 ;%job.choiceave.helpmemoryprob;
+
 
 %For multiple subjects average, look if montage is the same for each NIRS.mat
 % if avtype == 0 %NON VÉRIFIER JT
@@ -46,6 +47,8 @@ helpmemoryprob = 0 ;%job.choiceave.helpmemoryprob;
 % end
 % A = [];
 
+
+
 for filenb=1:size(job.NIRSmat,1) %For every specified NIRS.mat file
     %Load NIRS.mat information
     %     try
@@ -64,6 +67,7 @@ for filenb=1:size(job.NIRSmat,1) %For every specified NIRS.mat file
     %use last step of preprocessing
     lst = length(NIRS.Dt.fir.pp);
     rDtp = NIRS.Dt.fir.pp(lst).p; % path for files to be processed
+    [pathstr, ~, ~] = fileparts(rDtp{1});
     NC = NIRS.Cf.H.C.N;
     fs = NIRS.Cf.dev.fs;
     %erase matrices from previous NIRS.mat
@@ -98,19 +102,19 @@ for filenb=1:size(job.NIRSmat,1) %For every specified NIRS.mat file
         istop = ind_trig + abs((round(posttime*fs)*ones(size(ind_trig))));
         
         av_ind = zeros(2,numel(istart));
-        av_ind(1,:)=istart;
-        av_ind(2,:)=istop;
+        av_ind(1,:) = istart;
+        av_ind(2,:) = istop;
         %             try
         if ~helpmemoryprob %Help memory problem == no
             try
-            if job.choiceave.avg_datatype==2 % Open DC                
+            if job.choiceave.avg_datatype == 2 % Open DC                
                 namefile = rDtp{f,1};
-                d = fopen_NIR(namefile,NC); %Load whole bloc
-            elseif job.choiceave.avg_datatype==1 % Open AC
+                d = fopen_NIR(namefile,NC); %Load whole block
+            elseif job.choiceave.avg_datatype == 1 % Open AC
                 [pathstr, name, ext] = fileparts(rDtp{f,1});
                 namefile = fullfile(pathstr,[name,'AC',ext]);
-                d = fopen_NIR(namefile,NC); %Load whole bloc
-            elseif job.choiceave.avg_datatype==0 % Open PH
+                d = fopen_NIR(namefile,NC); %Load whole block
+            elseif job.choiceave.avg_datatype == 0 % Open PH
                 [pathstr, name, ext] = fileparts(rDtp{f,1});
                 namefile = fullfile(pathstr,[name,'PH',ext]);
                 d = fopen_NIR(namefile,NC); %Load whole bloc
@@ -170,9 +174,11 @@ for filenb=1:size(job.NIRSmat,1) %For every specified NIRS.mat file
                             if numel(find(isnan(A(Ich,:,trialnb))))/numel(A(Ich,:,trialnb)) >= badintervalratio %For epochs with too many artefacts
                                 A(Ich,:,trialnb) = NaN;
                                 disp(['File ', num2str(f), ', Channel ', num2str(Ich), ', Epoch ', num2str(atrig), ' was not used for averaging due to poor quality.']);
+                                 
                             end
                         else %If the channel is bad (flagged in NIRS.Cf.H.C.ok)
                             A(Ich,:,trialnb) = ones(1,numel(av_ind(1,atrig):av_ind(2,atrig)))*NaN;
+                            
                         end
                 end
                 trialnb = trialnb+1;
@@ -329,6 +335,8 @@ if avtype==1 %save data file for average over many files
         tval = av./(stdav./sqrt(nbevents));
         tval(zeronbevent)=0;  
 
+        
+               
         %Mettre les NAN à zero
         if modeTvalue>=1
             tval(:)=0;%initialisation tval
@@ -462,6 +470,43 @@ if avtype==1 %save data file for average over many files
         plot(t,av_tot)
         title('Multiple files Averaged Intensity')
     end
+    
+    if length(ind_trig)>numel(mediannbevents)/2
+        dim = length(ind_trig);
+    else
+        dim = numel(mediannbevents)/2;
+    end
+    rapport_temp = ones(dim);
+       
+    for w = 1:dim
+        for x = 1:8
+            if isnan(A(w,:,x))
+                rapport_temp(w,x) = 0;
+            end
+        end
+    end
+           
+    str = sprintf('\t');
+    for i = 1:8
+        str = [str,sprintf('%d', i)];
+    end
+    
+    for j = 1:54
+        
+        str = [str, newline, sprintf('%d',j)]; 
+        for k = 1:8
+            str = [str, sprintf('%d',rapport_temp(j,k))]; 
+        end   
+    end
+
+% for sheet = 1:filenb
+    clipboard('copy',str);
+    pathstr = [pathstr, sprintf('%s', '\rapport.xlsx')] 
+    [success,theMessage] = xlswrite(pathstr, str);
+% % end
+
+    
+    
     A = [];
 end
 
