@@ -263,10 +263,10 @@ if avtype==1 %save data file for average over many files
         return 
     end
         if isfield(job.choiceave.c_rejecttrial,'b_reject_trial')
-        maxz = zeros(size(A,1),1);
-        minz = zeros(size(A,1),1);
-        nbtrialrejected = zeros(size(A,1),1);
-        zthresh = abs(job.choiceave.c_rejecttrial.b_reject_trial.e_reject_outlier_threshold);
+            maxz = zeros(size(A,1),1);
+            minz = zeros(size(A,1),1);
+            nbtrialrejected = zeros(size(A,1),1);
+            zthresh = abs(job.choiceave.c_rejecttrial.b_reject_trial.e_reject_outlier_threshold);
                 for ich=1:size(A,1)
                     x = A(ich,:,:);
                     z = (x(:)-nanmean(x(:)))./nanstd(x(:));               
@@ -306,79 +306,78 @@ if avtype==1 %save data file for average over many files
                 end
                 close(hreport)
         end
-    
         
         
-    if size(A,3)>1
-        av = nanmean(A,3);   
-        stdav = nanstd(A,0,3);
-        nbevents = sum(~isnan(A),3);
-        mediannbevents = median(nbevents');
-    else
-        av = A(:,:,1);   
-        stdav = zeros(size(squeeze(A(:,:,1))));
-        nbevents = sum(~isnan(A),3);
-        mediannbevents = median(nbevents');
-    end
-    disp(['We find ',num2str(size(A,3)), ' events in the data'])
+        if size(A,3)>1
+            av = nanmean(A,3);   
+            stdav = nanstd(A,0,3);
+            nbevents = sum(~isnan(A),3);
+            mediannbevents = median(nbevents');
+        else
+            av = A(:,:,1);   
+            stdav = zeros(size(squeeze(A(:,:,1))));
+            nbevents = sum(~isnan(A),3);
+            mediannbevents = median(nbevents');
+        end
+        disp(['We find ',num2str(size(A,3)), ' events in the data'])
  
-    modeTvalue = job.choiceave.m_Tvalueoption; %0 against zero, 1 unpaired vs baseline Worstcase , 2 Avg baseline 
+        modeTvalue = job.choiceave.m_Tvalueoption; %0 against zero, 1 unpaired vs baseline Worstcase , 2 Avg baseline 
 
-    NIRS.Cf.H.C.okavg =  (mediannbevents >= ((trialnb-1)*job.choiceave.badchannelratio))';
-    %NIRS.Dt.fir.pp(lst+1).chok replace by NIRS.Cf.H.C.okavg
-    zeronbevent=find(nbevents==0);
-    tval = av./(stdav./sqrt(nbevents));
-    tval(zeronbevent)=0;  
+        NIRS.Cf.H.C.okavg =  (mediannbevents >= ((trialnb-1)*job.choiceave.badchannelratio))';
+    %   NIRS.Dt.fir.pp(lst+1).chok replace by NIRS.Cf.H.C.okavg
+        zeronbevent = find(nbevents==0);
+        tval = av./(stdav./sqrt(nbevents));
+        tval(zeronbevent)=0;  
 
-     %Mettre les NAN à zero
-    if modeTvalue>=1;
-        tval(:)=0;%initialisation tval
-        for ich = 1:size(tval,1)      
-            for istop = round(abs((round(pretime*fs)*ones(size(ind_trig))))/2);
-            ind_baseline_start = 1;
-            ind_baseline_stop = istop;
-            Baseline = A(ich,ind_baseline_start:ind_baseline_stop,:);        
+        %Mettre les NAN à zero
+        if modeTvalue>=1
+            tval(:)=0;%initialisation tval
+            for ich = 1:size(tval,1)      
+                for istop = round(abs((round(pretime*fs)*ones(size(ind_trig))))/2);
+                    ind_baseline_start = 1;
+                    ind_baseline_stop = istop;
+                    Baseline = A(ich,ind_baseline_start:ind_baseline_stop,:);        
 
-             if modeTvalue==1 %worstcasetvalue %On garde le temps avec la plus fort variance dans le baseline
-                mean2 = nanmean(squeeze(Baseline)'); %Mean
-                [v2,id] = max(nanvar(squeeze(Baseline)'));
-                m2 = mean2(id);
-                nt2 = sum(~isnan(Baseline(:,id)));
-             elseif modeTvalue==2
-                m2 = nanmean(nanmean(Baseline,2)); %Mean
-                dismeantime = nanmean(Baseline,2);
-                v2 = max(nanvar(dismeantime));            
-                nt2 = sum(~isnan(dismeantime));
-             end        
-            nt1 = nbevents(ich,:);
-            m1 = nanmean(A(ich,:,:),3);
-            v1 = nanstd(A(ich,:,:),0,3);     
-            %Equal variance
-            gl=(nt1+nt2)-2; %degrees of freedom
-            s=((nt1-1).*v1 + (nt2-1).*v2)./((nt1+nt2)-2); %combined variance
-            denom=sqrt((s./nt1+s./nt2));
-            dm=m1-m2;
-            tvalue=dm./denom; %t value unpaired
-            tval(ich,:)=tvalue;
-            end
-        end     
-    end
+                    if modeTvalue==1 %worstcasetvalue %On garde le temps avec la plus fort variance dans le baseline
+                        mean2 = nanmean(squeeze(Baseline)'); %Mean
+                        [v2,id] = max(nanvar(squeeze(Baseline)'));
+                        m2 = mean2(id);
+                        nt2 = sum(~isnan(Baseline(:,id)));
+                    elseif modeTvalue==2
+                        m2 = nanmean(nanmean(Baseline,2)); %Mean
+                        dismeantime = nanmean(Baseline,2);
+                        v2 = max(nanvar(dismeantime));            
+                        nt2 = sum(~isnan(dismeantime));
+                    end        
+                    nt1 = nbevents(ich,:);
+                    m1 = nanmean(A(ich,:,:),3);
+                    v1 = nanstd(A(ich,:,:),0,3);     
+                    %Equal variance
+                    gl=(nt1+nt2)-2; %degrees of freedom
+                    s=((nt1-1).*v1 + (nt2-1).*v2)./((nt1+nt2)-2); %combined variance
+                    denom=sqrt((s./nt1+s./nt2));
+                    dm=m1-m2;
+                    tvalue=dm./denom; %t value unpaired
+                    tval(ich,:)=tvalue;
+                end
+            end     
+        end
     %test   
 %     h=plot(tval(chlist,:))
 %     set(h,'displayname', num2str(modeTvalue));
 
     %Repport nb of trial
-    hnbtrial=figure
+    hnbtrial = figure;
     set(gca,'fontsize',14)
     hold on
-    for ichannel=1:numel(mediannbevents)/2
+    for ichannel = 1:numel(mediannbevents)/2
         if NIRS.Cf.H.C.okavg(ichannel)
             plot(ichannel,(mediannbevents(ichannel)/(trialnb-1))*100,'xk','markersize',10,'linewidth',3)
         else
             plot(ichannel,(mediannbevents(ichannel)/(trialnb-1))*100,'xg','markersize',10,'linewidth',3)
         end
     end
-     plot([1,numel(mediannbevents)/2],[job.choiceave.badchannelratio*100,job.choiceave.badchannelratio*100])
+    plot([1,numel(mediannbevents)/2],[job.choiceave.badchannelratio*100,job.choiceave.badchannelratio*100])
     xlabel('Channel')
     ylabel(['% Events = ',num2str(size(A,3))])
     ylim([-10,110])
@@ -406,7 +405,7 @@ if avtype==1 %save data file for average over many files
     %.nir format
 %     if NewDirCopyNIRS
 %         dir2 = [dir1 filesep NewNIRSdir];
-        if ~exist(dir2,'dir'), mkdir(dir2); end;
+    if ~exist(dir2,'dir'), mkdir(dir2); end;
         outfile = fullfile(dir2,[prefix fil1 ext1]);
         outfile2 = fullfile(dir2,[prefix fil1 '_std' ext1]);
         outfile3 = fullfile(dir2,[prefix fil1 '_events' ext1]);
@@ -529,7 +528,7 @@ if avtype==0 %save data file for multiple subjects average %NON vérifier
         try
             ChannelLabels = ConvertmlIDsrs2label(NIRS)
             SamplingInterval =floor(1000000/NIRS.Cf.dev.fs);
-             nirs_boxy_write_vhdr(outfilevhdr,... %Output file
+            nirs_boxy_write_vhdr(outfilevhdr,... %Output file
                         outfile,... %DataFile
                         outfilevmrk,... %MarkerFile,...
                         'nirs_run_average',... %Function that created the header
