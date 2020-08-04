@@ -332,7 +332,7 @@ if avtype==1 %save data file for average over many files
     %   NIRS.Dt.fir.pp(lst+1).chok replace by NIRS.Cf.H.C.okavg
         zeronbevent = find(nbevents==0);
         tval = av./(stdav./sqrt(nbevents));
-        tval(zeronbevent)=0;  
+        tval(zeronbevent) = 0;  
 
         
                
@@ -373,7 +373,7 @@ if avtype==1 %save data file for average over many files
 %     h=plot(tval(chlist,:))
 %     set(h,'displayname', num2str(modeTvalue));
 
-    %Repport nb of trial
+    %Repport nb of trials
     hnbtrial = figure;
     set(gca,'fontsize',14)
     hold on
