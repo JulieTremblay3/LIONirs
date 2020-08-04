@@ -28,7 +28,7 @@ for filenb=1:size(job.NIRSmat,1) %JT
         %load noise
         noise = logical(zeros(size(d')));
         mrk_type_arr = cellstr('bad_step');
-     mrks = [];
+    mrks = [];
     ind = [];
     dur = [];
     [ind_dur_ch] = read_vmrk_find(vmrk_path,mrk_type_arr);

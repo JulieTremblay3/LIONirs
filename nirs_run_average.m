@@ -312,8 +312,7 @@ if avtype==1 %save data file for average over many files
                 end
                 close(hreport)
         end
-        
-        
+       
         if size(A,3)>1
             av = nanmean(A,3);   
             stdav = nanstd(A,0,3);
@@ -329,7 +328,7 @@ if avtype==1 %save data file for average over many files
  
         modeTvalue = job.choiceave.m_Tvalueoption; %0 against zero, 1 unpaired vs baseline Worstcase , 2 Avg baseline 
 
-        NIRS.Cf.H.C.okavg =  (mediannbevents >= ((trialnb-1)*job.choiceave.badchannelratio))';
+        NIRS.Cf.H.C.okavg = (mediannbevents >= ((trialnb-1)*job.choiceave.badchannelratio))';
     %   NIRS.Dt.fir.pp(lst+1).chok replace by NIRS.Cf.H.C.okavg
         zeronbevent = find(nbevents==0);
         tval = av./(stdav./sqrt(nbevents));
@@ -361,12 +360,12 @@ if avtype==1 %save data file for average over many files
                     m1 = nanmean(A(ich,:,:),3);
                     v1 = nanstd(A(ich,:,:),0,3);     
                     %Equal variance
-                    gl=(nt1+nt2)-2; %degrees of freedom
-                    s=((nt1-1).*v1 + (nt2-1).*v2)./((nt1+nt2)-2); %combined variance
-                    denom=sqrt((s./nt1+s./nt2));
-                    dm=m1-m2;
-                    tvalue=dm./denom; %t value unpaired
-                    tval(ich,:)=tvalue;
+                    gl = (nt1+nt2)-2; %degrees of freedom
+                    s = ((nt1-1).*v1 + (nt2-1).*v2)./((nt1+nt2)-2); %combined variance
+                    denom = sqrt((s./nt1+s./nt2));
+                    dm = m1-m2;
+                    tvalue = dm./denom; %t value unpaired
+                    tval(ich,:) = tvalue;
                 end
             end     
         end
@@ -470,43 +469,44 @@ if avtype==1 %save data file for average over many files
         plot(t,av_tot)
         title('Multiple files Averaged Intensity')
     end
-    
-    if length(ind_trig)>numel(mediannbevents)/2
-        dim = length(ind_trig);
+    %Report of blocks used for averaging 
+    if size(A,3) > size(A,1)
+        dim     = (size(A,3));
+        dim2    = size(A,1);
     else
-        dim = numel(mediannbevents)/2;
+        dim     = (size(A,1));
+         dim2   = size(A,1);
     end
-    rapport_temp = ones(dim);
-       
+    report_temp = ones(dim);
+  
     for w = 1:dim
-        for x = 1:8
+        for x = 1:dim2
             if isnan(A(w,:,x))
-                rapport_temp(w,x) = 0;
+                report_temp(w,x) = 0;
             end
         end
     end
-           
-    str = sprintf('\t');
-    for i = 1:8
-        str = [str,sprintf('%d', i)];
+    
+    report = [];
+    for cols = 1:(size(A,3))
+        report{1,(cols+1)} = sprintf('%s%d', 'Block ',cols);
     end
     
-    for j = 1:54
-        
-        str = [str, newline, sprintf('%d',j)]; 
-        for k = 1:8
-            str = [str, sprintf('%d',rapport_temp(j,k))]; 
+    for rows = 1:(size(A,1))
+        report{(rows+1),1} = sprintf('%s%d', 'Channel ',rows);
+        for cols = 1:(size(A,3))
+            report{(rows+1),cols+1} = sprintf('%d',report_temp(rows,cols)); 
         end   
     end
-
-% for sheet = 1:filenb
-    clipboard('copy',str);
-    pathstr = [pathstr, sprintf('%s', '\rapport.xlsx')] 
-    [success,theMessage] = xlswrite(pathstr, str);
-% % end
-
-    
-    
+    if filenb > 1
+        for file = 1:filenb
+            path = fullfile(dir2,['Report_blocks_used_for_averaging_file',num2str(file)]);
+            xlswrite(path, report);
+        end
+    else
+        path = fullfile(dir2,'Report_blocks_used_for_averaging');
+        xlswrite(path, report);
+    end
     A = [];
 end
 
@@ -571,7 +571,7 @@ if avtype==0 %save data file for multiple subjects average %NON vérifier
         fwrite_NIR(outfile2,stdav);
         fwrite_NIR(outfile3,nbevents);
         try
-            ChannelLabels = ConvertmlIDsrs2label(NIRS)
+            ChannelLabels = ConvertmlIDsrs2label(NIRS);
             SamplingInterval =floor(1000000/NIRS.Cf.dev.fs);
             nirs_boxy_write_vhdr(outfilevhdr,... %Output file
                         outfile,... %DataFile
@@ -594,7 +594,7 @@ if avtype==0 %save data file for multiple subjects average %NON vérifier
         nirs_boxy_write_markers(outfilevmrk,... %Output file
             fileOut_nir,... %DataFile
             temp_markers);
-        ind_dur_ch = [abs((round(pretime*fs)*ones(size(ind_trig)))),0,0]
+        ind_dur_ch = [abs((round(pretime*fs)*ones(size(ind_trig)))),0,0];
         typemarker = trig;
         write_vmrk(outfilevmrk,'trigger',num2str(typemarker),ind_dur_ch);
         

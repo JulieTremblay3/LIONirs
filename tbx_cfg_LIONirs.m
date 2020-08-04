@@ -1439,7 +1439,8 @@ badintervalratio.name    = 'Reject trial ratio';
 badintervalratio.strtype = 'r';
 badintervalratio.num     = [1 Inf];
 badintervalratio.val     = {0.5};
-badintervalratio.help    = {'Reject the trial if more than xx% of its duration is marked as a bad interval, set to 1 to keep trial.'};
+badintervalratio.help    = {'Reject the trial if more than xx% of its duration is marked as a bad interval, set to 1 to keep trial.',...
+    'Entrer le pourcentage en nombre decimal, as an example: 0.5 for 50%'};
 
 badchannelratio         = cfg_entry;
 badchannelratio.tag     = 'badchannelratio';
@@ -1447,7 +1448,8 @@ badchannelratio.name    = 'Reject channel ratio';
 badchannelratio.strtype = 'r';
 badchannelratio.num     = [1 inf];
 badchannelratio.val     = {0.5};
-badchannelratio.help    = {'Reject the channel if less than xx% of the trial is rejected, set to 0 to keep all channels.'};
+badchannelratio.help    = {'It Rejects the channel if less than xx% of the trial is rejected, set to 0 to keep all channels.',...
+    'Entrer le pourcentage en nombre decimal, as an example: 0.5 for 50%'};
 
 helpmemoryprob          = cfg_menu;
 helpmemoryprob.tag      = 'helpmemoryprob';

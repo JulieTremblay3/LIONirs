@@ -287,7 +287,6 @@ pourcentagetr = job.i_minch_cardiac/100;
                     strDet = SDDet2strboxy(ML_new( ich,2));
                     strSrs = SDPairs2strboxy(ML_new( ich,1));                  
                 otherwise
-                
                     strDet = SDDet2strboxy(ML_new( ich,2));
                     strSrs = SDPairs2strboxy(ML_new( ich,1));  
                 end
@@ -295,12 +294,12 @@ pourcentagetr = job.i_minch_cardiac/100;
                 xlsall{idxls,2} = ich;
             end
             if  SNRfft
-            idbadsnr=find(snrpeak<2.5)
-              xlsallSNR{idxlsSNR,1} =  name;
-           idxlsSNR = idxlsSNR + 1;
-            xlsallSNR{idxlsSNR,1} = ['PEAK cardiac='];
-            xlsallSNR{idxlsSNR,2} = num2str(tablepeak(f,1));
-           chremove=find(snrpeak<2.5)
+                idbadsnr = find(snrpeak<2.5);
+                xlsallSNR{idxlsSNR,1} = name;
+                idxlsSNR = idxlsSNR + 1;
+                xlsallSNR{idxlsSNR,1} = ['PEAK cardiac='];
+                xlsallSNR{idxlsSNR,2} = num2str(tablepeak(f,1));
+                chremove=find(snrpeak<2.5)
               
             for i=1:numel(chremove)
                 idxlsSNR = idxlsSNR + 1;
