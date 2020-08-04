@@ -49,7 +49,7 @@ helpmemoryprob = 0 ;%job.choiceave.helpmemoryprob;
 
 
 
-for filenb=1:size(job.NIRSmat,1) %For every specified NIRS.mat file
+for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
     %Load NIRS.mat information
     %     try
     NIRS = [];
@@ -81,7 +81,7 @@ for filenb=1:size(job.NIRSmat,1) %For every specified NIRS.mat file
             ind_trig = [ind_trig; aux_trig(aux_trig==trig(b),2)];
         end
         if isempty(ind_trig)
-%            errordlg(['The selected trigger(s) are not avalaible for :',rDtp{f,1}],'Averaging Error');
+%             errordlg(['The selected trigger(s) are not avalaible for :',rDtp{f,1}],'Averaging Error');
 %             break
 %             answer = inputdlg('Enter valid trigger','Enter valid trigger');
 %             answer = str2num(answer{1});
@@ -337,7 +337,7 @@ if avtype==1 %save data file for average over many files
         
                
         %Mettre les NAN à zero
-        if modeTvalue>=1
+        if modeTvalue >= 1
             tval(:)=0;%initialisation tval
             for ich = 1:size(tval,1)      
                 for istop = round(abs((round(pretime*fs)*ones(size(ind_trig))))/2);
@@ -469,42 +469,35 @@ if avtype==1 %save data file for average over many files
         plot(t,av_tot)
         title('Multiple files Averaged Intensity')
     end
-    %Report of blocks used for averaging 
-    if size(A,3) > size(A,1)
-        dim     = (size(A,3));
-        dim2    = size(A,1);
-    else
-        dim     = (size(A,1));
-         dim2   = size(A,1);
-    end
-    report_temp = ones(dim);
+    
+    
+    %Report of blocks used for averaging
+    report = [];
   
-    for w = 1:dim
-        for x = 1:dim2
-            if isnan(A(w,:,x))
-                report_temp(w,x) = 0;
+    for jtrig = 1:(size(A,3))
+        report{1,(jtrig+1)} = sprintf('%s%d', 'Block ',jtrig);
+    end
+    
+    for jchannel = 1:(size(A,1)/2)
+        report{(jchannel+1),1} = sprintf('%s%d', 'Channel ',jchannel);
+        for jtrig = 1:(size(A,3))
+            if isnan(A(jchannel,:,jtrig))
+                report_temp = 0;
+            else
+                report_temp = 1;
             end
+            report{(jchannel+1),(jtrig+1)} = sprintf('%d',report_temp); 
         end
     end
     
-    report = [];
-    for cols = 1:(size(A,3))
-        report{1,(cols+1)} = sprintf('%s%d', 'Block ',cols);
-    end
-    
-    for rows = 1:(size(A,1))
-        report{(rows+1),1} = sprintf('%s%d', 'Channel ',rows);
-        for cols = 1:(size(A,3))
-            report{(rows+1),cols+1} = sprintf('%d',report_temp(rows,cols)); 
-        end   
-    end
     if filenb > 1
-        for file = 1:filenb
-            path = fullfile(dir2,['Report_blocks_used_for_averaging_file',num2str(file)]);
+        for jfile = 1:filenb
+            [dir2,~,~] = fileparts(job.NIRSmat{jfile,1});
+            path = fullfile(dir2,['Report_Blocks_Used_for_Averaging_File',num2str(jfile)]);
             xlswrite(path, report);
         end
     else
-        path = fullfile(dir2,'Report_blocks_used_for_averaging');
+        path = fullfile(dir2,'Report_Blocks_Used_for_Averaging');
         xlswrite(path, report);
     end
     A = [];

@@ -1440,7 +1440,7 @@ badintervalratio.strtype = 'r';
 badintervalratio.num     = [1 Inf];
 badintervalratio.val     = {0.5};
 badintervalratio.help    = {'Reject the trial if more than xx% of its duration is marked as a bad interval, set to 1 to keep trial.',...
-    'Entrer le pourcentage en nombre decimal, as an example: 0.5 for 50%'};
+    'Enter the percentage as a decimal number. Example: 0.5 for 50%'};
 
 badchannelratio         = cfg_entry;
 badchannelratio.tag     = 'badchannelratio';
@@ -1449,7 +1449,7 @@ badchannelratio.strtype = 'r';
 badchannelratio.num     = [1 inf];
 badchannelratio.val     = {0.5};
 badchannelratio.help    = {'It Rejects the channel if less than xx% of the trial is rejected, set to 0 to keep all channels.',...
-    'Entrer le pourcentage en nombre decimal, as an example: 0.5 for 50%'};
+    'Enter the percentage as a decimal number. Example: 0.5 for 50%'};
 
 helpmemoryprob          = cfg_menu;
 helpmemoryprob.tag      = 'helpmemoryprob';
@@ -2389,7 +2389,7 @@ v_component_list_remove.help    = {'Allow removing few components that could be 
 
 
 f_component_list         = cfg_files;
-f_component_list.name    = 'Enter list of component to export (xls)'; 
+f_component_list.name    = 'Enter list of components to export (xls)'; 
 f_component_list.tag     = 'f_component_list';       %file names
 f_component_list.filter  = {'xlsx','xls','txt'};
 f_component_list.ufilter = '.*';    
@@ -2411,7 +2411,7 @@ function vout = nirs_cfg_vout_E_exportcomponent_list(job)
     vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
 end
 f_component_zone         = cfg_files;
-f_component_zone.name    = 'Enter list of component to export and there zone (xls)'; 
+f_component_zone.name    = 'Enter list of components to export and there zone (xls)'; 
 f_component_zone.tag     = 'f_component_zone';       %file names
 f_component_zone.filter  = {'xlsx','xls','txt'};
 f_component_zone.ufilter = '.*';    
@@ -2480,7 +2480,7 @@ m_TtestOneSample.help   = {'Use 2-tailed or one-tailed assumption.'};
 
 
 f_component         = cfg_files;
-f_component.name    = 'Enter list of component'; 
+f_component.name    = 'Enter list of components'; 
 f_component.tag     = 'f_component';       %file names
 f_component.filter  = 'mat';
 f_component.ufilter = '.mat';    
