@@ -494,10 +494,19 @@ if avtype==1 %save data file for average over many files
         for jfile = 1:filenb
             [dir2,~,~] = fileparts(job.NIRSmat{jfile,1});
             path = fullfile(dir2,['Report_Blocks_Used_for_Averaging_File',num2str(jfile)]);
-            xlswrite(path, report);
+            if ismac
+                writetxtfile_asxlswrite(path, report)
+            else
+                xlswrite(path, report);
+            end
         end
     else
         path = fullfile(dir2,'Report_Blocks_Used_for_Averaging');
+        if ismac
+            writetxtfile_asxlswrite(path, report)
+        else
+            xlswrite(path, report);
+        end
         xlswrite(path, report);
     end
     A = [];
