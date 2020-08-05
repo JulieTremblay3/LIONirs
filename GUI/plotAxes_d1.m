@@ -45,10 +45,10 @@ void_ch = NaN*ones(size(PMI{currentsub}.data(cf).HRF.AvgC(:,plotLst(1))));
 %Trouver le champ normlist s'il  existe pour afficher les canaux à
 %renormaliser en gras
 imodulenorm = [];
-for i=1:numel(handles.NIRS.Dt.fir.pp)
-    if numel(handles.NIRS.Dt.fir.pp(i).pre)>=14
+for i = 1:numel(handles.NIRS.Dt.fir.pp)
+    if numel(handles.NIRS.Dt.fir.pp(i).pre) >= 14
         if strcmp(handles.NIRS.Dt.fir.pp(i).pre(1:14),'Step Detection')
-            imodulenorm  = i;        %Le dernier is plusieur Step Detection 
+            imodulenorm = i;        %Le dernier is plusieur Step Detection 
         end
     end
 end  
@@ -70,6 +70,7 @@ end
 try
     if isempty(start)|start == 0;
         xlim([PMI{currentsub}.data(cf).HRF.tHRF(1),PMI{currentsub}.data(cf).HRF.tHRF(end)]);
+        xlabel('time (s)');
         set(handles.edit_start,'string','0');
         idstart = 1 ;
         idstop = numel(PMI{currentsub}.data(cf).HRF.tHRF);
@@ -711,6 +712,28 @@ if ~get(handles.radio_autoaxis,'value')
     end
 end
 
+ylabel('');
+label = 0;
+for i = 1:size(handles.module_list,2)
+        if strncmp('ModifyBeerLambertLaw',handles.module_list{1,i},numel('ModifyBeerLambertLaw')) == 1
+            if handles.popupmenu_module.Value < i
+                ylabel('Light intensity (a.u.)')
+            else
+                ylabel('dCONC (uM/L)')
+            end
+            label = 1;
+            break            
+        end
+    end
+   
+
+if label == 0
+    ylabel('Light intensity (a.u.)')
+end
+
+
+    
+
 
 
 %%%%%%%%%%%%%%%%%% GENERAL TIMING OPTION %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -747,7 +770,7 @@ if isfield(handles,'selected_trig')
         
         %handles.selected_trig(itrig,:) = handles.triggers(ismember(handles.triggers(:,1), str2num(trig_name{trig_ind(itrig)})),:);
     end
-   selected_trig=tmp;
+   selected_trig = tmp;
     catch
     end
     
@@ -801,7 +824,7 @@ else
     handles.NIRS.Cf.H.C.ok(find(halflist(:)),fileid) = 1 ;
 end
 
-  NIRS=handles.NIRS;
+NIRS = handles.NIRS;
 save(handles.NIRSpath{handles.subjectnb,1},'NIRS','-mat');
 
 set(guiHOMER,'UserData',PMI)
