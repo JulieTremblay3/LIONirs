@@ -53,8 +53,11 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
     %Load NIRS.mat information
     %     try
     NIRS = [];
+    unused_blocks = [];
+    
     load(job.NIRSmat{filenb,1});
     [dir2,tmp,tmp] = fileparts(job.NIRSmat{filenb,1});
+    report_temp = ones(NIRS.Cf.H.C.N);
     if avtype == 0 %For multiple subjects average, look if montage is the same for each NIRS.mat
         if filenb > 1
             if previous_montage ~= NIRS.Cf.H.S.r.o.mm.p
@@ -73,7 +76,7 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
     %erase matrices from previous NIRS.mat
     av_tot = [];
     trialnb = 1;
-    for f=1:size(rDtp,1) %For every path of NIRS.mat file
+    for f = 1:size(rDtp,1) %For every path of NIRS.mat file
         %obtain indices of triggers
         ind_trig = [];
         aux_trig = NIRS.Dt.fir.aux5{f};
@@ -89,6 +92,8 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
 %                 ind_trig = [ind_trig aux_trig(aux_trig==answer,2)];
 %             end
             disp(['No trig found in file : ',rDtp{f,1}])
+            report_temp (:,f) = 0; 
+            
         else
         %erase matrices from previous filepaths
         av = [];
@@ -117,7 +122,7 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
             elseif job.choiceave.avg_datatype == 0 % Open PH
                 [pathstr, name, ext] = fileparts(rDtp{f,1});
                 namefile = fullfile(pathstr,[name,'PH',ext]);
-                d = fopen_NIR(namefile,NC); %Load whole bloc
+                d = fopen_NIR(namefile,NC); %Load whole block
             end
             catch
                 msgbox(['The file : ', namefile,' does''nt exist'])
@@ -178,7 +183,8 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
                             end
                         else %If the channel is bad (flagged in NIRS.Cf.H.C.ok)
                             A(Ich,:,trialnb) = ones(1,numel(av_ind(1,atrig):av_ind(2,atrig)))*NaN;
-                            
+                            report_temp(Ich,f) = 0;
+                           
                         end
                 end
                 trialnb = trialnb+1;
@@ -249,10 +255,10 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
             A = [];
             trialnb = 1;
         end
-    end  %fin filenb .nir
-    end
-    %Fin boucle des fichier
-end %fin filenb nirs.mat
+        
+        end     %fin filenb .nir
+    end         %Fin boucle des fichier
+end             %fin filenb nirs.mat
 
 [dir1,fil1,ext1] = fileparts(rDtp{f,1});
 %  if NewDirCopyNIRS
@@ -262,7 +268,7 @@ end %fin filenb nirs.mat
 
 
 %%%%%%%%processing for multiple files average%%%%%%%%%%
-if avtype==1 %save data file for average over many files
+if avtype == 1 %save data file for average over many files
     if isempty(A)
         disp('No event was found for this condition')
         out.NIRSmat = job.NIRSmat;
@@ -273,7 +279,7 @@ if avtype==1 %save data file for average over many files
             minz = zeros(size(A,1),1);
             nbtrialrejected = zeros(size(A,1),1);
             zthresh = abs(job.choiceave.c_rejecttrial.b_reject_trial.e_reject_outlier_threshold);
-                for ich=1:size(A,1)
+                for ich = 1:size(A,1)
                     x = A(ich,:,:);
                     z = (x(:)-nanmean(x(:)))./nanstd(x(:));               
                     minz(ich) = nanmin(z);
@@ -474,19 +480,19 @@ if avtype==1 %save data file for average over many files
     %Report of blocks used for averaging
     report = [];
   
-    for jtrig = 1:(size(A,3))
+    for jtrig = 1:f
         report{1,(jtrig+1)} = sprintf('%s%d', 'Block ',jtrig);
     end
     
     for jchannel = 1:(size(A,1)/2)
         report{(jchannel+1),1} = sprintf('%s%d', 'Channel ',jchannel);
-        for jtrig = 1:(size(A,3))
-            if isnan(A(jchannel,:,jtrig))
-                report_temp = 0;
+        for jtrig = 1:f
+            if report_temp(jchannel,jtrig) == 0
+                report{(jchannel+1),(jtrig+1)} = sprintf('%d',0); 
             else
-                report_temp = 1;
+                report{(jchannel+1),(jtrig+1)} = sprintf('%d',1);
+            
             end
-            report{(jchannel+1),(jtrig+1)} = sprintf('%d',report_temp); 
         end
     end
     
