@@ -5643,7 +5643,7 @@ elseif strcmp(listmethod{valmethod},'Component')
     end
     idcomp = get(handles.listbox_CorrectionDecomposition,'value');
     if strcmp( PARCORR(1,idcomp).type,'Offset Adjustment')
-         msgbox('Offset ajustment could not be add')
+         msgbox('Offset ajustment could not be added')
          return
     else       
         choice = questdlg(['Add', label{val}], ...
@@ -9035,8 +9035,8 @@ if strcmp(listmethod{idval},'Parafac') %get(handles.popupmethodselected,'value')
         %Detrent DATA segment for centrering
         PMI{currentsub}.tmpPARAFAC
         X = 1:1:size(intensnorm,1);
-        Mb1 =  ((intensnorm(end,:)-intensnorm(1,:))./numel(X))';
-        Mb2 =  intensnorm(1,:)'; %offset
+        Mb1 = ((intensnorm(end,:)-intensnorm(1,:))./numel(X))';
+        Mb2 = intensnorm(1,:)'; %offset
         A = reshape(X,numel(X),1)*reshape( Mb1,1,numel(Mb1)) +ones(numel(X),1)*reshape( Mb2,1,numel(Mb2));
         spar = intensnorm - A;
         A = PMI{currentsub}.tmpPARAFAC.Factors{1};
@@ -9059,7 +9059,7 @@ if strcmp(listmethod{idval},'Parafac') %get(handles.popupmethodselected,'value')
     %save in a structure all apply correction
         try
             load(fullfile(pathstr,'SelectedFactors.mat'))
-            newfile = 0
+            newfile = 0;
         catch
             %donot exist create the stucture
             PARCOMP.file= get(handles.popupmenu_file,'value');
@@ -9082,7 +9082,7 @@ if strcmp(listmethod{idval},'Parafac') %get(handles.popupmethodselected,'value')
             FacSpatial = PMI{currentsub}.tmpPARAFAC.Factors{2}
             selected = PMI{currentsub}.tmpPARAFAC.selected;
             PARCOMP.topo = FacSpatial(:,selected);
-        
+                
             newfile = 1;
         end
         if newfile == 0
@@ -9113,7 +9113,7 @@ if strcmp(listmethod{idval},'Parafac') %get(handles.popupmethodselected,'value')
             PARCOMP = [PARCOMP(1,1:idcurrent-1),PARCOMP(1,id+1), PARCOMP(1,idcurrent:id)]
         end
         
-        for i=1:numel(PARCOMP)
+        for i=1:(numel(PARCOMP))
             CORRlist{i} = PARCOMP(i).label
         end
         set(handles.listbox_Component,'string',CORRlist)
@@ -9148,8 +9148,8 @@ elseif strcmp(listmethod{idval},'PCA')  %extract PCA get(handles.radio_PCA,'valu
 %             return
 %         end
 %         
-        save in a structure all apply correction
-        [pathstr, name, ext] = fileparts(handles.NIRSpath{1})
+        %save in a structure all apply correction
+        [pathstr, name, ext] = fileparts(handles.NIRSpath{1});
         try
             load(fullfile(pathstr,'SelectedFactors.mat'))
             newfile = 0
@@ -9239,6 +9239,7 @@ elseif strcmp(listmethod{idval},'ICA')   %extract ICA Component
             PARCOMP.label= [labelid,'ICA', sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}];
             PARCOMP.type = 'ICA';
             PARCOMP.topo =  C(:,PMI{currentsub}.tmpICA.selected);
+          
             newfile = 1;
         end
         if newfile == 0
@@ -9316,6 +9317,7 @@ elseif strcmp(listmethod{idval},'GLM')   %extract GLM Component
             PARCOMP.label= [labelid,'GLM',label , sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}];
             PARCOMP.type = 'GLM';
             PARCOMP.topo =  beta(selected,:);
+            
             newfile = 1;
         end
         if newfile == 0
@@ -9441,7 +9443,7 @@ if isempty(time_start); indstart = 1;else;
     end
 end
 
-if isempty(time_stop);
+if isempty(time_stop)
     indstop =numel(PMI{currentsub}.data(cf).HRF.tHRF);
 else
     indstop= find(time_stop>PMI{currentsub}.data(cf).HRF.tHRF);
@@ -10734,7 +10736,10 @@ topo = PARCORR(idComp).topo;
 % elseif strcmpi((PARCOMP(idComp).type),'PCA')
 %     ntopo = ;
 % end
-
+if ntopo == 0
+    msgbox('There is no data associated to this label')
+    return
+end
 for j = 1:ntopo
     ichannel = PARCORR(idComp).listgood(j);
     switch  NIRS.Cf.dev.n
@@ -10773,16 +10778,43 @@ idComp = get(handles.listbox_Component,'value');
 strComp = get(handles.listbox_Component,'string');
 label = strComp{idComp};
 strTopo = sprintf('%s\t %s\t %s\n', 'Detector', 'Source', label);
-
+guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
+PMI = get(guiHOMER,'UserData');
 [pathstr, ~ , ~ ] = fileparts(handles.NIRSpath{1});
 try
     load(fullfile(pathstr,'SelectedFactors.mat'));
     load(fullfile(pathstr, 'NIRS.mat'));
 catch
+%     prelabel = get(handles.edit_selectedlabel, 'string');
+%     if strncmpi((label),[prelabel,'PARAFAC'],numel(prelabel)+numel('PARAFAC'))
+%         FacSpatial = PMI{currentsub}.tmpPARAFAC.Factors{2};
+%         selected = PMI{currentsub}.tmpPARAFAC.selected;
+%         PARCOMP.topo = FacSpatial(:,selected);
+%         listgood = PMI{currentsub}.tmpPARAFAC.listgood;
+%         PARCOMP.listgood = listgood;
+%         
+%     elseif strncmpi((label),[prelabel,'PCA'],numel(prelabel)+numel('PCA'))
+%         listgood = PMI{currentsub}.tmpPCA.listgood;
+%         u =PMI{currentsub}.tmpPCA.u ;
+%         s =PMI{currentsub}.tmpPCA.s ;
+%         v = PMI{currentsub}.tmpPCA.v ;
+%         lstSV = PMI{1}.tmpPCA.selected;
+%         PARCOMP.topo = s(lstSV,lstSV)*v(:,lstSV)';
+%         PARCOMP.listgood = listgood;
+%         
+%     elseif strncmpi((label),[prelabel,'GLM'],numel(prelabel)+numel('GLM'))
+%         beta = PMI{currentsub}.tmpGLM.beta ;
+%         selected = PMI{currentsub}.tmpGLM.selected;
+%         listgood = PMI{currentsub}.tmpGLM.listgood;
+%         PARCOMP.topo =  beta(selected,:);
+%         PARCOMP.listgood = listgood;
+%        
+%     end
+%     load(fullfile(pathstr, 'NIRS.mat'));
+    msgbox('The data couldn''t be copied.');
     return
 end
-guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
-PMI = get(guiHOMER,'UserData');
+
 ML = PMI{currentsub}.data.MeasList;
 topo = PARCOMP(idComp).topo;
 
@@ -10794,6 +10826,11 @@ topo = PARCOMP(idComp).topo;
 % elseif strcmpi((PARCOMP(idComp).type),'PCA')
 %     ntopo = ;
 % end
+
+if ntopo == 0
+    msgbox('There is no data associated to this label')
+    return
+end
 
 for j = 1:ntopo
     ichannel = PARCOMP(idComp).listgood(j);
