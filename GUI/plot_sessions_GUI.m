@@ -22,7 +22,7 @@ function varargout = plot_sessions_GUI(varargin)
 
 % Edit the above text to modify the response to help plot_sessions_GUI
 
-% Last Modified by GUIDE v2.5 24-Jul-2020 13:51:13
+% Last Modified by GUIDE v2.5 10-Aug-2020 15:35:57
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -2089,7 +2089,7 @@ function pushbutton13_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-choice = questdlg(['Are you sure you want to modify the data ?'],'Be carefull', ...
+choice = questdlg(['Are you sure you want to modify the data ?'],'Be careful', ...
     'Yes', ...
     'No',...
     'No');
@@ -2825,6 +2825,12 @@ if get(handles.popup_view,'value')~=5 %Autre mode que zone list
     guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
     PMI = get(guiHOMER,'UserData');
     cf  = 1;
+    
+    if numel(list) == length(PMI{currentsub}.data(cf).MeasList)
+        msgbox('All channels are already displayed.');
+        return
+    end
+    
     if min(list) < 1 % Check if minimum channel is reached and return if next channel cannot be selected.
         % errordlg('Minimum channel reached.','Operation error') % Inform the user that the operation cannot be done.
         return
@@ -2864,10 +2870,18 @@ if get(handles.popup_view,'value')~=5 %Autre mode que zone list
     guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
     PMI = get(guiHOMER,'UserData');
     cf  = 1;
+       
+    if numel(list) == length(PMI{currentsub}.data(cf).MeasList)
+        msgbox('All channels are already displayed.');
+        return
+    end
+    
     if max(list) > length(PMI{currentsub}.data(cf).MeasList) % Check if maximum channel is reached and return if next channel cannot be selected.
         % errordlg('Maximum channel reached.','Operation error') % Inform the user that the operation cannot be done.
         return
     end
+
+    
     set(handles.edit_plotLst,'string',num2str(list));
     PMI{currentsub}.plotLst = list;
     PMI{currentsub}.plot = [PMI{currentsub}.data(cf).MeasList(list,1),PMI{currentsub}.data(cf).MeasList(list,2)];
@@ -2990,6 +3004,10 @@ guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
 DOT = get(guiHOMER,'UserData');
 cf = DOT{currentsub}.currentFile;
 num = get(handles.popupmenu_zone,'value');
+if ~isfield(DOT{currentsub}, 'zone' | isempty(DOT{currentsub}.zone.plot))
+    errordlg('Make sure a zone exists before using this function of the displayGUI.');
+   return
+end
 button = questdlg('Are you sure to modify the current zone',DOT{currentsub}.zone.label{num},'Yes','No','Yes');
 if strcmp(button,'Yes')
     DOT{currentsub}.zone.plotLst{num} = DOT{currentsub}.plotLst;
@@ -3060,6 +3078,9 @@ if type == 1
     DOT{currentsub}.zone.SD = SD;
     [name, path]= uiputfile('.zone');
     zone = DOT{currentsub}.zone;
+    if name == 0
+        return
+    end
     save( [path, name],'zone');
     
     
@@ -3075,19 +3096,27 @@ else
             msgbox('error in zone concordance');return
         end
         if find(zone.ml ~=  DOT{currentsub}.data(cf).MeasList)
-            msgbox('error in zone concordance')
+            msgbox('error in zone concordance');
+            
         end
     else
-        msgbox('Montage concordance could no be check')
+        msgbox('Montage concordance could no be check');
     end
     DOT{currentsub}.data(cf).MeasList;
     if isfield(DOT{currentsub},'zone')
-        if zone.plot{1}== 0
-            for izone = 1:numel(zone.plot)
-                zone.plot{izone} = [DOT{currentsub}.data(cf).MeasList(zone.plotLst{izone},1),...
+       try
+           if zone.plot{1}== 0
+                for izone = 1:numel(zone.plot)
+                    zone.plot{izone} = [DOT{currentsub}.data(cf).MeasList(zone.plotLst{izone},1),...
                     DOT{currentsub}.data(cf).MeasList(zone.plotLst{izone},2)];
+                end
             end
-        end
+       catch
+           errordlg('The selected file was not enable to open.');
+           return  
+       end
+            
+        
         DOT{currentsub}.zone.plot = [DOT{currentsub}.zone.plot,zone.plot];
         %Check the plotLst with the measure list
         DOT{currentsub}.zone.plotLst = [DOT{currentsub}.zone.plotLst, zone.plotLst];
@@ -3117,22 +3146,32 @@ else
         DOT{currentsub}.zone.plotLst = zone.plotLst;
         set(handles.popupmenu_zone,'string',DOT{currentsub}.zone.label);
     else
-        if zone.plot{1}== 0
-            for izone = 1:numel(zone.plot)
-                zone.plot{izone} = [DOT{currentsub}.data(cf).MeasList(zone.plotLst{izone},1),...
+        try
+            if zone.plot{1}== 0
+                for izone = 1:numel(zone.plot)
+                    zone.plot{izone} = [DOT{currentsub}.data(cf).MeasList(zone.plotLst{izone},1),...
                     DOT{currentsub}.data(cf).MeasList(zone.plotLst{izone},2)];
+                end
             end
-        end
         DOT{currentsub}.zone.plot = zone.plot;
         DOT{currentsub}.zone.plotLst = zone.plotLst;
         DOT{currentsub}.zone.label = zone.label;
         DOT{currentsub}.zone.color =  zone.color;
         set(handles.popupmenu_zone,'string',DOT{currentsub}.zone.label);
         set(handles.popupmenu_zone,'value',numel(DOT{currentsub}.zone.label));
+       
+        catch
+            errordlg('The selected file was not enable to open.');
+            return
+        end
     end
 end
+ 
+    
+    
 
 set(guiHOMER,'UserData',DOT);
+
 
 
 % --- Executes on button press in btn_openzone.
@@ -3150,9 +3189,19 @@ function btn_CleanZone_Callback(hObject, eventdata, handles)
 
 global currentsub;
 guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
-DOT = get(guiHOMER,'UserData')
+DOT = get(guiHOMER,'UserData');
 cf = DOT{currentsub}.currentFile;
 num = get(handles.popupmenu_zone,'value');
+try
+    if isempty(DOT{currentsub}.zone.plot)
+    msgbox('All the zones are already cleared.');
+    end
+catch
+    if ~isfield(DOT{currentsub},'zone')|~isfield(DOT{currentsub}.zone,'plot')
+        msgbox('There are no zones to be cleared.');
+    end
+end
+    
 DOT{currentsub}.zone.plot = {};
 DOT{currentsub}.zone.plotLst = {};
 DOT{currentsub}.zone.label = {};
@@ -9286,14 +9335,19 @@ elseif strcmp(listmethod{idval},'ICA')   %extract ICA Component
    
 elseif strcmp(listmethod{idval},'GLM')   %extract GLM Component
     if isfield (PMI{currentsub}, 'tmpGLM')
-        indt = [PMI{currentsub}.tmpGLM.indt(1):PMI{currentsub}.tmpGLM.indt(2)];%Time indice
-      	listgood = PMI{currentsub}.tmpGLM.listgood;
-        lstSV = PMI{1}.tmpGLM.selected;
-        beta = PMI{currentsub}.tmpGLM.beta ;
-        selected = PMI{currentsub}.tmpGLM.selected;
-        idreg = PMI{currentsub}.tmpGLM.idreg;
-        Xm = PMI{1}.tmpGLM.AUX.data{idreg(selected)}*beta(selected,:);
-        label =  PMI{1}.tmpGLM.AUX.label{idreg(selected)};
+        try
+            indt = [PMI{currentsub}.tmpGLM.indt(1):PMI{currentsub}.tmpGLM.indt(2)];%Time indice
+            listgood = PMI{currentsub}.tmpGLM.listgood;
+            lstSV = PMI{1}.tmpGLM.selected;
+            beta = PMI{currentsub}.tmpGLM.beta ;
+            selected = PMI{currentsub}.tmpGLM.selected;
+            idreg = PMI{currentsub}.tmpGLM.idreg;
+            Xm = PMI{1}.tmpGLM.AUX.data{idreg(selected)}*beta(selected,:);
+            label =  PMI{1}.tmpGLM.AUX.label{idreg(selected)};
+        catch
+            msgbox('The component cannot be added to the list. Make sure to adjust the parameters in the GLM identificaiton GUI to make it worked.', 'ERROR');
+            return
+        end
     
     %save in a structure all apply correction
         [pathstr, name, ext] = fileparts(handles.NIRSpath{1});
@@ -10071,60 +10125,66 @@ function btn_exportmeanzonecurve_Callback(hObject, eventdata, handles)
 % hObject    handle to btn_exportmeanzonecurve (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
-currentsub=1;
-PMI = get(guiHOMER,'UserData');
-cf = PMI{currentsub}.currentFile;
- num = get(handles.popupmenu_zone,'value');
-  plotLst = PMI{currentsub}.zone.plotLst{num};
-   label = PMI{currentsub}.zone.label{num};
-   try
-     colorid = PMI{currentsub}.zone.color(num,:);
-   catch
-       colorid = [0 0 0]
-   end
-     listCH = zeros(size( PMI{currentsub}.data.HRF.AvgC,2),1);
-   listCH(plotLst) = 1;
-  both =  reshape(listCH,numel(listCH)/2,2);
-  chHbO = find(sum(both,2));
-  chHbR =   chHbO + numel(listCH)/2;
-  
- if strcmp(get(handles.Context_MenuExportZone_All,'checked'),'off') %only one curve
-      figure; hold on
-      plotLst = PMI{currentsub}.zone.plotLst{num};
-      label = PMI{currentsub}.zone.label{num};
-      colorid = PMI{currentsub}.zone.color(num,:);
-      listCH = zeros(size( PMI{currentsub}.data.HRF.AvgC,2),1);
-      listCH(plotLst) = 1;
-      both =  reshape(listCH,numel(listCH)/2,2);
-      chHbO = find(sum(both,2));
-      chHbR =   chHbO + numel(listCH)/2;
-      % plot(PMI{currentsub}.data.HRF.AvgC(:,chHbO))
-      plot(PMI{currentsub}.data.HRF.tHRF,nanmean(PMI{currentsub}.data.HRF.AvgC(:,chHbO),2),'displayname',['HbO',label],'color',colorid,'linewidth',4);
-      plot(PMI{currentsub}.data.HRF.tHRF,nanmean(PMI{currentsub}.data.HRF.AvgC(:,chHbR),2),'displayname',['HbR',label],'color',colorid,'linestyle','--','linewidth',4);
-      set(gca,'fontsize',20)
-      xlabel('Time (s)')
- else
-     figure; hold on
-     for num = 1:numel(PMI{currentsub}.zone.label)           
-          plotLst = PMI{currentsub}.zone.plotLst{num};
-          label = PMI{currentsub}.zone.label{num};
-          colorid = PMI{currentsub}.zone.color(num,:);
-          listCH = zeros(size( PMI{currentsub}.data.HRF.AvgC,2),1);
-          listCH(plotLst) = 1;
-          both =  reshape(listCH,numel(listCH)/2,2);
-          chHbO = find(sum(both,2));
-          chHbR =   chHbO + numel(listCH)/2;
-          % plot(PMI{currentsub}.data.HRF.AvgC(:,chHbO))
-          plot(PMI{currentsub}.data.HRF.tHRF,nanmean(PMI{currentsub}.data.HRF.AvgC(:,chHbO),2),'displayname',['HbO',label],'color',colorid,'linewidth',4);
-          plot(PMI{currentsub}.data.HRF.tHRF,nanmean(PMI{currentsub}.data.HRF.AvgC(:,chHbR),2),'displayname',['HbR',label],'color',colorid,'linestyle','--','linewidth',4);
-          set(gca,'fontsize',20)
-          xlabel('Time (s)')
-     end
- end
+try
+    guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
+    currentsub=1;
+    PMI = get(guiHOMER,'UserData');
+    cf = PMI{currentsub}.currentFile;
+    num = get(handles.popupmenu_zone,'value');
+    plotLst = PMI{currentsub}.zone.plotLst{num};
+    label = PMI{currentsub}.zone.label{num};
+catch
+    errordlg('Make sure a zone exists before using this function of the displayGUI.');
+    return
+end
+
+try
+    colorid = PMI{currentsub}.zone.color(num,:);
+catch
+    colorid = [0 0 0];
+end
+listCH = zeros(size( PMI{currentsub}.data.HRF.AvgC,2),1);
+listCH(plotLst) = 1;
+both =  reshape(listCH,numel(listCH)/2,2);
+chHbO = find(sum(both,2));
+chHbR =   chHbO + numel(listCH)/2;
+
+if strcmp(get(handles.Context_MenuExportZone_All,'checked'),'off') %only one curve
+    figure; hold on
+    plotLst = PMI{currentsub}.zone.plotLst{num};
+    label = PMI{currentsub}.zone.label{num};
+    colorid = PMI{currentsub}.zone.color(num,:);
+    listCH = zeros(size( PMI{currentsub}.data.HRF.AvgC,2),1);
+    listCH(plotLst) = 1;
+    both =  reshape(listCH,numel(listCH)/2,2);
+    chHbO = find(sum(both,2));
+    chHbR =   chHbO + numel(listCH)/2;
+    % plot(PMI{currentsub}.data.HRF.AvgC(:,chHbO))
+    plot(PMI{currentsub}.data.HRF.tHRF,nanmean(PMI{currentsub}.data.HRF.AvgC(:,chHbO),2),'displayname',['HbO',label],'color',colorid,'linewidth',4);
+    plot(PMI{currentsub}.data.HRF.tHRF,nanmean(PMI{currentsub}.data.HRF.AvgC(:,chHbR),2),'displayname',['HbR',label],'color',colorid,'linestyle','--','linewidth',4);
+    set(gca,'fontsize',20)
+    xlabel('Time (s)')
+else
+    figure; hold on
+    for num = 1:numel(PMI{currentsub}.zone.label)
+        plotLst = PMI{currentsub}.zone.plotLst{num};
+        label = PMI{currentsub}.zone.label{num};
+        colorid = PMI{currentsub}.zone.color(num,:);
+        listCH = zeros(size( PMI{currentsub}.data.HRF.AvgC,2),1);
+        listCH(plotLst) = 1;
+        both =  reshape(listCH,numel(listCH)/2,2);
+        chHbO = find(sum(both,2));
+        chHbR =   chHbO + numel(listCH)/2;
+        % plot(PMI{currentsub}.data.HRF.AvgC(:,chHbO))
+        plot(PMI{currentsub}.data.HRF.tHRF,nanmean(PMI{currentsub}.data.HRF.AvgC(:,chHbO),2),'displayname',['HbO',label],'color',colorid,'linewidth',4);
+        plot(PMI{currentsub}.data.HRF.tHRF,nanmean(PMI{currentsub}.data.HRF.AvgC(:,chHbR),2),'displayname',['HbR',label],'color',colorid,'linestyle','--','linewidth',4);
+        set(gca,'fontsize',20)
+        xlabel('Time (s)')
+    end
+end
 tstart = str2num(get(handles.edit_start,'string'));
-duration =  str2num(get(handles.edit_duration,'string'));
-if tstart==0
+duration = str2num(get(handles.edit_duration,'string'));
+if tstart == 0
 else
     xlim([tstart,tstart+duration]);
 end
@@ -10734,14 +10794,8 @@ PMI = get(guiHOMER,'UserData');
 ML = PMI{currentsub}.data.MeasList;
 topo = PARCORR(idComp).topo;
 
+ntopo = numel(topo);
 
-% if strcmpi((PARCOMP(idComp).type),'GLM')
-    ntopo = numel(topo);
-% elseif strcmpi((PARCOMP(idComp).type),'Parafac')
-%     ntopo = ;
-% elseif strcmpi((PARCOMP(idComp).type),'PCA')
-%     ntopo = ;
-% end
 if ntopo == 0
     msgbox('There is no data associated to this label')
     return
@@ -10791,47 +10845,13 @@ try
     load(fullfile(pathstr,'SelectedFactors.mat'));
     load(fullfile(pathstr, 'NIRS.mat'));
 catch
-%     prelabel = get(handles.edit_selectedlabel, 'string');
-%     if strncmpi((label),[prelabel,'PARAFAC'],numel(prelabel)+numel('PARAFAC'))
-%         FacSpatial = PMI{currentsub}.tmpPARAFAC.Factors{2};
-%         selected = PMI{currentsub}.tmpPARAFAC.selected;
-%         PARCOMP.topo = FacSpatial(:,selected);
-%         listgood = PMI{currentsub}.tmpPARAFAC.listgood;
-%         PARCOMP.listgood = listgood;
-%         
-%     elseif strncmpi((label),[prelabel,'PCA'],numel(prelabel)+numel('PCA'))
-%         listgood = PMI{currentsub}.tmpPCA.listgood;
-%         u =PMI{currentsub}.tmpPCA.u ;
-%         s =PMI{currentsub}.tmpPCA.s ;
-%         v = PMI{currentsub}.tmpPCA.v ;
-%         lstSV = PMI{1}.tmpPCA.selected;
-%         PARCOMP.topo = s(lstSV,lstSV)*v(:,lstSV)';
-%         PARCOMP.listgood = listgood;
-%         
-%     elseif strncmpi((label),[prelabel,'GLM'],numel(prelabel)+numel('GLM'))
-%         beta = PMI{currentsub}.tmpGLM.beta ;
-%         selected = PMI{currentsub}.tmpGLM.selected;
-%         listgood = PMI{currentsub}.tmpGLM.listgood;
-%         PARCOMP.topo =  beta(selected,:);
-%         PARCOMP.listgood = listgood;
-%        
-%     end
-%     load(fullfile(pathstr, 'NIRS.mat'));
     msgbox('The data couldn''t be copied.');
     return
 end
 
 ML = PMI{currentsub}.data.MeasList;
 topo = PARCOMP(idComp).topo;
-
-
-% if strcmpi((PARCOMP(idComp).type),'GLM')
-    ntopo = numel(topo);
-% elseif strcmpi((PARCOMP(idComp).type),'Parafac')
-%     ntopo = ;
-% elseif strcmpi((PARCOMP(idComp).type),'PCA')
-%     ntopo = ;
-% end
+ntopo = numel(topo);
 
 if ntopo == 0
     msgbox('There is no data associated to this label')
@@ -10872,6 +10892,7 @@ function context_reportnoise_Callback(hObject, eventdata, handles)
 try
     load(fullfile(pathstr, 'NIRS.mat'));
 catch
+    
     return
 end
 
@@ -10922,3 +10943,5 @@ for f=1:size(rDtp,1)
     ylim([0,100]);
     set(gca,'fontsize',8)
 end
+
+
