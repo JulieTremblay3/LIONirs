@@ -3004,7 +3004,7 @@ guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
 DOT = get(guiHOMER,'UserData');
 cf = DOT{currentsub}.currentFile;
 num = get(handles.popupmenu_zone,'value');
-if ~isfield(DOT{currentsub}, 'zone' | isempty(DOT{currentsub}.zone.plot))
+if ~isfield(DOT{currentsub}, 'zone') | isempty(DOT{currentsub}.zone.plot)
     errordlg('Make sure a zone exists before using this function of the displayGUI.');
    return
 end
