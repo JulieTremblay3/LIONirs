@@ -91,8 +91,8 @@ function btn_Browserawdata_Callback(hObject, eventdata, handles)
 % hObject    handle to btn_Browserawdata (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-listoption = get(handles.popupmenuoption,'string')
-idval = get(handles.popupmenuoption,'value')
+listoption = get(handles.popupmenuoption,'string');
+idval = get(handles.popupmenuoption,'value');
 if strcmp(listoption{idval},'Create HRF using onset duration xls file')
  [file,pathout]= uigetfile({'*.nir';'*.dat';'*.*';},'Selector file to create analogous trig in aux file .nir or .dat EEG BrainVision generic data export');
  set(handles.edit_rawdata,'string', [pathout,file])
@@ -144,20 +144,20 @@ function btn_Browseeventfile_Callback(hObject, eventdata, handles)
 % hObject    handle to btn_Browseeventfile (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-listoption = get(handles.popupmenuoption,'string')
+listoption = get(handles.popupmenuoption,'string');
 idval = get(handles.popupmenuoption,'value');
 if strcmp(listoption{idval},'Create HRF using onset duration xls file')
     [file,path]=uigetfile('.xlsx');
 elseif strcmp(listoption{idval},'Create HRF convolution .dat AUX signal ')%
     [file,path]=uigetfile('.dat'); 
 elseif strcmp(listoption{idval},'Global regressor NIRS.mat average exclude rejected channel')
-    path=uigetdir()
+    path = uigetdir();
     file = [];
 elseif strcmp(listoption{idval},'Short channel regressor NIRS.mat (channel is measurement in the data)')
-    path=uigetdir()
+    path = uigetdir();
     file = [];
 elseif strcmp(listoption{idval},'Audio .wav (sum mel coefficients)')
-    [file,path]=uigetfile('.wav')
+    [file,path] = uigetfile('.wav');
 end
 set(handles.edit_eventfile,'string',[path,file])
 % --- Executes on button press in btn_createHRF.
@@ -165,13 +165,13 @@ function btn_createHRF_Callback(hObject, eventdata, handles)
 % hObject    handle to btn_createHRF (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-fileevent = get(handles.edit_eventfile,'string')
-filedata = get(handles.edit_rawdata,'string')
-label = get(handles.edit_name,'string')
-pathout = get(handles.edit_pathout,'string')
+fileevent = get(handles.edit_eventfile,'string');
+filedata = get(handles.edit_rawdata,'string');
+label = get(handles.edit_name,'string');
+pathout = get(handles.edit_pathout,'string');
 %Read onset
-listoption = get(handles.popupmenuoption,'string')
-idval = get(handles.popupmenuoption,'value')
+listoption = get(handles.popupmenuoption,'string');
+idval = get(handles.popupmenuoption,'value');
 
 if strcmp(listoption{idval},'Create HRF using onset duration xls file')
     [~,~,ext] =fileparts(fileevent);
@@ -191,19 +191,19 @@ if strcmp(listoption{idval},'Create HRF using onset duration xls file')
     eventV =zeros(size(EEG.data,1),1);
     fs = 1/(EEG.infoBV.SamplingInterval/1e6)
     t = 1/fs:1/fs:1/fs*size(EEG.data,1);
-    idevent = []
+    idevent = [];
     for ievent = 1:numel(onset)
         idon = find(t>onset(ievent) & t<(onset(ievent)+dur(ievent)));      
-        eventV(idon ) = weight(ievent,1);
+        eventV(idon) = weight(ievent,1);
     end
     %eventV( idevent) = 1;
    
     frametimes = 1/fs:1/fs:size(EEG.data,1)*1/fs;
-    param1=str2num(get(handles.edit_parameter_1,'string'))
-    param2=str2num(get(handles.edit_parameter_2,'string'))
-    param3=str2num(get(handles.edit_parameter_3,'string'))
-    param4=str2num(get(handles.edit_parameter_4,'string'))
-    param5=str2num(get(handles.edit_parameter_5,'string'))
+    param1 = str2num(get(handles.edit_parameter_1,'string'));
+    param2 = str2num(get(handles.edit_parameter_2,'string'));
+    param3 = str2num(get(handles.edit_parameter_3,'string'));
+    param4 = str2num(get(handles.edit_parameter_4,'string'));
+    param5 = str2num(get(handles.edit_parameter_5,'string'));
     H = fmridesign(frametimes,0,[1 0],[],[param1 param2 param3 param4 param5 0]); %Default
     Sc1 = conv2(H.X(:,1,1), eventV);
     Scn = Sc1(1:end-numel(H.X(:,1,1))+1);
@@ -211,8 +211,8 @@ if strcmp(listoption{idval},'Create HRF using onset duration xls file')
      Scn = Scn/max(Scn);
      Regressor.xdata = t'
      Regressor.ydata = Scn
-     Onset.xdata = [onset,onset]
-     Onset.ydata = [min(Scn),max(Scn) ]
+     Onset.xdata = [onset,onset];
+     Onset.ydata = [min(Scn),max(Scn)];
     save(fullfile(pathout,'Regressor.mat'),'Regressor', 'Onset')
     h= figure;plot(t,Scn,'displayname','HRF');
      hold on
@@ -225,7 +225,7 @@ if strcmp(listoption{idval},'Create HRF using onset duration xls file')
     HRFcurve.data = Scn;
     HRFcurve.ind_dur_ch=EEG.ind_dur_ch;
     HRFcurve.marker=EEG.marker;
-    HRFcurve.infoBV = EEG.infoBV
+    HRFcurve.infoBV = EEG.infoBV;
     HRFcurve.infoBV.DataType = 'TIMEDOMAIN';
     HRFcurve.infoBV.NumberOfChannels = '1';
     HRFcurve.infoBV.name_ele = {deblank(label)};
@@ -233,47 +233,47 @@ if strcmp(listoption{idval},'Create HRF using onset duration xls file')
     HRFcurve.infoBV.coor_theta  = 90;
     HRFcurve.infoBV.coor_phi = 45;
     HRFcurve.infoBV.DataPoints = numel(Scn);
-    [pathstr, name, ext] = fileparts(fileevent)
-    fileoutHRFcurve = fullfile(pathout, [label,'.dat'])
+    [pathstr, name, ext] = fileparts(fileevent);
+    fileoutHRFcurve = fullfile(pathout, [label,'.dat']);
     fwrite_EEG(fileoutHRFcurve,HRFcurve,1,HRFcurve.infoBV.DataPoints );
 elseif strcmp(listoption{idval},'Create HRF convolution .dat AUX signal ')
     [EEG.data,EEG.infoBV,EEG.marker,EEG.ind_dur_ch]= fopen_EEG(fileevent);
-     idtrigger = find(strcmp('trigger',EEG.marker(:,1))& EEG.ind_dur_ch(:,1)>0);
-     EEG.marker = EEG.marker(idtrigger,:);
-     EEG.ind_dur_ch = EEG.ind_dur_ch(idtrigger,:);
- 
-      fs = 1/(EEG.infoBV.SamplingInterval/1e6)
+    idtrigger = find(strcmp('trigger',EEG.marker(:,1))& EEG.ind_dur_ch(:,1)>0);
+    EEG.marker = EEG.marker(idtrigger,:);
+    EEG.ind_dur_ch = EEG.ind_dur_ch(idtrigger,:);
+     
+    fs = 1/(EEG.infoBV.SamplingInterval/1e6);
     t = 1/fs:1/fs:1/fs*size(EEG.data,1);
     frametimes = 1/fs:1/fs:30;
     
     
-    param1=str2num(get(handles.edit_parameter_1,'string'))
-    param2=str2num(get(handles.edit_parameter_2,'string'))
-    param3=str2num(get(handles.edit_parameter_3,'string'))
-    param4=str2num(get(handles.edit_parameter_4,'string'))
-    param5=str2num(get(handles.edit_parameter_5,'string'))
-    param6=str2num(get(handles.edit_parameter_6,'string'))
+    param1 = str2num(get(handles.edit_parameter_1,'string'));
+    param2 = str2num(get(handles.edit_parameter_2,'string'));
+    param3 = str2num(get(handles.edit_parameter_3,'string'));
+    param4 = str2num(get(handles.edit_parameter_4,'string'));
+    param5 = str2num(get(handles.edit_parameter_5,'string'));
+    param6 = str2num(get(handles.edit_parameter_6,'string'));
      
     figure;
     H = fmridesign(frametimes,0,[1 0],[],[param1 param2 param3 param4 param5 0]); %Default
     if param6 %binarise event
-        tr = max(EEG.data)*0.25
+        tr = max(EEG.data)*0.25;
         eventV = EEG.data>tr;
         subplot(2,1,1)
         plot(t,eventV);title('EVENT binarize');
     else
         eventV = EEG.data;      
         subplot(2,1,1)
-         plot(t,eventV);title('EVENT analog');
+        plot(t,eventV);title('EVENT analog');
     end
     Sc1 = conv2(H.X(:,1,1), eventV);
     Scn = Sc1(1:end-numel(H.X(:,1,1))+1);
-     subplot(2,1,2);plot(t, Scn);title('HRF');
+    subplot(2,1,2);plot(t, Scn);title('HRF');
     filename = 'AUX';
     HRFcurve.data = Scn;
     HRFcurve.ind_dur_ch=EEG.ind_dur_ch;
     HRFcurve.marker=EEG.marker;
-    HRFcurve.infoBV = EEG.infoBV
+    HRFcurve.infoBV = EEG.infoBV;
     HRFcurve.infoBV.DataType = 'TIMEDOMAIN';
     HRFcurve.infoBV.NumberOfChannels = '1';
     HRFcurve.infoBV.name_ele = {deblank(label)};
@@ -281,8 +281,8 @@ elseif strcmp(listoption{idval},'Create HRF convolution .dat AUX signal ')
     HRFcurve.infoBV.coor_theta  = 90;
     HRFcurve.infoBV.coor_phi = 45;
     HRFcurve.infoBV.DataPoints = numel(Scn);
-    [pathstr, name, ext] = fileparts(fileevent)
-    fileoutHRFcurve = fullfile(pathout, [label,'.dat'])
+    [pathstr, name, ext] = fileparts(fileevent);
+    fileoutHRFcurve = fullfile(pathout, [label,'.dat']);
     fwrite_EEG(fileoutHRFcurve,HRFcurve,1,HRFcurve.infoBV.DataPoints );
 elseif strcmp(listoption{idval},'Global regressor NIRS.mat average exclude rejected channel')
     load(filedata); 
@@ -292,8 +292,8 @@ elseif strcmp(listoption{idval},'Global regressor NIRS.mat average exclude rejec
     HbOch = 1:NC/2;
     HbRch = (NC/2+1):NC;
     fs = NIRS.Cf.dev.fs;
-    regressch = 'Global'
-     for f=1:size(rDtp,1)
+    regressch = 'Global';
+    for f=1:size(rDtp,1)
         idok = find(NIRS.Cf.H.C.ok(HbOch,f));
         listHBO = HbOch(idok);
         idok = find(NIRS.Cf.H.C.ok(HbRch,f));
@@ -305,10 +305,10 @@ elseif strcmp(listoption{idval},'Global regressor NIRS.mat average exclude rejec
         
         x1HbO=nanmean(EEG.data(:,listHBO),2);
         x1HbR=nanmean(EEG.data(:,listHBR),2);
-        AUX.data = [x1HbO,x1HbR]
+        AUX.data = [x1HbO,x1HbR];
         AUX.ind_dur_ch=EEG.ind_dur_ch;
         AUX.marker=EEG.marker;
-        AUX.infoBV = EEG.infoBV
+        AUX.infoBV = EEG.infoBV;
         AUX.infoBV.DataType = 'TIMEDOMAIN';
         AUX.infoBV.NumberOfChannels = '2';
         AUX.infoBV.name_ele = {'GlobalHBO', 'GlobalHbR'};
@@ -316,14 +316,14 @@ elseif strcmp(listoption{idval},'Global regressor NIRS.mat average exclude rejec
         AUX.infoBV.coor_theta  = [90 90];
         AUX.infoBV.coor_phi = [45 45];
         AUX.infoBV.DataPoints = size(AUX.data,1);  
-        fileoutHRFcurve = fullfile(pathout, [label,'.dat'])
+        fileoutHRFcurve = fullfile(pathout, [label,'.dat']);
         fwrite_EEG(fileoutHRFcurve,AUX,1,AUX.infoBV.DataPoints );
      end 
 elseif strcmp(listoption{idval},'Short channel regressor NIRS.mat (channel is measurement in the data)')
     if ~isdir(fileevent)
         mkdir(fileevent)
     end
-    [Detstr, Srsstr]=strtok(label)                
+    [Detstr, Srsstr]=strtok(label);              
     iddet = StrBoxy2SDDet_ISS( deblank(strtrim(Detstr)));
     idsrs = StrBoxy2SDPairs( deblank(strtrim(Srsstr)));
     load(filedata); 
@@ -334,9 +334,9 @@ elseif strcmp(listoption{idval},'Short channel regressor NIRS.mat (channel is me
     HbOch = 1:NC/2;
     HbRch = (NC/2+1):NC;
     fs = NIRS.Cf.dev.fs;
-    regressch = 'ShortDistance'
+    regressch = 'ShortDistance';
   
-     for f=1:size(rDtp,1)
+    for f=1:size(rDtp,1)
         idok = find(NIRS.Cf.H.C.ok(HbOch,f));
         listHBO = HbOch(idok);
         idok = find(NIRS.Cf.H.C.ok(HbRch,f));
@@ -353,7 +353,7 @@ elseif strcmp(listoption{idval},'Short channel regressor NIRS.mat (channel is me
         AUX.data = [x1HbO,x1HbR];%VECTORIZED=ch1,pt1, ch1,pt2
         AUX.ind_dur_ch=EEG.ind_dur_ch;
         AUX.marker=EEG.marker;
-        AUX.infoBV = EEG.infoBV
+        AUX.infoBV = EEG.infoBV;
         AUX.infoBV.DataType = 'TIMEDOMAIN';
         AUX.infoBV.NumberOfChannels = '2';
         AUX.infoBV.name_ele = {[deblank(label),'HBO'],[deblank(label), 'HbR']};
@@ -361,9 +361,9 @@ elseif strcmp(listoption{idval},'Short channel regressor NIRS.mat (channel is me
         AUX.infoBV.coor_theta  = [90 90];
         AUX.infoBV.coor_phi = [45 45];
         AUX.infoBV.DataPoints = size(AUX.data,1);  
-        fileoutHRFcurve = fullfile(pathout, [label,'.dat'])
+        fileoutHRFcurve = fullfile(pathout, [label,'.dat']);
         fwrite_EEG(fileoutHRFcurve,AUX,1,AUX.infoBV.DataPoints );
-      end    
+    end    
 elseif strcmp(listoption{idval},'Audio .wav (sum mel coefficients)')
     [EEG.data,EEG.infoBV,EEG.marker,EEG.ind_dur_ch]= fopen_EEG(filedata);
     idtrigger = find((strcmp('trigger',EEG.marker(:,1))& EEG.ind_dur_ch(:,1)>0)|(strcmp('Stimulus',EEG.marker(:,1))& EEG.ind_dur_ch(:,1)>0));
@@ -385,34 +385,35 @@ elseif strcmp(listoption{idval},'Audio .wav (sum mel coefficients)')
     hamming = @(N)(0.54-0.46*cos(2*pi*[0:N-1].'/(N-1)));
    
     [ MFCCs, FBEs, frames ] = mfcc( speech(:,1), Fsaudio, Tw, Ts, alpha, hamming, R, M, C, L );
-     sumMel = sum(log10(FBEs));
+    sumMel = sum(log10(FBEs));
      
      %exclude inf or nan number
-     idbad = find(isinf(sumMel)|isnan(sumMel));
-     sumMel(idbad)=0;  
-     msumMel = mean(sumMel);
-     sumMel(idbad)= msumMel;
-     sumMel=sumMel - msumMel;
-      time = 1/Fsaudio:1/Fsaudio:((1/Fsaudio)*numel(speech));
-     Fsmel = numel(sumMel)/time(end);
+    idbad = find(isinf(sumMel)|isnan(sumMel));
+    sumMel(idbad) = 0;  
+    msumMel = mean(sumMel);
+    sumMel(idbad) = msumMel;
+    sumMel = sumMel - msumMel;
+    time = 1/Fsaudio:1/Fsaudio:((1/Fsaudio)*numel(speech));
+    Fsmel = numel(sumMel)/time(end);
     offsetval_sec = str2num(get(handles.edit_name,'string')); %CHANGE HERE TO ADJUST EEG TRIG AND SOUND DISPLAY
 	if offsetval_sec < 0
        % the audio segment is shorter, pad the beggining with zeros to
        % avoid missing trig
        % AddOffsetval in the biggining 
-       sampleadd = round(Fsmel*abs(offsetval_sec))
-        sumMel
-        sumMel = [zeros(1,sampleadd),sumMel] 
-        offsetval_sec = 1/Fsmel;
+       sampleadd = round(Fsmel*abs(offsetval_sec));
+       sumMel
+       sumMel = [zeros(1,sampleadd),sumMel]; 
+       offsetval_sec = 1/Fsmel;
     end
-     tmel = 1/Fsmel:1/Fsmel:(1/Fsmel*numel(sumMel)); 
-        EEG.ind_dur_ch
-           Fsnirs = 1/(EEG.infoBV.SamplingInterval/1000000)
-        tNIRS = size(EEG.data,1)*1/Fsnirs
+    tmel = 1/Fsmel:1/Fsmel:(1/Fsmel*numel(sumMel));
+    
+    EEG.ind_dur_ch
+    Fsnirs = 1/(EEG.infoBV.SamplingInterval/1000000);
+    tNIRS = size(EEG.data,1)*1/Fsnirs;
     if tmel(end)<tNIRS %tmel too short add sample to the end
-        timetoadd = tNIRS-tmel(end);
-       sampleadd = round(Fsmel*timetoadd)
-       sumMel = [sumMel,zeros(1,sampleadd),] 
+       timetoadd = tNIRS-tmel(end);
+       sampleadd = round(Fsmel*timetoadd);
+       sumMel = [sumMel,zeros(1,sampleadd),] ;
        tmel = 1/Fsmel:1/Fsmel:(1/Fsmel*numel(sumMel));
     end
          
@@ -467,14 +468,14 @@ elseif strcmp(listoption{idval},'Audio .wav (sum mel coefficients)')
     fwrite_EEG(fileoutMEL,SUMMEL,1,SUMMEL.infoBV.DataPoints );
     %WRITE AUX avg
 elseif strcmp(listoption{idval},'Concatenate AUX/EEG')
-    pathin = get(handles.edit_rawdata,'string')
+    pathin = get(handles.edit_rawdata,'string');
     offsetsizebloc = 0;
     AUX.data = [];
     AUX.marker = [];
     AUX.ind_dur_ch = [];
-    rDtp = get(handles.listbox_AUXCONCATENATE,'string')
+    rDtp = get(handles.listbox_AUXCONCATENATE,'string');
     for f=1:size(rDtp,1)
-         fileAUX =fullfile(pathin, rDtp{f})
+         fileAUX = fullfile(pathin, rDtp{f});
         [data,infoBV,marker,ind_dur_ch]= fopen_EEG(fileAUX); 
          AUX.data=[ AUX.data;data];
          ind_dur_ch(:,1)=ind_dur_ch(:,1)+ offsetsizebloc;      
@@ -504,16 +505,16 @@ elseif strcmp(listoption{idval},'VIDEO CONVERT and MERGE file CODEC 32 to 64 bit
        rDtp = {rDtp};
    end
    tic
-     filename = rDtp{1}
+     filename = rDtp{1};
      outfilevideo=fullfile(pathin,['all',filename(1:end-4),'v64',filename(end-3:end)]);
      tmp = VideoWriter(outfilevideo);  
     for f=1:numel(rDtp)  
-        v = VideoReader(fullfile(pathin,rDtp{f}))
+        v = VideoReader(fullfile(pathin,rDtp{f}));
         if f==1  
             tmp.FrameRate = v.FrameRate;       
             open(tmp)
         end
-        id = 1
+        id = 1;
         while hasFrame(v)          
             frame = readFrame(v);
             % [frame,Cb,Cr,audio] = videofreader(v);
@@ -530,9 +531,9 @@ elseif strcmp(listoption{idval},'VIDEO CONVERT and MERGE file CODEC 32 to 64 bit
         
     for f=1:numel(rDtp) 
          
-            filename= rDtp{1}
+            filename = rDtp{1};
             outfileaudio=fullfile(pathout,['all',filename(1:end-4),'v64','.wav']);
-            filename =fullfile(pathin,rDtp{f})
+            filename = fullfile(pathin,rDtp{f});
             [y,Fs] = audioread(filename);
             yall = [yall;y];
             audiowrite(outfileaudio,yall,Fs);
@@ -597,34 +598,34 @@ if strcmp(listoption{idval},'Create HRF using onset duration xls file')%HRF from
     set(handles.edit_name,'visible','on')
     set(handles.edit_name,'string','HRF_evt1')
     
-     set(handles.text_parameterdescription,'visible','on')
-     set(handles.text_parameterdescription,'string','4. HRF parameter Glover, NeuroImage, 9:416-429 gamma1/max(gamma1)-DIP*gamma2/max(gamma2) scaled so that its total integral is 1. ')
-     set(handles.text_parameter_1,'visible','on')
-     set(handles.text_parameter_1,'string','Time to the peak of the first gamma density')
-     set(handles.edit_parameter_1,'visible','on')
-     set(handles.edit_parameter_1,'string','5.4')
+    set(handles.text_parameterdescription,'visible','on')
+    set(handles.text_parameterdescription,'string','4. HRF parameter Glover, NeuroImage, 9:416-429 gamma1/max(gamma1)-DIP*gamma2/max(gamma2) scaled so that its total integral is 1. ')
+    set(handles.text_parameter_1,'visible','on')
+    set(handles.text_parameter_1,'string','Time to the peak of the first gamma density')
+    set(handles.edit_parameter_1,'visible','on')
+    set(handles.edit_parameter_1,'string','5.4')
      
-     set(handles.text_parameter_2,'string','FWHM1: approximate FWHM of the first gamma density')
-     set(handles.text_parameter_2,'visible','on')
-     set(handles.edit_parameter_2,'visible','on')
-     set(handles.edit_parameter_2,'string','5.2')
+    set(handles.text_parameter_2,'string','FWHM1: approximate FWHM of the first gamma density')
+    set(handles.text_parameter_2,'visible','on')
+    set(handles.edit_parameter_2,'visible','on')
+    set(handles.edit_parameter_2,'string','5.2')
   
-     set(handles.text_parameter_3,'string','time to the peak of the second gamma density')
-     set(handles.text_parameter_3,'visible','on')
-     set(handles.edit_parameter_3,'visible','on')
-     set(handles.edit_parameter_3,'string','10.8')
+    set(handles.text_parameter_3,'string','time to the peak of the second gamma density')
+    set(handles.text_parameter_3,'visible','on')
+    set(handles.edit_parameter_3,'visible','on')
+    set(handles.edit_parameter_3,'string','10.8')
       
-     set(handles.text_parameter_4,'string','FWHM2: approximate FWHM of the second gamma density');
-     set(handles.text_parameter_4,'visible','on')
-     set(handles.edit_parameter_4,'visible','on')
-     set(handles.edit_parameter_4,'string','7.35')
+    set(handles.text_parameter_4,'string','FWHM2: approximate FWHM of the second gamma density');
+    set(handles.text_parameter_4,'visible','on')
+    set(handles.edit_parameter_4,'visible','on')
+    set(handles.edit_parameter_4,'string','7.35')
      
-     set(handles.text_parameter_5,'string','DIP: coefficient of the second gamma density');
-     set(handles.text_parameter_5,'visible','on')
-     set(handles.edit_parameter_5,'visible','on')
-     set(handles.edit_parameter_5,'string','0.35')
-     
-elseif  strcmp(listoption{idval},'Create HRF convolution .dat AUX signal ')%
+    set(handles.text_parameter_5,'string','DIP: coefficient of the second gamma density');
+    set(handles.text_parameter_5,'visible','on')
+    set(handles.edit_parameter_5,'visible','on')
+    set(handles.edit_parameter_5,'string','0.35')
+    
+elseif  strcmp(listoption{idval},'Create HRF convolution .dat AUX signal ')
     set(handles.text_eventfile,'visible','on')
     set(handles.text_eventfile,'string','1. Enter auxiliary to convolve ')
     set(handles.edit_eventfile,'visible','on')
@@ -635,38 +636,37 @@ elseif  strcmp(listoption{idval},'Create HRF convolution .dat AUX signal ')%
     set(handles.edit_name,'visible','on')
     set(handles.edit_name,'string','HRF_evt1')
     
-     set(handles.text_parameterdescription,'visible','on')
-     set(handles.text_parameterdescription,'string','HRF parameter Glover, NeuroImage, 9:416-429 gamma1/max(gamma1)-DIP*gamma2/max(gamma2) scaled so that its total integral is 1. ')
-     set(handles.text_parameter_1,'visible','on')
-     set(handles.text_parameter_1,'string','Time to the peak of the first gamma density')
-     set(handles.edit_parameter_1,'visible','on')
-     set(handles.edit_parameter_1,'string','5.4')
+    set(handles.text_parameterdescription,'visible','on')
+    set(handles.text_parameterdescription,'string','HRF parameter Glover, NeuroImage, 9:416-429 gamma1/max(gamma1)-DIP*gamma2/max(gamma2) scaled so that its total integral is 1. ')
+    set(handles.text_parameter_1,'visible','on')
+    set(handles.text_parameter_1,'string','Time to the peak of the first gamma density')
+    set(handles.edit_parameter_1,'visible','on')
+    set(handles.edit_parameter_1,'string','5.4')
      
-     set(handles.text_parameter_2,'string','FWHM1: approximate FWHM of the first gamma density')
-     set(handles.text_parameter_2,'visible','on')
-     set(handles.edit_parameter_2,'visible','on')
-     set(handles.edit_parameter_2,'string','5.2')
+    set(handles.text_parameter_2,'string','FWHM1: approximate FWHM of the first gamma density')
+    set(handles.text_parameter_2,'visible','on')
+    set(handles.edit_parameter_2,'visible','on')
+    set(handles.edit_parameter_2,'string','5.2')
   
-     set(handles.text_parameter_3,'string','time to the peak of the second gamma density')
-     set(handles.text_parameter_3,'visible','on')
-     set(handles.edit_parameter_3,'visible','on')
-     set(handles.edit_parameter_3,'string','10.8')
+    set(handles.text_parameter_3,'string','time to the peak of the second gamma density')
+    set(handles.text_parameter_3,'visible','on')
+    set(handles.edit_parameter_3,'visible','on')
+    set(handles.edit_parameter_3,'string','10.8')
       
-     set(handles.text_parameter_4,'string','FWHM2: approximate FWHM of the second gamma density');
-     set(handles.text_parameter_4,'visible','on')
-     set(handles.edit_parameter_4,'visible','on')
-     set(handles.edit_parameter_4,'string','7.35')
+    set(handles.text_parameter_4,'string','FWHM2: approximate FWHM of the second gamma density');
+    set(handles.text_parameter_4,'visible','on')
+    set(handles.edit_parameter_4,'visible','on')
+    set(handles.edit_parameter_4,'string','7.35')
      
-     set(handles.text_parameter_5,'string','DIP: coefficient of the second gamma density');
-     set(handles.text_parameter_5,'visible','on')
-     set(handles.edit_parameter_5,'visible','on')
-     set(handles.edit_parameter_5,'string','0.35')
-     
-     set(handles.text_parameter_6,'string','Enter 1 to binarize the input, enter 0 to keep analog');
-     set(handles.text_parameter_6,'visible','on')
-     set(handles.edit_parameter_6,'visible','on')
-     set(handles.edit_parameter_6,'string','0')
-
+    set(handles.text_parameter_5,'string','DIP: coefficient of the second gamma density');
+    set(handles.text_parameter_5,'visible','on')
+    set(handles.edit_parameter_5,'visible','on')
+    set(handles.edit_parameter_5,'string','0.35')
+    
+    set(handles.text_parameter_6,'string','Enter 1 to binarize the input, enter 0 to keep analog');
+    set(handles.text_parameter_6,'visible','on')
+    set(handles.edit_parameter_6,'visible','on')
+    set(handles.edit_parameter_6,'string','0')
 elseif  strcmp(listoption{idval},'Global regressor NIRS.mat average exclude rejected channel') %HRF from event xls
     set(handles.text_rawdata,'visible','on')
     set(handles.text_rawdata,'string','Enter NIRS.mat at the step before normalisation') 
@@ -713,59 +713,58 @@ elseif strcmp(listoption{idval},'Audio .wav (sum mel coefficients)')
     set(handles.edit_name,'visible','on')
     set(handles.edit_name,'string','0')
     
-     set(handles.text_parameter_1,'visible','on')
-     set(handles.text_parameter_1,'string','Analysis frame duration (ms)')
-     set(handles.edit_parameter_1,'visible','on')
-     set(handles.edit_parameter_1,'string','25')
+    set(handles.text_parameter_1,'visible','on')
+    set(handles.text_parameter_1,'string','Analysis frame duration (ms)')
+    set(handles.edit_parameter_1,'visible','on')
+    set(handles.edit_parameter_1,'string','25')
      
-     set(handles.text_parameter_2,'string','Analysis frame shift (ms)')
-     set(handles.text_parameter_2,'visible','on')
-     set(handles.edit_parameter_2,'visible','on')
-     set(handles.edit_parameter_2,'string','10')
+    set(handles.text_parameter_2,'string','Analysis frame shift (ms)')
+    set(handles.text_parameter_2,'visible','on')
+    set(handles.edit_parameter_2,'visible','on')
+    set(handles.edit_parameter_2,'string','10')
   
-     set(handles.text_parameter_3,'string','Preemphasis coefficient alpha')
-     set(handles.text_parameter_3,'visible','on')
-     set(handles.edit_parameter_3,'visible','on')
-     set(handles.edit_parameter_3,'string','0.97')
+    set(handles.text_parameter_3,'string','Preemphasis coefficient alpha')
+    set(handles.text_parameter_3,'visible','on')
+    set(handles.edit_parameter_3,'visible','on')
+    set(handles.edit_parameter_3,'string','0.97')
       
-     set(handles.text_parameter_4,'string','Frequency range to consider');
-     set(handles.text_parameter_4,'visible','on')
-     set(handles.edit_parameter_4,'visible','on')
-     set(handles.edit_parameter_4,'string','300, 3700')
+    set(handles.text_parameter_4,'string','Frequency range to consider');
+    set(handles.text_parameter_4,'visible','on')
+    set(handles.edit_parameter_4,'visible','on')
+    set(handles.edit_parameter_4,'string','300, 3700')
      
-     set(handles.text_parameter_5,'string','Number of filterbank channels');
-     set(handles.text_parameter_5,'visible','on')
-     set(handles.edit_parameter_5,'visible','on')
-     set(handles.edit_parameter_5,'string','20')
+    set(handles.text_parameter_5,'string','Number of filterbank channels');
+    set(handles.text_parameter_5,'visible','on')
+    set(handles.edit_parameter_5,'visible','on')
+    set(handles.edit_parameter_5,'string','20')
      
-     set(handles.text_parameter_6,'string','Number of cepstral coefficients');
-     set(handles.text_parameter_6,'visible','on')
-     set(handles.edit_parameter_6,'visible','on')
-     set(handles.edit_parameter_6,'string','13')
+    set(handles.text_parameter_6,'string','Number of cepstral coefficients');
+    set(handles.text_parameter_6,'visible','on')
+    set(handles.edit_parameter_6,'visible','on')
+    set(handles.edit_parameter_6,'string','13')
      
-     set(handles.text_parameter_7,'string','Cepstral sine lifter parameter');
-     set(handles.text_parameter_7,'visible','on')
-     set(handles.edit_parameter_7,'visible','on')
-     set(handles.edit_parameter_7,'string','22')
+    set(handles.text_parameter_7,'string','Cepstral sine lifter parameter');
+    set(handles.text_parameter_7,'visible','on')
+    set(handles.edit_parameter_7,'visible','on')
+    set(handles.edit_parameter_7,'string','22')
      
-     set(handles.text_parameter_8,'string','Hamming window');
-     set(handles.text_parameter_8,'visible','on')
-     set(handles.edit_parameter_8,'visible','on')
-     set(handles.edit_parameter_8,'string','20')
+    set(handles.text_parameter_8,'string','Hamming window');
+    set(handles.text_parameter_8,'visible','on')
+    set(handles.edit_parameter_8,'visible','on')
+    set(handles.edit_parameter_8,'string','20')
 elseif strcmp(listoption{idval},'Concatenate AUX/EEG')
-     set(handles.listbox_AUXCONCATENATE,'visible','on')
-     set(handles.btn_Browserawdata,'visible','on')
-     set(handles.text_rawdata,'visible','on')
-     set(handles.text_rawdata,'string',['Open generic data export data to merge, keep the order of the recording' ])
-     set(handles.edit_rawdata,'visible','on')
+    set(handles.listbox_AUXCONCATENATE,'visible','on')
+    set(handles.btn_Browserawdata,'visible','on')
+    set(handles.text_rawdata,'visible','on')
+    set(handles.text_rawdata,'string',['Open generic data export data to merge, keep the order of the recording' ])
+    set(handles.edit_rawdata,'visible','on')
 elseif strcmp(listoption{idval},'VIDEO CONVERT and MERGE file CODEC 32 to 64 bit')
-     set(handles.listbox_AUXCONCATENATE,'visible','on')
-     set(handles.btn_Browserawdata,'visible','on')
-     set(handles.text_rawdata,'visible','on')
-     set(handles.text_rawdata,'string',['Open .avi LEADMCMPCodec 32bit to be convert in 64bit, use MATLAB 32bit'])
-     set(handles.edit_rawdata,'visible','on')
+    set(handles.listbox_AUXCONCATENATE,'visible','on')
+    set(handles.btn_Browserawdata,'visible','on')
+    set(handles.text_rawdata,'visible','on')
+    set(handles.text_rawdata,'string',['Open .avi LEADMCMPCodec 32bit to be convert in 64bit, use MATLAB 32bit'])
+    set(handles.edit_rawdata,'visible','on')
 end
-
 
 
 
