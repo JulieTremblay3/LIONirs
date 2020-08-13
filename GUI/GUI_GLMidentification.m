@@ -243,10 +243,15 @@ for iReg = 1:numel(Regressorlist)
     
 end
 PMI{1}.tmpGLM.idreg = idreg; %regression auxiliary indice used 
-idreg
+disp('idreg = ');
+disp(idreg);
 X = [];%ones(size(PMI{1}.tmpGLM.spar,1),1);
 for ireg = 1:numel(idreg)
     X = [X,    PMI{1}.tmpGLM.AUX.data{idreg(ireg)}];
+end
+if isempty(X)
+    errordlg('The variable X is empty. Use the GUI to correct it.');
+    return
 end
 %figure;plot(X)
 %figure;plot(PMI{1}.tmpGLM.AUX.data{idreg(ireg)})
