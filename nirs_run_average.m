@@ -53,8 +53,11 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
     %Load NIRS.mat information
     %     try
     NIRS = [];
+    unused_blocks = [];
+    
     load(job.NIRSmat{filenb,1});
     [dir2,tmp,tmp] = fileparts(job.NIRSmat{filenb,1});
+    report_temp = ones(NIRS.Cf.H.C.N);
     if avtype == 0 %For multiple subjects average, look if montage is the same for each NIRS.mat
         if filenb > 1
             if previous_montage ~= NIRS.Cf.H.S.r.o.mm.p
@@ -73,12 +76,12 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
     %erase matrices from previous NIRS.mat
     av_tot = [];
     trialnb = 1;
-    for f=1:size(rDtp,1) %For every path of NIRS.mat file
+    for f = 1:size(rDtp,1) %For every path of NIRS.mat file
         %obtain indices of triggers
         ind_trig = [];
         aux_trig = NIRS.Dt.fir.aux5{f};
         for b = 1:size(trig,2)
-            ind_trig = [ind_trig; aux_trig(aux_trig==trig(b),2)];
+            ind_trig = [ind_trig; aux_trig(aux_trig == trig(b),2)];
         end
         if isempty(ind_trig)
 %             errordlg(['The selected trigger(s) are not avalaible for :',rDtp{f,1}],'Averaging Error');
@@ -89,6 +92,8 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
 %                 ind_trig = [ind_trig aux_trig(aux_trig==answer,2)];
 %             end
             disp(['No trig found in file : ',rDtp{f,1}])
+            report_temp (:,f) = 0; 
+            
         else
         %erase matrices from previous filepaths
         av = [];
@@ -117,7 +122,7 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
             elseif job.choiceave.avg_datatype == 0 % Open PH
                 [pathstr, name, ext] = fileparts(rDtp{f,1});
                 namefile = fullfile(pathstr,[name,'PH',ext]);
-                d = fopen_NIR(namefile,NC); %Load whole bloc
+                d = fopen_NIR(namefile,NC); %Load whole block
             end
             catch
                 msgbox(['The file : ', namefile,' does''nt exist'])
@@ -155,15 +160,15 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
                             elseif isfield(job.choiceave.c_baseline_corr,'b_manualbaseline_corr') %Manual timing baseline correction
                                 nbs_pretrig = round(job.choiceave.c_baseline_corr.b_manualbaseline_corr.e_base_pretime*fs);
                                 nbs_posttrig = round(job.choiceave.c_baseline_corr.b_manualbaseline_corr.e_base_posttime*fs); 
-                                if job.choiceave.c_baseline_corr.b_manualbaseline_corr.m_mean ==0            %Mean Nan
+                                if job.choiceave.c_baseline_corr.b_manualbaseline_corr.m_mean == 0            %Mean Nan
                                     A(Ich,:,trialnb) = d(Ich,av_ind(1,atrig):av_ind(2, atrig))...
                                         - nanmean(d(Ich,(ind_trig(atrig)+nbs_pretrig):(ind_trig(atrig)+nbs_posttrig)));       
-                                elseif job.choiceave.c_baseline_corr.b_manualbaseline_corr.m_mean ==1      %Median NaN
+                                elseif job.choiceave.c_baseline_corr.b_manualbaseline_corr.m_mean == 1      %Median NaN
                                     A(Ich,:,trialnb) = d(Ich,av_ind(1,atrig):av_ind(2, atrig))...
                                         - nanmean(d(Ich,(ind_trig(atrig)+nbs_pretrig):(ind_trig(atrig)+nbs_posttrig)));   
                                 end    
-                                if isnan(nanmean(d(Ich,(ind_trig(atrig)+nbs_pretrig):(ind_trig(atrig)+nbs_posttrig))));
-                                    1
+                                if isnan(nanmean(d(Ich,(ind_trig(atrig)+nbs_pretrig):(ind_trig(atrig)+nbs_posttrig))))
+                                    1;
                                 end
                                 %attention si zero NaN                               
                             elseif isfield(job.choiceave.c_baseline_corr,'m_nobaseline_corr') %No baseline correction
@@ -178,7 +183,8 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
                             end
                         else %If the channel is bad (flagged in NIRS.Cf.H.C.ok)
                             A(Ich,:,trialnb) = ones(1,numel(av_ind(1,atrig):av_ind(2,atrig)))*NaN;
-                            
+                            report_temp(Ich,f) = 0;
+                           
                         end
                 end
                 trialnb = trialnb+1;
@@ -186,7 +192,7 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
         end   
        1
        
-        if avtype==2 %save data file for separate files average %NON VÉRIfIER JT
+        if avtype == 2 %save data file for separate files average %NON VÉRIfIER JT
             av = nanmean(A,3);
             stdav = nanstd(A,0,3);
             nbevents = sum(~isnan(A),3);
@@ -249,10 +255,10 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
             A = [];
             trialnb = 1;
         end
-    end  %fin filenb .nir
-    end
-    %Fin boucle des fichier
-end %fin filenb nirs.mat
+        
+        end     %fin filenb .nir
+    end         %Fin boucle des fichier
+end             %fin filenb nirs.mat
 
 [dir1,fil1,ext1] = fileparts(rDtp{f,1});
 %  if NewDirCopyNIRS
@@ -262,7 +268,7 @@ end %fin filenb nirs.mat
 
 
 %%%%%%%%processing for multiple files average%%%%%%%%%%
-if avtype==1 %save data file for average over many files
+if avtype == 1 %save data file for average over many files
     if isempty(A)
         disp('No event was found for this condition')
         out.NIRSmat = job.NIRSmat;
@@ -273,7 +279,7 @@ if avtype==1 %save data file for average over many files
             minz = zeros(size(A,1),1);
             nbtrialrejected = zeros(size(A,1),1);
             zthresh = abs(job.choiceave.c_rejecttrial.b_reject_trial.e_reject_outlier_threshold);
-                for ich=1:size(A,1)
+                for ich = 1:size(A,1)
                     x = A(ich,:,:);
                     z = (x(:)-nanmean(x(:)))./nanstd(x(:));               
                     minz(ich) = nanmin(z);
@@ -283,8 +289,8 @@ if avtype==1 %save data file for average over many files
                     tmax = nanmax(z);                
                     indNaN = find(tmin < -zthresh | tmax > zthresh);
                     if ~isempty(indNaN)
-                        A(ich,:,indNaN)=NaN;
-                        nbtrialrejected(ich)=numel(indNaN);
+                        A(ich,:,indNaN) = NaN;
+                        nbtrialrejected(ich) = numel(indNaN);
                     end              
                 end
                 if job.choiceave.c_rejecttrial.b_reject_trial.m_reject_outlier_printreport
@@ -330,7 +336,7 @@ if avtype==1 %save data file for average over many files
 
         NIRS.Cf.H.C.okavg = (mediannbevents >= ((trialnb-1)*job.choiceave.badchannelratio))';
     %   NIRS.Dt.fir.pp(lst+1).chok replace by NIRS.Cf.H.C.okavg
-        zeronbevent = find(nbevents==0);
+        zeronbevent = find(nbevents == 0);
         tval = av./(stdav./sqrt(nbevents));
         tval(zeronbevent) = 0;  
 
@@ -345,12 +351,12 @@ if avtype==1 %save data file for average over many files
                     ind_baseline_stop = istop;
                     Baseline = A(ich,ind_baseline_start:ind_baseline_stop,:);        
 
-                    if modeTvalue==1 %worstcasetvalue %On garde le temps avec la plus fort variance dans le baseline
+                    if modeTvalue == 1 %worstcasetvalue %On garde le temps avec la plus fort variance dans le baseline
                         mean2 = nanmean(squeeze(Baseline)'); %Mean
                         [v2,id] = max(nanvar(squeeze(Baseline)'));
                         m2 = mean2(id);
                         nt2 = sum(~isnan(Baseline(:,id)));
-                    elseif modeTvalue==2
+                    elseif modeTvalue == 2
                         m2 = nanmean(nanmean(Baseline,2)); %Mean
                         dismeantime = nanmean(Baseline,2);
                         v2 = max(nanvar(dismeantime));            
@@ -474,19 +480,19 @@ if avtype==1 %save data file for average over many files
     %Report of blocks used for averaging
     report = [];
   
-    for jtrig = 1:(size(A,3))
+    for jtrig = 1:f
         report{1,(jtrig+1)} = sprintf('%s%d', 'Block ',jtrig);
     end
     
     for jchannel = 1:(size(A,1)/2)
         report{(jchannel+1),1} = sprintf('%s%d', 'Channel ',jchannel);
-        for jtrig = 1:(size(A,3))
-            if isnan(A(jchannel,:,jtrig))
-                report_temp = 0;
+        for jtrig = 1:f
+            if report_temp(jchannel,jtrig) == 0
+                report{(jchannel+1),(jtrig+1)} = sprintf('%d',0); 
             else
-                report_temp = 1;
+                report{(jchannel+1),(jtrig+1)} = sprintf('%d',1);
+            
             end
-            report{(jchannel+1),(jtrig+1)} = sprintf('%d',report_temp); 
         end
     end
     
@@ -516,24 +522,24 @@ end
 %save NIRS.mat
 % if NewDirCopyNIRS
 if isfield(NIRS.Dt,'Video')
-   NIRS.Dt = rmfield(NIRS.Dt,'Video')
+   NIRS.Dt = rmfield(NIRS.Dt,'Video');
 end
 if isfield(NIRS.Dt,'AUX')
-   NIRS.Dt = rmfield(NIRS.Dt,'AUX')
+   NIRS.Dt = rmfield(NIRS.Dt,'AUX');
 end
 if isfield(NIRS.Dt,'EEG')
-   NIRS.Dt = rmfield(NIRS.Dt,'EEG')
+   NIRS.Dt = rmfield(NIRS.Dt,'EEG');
 end
  
 % else
 %     save(job.NIRSmat{filenb,1},'NIRS');
 % end
 if 1 %newtrig
-    aux5 = []
+    aux5 = [];
     for i = 1:numel(trig)
-        aux5 = [aux5; trig(i),round(pretime*NIRS.Cf.dev.fs)]
+        aux5 = [aux5; trig(i),round(pretime*NIRS.Cf.dev.fs)];
     end
-    NIRS.Dt.fir.aux5{1} = aux5
+    NIRS.Dt.fir.aux5{1} = aux5;
 end
    save(fullfile(dir2,'NIRS.mat'),'NIRS');
     job.NIRSmat{1} =fullfile(dir2,'NIRS.mat');
