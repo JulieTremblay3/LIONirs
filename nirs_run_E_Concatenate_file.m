@@ -24,7 +24,7 @@ for filenb=1:1 %only one NIRS.mat merge file inside
     fs = NIRS.Cf.dev.fs;
     dall = [];
     ind_dur_chtmp =[];
-    labeltmp=[] 
+    labeltmp=[] ;
     if isfield(NIRS.Dt,'EEG')
         moduleEEG =  numel(NIRS.Dt.EEG(end).pp);
     end
@@ -162,7 +162,7 @@ for filenb=1:1 %only one NIRS.mat merge file inside
             
             
             for f=1:size(rDtp,1)
-                fileAUX = NIRS.Dt.AUX(iaux).pp(moduleaux).p{idselected(f)}
+                fileAUX = NIRS.Dt.AUX(iaux).pp(moduleaux).p{idselected(f)};
                 tstartf = NIRS.Dt.AUX(iaux).pp(moduleaux).sync_timesec{idselected(f)};
                 tstopf = tstartf+ size( d,2)*1/NIRS.Cf.dev.fs;
                 [data,infoBV,marker,ind_dur_ch]= fopen_EEG(fileAUX,tstartf , tstopf);
@@ -252,7 +252,7 @@ for filenb=1:1 %only one NIRS.mat merge file inside
     write_vmrk_all(outfilevmrk,ind_dur_chtmp,labeltmp);
     
     %write outvhdr file
-    ChannelLabels = ConvertmlIDsrs2label(NIRS)
+    ChannelLabels = ConvertmlIDsrs2label(NIRS);
     SamplingInterval =floor(1000000/NIRS.Cf.dev.fs);
     nirs_boxy_write_vhdr(outfilevhdr,... %Output file
         outfile,... %DataFile
