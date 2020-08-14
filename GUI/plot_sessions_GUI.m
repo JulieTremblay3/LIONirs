@@ -10407,7 +10407,17 @@ function context_listbox_Component_rename_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 label = get(handles.listbox_Component,'string');
 id = get(handles.listbox_Component,'value');
-msgbox('FINISH CODE');
+
+prompt = {'New name'};
+name = 'Rename Component';
+numlines = 1;
+defaultanswer = {''};
+answer = inputdlg(prompt,name,numlines,defaultanswer);
+
+label(id) = answer;
+set(handles.listbox_Component, 'string', label);
+
+
 
 
 % --------------------------------------------------------------------
@@ -10475,7 +10485,15 @@ function context_listbox_Correction_rename_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 label = get(handles.listbox_CorrectionDecomposition,'string');
 id = get(handles.listbox_CorrectionDecomposition,'value');
-msgbox('FINISH CODE');
+
+prompt = {'New name'};
+name = 'Rename Component';
+numlines = 1;
+defaultanswer = {''};
+answer = inputdlg(prompt,name,numlines,defaultanswer);
+
+label(id) = answer;
+set(handles.listbox_CorrectionDecomposition, 'string', label);
 
 
 % --------------------------------------------------------------------
