@@ -1529,12 +1529,12 @@ slider_time_Callback(hObject, eventdata, handles)
 
 
 function IO_Helmetclosereq(src,evnt)
-handles = guidata(gcf) 
+handles = guidata(gcf); 
 if get(handles.radio_guiSPMnirsHSJ,'value')==1
     guiHOMER = getappdata(0,'guiHOMER');
 elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
     guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
-    handlesHSJ = guidata(guiHOMER)
+    handlesHSJ = guidata(guiHOMER);
     set( handlesHSJ.radio_3dmontageupdate,'value',0)
 elseif get(handles.radio_guiSPMnirsHSJ,'value')==3
     guiHOMER = getappdata(0,'gui_SPMvideo');
