@@ -5041,7 +5041,7 @@ end
 
 % if idval ~= 5
 %     msgbox('To subtract a previously identified component, you must choose the option ''component'' on the menu.')
-%     return 
+%     return
 % end
 
 if strcmp(listmethod{idval},'Parafac')  %substractPARAFAC
