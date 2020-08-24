@@ -63,7 +63,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                         ind_dur_chmid(:,1) =ind_dur_ch(:,1)+tstart-1;
                         ind_dur_chpost = ind_dur_ch;
                         ind_dur_chpost(:,1) = (tstart-ind_dur_ch(:,1)-ind_dur_ch(:,2))+tstop;
-                        ind_dur_chtot = [ind_dur_chpre;ind_dur_chmid;ind_dur_chpost]
+                        ind_dur_chtot = [ind_dur_chpre;ind_dur_chmid;ind_dur_chpost];
                     end
                     [dinterp] = interpolate_bad(d,ind_dur_chtot);
                 else
