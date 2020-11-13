@@ -100,11 +100,11 @@ for filenb = 1:size(job.NIRSmat,1)
             else
                  switch job.pretime
                   case 'start'
-                      'ERROR only one trig for start option'
+                      'ERROR only one trig for start option';
                  end
                  switch job.posttime
                   case 'end'
-                      'ERROR only one trig for end option'
+                      'ERROR only one trig for end option';
                  end
                  
             end
@@ -143,10 +143,10 @@ for filenb = 1:size(job.NIRSmat,1)
                         idstimEEG = [idstimEEG;strmatch(idtrigEEG,EEG.marker(:,2))];
                     end
                       if isfield(NIRS.Dt.EEG.pp(moduleEEG),'sync_timesec')
-                        tstart= NIRS.Dt.EEG.pp(moduleEEG).sync_timesec{f}
-                        tstop = tstart+size(d,2)*1/NIRS.Cf.dev.fs                    
-                        valtimestim =       EEG.ind_dur_ch(idstimEEG,1).*EEG.infoBV.SamplingInterval/1000000
-                        triginside = find(valtimestim>tstart & valtimestim<tstop)                   
+                        tstart= NIRS.Dt.EEG.pp(moduleEEG).sync_timesec{f};
+                        tstop = tstart+size(d,2)*1/NIRS.Cf.dev.fs     ;               
+                        valtimestim =       EEG.ind_dur_ch(idstimEEG,1).*EEG.infoBV.SamplingInterval/1000000;
+                        triginside = find(valtimestim>tstart & valtimestim<tstop)      ;             
                          tmp = idstimEEG ;
                          idstimEEG = tmp(triginside);
                     end
@@ -189,11 +189,11 @@ for filenb = 1:size(job.NIRSmat,1)
                     end
                     %PRESEGMENTATION ALLREALY DONE.
                     if isfield(NIRS.Dt.AUX(iaux).pp(moduleaux),'sync_timesec')
-                    tstart= NIRS.Dt.AUX(iaux).pp(moduleaux).sync_timesec{f}
-                    tstop = tstart+size(d,2)*1/NIRS.Cf.dev.fs
-                    indstim*1/NIRS.Cf.dev.fs
-                    valtimestim =        AUX(iaux).ind_dur_ch(idstimAUX{iaux},1).*AUX(iaux).infoBV.SamplingInterval/1000000
-                    triginside = find(valtimestim>tstart & valtimestim<tstop)                   
+                    tstart= NIRS.Dt.AUX(iaux).pp(moduleaux).sync_timesec{f};
+                    tstop = tstart+size(d,2)*1/NIRS.Cf.dev.fs;
+                    indstim*1/NIRS.Cf.dev.fs;
+                    valtimestim =        AUX(iaux).ind_dur_ch(idstimAUX{iaux},1).*AUX(iaux).infoBV.SamplingInterval/1000000;
+                    triginside = find(valtimestim>tstart & valtimestim<tstop)        ;           
                     tmp = idstimAUX{iaux} ;
                     idstimAUX{iaux} = tmp(triginside);
                     end
@@ -202,9 +202,9 @@ for filenb = 1:size(job.NIRSmat,1)
                     if numel(indstim)==numel(idstimAUX{iaux}) %gerer les cas stim agree dimention only
                         indstim_AUX{iaux} = AUX(iaux).ind_dur_ch(idstimAUX{iaux},1);
                     else
-                        idtocheckAUX = AUX(iaux).ind_dur_ch(idstimAUX{iaux},1)
-                        timetrig = idtocheckAUX * AUX(iaux).infoBV.SamplingInterval/1000000
-                        timestim = indstim*1/NIRS.Cf.dev.fs
+                        idtocheckAUX = AUX(iaux).ind_dur_ch(idstimAUX{iaux},1);
+                        timetrig = idtocheckAUX * AUX(iaux).infoBV.SamplingInterval/1000000;
+                        timestim = indstim*1/NIRS.Cf.dev.fs;
                         if 0
                         figure;hold on;
                         for i=1:numel(timetrig)
@@ -367,7 +367,8 @@ for filenb = 1:size(job.NIRSmat,1)
                     
                 end
                 catch
-                        msgbox('AUX could not be segment')
+                       % msgbox('AUX could not be segment')
+                       fprintf('AUX could not be segment');
                  end
                 %dnorm=log(dnorm)
                 %WRITE THE RESEGMENTATION

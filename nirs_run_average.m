@@ -91,7 +91,7 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
 %             for b = 1:size(trig,2)
 %                 ind_trig = [ind_trig aux_trig(aux_trig==answer,2)];
 %             end
-            disp(['No trig found in file : ',rDtp{f,1}])
+     %       disp(['No trig found in file : ',rDtp{f,1}])
             report_temp (:,f) = 0; 
             
         else
@@ -190,7 +190,7 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
                 trialnb = trialnb+1;
             end             
         end   
-       1
+       %1;
        
         if avtype == 2 %save data file for separate files average %NON VÉRIfIER JT
             av = nanmean(A,3);

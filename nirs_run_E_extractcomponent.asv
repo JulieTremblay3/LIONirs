@@ -719,9 +719,10 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
                 idorder = 1;
                 %check good channel for regressor
                 badch = NIRS.Cf.H.C.ok(:,f);
-                if badch==0 %if all channels are bad, switch to next block! %%ADDED BY LAURA
-                    continue %%ADDED BY LAURA
-                end %%ADDED BY LAURA
+                %%ADDED BY LAURA
+                if ~badch>0
+                    continue
+                end
                 
                 for izoneRegressor = 1:numel(ListRegressorZone)
                     %do the wavelength 1
