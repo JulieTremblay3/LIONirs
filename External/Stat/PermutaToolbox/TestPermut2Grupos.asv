@@ -19,11 +19,12 @@ function [FSupSup,FSupDeriv,FSupTime,FUniv,T0ij] = TestPermut2Grupos(ESTAD,INDEP
 %%OUTPUT
 %   FSupSup : global significant probability that the mean is equal to zero 
 %   FSupDeriv: vector (1:numROI) of significant probabilities that the mean is equal to zero 
-%       for each ROI/channel with respect of all the time points (multivariate)
-%   Fsuptime: vector (1:numtime) of significant probabilities that the mean is equal to zero 
-%       for each time point/interval with respect of all ROI/channels (multivariate)
-%   Funiv : matriz (numROI x numtime) of significant probabilities that the mean is equal 
-%       to zero for each univariate variable (for each combination of ROIxtime)  
+%       for each ROI/channel with respect of all the times (multivari
+%       ROI con respecto a todos los times multivariadamente
+%   Fsuptime: vector (1:numtime) de probabilidades de significacion si la media es cero en cada
+%       time con respecto a todos las deriv multivariadamente
+%   Funiv : matriz (numROI x numtime) de probabilidades de significacion si la media es cero en cada
+%       variable univariadamente%  
 %
 
 
