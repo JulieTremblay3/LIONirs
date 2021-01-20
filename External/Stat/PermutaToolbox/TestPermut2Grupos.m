@@ -3,10 +3,10 @@ function [FSupSup,FSupDeriv,FSupTime,FUniv,T0ij] = TestPermut2Grupos(ESTAD,INDEP
 %global T0 
 %
 %  ESTAD - Statistic to use
-%         1 - t-student with "identity"
-%         2 - sum of difference with "identity"
-%         4 - t-student with absolute valor
-%         5 - sum of difference with absolute valor
+%         1 - t-student with "original" values
+%         2 - sum of difference with "original" values
+%         4 - t-student with absolute values
+%         5 - sum of difference with absolute values
 % 
 %  INDEP- Indice if groups are independent 
 %         0 - DEPENDENT 
