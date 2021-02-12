@@ -21,7 +21,8 @@ case {1,2,4,5}
 end
 
 V1 = [];
-h = waitbar(0,'Computing Permutations...');
+%h = waitbar(0,'Computing Permutations...'); %aussi ligne 102 et 104
+disp('Computing Permutations...')
 for iperm = 1:NPERM
    
    %%   Calculo del vector de permutaciones
@@ -99,9 +100,9 @@ for iperm = 1:NPERM
          
 end
 
-waitbar(iperm/NPERM,h)      
+%waitbar(iperm/NPERM,h)      
 end
-close(h)
+%close(h)
 
 %disp(V1)   %%%%   Para ver las permutaciones generadas
 % bar(V1(6,:))
