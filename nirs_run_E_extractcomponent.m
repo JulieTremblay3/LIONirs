@@ -934,8 +934,11 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                     tmp = data(:,ich);
                     [p,q] = rat(fsNIRS/fsAUX,0.0001);
                     
-                    tmpr=resample( tmp , p, q);
-                    
+                    %tmpr=resample( tmp , p, q); %ancien Julie - a cause
+                    %d'un jump au début fin, Laura l'a modifie par
+                    %downsample - environ le meme fonctionnement - voir la
+                    %photo Guide DownsampleEEgdata dans GITHUB student
+                     tmpr=downsample( tmp , q);
                     
                     % we cut aux to the data initial size
                     if numel(tmpr)<numel(tHRF)
