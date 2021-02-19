@@ -395,7 +395,7 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                                         try
                                             [Factors,it,err,corcondia] = parafac(spartmp,Nc,opt,const,Oldload,fixMode,weights);
                                         catch
-                                            1
+                                            1;
                                         end
                                         Factorsall{itry,icom} = Factors;
                                         errall(itry,icom) = err;
@@ -555,7 +555,7 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                             save(fullfile(dirout,'SelectedFactors.mat'),'PARCOMP');
                         end
                     end
-                    1
+                    1;
                 end
             end
         end
@@ -640,8 +640,8 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
         if isempty(ind)
             disp(['No noisy event found in file ', fil1])
             temp= [1; size(noise,1)];
-            eventint=  reshape(temp,2,numel(temp)/2)
-            eventgoodstartstop=permute(eventint, [2,1])
+            eventint=  reshape(temp,2,numel(temp)/2);
+            eventgoodstartstop=permute(eventint, [2,1]);
         else
             idsep = find(inddiff>indconsecutifthreshold);
             if isempty(idsep)
@@ -654,10 +654,10 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
             
             % add event start
             eventbadstartstop = [idstart,idstop] ;
-            temp =   permute(eventbadstartstop, [2,1])
+            temp =   permute(eventbadstartstop, [2,1]);
             temp= [1;temp(:); size(noise,1)];
-            eventint=  reshape(temp,2,numel(temp)/2)
-            eventgoodstartstop=permute(eventint, [2,1])
+            eventint=  reshape(temp,2,numel(temp)/2);
+            eventgoodstartstop=permute(eventint, [2,1]);
         end
         %%%%%%%jusqu'ici proposition Laura
         
@@ -694,7 +694,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
         
         for iRegressor = 1:numel(ListRegressorZone)
             tmp = upper(zone.label{ListRegressorZone(iRegressor)});
-            zoneidentification = tmp(10:end)
+            zoneidentification = tmp(10:end);
             for izone = 1:numel(zone.label)
                 tmpzone = upper(zone.label{izone});
                 if strcmp( strtrim(zoneidentification), strtrim(tmpzone))
@@ -759,7 +759,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
                     end
                     %do the wavelength 2
                     chlistRegressor =  chlistRegressor + size(d,2)/2;
-                    chlistApply =  chlistApply + size(d,2)/2;;
+                    chlistApply =  chlistApply + size(d,2)/2;
                     if job.c_extractcomponent.b_extractcomponent_phys.m_extractcomponent_physzone == 0 %mean if many channel
                         XmeanSD = nanmean(tmpGLM.spar(:,chlistRegressor),2)-  nanmean(nanmean(tmpGLM.spar(:,chlistRegressor),2)); %center to zero ? necessary ?
                     elseif  job.c_extractcomponent.b_extractcomponent_phys.m_extractcomponent_physzone == 1  %PCA  if many channel
@@ -768,7 +768,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
                         [v,s,foo]=svd(c);
                         svs = diag(s);
                         u = d1*v*inv(s);
-                        lstSV = 1
+                        lstSV = 1;
                         Xm =  u(:,lstSV)*s(lstSV,lstSV)*v(:,lstSV)';
                         XmeanSD = Xm(:,1)-mean(Xm(:,1));
                     end
@@ -939,6 +939,9 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                     %downsample - environ le meme fonctionnement - voir la
                     %photo Guide DownsampleEEgdata dans GITHUB student
                      tmpr=downsample( tmp , q);
+                     
+                     %%addition to the script: normalize the AUX data LCD
+            tmpr=(tmpr-mean(tmpr))/std(tmpr);
                     
                     % we cut aux to the data initial size
                     if numel(tmpr)<numel(tHRF)
@@ -1428,7 +1431,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_AVG')
             
             Xm = zeros(size(intensnorm,1), numel(zone.plotLst));
             for izone = 1:numel(zone.plotLst)
-                plotLst = zone.plotLst{izone}
+                plotLst = zone.plotLst{izone};
                 Xm(:,izone) = nanmean(intensnorm(:,plotLst),2);
                 %  figure;plot(Xm)
             end

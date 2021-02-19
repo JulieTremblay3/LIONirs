@@ -67,7 +67,7 @@ intensnorm = d(indt,:);
  set(handles.text_tstart,'string', ['Time :' num2str(PMI{currentsub}.data(cf).HRF.tHRF(tstart)), ' to ',num2str(PMI{currentsub}.data(cf).HRF.tHRF(tstop))] ) 
 %Detrent DATA segment for centrering 
 X = 1:1:size(intensnorm,1);
-sous = intensnorm(end,:) - intensnorm(1,:)
+sous = intensnorm(end,:) - intensnorm(1,:);
 Mb1 =  ((intensnorm(end,:)-intensnorm(1,:))./numel(X))';
 Mb2 =  intensnorm(1,:)'; %offset    
 A = reshape(X,numel(X),1)*reshape( Mb1,1,numel(Mb1)) +ones(numel(X),1)*reshape( Mb2,1,numel(Mb2));
@@ -88,17 +88,17 @@ PMI{currentsub}.data(cf).AUX
 t = PMI{currentsub}.data(cf).HRF.tHRF;
 % spar = cat(4,spar(:,:,1:end/2),spar(:,:,end/2+1:end));
 % spartmp = spar(:,:,listgood,:);
-PMI{1}.tmpGLM.selected =1     %used to visualised
+PMI{1}.tmpGLM.selected =1  ;   %used to visualised
 PMI{1}.tmpGLM.spar = spar;                    %Data initial
 PMI{1}.tmpGLM.listgood = listgood ; 
 PMI{1}.tmpGLM.indt = [tstart(end),tstop(end)];%Time indice
 load(PMI{1}.NIRSmat{1});
-iAUX = 1 %each aux file could have a different sample rate
+iAUX = 1 ;%each aux file could have a different sample rate
 fsNIRS=NIRS.Cf.dev.fs;
 idfile=PMI{1}.idfile;
 iRegressor =  2;
 if isfield(PMI{currentsub}.tmpGLM,'AUX')
-    rmfield(PMI{currentsub}.tmpGLM,'AUX')
+    rmfield(PMI{currentsub}.tmpGLM,'AUX');
 end
 
 for iAUX = 1:numel(NIRS.Dt.AUX)
@@ -117,11 +117,19 @@ for iAUX = 1:numel(NIRS.Dt.AUX)
             fsAUX =1/(infoBV.SamplingInterval/1000000); %Frequence echantillonage Hz
             tmp = data(:,ich);
             [p,q] = rat(fsNIRS/fsAUX,0.0001);
-            tmpr=resample( tmp , p, q);
+            %tmpr=resample( tmp , p, q); %ancien Julie - a cause
+                    %d'un jump au début fin, LCD l'a modifie par
+                    %downsample - environ le meme fonctionnement - voir la
+                    %photo Guide DownsampleEEgdata dans GITHUB student
+                     tmpr=downsample( tmp , q);
             % we resample aux to the data initial size
+            
+            %%addition to the script: normalize the AUX data LCD
+            tmpr=(tmpr-mean(tmpr))/std(tmpr);
+            
             if numel(tmpr)<numel(t)
-                nplus = numel(t)-numel(tmpr)
-                tmpr = [tmpr;tmpr(end-nplus:end) ]
+                nplus = numel(t)-numel(tmpr);
+                tmpr = [tmpr;tmpr(end-nplus:end) ];
             elseif numel(tmpr)>numel(t)
                 tmpr = tmpr(1:numel(t));
             end
@@ -137,7 +145,7 @@ for iAUX = 1:numel(NIRS.Dt.AUX)
     end
 end
 
-PMI{1}.tmpGLM.AUX.label{1} = 'Constant'
+PMI{1}.tmpGLM.AUX.label{1} = 'Constant';
 PMI{1}.tmpGLM.AUX.fs{1} = fsNIRS;
 PMI{1}.tmpGLM.AUX.data{1} = ones(numel(PMI{1}.tmpGLM.indt(1):PMI{1}.tmpGLM.indt(end) ),1);
 PMI{1}.tmpGLM.AUX.view{1} = 1;
@@ -223,14 +231,14 @@ function btn_MultipleLinearRegression_Callback(hObject, eventdata, handles)
 % hObject    handle to btn_MultipleLinearRegression (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-1
+1;
 handlesoutput = hObject;
 guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
 PMI = get(guiHOMER,'UserData');
 y=PMI{1}.tmpGLM.spar; 
-Regressorlist = get(handles.listbox_AUXselected,'string')
+Regressorlist = get(handles.listbox_AUXselected,'string');
 if ~iscell(Regressorlist)
-    Regressorlist = {Regressorlist}
+    Regressorlist = {Regressorlist};
 end
 %find indice of regressor in the list
 idreg = [];
@@ -255,14 +263,14 @@ if isempty(X)
 end
 %figure;plot(X)
 %figure;plot(PMI{1}.tmpGLM.AUX.data{idreg(ireg)})
-beta = zeros(size(X,2),numel(PMI{1}.tmpGLM.listgood))
-bstd = zeros(size(X,2),numel(PMI{1}.tmpGLM.listgood))
+beta = zeros(size(X,2),numel(PMI{1}.tmpGLM.listgood));
+bstd = zeros(size(X,2),numel(PMI{1}.tmpGLM.listgood));
 for ich = 1:numel(PMI{1}.tmpGLM.listgood)
     idch = PMI{1}.tmpGLM.listgood(ich);
     y = PMI{1}.tmpGLM.spar(:,idch);
    %figure;plot(PMI{1}.tmpGLM.spar)
     if sum(isnan(y)) 
-        b = zeros(size(X,2),1)
+        b = zeros(size(X,2),1);
         beta(:,ich) = 0;
         bstd(:,ich) = 0;
 
@@ -339,7 +347,7 @@ elseif  ~iscell(listchoose)
 end
 listaux = get(handles.listbox_auxilary,'string');
 valaux = get(handles.listbox_auxilary,'value'); 
-listchoose = [listchoose;listaux{valaux}]
+listchoose = [listchoose;listaux{valaux}];
 set(handles.listbox_AUXselected,'string',listchoose)
 
 % --- Executes on button press in btn_removeregressor.
