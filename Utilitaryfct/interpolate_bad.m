@@ -37,7 +37,7 @@ if ~isempty(ind_dur_ch)
             
             dur = dur + ind_dur_ch(i,1)-ind;
 
-            interval = ind:ind+dur;
+            interval = ind:(ind+dur);
 
             %y = ax + b
             a = (y2-y1)/dur;

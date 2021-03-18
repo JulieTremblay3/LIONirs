@@ -1,14 +1,14 @@
 function out = nirs_run_NIRSmatcreatenewbranch(job)
 
 load(job.NIRSmat{1,1});
-job.e_NIRSmatdirnewbranch
+job.e_NIRSmatdirnewbranch;
 [NIRSmatnewdir,name,ext] = fileparts(job.NIRSmat{1,1});
 
 
 
 dir2 = [NIRSmatnewdir,filesep,job.e_NIRSmatdirnewbranch];
 file2= fullfile(dir2,'NIRS.mat' );
-if ~isdir(dir2)
+if ~isfolder(dir2)
     mkdir(dir2);
 else
     try
