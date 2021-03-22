@@ -314,9 +314,10 @@ if avtype == 1 %save data file for average over many files
                         filereport = fullfile(dir2,['Report_Reject_trial_zscore_',num2str(zthresh)]);
 %                    end
                     saveas(hreport,[filereport,'.jpg'],'jpg');  
-                    saveas(hreport,[filereport,'.fig'],'fig');   
+                    saveas(hreport,[filereport,'.fig'],'fig');
+                    close(hreport)
                 end
-                close(hreport)
+                
         end
        
         if size(A,3)>1
