@@ -185,7 +185,13 @@ for filenb = 1:size(job.NIRSmat,1)
                             idtrigAUX{iaux} = [sprintf('%3.0f',trigger(itypestim))];
                         end
                         
-                        idstimAUX{iaux} = [idstimAUX{iaux};strmatch(deblank(idtrigAUX{iaux}),deblank(AUX(iaux).marker(:,2)))];
+                    %    idstimAUX{iaux} = [idstimAUX{iaux};strmatch(deblank(idtrigAUX{iaux}),deblank(AUX(iaux).marker(:,2)))];
+                    for aaa=1:length(AUX(iaux).marker(:,2))%adjustment LCD
+                    tmpAUXmarker{aaa,1}=AUX(iaux).marker{aaa,2}(~isspace(AUX(iaux).marker{aaa,2}));%adjustment LCD
+                    end%adjustment LCD
+                    idstimAUX{iaux} = [idstimAUX{iaux};...%adjustment LCD
+                        strmatch(idtrigAUX{iaux}(~isspace(idtrigAUX{iaux})),tmpAUXmarker)]; %adjustment LCD
+                   
                     end
                     %PRESEGMENTATION ALLREALY DONE.
                     if isfield(NIRS.Dt.AUX(iaux).pp(moduleaux),'sync_timesec')
