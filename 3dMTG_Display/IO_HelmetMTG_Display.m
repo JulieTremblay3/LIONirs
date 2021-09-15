@@ -65,8 +65,8 @@ end
 set(handles.radio_guiSPMnirsHSJ, 'visible', 'off'); % Set the view selector to invisible as it is not needed.
 if isfield(option,'restorestetting')
 else%~isempty(varargin)
-    set(handles.radio_Channel,'value',0);
-    set(handles.radio_holes,'value',0);
+    set(handles.radio_Channel,'value',1);
+    set(handles.radio_holes,'value',1);
     set(handles.radio_ViewMeasListAct,'value',0);
     set(handles.radio_viewskin,'value',1);
     if isfield(option,'scalemin')
@@ -154,7 +154,8 @@ catch %Proposer d'ouvrir un autre casque
 end
 setappdata(handles.IO_HelmetMTG,'PrjStruct',PrjStruct);
 guidata(handles.IO_HelmetMTG, handles);
-cameratoolbar(handles.IO_HelmetMTG);
+
+cameratoolbar(handles.IO_HelmetMTG,'Show','SetMode','nomode');
 resetview(handles);
 
 p = mfilename('fullpath');
@@ -1162,8 +1163,8 @@ d1temp = d1; %log(d1);
 %d1temp = ones(size(d1));%JTHARDCODE
 if numel(d1)==size(PMI{currentsub}.data(cf).MeasList,1)/2
     for numd1 = 1:size(d1temp,1)
-        d1 = d1temp(numd1,:);
-        PMI{1}.coloramp = (d1-min(d1temp))/(max(d1temp)-min(d1temp));
+       %d1 = d1temp(numd1,:);
+        PMI{1}.coloramp = d1;
     end
 end
 d1 = d1temp;
@@ -1868,9 +1869,25 @@ elseif get(handles.radio_viewcortex,'value')
 elseif get(handles.radio_viewatlas,'value')
     vColor = get_CortexHiResVcolor(oMRI);
 end
+if get(handles.radio_guiSPMnirsHSJ,'value')==1
+    guiHOMER = getappdata(0,'guiHOMER');
+elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
+    guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
+elseif get(handles.radio_guiSPMnirsHSJ,'value')==3
+    guiHOMER = getappdata(0,'gui_SPMvideo');
+end
+HOMERhandles = guihandles(guiHOMER);
+PMI = get(guiHOMER,'UserData');
+
+max_color =max(abs(PMI{1}.coloramp));
+min_color =max(abs(PMI{1}.coloramp));
+
+% max_color = max(abs(vColor));
+% min_color = min(vColor);
+if get(handles.radio_viewatlas,'value')
+    
 max_color = max(abs(vColor));
 min_color = min(vColor);
-if get(handles.radio_viewatlas,'value')
     caxis([min_color, max_color]);
     min_color = sprintf('%0.2g',min_color);
     max_color = sprintf('%0.2g',max_color);

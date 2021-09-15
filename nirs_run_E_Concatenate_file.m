@@ -35,7 +35,7 @@ for filenb=1:1 %only one NIRS.mat merge file inside
         NIRS.Dt = rmfield(NIRS.Dt,'Video');
     end
     %retro compatibilité find size block
-    if ~isfield(NIRS.Dt.fir,'sizebloc')
+    if 1 %~isfield(NIRS.Dt.fir,'sizebloc')
         for f=1:size(rDtp,1)
          [pathstr, name, ext] = fileparts(rDtp{f,1});
          d = fopen_NIR(rDtp{f,1},NC);

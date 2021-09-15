@@ -5,8 +5,6 @@
 function nirsHSJ = tbx_cfg_LIONirs
 
 
-nirOutputDefaultPath = fullfile('C:\data\'); % Default output path for .nir files. Temporary solution.
-
 addpath(fileparts(which(mfilename))); 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -397,44 +395,6 @@ end
  
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Module 1b Configuration for .nirs from HOMER
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-inputrawhomer         = cfg_files; %Select raw BOXY data files for this subject 
-inputrawhomer.name    = 'Select .nirs'; % The displayed name
-inputrawhomer.tag     = 'inputrawhomer';    %file names
-inputrawhomer.ufilter = '.nirs';    %
-inputrawhomer.num     = [1 Inf];     % Number of inputs required 
-inputrawhomer.help    = {'Select raw .nirs file (HOMER FORMAT).'}; 
-
-
-
-m_inputrawhomer         = cfg_menu;
-m_inputrawhomer.tag     = 'm_inputrawhomer';
-m_inputrawhomer.name    = 'Options';
-m_inputrawhomer.labels  = {'Each file','Merge file', 'Merge and detrend'};
-m_inputrawhomer.values  = {0,1, 2};
-m_inputrawhomer.val     = {1};
-m_inputrawhomer.help    = {'Read the data as each block separeted or merge and detrend each segment.'}';
-
-
-
-
-% Executable Branch
-E_rawhomer      = cfg_exbranch;      
-E_rawhomer.name = 'Read .nirs (HoMER)';            
-E_rawhomer.tag  = 'E_rawhomer'; 
-E_rawhomer.val  = {inputrawhomer,age1, prjfile,output_path ,m_inputrawhomer};   
-E_rawhomer.prog = @nirs_run_readhomerfile;  
-E_rawhomer.vout = @nirs_cfg_vout_readhomerfile;
-E_rawhomer.help = {'Select raw .nirs data files. Matlab structure containing fields: ''d'' (raw data sample x channel), ''ml''(channel used sources, detector, weight wavelength), ''t'' (Time vector), data, ml, S vector will be used as AUX trigger 1.'};
-
-function vout = nirs_cfg_vout_readhomerfile(job)
-    vout = cfg_dep;                    
-    vout.sname      = 'NIRS.mat';       
-    vout.src_output = substruct('.','NIRSmat'); 
-    vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
-end
 
 
 
@@ -544,15 +504,6 @@ inputSNIRF.ufilter = '.snirf';    %
 inputSNIRF.num     = [1 Inf];     % Number of inputs required 
 inputSNIRF.help    = {'Select .snirf file record data.'}; 
 
-% Folder selector.
-output_path_SNIRF         = cfg_entry; %path
-output_path_SNIRF.name    = 'Path for output folder';
-output_path_SNIRF.tag     = 'output_path_SNIRF';
-output_path_SNIRF.strtype = 's';
-output_path_SNIRF.num     = [1 Inf];
-output_path_SNIRF.val     = {nirOutputDefaultPath};
-output_path_SNIRF.help    = {'Path for the output folder where the .nir, .mat, .prj, etc. will be created.'};
-
 % Create the two branch required.
 b_importProject         = cfg_branch; % Contains the project file selector.
 b_importProject.tag     = 'b_importProject';
@@ -576,14 +527,43 @@ c_createImportProjectSnirf.help     = {'Choose whether you want to import a proj
 
 % Executable Branch -- Create the drop down menu branch necessary to read .snirf file.
 E_readSNIRF      = cfg_exbranch;      
-E_readSNIRF.name = 'Read SNIRF';            
+E_readSNIRF.name = 'Read .snirf';            
 E_readSNIRF.tag  = 'E_readSNIRF'; 
-E_readSNIRF.val  = {inputSNIRF,c_createImportProjectSnirf,output_path_SNIRF,STD_amp_choice, DC_amp_choice,distmin, distmax, c_shortdistance};
+E_readSNIRF.val  = {inputSNIRF,age1,c_createImportProjectSnirf,output_path};
 E_readSNIRF.prog = @nirs_run_readSNIRF; % Handle to the SNIRF import function.
 E_readSNIRF.vout = @nirs_cfg_vout_readSNIRF;
-E_readSNIRF.help = {'Import the SNIRF data into SPM.'};
+E_readSNIRF.help = {'Import the SNIRF please install https://github.com/fNIRS/snirf_homer3 to support snirf class'};
 
 function vout = nirs_cfg_vout_readSNIRF(job)
+    vout = cfg_dep;                    
+    vout.sname      = 'NIRS.mat';       
+    vout.src_output = substruct('.','NIRSmat'); 
+    vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
+end
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Module 1b Configuration for .nirs from HOMER
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+inputrawhomer         = cfg_files; %Select raw BOXY data files for this subject 
+inputrawhomer.name    = 'Select .nirs'; % The displayed name
+inputrawhomer.tag     = 'inputrawhomer';    %file names
+inputrawhomer.ufilter = '.nirs';    %
+inputrawhomer.num     = [1 Inf];     % Number of inputs required 
+inputrawhomer.help    = {'Select raw .nirs file (HOMER FORMAT).'}; 
+
+
+% Executable Branch
+E_rawhomer      = cfg_exbranch;      
+E_rawhomer.name = 'Read .nirs (HoMER)';            
+E_rawhomer.tag  = 'E_rawhomer'; 
+E_rawhomer.val  = {inputrawhomer,age1, c_createImportProjectSnirf,output_path};   
+E_rawhomer.prog = @nirs_run_readhomerfile;  
+E_rawhomer.vout = @nirs_cfg_vout_readhomerfile;
+E_rawhomer.help = {'Select raw .nirs data files. Matlab structure containing fields: ''d'' (raw data sample x channel), ''ml''(channel used sources, detector, weight wavelength), ''t'' (Time vector), data, ml, S vector will be used as AUX trigger 1.'};
+
+function vout = nirs_cfg_vout_readhomerfile(job)
     vout = cfg_dep;                    
     vout.sname      = 'NIRS.mat';       
     vout.src_output = substruct('.','NIRSmat'); 
@@ -1663,6 +1643,9 @@ c_NIRS_exportoption.val     = {NIRS_export_Separatefile}; %Default option
 c_NIRS_exportoption.help    = {''};
 
 
+
+
+
 % Executable Branch
 E_writeNIRS      = cfg_exbranch;
 E_writeNIRS.name = 'Write NIRS';
@@ -1680,6 +1663,85 @@ function vout = nirs_cfg_vout_writenirs(job)
 end
 
 
+% Executable Branch
+E_writeNIRSHomer      = cfg_exbranch;
+E_writeNIRSHomer.name = 'Write .nirs homer';
+E_writeNIRSHomer.tag  = 'E_writeNIRSHomer';
+E_writeNIRSHomer.val  = {NIRSmat};
+E_writeNIRSHomer.prog = @nirs_run_writenirshomer;
+E_writeNIRSHomer.vout = @nirs_cfg_vout_writenirshomer;
+E_writeNIRSHomer.help = {'Write in .nirs format for Homer.'};
+
+function vout = nirs_cfg_vout_writenirshomer(job)
+    vout = cfg_dep;                    
+    vout.sname      = 'NIRS.mat';       
+    vout.src_output = substruct('.','NIRSmat'); 
+    vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%Module 6d WRITE .snirf file
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+SNIRFname         = cfg_entry;
+SNIRFname.name    = 'Output filename';
+SNIRFname.tag     = 'FileOutput';       
+SNIRFname.strtype = 's';
+SNIRFname.num     = [1 inf];
+SNIRFname.help    = {'Used to name the resulting output SNIRF file.'};
+
+SNIRF_outpath         = cfg_entry; %path
+SNIRF_outpath.name    = 'Folder path for output SNIRF file';
+SNIRF_outpath.tag     = 'SNIRF_outpath';       
+SNIRF_outpath.strtype = 's';
+SNIRF_outpath.num     = [1 Inf];     
+SNIRF_outpath.val     = {'C:\data\'}; 
+SNIRF_outpath.help    = {'The path of the folder in which the SNIRF file is going to be created.',...
+    'Ex: C:\data\user1\SNIRFfolder\'}; 
+
+f_SNIRFfile         = cfg_files;
+f_SNIRFfile.name    = 'Select existing SNIRF file'; 
+f_SNIRFfile.tag     = 'f_SNIRFfile';       %file names
+f_SNIRFfile.filter  = 'snirf';
+f_SNIRFfile.ufilter = '.snirf$';    
+f_SNIRFfile.num     = [1 1];     % Number of inputs required 
+f_SNIRFfile.help    = {'Select the SNIRF file to which you want to append your data.'}; 
+
+B_SNIRFAppend       = cfg_branch;
+B_SNIRFAppend.name  = 'Append to an existing SNIRF file';
+B_SNIRFAppend.tag   = 'B_SNIRFAppend';
+B_SNIRFAppend.val   = {f_SNIRFfile};
+B_SNIRFAppend.help   = {'To append the data to an existing file.'};
+
+B_SNIRFCreate       = cfg_branch;
+B_SNIRFCreate.name  = 'Create a new SNIRF file';
+B_SNIRFCreate.tag   = 'B_SNIRFCreate';
+B_SNIRFCreate.val   = {SNIRFname SNIRF_outpath};
+B_SNIRFCreate.help  = {'Export the data to a new SNIRF file.'};
+
+B_SNIRFExportLocation         = cfg_choice;
+B_SNIRFExportLocation.tag     = 'B_SNIRFExportLocation';
+B_SNIRFExportLocation.name    = 'Choose SNIRF export type';
+B_SNIRFExportLocation.val     = {B_SNIRFCreate};
+B_SNIRFExportLocation.values  = {B_SNIRFCreate  B_SNIRFAppend};
+B_SNIRFExportLocation.help    = {'Choose whether you want to export your data to a new SNIRF file or append it to an existing SNIRF file.'};
+
+% Executable Branch
+E_writeSNIRF      = cfg_exbranch;
+E_writeSNIRF.name = 'Write .snirf';
+E_writeSNIRF.tag  = 'E_writeSNIRF';
+E_writeSNIRF.val  = {NIRSmat};
+E_writeSNIRF.prog = @nirs_run_writeSNIRF;
+E_writeSNIRF.vout = @nirs_cfg_vout_writeSNIRF;
+E_writeSNIRF.help = {'Write session in Shared Near Infrared File Format Specification to export the data.',...
+    'This will produce data format .snirf' };
+
+function vout = nirs_cfg_vout_writeSNIRF(job)
+    vout = cfg_dep;                    
+    vout.sname      = 'SNIRF.mat';       
+    vout.src_output = substruct('.','NIRSmat'); 
+    vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
+end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1750,69 +1812,7 @@ function vout = nirs_run_vout_E_NIR_segment(job)
     vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
 end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%
-%Module 6d WRITE .snirf file
-%%%%%%%%%%%%%%%%%%%%%%%%%
 
-SNIRFname         = cfg_entry;
-SNIRFname.name    = 'Output filename';
-SNIRFname.tag     = 'FileOutput';       
-SNIRFname.strtype = 's';
-SNIRFname.num     = [1 inf];
-SNIRFname.help    = {'Used to name the resulting output SNIRF file.'};
-
-SNIRF_outpath         = cfg_entry; %path
-SNIRF_outpath.name    = 'Folder path for output SNIRF file';
-SNIRF_outpath.tag     = 'SNIRF_outpath';       
-SNIRF_outpath.strtype = 's';
-SNIRF_outpath.num     = [1 Inf];     
-SNIRF_outpath.val     = {'C:\data\'}; 
-SNIRF_outpath.help    = {'The path of the folder in which the SNIRF file is going to be created.',...
-    'Ex: C:\data\user1\SNIRFfolder\'}; 
-
-f_SNIRFfile         = cfg_files;
-f_SNIRFfile.name    = 'Select existing SNIRF file'; 
-f_SNIRFfile.tag     = 'f_SNIRFfile';       %file names
-f_SNIRFfile.filter  = 'snirf';
-f_SNIRFfile.ufilter = '.snirf$';    
-f_SNIRFfile.num     = [1 1];     % Number of inputs required 
-f_SNIRFfile.help    = {'Select the SNIRF file to which you want to append your data.'}; 
-
-B_SNIRFAppend       = cfg_branch;
-B_SNIRFAppend.name  = 'Append to an existing SNIRF file';
-B_SNIRFAppend.tag   = 'B_SNIRFAppend';
-B_SNIRFAppend.val   = {f_SNIRFfile};
-B_SNIRFAppend.help   = {'To append the data to an existing file.'};
-
-B_SNIRFCreate       = cfg_branch;
-B_SNIRFCreate.name  = 'Create a new SNIRF file';
-B_SNIRFCreate.tag   = 'B_SNIRFCreate';
-B_SNIRFCreate.val   = {SNIRFname SNIRF_outpath};
-B_SNIRFCreate.help  = {'Export the data to a new SNIRF file.'};
-
-B_SNIRFExportLocation         = cfg_choice;
-B_SNIRFExportLocation.tag     = 'B_SNIRFExportLocation';
-B_SNIRFExportLocation.name    = 'Choose SNIRF export type';
-B_SNIRFExportLocation.val     = {B_SNIRFCreate};
-B_SNIRFExportLocation.values  = {B_SNIRFCreate  B_SNIRFAppend};
-B_SNIRFExportLocation.help    = {'Choose whether you want to export your data to a new SNIRF file or append it to an existing SNIRF file.'};
-
-% Executable Branch
-E_writeSNIRF      = cfg_exbranch;
-E_writeSNIRF.name = 'Write SNIRF';
-E_writeSNIRF.tag  = 'E_writeSNIRF';
-E_writeSNIRF.val  = {NIRSmat,B_SNIRFExportLocation};
-E_writeSNIRF.prog = @nirs_run_writeSNIRF;
-E_writeSNIRF.vout = @nirs_cfg_vout_writeSNIRF;
-E_writeSNIRF.help = {'Write session in Shared Near Infrared File Format Specification to export the data.',...
-    'This will produce data format .snirf' };
-
-function vout = nirs_cfg_vout_writeSNIRF(job)
-    vout = cfg_dep;                    
-    vout.sname      = 'SNIRF.mat';       
-    vout.src_output = substruct('.','NIRSmat'); 
-    vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
-end
 
 % f_Pipeline         = cfg_files;
 % f_Pipeline.name    = 'Select output folder to Batch pipeline.m'; 
@@ -3424,10 +3424,19 @@ b_PearsonCorr_Mat.name   = 'Pearson correlation' ;
 b_PearsonCorr_Mat.val    = {b_Covariable_Mat};
 b_PearsonCorr_Mat.help   = {'Compute the pearson correlation coefficient between connectivity score and one covariable in the excel file.'};
 
+b_substractidCovariable_Mat         =  cfg_entry;
+b_substractidCovariable_Mat.name    = 'Covariable to subtract';
+b_substractidCovariable_Mat.tag     = 'b_substractidCovariable_Mat';       
+b_substractidCovariable_Mat.strtype = 's';
+b_substractidCovariable_Mat.num     = [0 inf];
+b_substractidCovariable_Mat.val     = {'Name column'};
+b_substractidCovariable_Mat.help    = {'Subtract one covariable and save residual.'};
+
+
 b_GLM_Mat        = cfg_branch;
 b_GLM_Mat.tag    = 'b_GLM_Mat';
 b_GLM_Mat.name   = 'GLM' ;
-b_GLM_Mat.val    = {b_Covariable_Mat};
+b_GLM_Mat.val    = {b_Covariable_Mat b_substractidCovariable_Mat};
 b_GLM_Mat.help   = {'Apply the general linear model, specify covariable as regressor y=b1*x1+b2*x2+...+c, do not forget to include a covariable for the constant.'};
 
 
@@ -3505,7 +3514,7 @@ M_preprocessing.help   = {'These modules apply basic operations on fNIRS data'};
 M_datawritenirs        =  cfg_choice; 
 M_datawritenirs.name   = 'Write external file';
 M_datawritenirs.tag    = 'M_datawritenirs';
-M_datawritenirs.values = {E_writeNIRS, E_writeHMR, E_writeSNIRF, E_NIR_segment }; 
+M_datawritenirs.values = {E_writeNIRSHomer,  E_writeSNIRF, E_NIR_segment,E_writeHMR}; 
 M_datawritenirs.help   = {'These modules convert nir file in .nirs'};
 
 %Module 7 Data Display GUI'

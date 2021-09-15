@@ -40,7 +40,7 @@ function oHelmet = ComputeHNormals( oHelmet, PlaneRange )
         v_Coords_xyz(Pos,:) = [v_Holes(Pos).Coord.x, v_Holes(Pos).Coord.y, v_Holes(Pos).Coord.z]-vHead_Center;
     end
     
-    
+ 
     %Pour tous les trous
     for( p=1:numel(oHelmet.v_Holes) );
         
@@ -61,7 +61,7 @@ function oHelmet = ComputeHNormals( oHelmet, PlaneRange )
                 S.subs = {PosNeighbors};
                 v_pNei = subsref([v_Holes(p).Neighbors.v_Near.p],S);
                 v_pNei = v_pNei( find(v_pNei) );
-                if( numel(v_pNei) > 2 )& numel(v_Holes) > 100
+                if ( numel(v_pNei) > 2 )& numel(v_Holes) > 100
                     
                     %matrice de vecteurs de positions de voisins
                     v_NeiCoords = v_Coords_xyz(v_pNei,:);
@@ -92,11 +92,15 @@ function oHelmet = ComputeHNormals( oHelmet, PlaneRange )
                     oHelmet.v_Holes(p).Normal.z = -d*n(3);
                     %FIN ALGORITME D'APPROXIMATION DE PLAN PAR LES MOINDRES
                     %CARRES (forme standard)
-                else %Ajout julie s'il n'y a pas de voisin, aller vers le centre.
+                elseif  sum(abs(v_Coords_xyz(:,3)))>0 %3d plane  go to the center of the head (0,0,0)
                     norm = sqrt(v_Holes(p).Coord.x^2+v_Holes(p).Coord.y^2+v_Holes(p).Coord.z^2);                    
                     oHelmet.v_Holes(p).Normal.x = v_Holes(p).Coord.x/norm; 
                     oHelmet.v_Holes(p).Normal.y = v_Holes(p).Coord.y/norm;
                     oHelmet.v_Holes(p).Normal.z = v_Holes(p).Coord.z/norm;
+                else %2d
+                    oHelmet.v_Holes(p).Normal.x = 0.001
+                    oHelmet.v_Holes(p).Normal.y = 0.001
+                    oHelmet.v_Holes(p).Normal.z = 0.1
                 end
             end
         end % for

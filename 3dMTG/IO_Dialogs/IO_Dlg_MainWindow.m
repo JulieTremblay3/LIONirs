@@ -1,7 +1,7 @@
 function varargout = IO_Dlg_MainWindow(varargin)
 % IO_DLG_MAINWINDOW M-menuparameters for IO_Dlg_MainWindow.fig
 
-    % Last Modified by GUIDE v2.5 05-Mar-2020 14:07:29
+    % Last Modified by GUIDE v2.5 08-Sep-2021 15:50:09
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -2570,3 +2570,24 @@ oHelmet = set_vHoles(oHelmet,vHoles);
 handles.m_oProjectData = set_Helmet( handles.m_oProjectData, oHelmet );
 guidata( handles.figure_MainWindow, handles );
 Refresh_All( handles.m_oDisplayOptions, handles.m_oInterDlgComm, handles.m_oProjectData );
+
+
+% --------------------------------------------------------------------
+function MenuFileCreateproject_Callback(hObject, eventdata, handles)
+% hObject    handle to MenuFileCreateproject (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[FileName,PathName] =uigetfile({'*.nirs','*.nirs NIRS hoMER data file with 2d coordinate ';...
+    '*.snirf','*.snirf data file with 2d coordinate ';},'Select file to create a fast 2d project');
+%Construct new project structure
+newPrj=Createproject_fromsnirf(fullfile(PathName,FileName));
+oHelmet = get_Helmet( newPrj);
+
+%oInterDlgComm = handles.m_oInterDlgComm;
+handles.m_oProjectData = newPrj;
+oInterDlgComm = InitInterfaceData( handles.m_oInterDlgComm, handles.m_oDisplayOptions, oHelmet);
+
+Refresh_All( handles.m_oDisplayOptions,handles.m_oInterDlgComm, handles.m_oProjectData );
+
+guidata( handles.figure_MainWindow, handles );
+

@@ -29,6 +29,8 @@ if type == 1 %Cortex
     [VertexBuffer, IndexBuffer] = get_SkinMesh( oMRI ); %On prend la peau pour commencer
 
 end
+
+
 meanchannel = 1;
 VertexBuffer(:,4) = 1;
 T = get_matTransform(oMRI);   % Transfert de plan pour le mapping
@@ -42,19 +44,84 @@ cf = PMI{currentsub}.currentFile;
 ml = PMI{currentsub}.data(cf).MeasList;
 pzone =[];
 tic
-%L'arrière est moins bien couvert changement de plan pour eviter l'effet
-%des coordonnées sphérique ou phi est moins bien représenté dans l'axe
-%z on effectue un changement de plan pour éviter ce défaut
-%CAS1 x,y,z standard
-[Vertex_sph(:,1),Vertex_sph(:,2),Vertex_sph(:,3)] = cart2sph(Vertex_tmp(:,1),Vertex_tmp(:,2),Vertex_tmp(:,3));
+iscase0 = 1;
+iscase1 = 1;
+iscase2 = 1;
+iscase3 = 1;
+%adaptation pour plan 2d spherical angle work well on 3d sphere as head but
+%not on 2d plane,use only x y step projection. 
+if iscase0
 for ch = 1:size(ml,1)/2 %Passage 1 coordonné 
     % Coordonnées du canal à tracer
     if PMI{currentsub}.data(cf).MeasListAct(ch)& ml(ch,1)~= 0;
         Srs_n = SDpairs2Srs_n(ml(ch,1),1);
         Det_n = SDpairs2Srs_n(ml(ch,2),2);
-        if ch==57 %Srs_n==23008 & Det_n==15000000
-            1
+        pSrs = find( Srs_n == sMtg.v_HolesMtg);
+        pDet = find( Det_n == sMtg.v_HolesMtg);
+        if ~isempty(pSrs)&~isempty(pDet)
+            if type == 0 | type == 1  %Ne donne pas de bon resultats avec les normals sur le cortex remplacé par la projection de
+            %par une projection sur la peau de l'activation et ensuite
+            %transfert sur le cortex.
+                x_srs = vHoles(pSrs).Coord.x-vHoles(pSrs).Normal.x*vHoles(pSrs).SkinDepth;
+                y_srs = vHoles(pSrs).Coord.y-vHoles(pSrs).Normal.y*vHoles(pSrs).SkinDepth;
+                z_srs = vHoles(pSrs).Coord.z-vHoles(pSrs).Normal.z*vHoles(pSrs).SkinDepth;
+                x_det = vHoles(pDet).Coord.x-vHoles(pDet).Normal.x*vHoles(pDet).SkinDepth;
+                y_det = vHoles(pDet).Coord.y-vHoles(pDet).Normal.y*vHoles(pDet).SkinDepth;
+                z_det = vHoles(pDet).Coord.z-vHoles(pDet).Normal.z*vHoles(pDet).SkinDepth;
+           
+          if  z_srs == 0 & z_det ==0
+             delta_x = (x_det - x_srs)/7;
+             delta_x =x_srs :((x_det - x_srs)/7):x_det;
+             delta_y =y_srs :((y_det - y_srs)/7):y_det;
+          else
+              break
+          end
+                       pzone = [];
+            for i = 1:(numel(delta_x)-1)
+                x_min = min([delta_x(i),delta_x(i+1)])-.002;;
+                x_max = max([delta_x(i),delta_x(i+1)])+.002;;
+                y_min = min([delta_y(i),delta_y(i+1)])-.002;;
+                y_max = max([delta_y(i),delta_y(i+1)])+.002;;
+                p_in = find(Vertex_tmp(:,1) > x_min & Vertex_tmp(:,1) < x_max & Vertex_tmp(:,2) > y_min & Vertex_tmp(:,2) < y_max);
+                pzone = [pzone; p_in];
+                if ~isempty(p_in)
+                    for p_vertex = 1 : numel(p_in)
+                        if ~(Vcolor(p_in((p_vertex)),1) == 0)
+                            if meanchannel == 0
+                                Vcolor(p_in(p_vertex),1) = (Vcolor(p_in(p_vertex),1) + d1(ch))/2; %moyennage des canaux superposés
+                            elseif 1
+                                val = [Vcolor(p_in(p_vertex),1),d1(ch)];
+                                [maxval,id]=max(abs(val));
+                                Vcolor(p_in(p_vertex),1) = val(id);            %la plus grande valeur est selectionné minimal ou maximal
+                            else
+                                Vcolor(p_in(p_vertex),1) = (Vcolor(p_in(p_vertex),1) + d1(ch)); %Somme des canaux superposés
+                            end
+                        else
+                            Vcolor(p_in(p_vertex),1) = d1(ch);
+                        end
+                    end
+                end
+            end
+            end
+            %no 3 d
+            iscase1 = 0;
+            iscase2 = 0;
+            iscase3 = 0;
         end
+    end
+end
+end
+%L'arrière est moins bien couvert changement de plan pour eviter l'effet
+%des coordonnées sphérique ou phi est moins bien représenté dans l'axe
+%z on effectue un changement de plan pour éviter ce défaut
+%CAS1 x,y,z standard
+[Vertex_sph(:,1),Vertex_sph(:,2),Vertex_sph(:,3)] = cart2sph(Vertex_tmp(:,1),Vertex_tmp(:,2),Vertex_tmp(:,3));
+if iscase1
+for ch = 1:size(ml,1)/2 %Passage 1 coordonné 
+    % Coordonnées du canal à tracer
+    if PMI{currentsub}.data(cf).MeasListAct(ch)& ml(ch,1)~= 0;
+        Srs_n = SDpairs2Srs_n(ml(ch,1),1);
+        Det_n = SDpairs2Srs_n(ml(ch,2),2);
         pSrs = find( Srs_n == sMtg.v_HolesMtg);
         pDet = find( Det_n == sMtg.v_HolesMtg);
         if ~isempty(pSrs)&~isempty(pDet)
@@ -84,6 +151,14 @@ for ch = 1:size(ml,1)/2 %Passage 1 coordonné
                     phi_det = phi_det + 2*pi;
                 end
             end
+            if phi_srs * phi_det == 0
+                if  phi_srs < -pi/2
+                    phi_srs = phi_srs + 2*pi;
+                elseif phi_det < -pi/2
+                    phi_det = phi_det + 2*pi;
+                end
+            end
+            
             delta_theta = theta_det-theta_srs;
             delta_phi = phi_det-phi_srs;
             %Définition de la zone à tracer en coordonnée polaire
@@ -119,9 +194,10 @@ for ch = 1:size(ml,1)/2 %Passage 1 coordonné
         end
     end
 end
+end
 %CAS2 x,z,y standard
+if iscase2
 [Vertex_sph(:,1),Vertex_sph(:,2),Vertex_sph(:,3)] = cart2sph(Vertex_tmp(:,1),Vertex_tmp(:,3),Vertex_tmp(:,2));
-if 1
 for ch = 1:size(ml,1)/2 %Passage 1 coordonné 
     % Coordonnées du canal à tracer
     if PMI{currentsub}.data(cf).MeasListAct(ch)& ml(ch,1)~= 0;
@@ -201,8 +277,8 @@ for ch = 1:size(ml,1)/2 %Passage 1 coordonné
 end
 end
 %CAS3 z,y,x standard
+if iscase3 == 1
 [Vertex_sph(:,1),Vertex_sph(:,2),Vertex_sph(:,3)] = cart2sph(Vertex_tmp(:,3),Vertex_tmp(:,2),Vertex_tmp(:,1));
-if 1
 for ch = 1:size(ml,1)/2 %Passage 1 coordonné 
     % Coordonnées du canal à tracer
     if PMI{currentsub}.data(cf).MeasListAct(ch)& ml(ch,1)~= 0;

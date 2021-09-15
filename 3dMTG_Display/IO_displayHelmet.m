@@ -123,7 +123,6 @@ function IO_DisplayHelmet(PrjStruct,PMI,DispParameter)
     if DispParameter.viewskin & DispParameter.reset | DispParameter.viewcortex & DispParameter.reset | DispParameter.viewatlas & DispParameter.reset
         displayMRI(oMRI,DispParameter);
     end
-
 %     up = get(DispParameter.axes1,'cameraupvector')
 %     Ry = makehgtform('yrotate',pi/2);
 %     up(4) = 1
@@ -506,6 +505,8 @@ function displaychannel(DispHelm,PMI,DispParameter)
     vHoles = get_vHoles( DispHelm );
     cf = PMI{currentsub}.currentFile;
     colorjet = colormap(jet(101));
+
+    
   for ind = 1:length(PMI{currentsub}.plotLst);  
       if ~size(PMI{currentsub}.plot,2)
           msgbox('Size wrong')
@@ -535,8 +536,15 @@ function displaychannel(DispHelm,PMI,DispParameter)
          end
         if DispParameter.viewd1chcolor==1 & isfield(PMI{currentsub},'coloramp')         
 %          ind = find(isnan(PMI{currentsub}.coloramp));
-%          PMI{currentsub}.coloramp(ind) = 0.001;            
-          colorch =  colorjet(round(PMI{currentsub}.coloramp*100)+1,:);      
+%          PMI{currentsub}.coloramp(ind) = 0.001;      
+        cmin = DispParameter.cmin;
+        cmax = DispParameter.cmax;
+        d1=round(0+(PMI{currentsub}.coloramp-cmin)./(cmax-cmin)*100);
+        idtop = find(d1>100);
+        idless = find(d1<=0);
+        if ~isempty(idtop);d1(idtop)=100; end
+        if ~isempty(idless);d1(idless)=1;; end
+        colorch =  colorjet(d1,:);      
         elseif   DispParameter.viewd1chcolor==2        
           colorch = zeros(numel(PMI{currentsub}.color),3); %+1
         else
@@ -581,31 +589,27 @@ function displaychannel(DispHelm,PMI,DispParameter)
                 plot3( [srsx2,detx2], [srsy2,dety2], [srsz2,detz2],'color',colorch(idxc,:),'LineWidth',DispParameter.LineWidth ,'linestyle','--');
             end
         end
-        
-         if  DispParameter.D1label & isfield(DispParameter,'d1')
             x = ((srsx+detx)/2)+0.005*((srsx+detx)/2)/abs(((srsx+detx)/2));
             y = (srsy+dety)/2+0.005*((srsy+dety)/2)/abs(((srsy+dety)/2));
             z = (srsz+detz)/2+0.005*((srsz+detz)/2)/abs(((srsz+detz)/2));
-            if PMI{currentsub}.plotLst(ind)<numel(DispParameter.d1)
+            if isnan(z);%support 2d label position
+                 vHoles(p_srs).Coord.x;
+                 vHoles(p_det).Coord.x;
+                 x = srsx + (detx-srsx)/2;
+                 y = srsy + (dety-srsy)/2;
+                 z = 0.01;  end 
+        if  DispParameter.D1label & isfield(DispParameter,'d1')         
+            if PMI{currentsub}.plotLst(ind)<=numel(DispParameter.d1)
                 val = DispParameter.d1(PMI{currentsub}.plotLst(ind));  
             else 
                 val = '';
             end
             text(x,y,z,num2str(val),'color','black','FontSize',14);
         elseif DispParameter.dist
-            x = ((srsx+detx)/2)+0.005*((srsx+detx)/2)/abs(((srsx+detx)/2));
-            y = (srsy+dety)/2+0.005*((srsy+dety)/2)/abs(((srsy+dety)/2));
-            z = (srsz+detz)/2+0.005*((srsz+detz)/2)/abs(((srsz+detz)/2));
             text(x,y,z,d_str,'color','black','FontSize',14);
         elseif DispParameter.idnb
-            x = ((srsx+detx)/2)+0.005*((srsx+detx)/2)/abs(((srsx+detx)/2));
-            y = (srsy+dety)/2+0.005*((srsy+dety)/2)/abs(((srsy+dety)/2));
-            z = (srsz+detz)/2+0.005*((srsz+detz)/2)/abs(((srsz+detz)/2));
             text(x,y,z,num2str(PMI{currentsub}.plotLst(ind)),'color','black','FontSize',14);         
-         elseif DispParameter.nbavg&isfield(PMI{currentsub}.data(cf).HRF,'navg')
-             x = ((srsx2+detx2)/2)+0.005*((srsx+detx)/2)/abs(((srsx+detx)/2));
-            y = (srsy2+dety2)/2+0.005*((srsy+dety)/2)/abs(((srsy+dety)/2));
-            z = (srsz2+detz2)/2+0.005*((srsz+detz)/2)/abs(((srsz+detz)/2));                      
+        elseif DispParameter.nbavg&isfield(PMI{currentsub}.data(cf).HRF,'navg')                 
             text(x,y,z,num2str(PMI{currentsub}.data(cf).HRF.navg(PMI{currentsub}.plotLst(ind))),'color','black','FontSize',14,'BackgroundColor',[1,1,1]);
         end
         
@@ -793,7 +797,7 @@ end
     if DispParameter.viewskin
     [VertexBuffer, IndexBuffer] = get_SkinMesh( oMRI );
       if isempty(VertexBuffer)
-          msgbox('Sorry skin is''nt available on this project')
+         % msgbox('Sorry skin is''nt available on this project')
           return
       end
     VertexBuffer(:,4) = 1;
@@ -805,7 +809,7 @@ end
     elseif DispParameter.viewcortex
       [VertexBuffer, IndexBuffer] = get_CortexMeshLowRes( oMRI );  
      if isempty(VertexBuffer)
-          msgbox('Sorry cortex is''nt available on this project')
+          %msgbox('Sorry cortex is''nt available on this project')
           return
      end
       VertexBuffer(:,4) = 1;
@@ -818,7 +822,7 @@ end
     if DispParameter.viewcortexandatlas       
      [VertexBufferatlas, IndexBufferatlas] = get_CortexMeshHiRes( oMRI );  
           if isempty(VertexBufferatlas)
-              msgbox('Sorry cortex is''nt available on this project')
+              %msgbox('Sorry cortex is''nt available on this project')
               return
           end 
       VertexBufferatlas(:,4) = 1;
@@ -836,7 +840,7 @@ end
     elseif DispParameter.viewatlas
           [VertexBuffer, IndexBuffer] = get_CortexMeshHiRes( oMRI );  
           if isempty(VertexBuffer)
-              msgbox('Sorry cortex is''nt available on this project')
+             % msgbox('Sorry cortex is''nt available on this project')
               return
           end 
       VertexBuffer(:,4) = 1;

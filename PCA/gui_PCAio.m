@@ -112,6 +112,17 @@ c = d1'*d1;
 [v,s,foo]=svd(c);
 svs = diag(s);
 u = d1*v*inv(s);
+
+%CHECK COV
+% figure
+% imagesc(d1*d1')
+% title('iner product time' )
+% figure
+% imagesc(d1'*d1)
+% title('iner product channel' )
+%end
+
+
 PMI{currentsub}.tmpPCA.selected =1;
 PMI{currentsub}.tmpPCA.d1 = d1;                    %Data initial
 PMI{currentsub}.tmpPCA.checksumd = sum(intensnorm(:)); 

@@ -15,7 +15,7 @@ for isubject=2:size(info,1)
     DATA{id}.ZoneList = MAT.ZoneList;
     if isfield(MAT, 'meancorr')
         matcorr = MAT.meancorr;
-        if job.m_fishertransform==1 % add fisher transform  
+        if job.m_fishertransform==1 % add fisher transform
             matcorr =  1/2*log((1+matcorr)./(1-matcorr));
             DATA{id}.MAT = matcorr;
         else
@@ -137,9 +137,9 @@ elseif  job.m_nodeunit==2
     ZONEid = ['avg', info{isubject,3}];
 end
 
- [filepath,name,ext] = fileparts(xlslistfile);
-if isfield(job.c_statmatrix,'b_TtestOneSamplematrix') 
-    AllC = []; 
+[filepath,name,ext] = fileparts(xlslistfile);
+if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
+    AllC = [];
     id =1;
     %Use a specific groupe
     idG1 = find(  groupeall==job.c_statmatrix.b_TtestOneSamplematrix.e_TtestOneSampleGR);
@@ -154,19 +154,19 @@ if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
                 % Compute the correct p-value for the test, and confidence intervals
                 % if requested.
                 if job.c_statmatrix.b_TtestOneSamplematrix.m_TtestOneSample_matrix == 1 % two-tailed test
-                     pval(i,j) = 2 * tcdf(-abs(-tval(i,j)), dfall(i,j));
+                    pval(i,j) = 2 * tcdf(-abs(-tval(i,j)), dfall(i,j));
                     %     if nargout > 2
                     %         crit = tinv((1 - alpha / 2), df) .* ser;
                     %         ci = cat(dim, xmean - crit, xmean + crit);
                     %     end
                 elseif job.c_statmatrix.b_TtestOneSamplematrix.m_TtestOneSample_matrix == 3 % right one-tailed test
-                     pval(i,j) = tcdf(-tval(i,j), dfall(i,j));
+                    pval(i,j) = tcdf(-tval(i,j), dfall(i,j));
                     %     if nargout > 2
                     %         crit = tinv(1 - alpha, df) .* ser;
                     %         ci = cat(dim, xmean - crit, Inf(size(p)));
                     %     end
                 elseif job.c_statmatrix.b_TtestOneSamplematrix.m_TtestOneSample_matrix == 2 % left one-tailed test
-                     pval(i,j) = tcdf(tval(i,j), dfall(i,j));
+                    pval(i,j) = tcdf(tval(i,j), dfall(i,j));
                     %     if nargout > 2
                     %         crit = tinv(1 - alpha, df) .* ser;
                     %         ci = cat(dim, -Inf(size(p)), xmean + crit);
@@ -183,11 +183,11 @@ if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
         mkdir(dir1)
     end
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
-
+    
     
     matcorr =  meanall;
     meancorr = meanall;
-    totaltrialgood = mean(dfall(:));    
+    totaltrialgood = mean(dfall(:));
     file = [name,labelnode,'OneSampleTtest mean','.mat'];
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     new = [{dir1},{file}, {ZONEid},{1} ];
@@ -197,7 +197,7 @@ if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     % ZoneList = MAT.ZoneList;
     matcorr =  tval;
     meancorr = tval;
-    totaltrialgood = mean(dfall(:));    
+    totaltrialgood = mean(dfall(:));
     file = [name,labelnode,'OneSampleTtest tval','.mat'];
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     new = [{dir1},{file}, {ZONEid},{1} ];
@@ -238,7 +238,7 @@ if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     infonew = [infonew;new];
     copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid))
     %  dir1 = job.e_statmatrixPath{1};
-
+    
     if ismac
         % Code to run on Mac platform problem with xlswrite
         writetxtfile(fullfile(dir1,[name,labelnode,'SimpleTtest.txt']),infonew);
@@ -248,51 +248,51 @@ if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
         disp(['Result .xlsx file saved' fullfile(dir1,[name,labelnode,'SimpleTtest.xlsx'])])
     end
 elseif isfield(job.c_statmatrix,'b_PermutationTest')
-       ESTAD = 4;
-        INDEP = 1;
-        NPERM = str2num(job.c_statmatrix.b_PermutationTest.e_npermutation);
-        g1 = find(groupid==job.c_statmatrix.b_PermutationTest.e_TtestOneSampleGR);
-        g2 = find(groupid==job.c_statmatrix.b_PermutationTest.e_TtestOneSampleGR2);
-         
-        cb1 = MATall(g1,:,:);
-        pb1 = MATall(g2,:,:);   
-        %initialised 
-        Toij=zeros(size( cb1,2));
-        ncb1=zeros(size( cb1,2));
-        npb1 =zeros(size( pb1,2));
-   
-        if NPERM<=1 %permuation =1 do unpaired test
-            mean_G1=squeeze(nanmean(cb1,1));
-            mean_G2=squeeze(nanmean(pb1,1));
-            var_G1 = squeeze(nanvar(cb1,0,1));
-            var_G2 = squeeze(nanvar(pb1,0,1));
-            n_G1 = squeeze(sum(~isnan(cb1),1));
-            n_G2 = squeeze(sum(~isnan(pb1),1));
-            df = n_G1+ n_G2-2;                 
-            varc = (1./n_G1+ 1./n_G2 ).*((n_G1-1).*var_G1 + (n_G2-1).* var_G2 )./df;
-            Toij= (mean_G1-mean_G2)*1./sqrt(varc);
-            ncb1 = n_G1;
-            npb1 = n_G2;
-            
+    ESTAD = 4;
+    INDEP = 1;
+    NPERM = str2num(job.c_statmatrix.b_PermutationTest.e_npermutation);
+    g1 = find(groupid==job.c_statmatrix.b_PermutationTest.e_TtestOneSampleGR);
+    g2 = find(groupid==job.c_statmatrix.b_PermutationTest.e_TtestOneSampleGR2);
+    
+    cb1 = MATall(g1,:,:);
+    pb1 = MATall(g2,:,:);
+    %initialised
+    Toij=zeros(size( cb1,2));
+    ncb1=zeros(size( cb1,2));
+    npb1 =zeros(size( pb1,2));
+    
+    if NPERM<=1 %permuation =1 do unpaired test
+        mean_G1=squeeze(nanmean(cb1,1));
+        mean_G2=squeeze(nanmean(pb1,1));
+        var_G1 = squeeze(nanvar(cb1,0,1));
+        var_G2 = squeeze(nanvar(pb1,0,1));
+        n_G1 = squeeze(sum(~isnan(cb1),1));
+        n_G2 = squeeze(sum(~isnan(pb1),1));
+        df = n_G1+ n_G2-2;
+        varc = (1./n_G1+ 1./n_G2 ).*((n_G1-1).*var_G1 + (n_G2-1).* var_G2 )./df;
+        Toij= (mean_G1-mean_G2)*1./sqrt(varc);
+        ncb1 = n_G1;
+        npb1 = n_G2;
+        
         for i=1:size(Toij,1)
-        for j=1:size(Toij,2)
-            try
-                % Compute the correct p-value for the test
-                if 1 % two-tailed test pval
-                     FUniv(i,j) = 2 * tcdf(-abs(- Toij(i,j)), df(i,j));
+            for j=1:size(Toij,2)
+                try
+                    % Compute the correct p-value for the test
+                    if 1 % two-tailed test pval
+                        FUniv(i,j) = 2 * tcdf(-abs(- Toij(i,j)), df(i,j));
+                    end
+                    
+                catch
+                    FUniv(i,j) = nan;
                 end
-
-            catch
-                FUniv(i,j) = nan;
             end
         end
-    end
-            
-  
-    [FDRmat,pcritic] = mafdr(FUniv(:));
-    %figure;cdfplot(FUniv(:))
+        
+        
+        [FDRmat,pcritic] = mafdr(FUniv(:));
+        %figure;cdfplot(FUniv(:))
         %WRITE IN A NEW FILE
-        else
+    else
         if (sum(isnan(pb1(:)))+sum(isnan(cb1(:))))>0 %if presence NAN do the stat without them...
             for i=1:size(pb1,2) % row
                 for j=1:size(cb1,3) %col
@@ -306,224 +306,224 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
                     if ~isempty(idnan)
                         tmppb1(idnan)=[];
                     end
-                    if Toij(i,j)==0 
-                    [FSupSup,FSupDeriv,FSupTime,pij,tij] = TestPermut2Grupos(ESTAD,INDEP,tmpcb1,tmppb1,NPERM);
-                    %apply symetric
-                    ncb1(i,j) = numel(tmpcb1);
-                    npb1(i,j) = numel(tmppb1);
-                    FUniv(i,j) = pij;
-                    Toij(i,j) = tij;
-                     ncb1(j,i) = numel(tmpcb1);
-                    npb1(j,i) = numel(tmppb1);
-                    FUniv(j,i) = pij;
-                    Toij(j,i) = tij;
-                    
+                    if Toij(i,j)==0
+                        [FSupSup,FSupDeriv,FSupTime,pij,tij] = TestPermut2Grupos(ESTAD,INDEP,tmpcb1,tmppb1,NPERM);
+                        %apply symetric
+                        ncb1(i,j) = numel(tmpcb1);
+                        npb1(i,j) = numel(tmppb1);
+                        FUniv(i,j) = pij;
+                        Toij(i,j) = tij;
+                        ncb1(j,i) = numel(tmpcb1);
+                        npb1(j,i) = numel(tmppb1);
+                        FUniv(j,i) = pij;
+                        Toij(j,i) = tij;
+                        
                     end
                 end
             end
         else
             [FSupSup,FSupDeriv,FSupTime,FUniv,Toij] = TestPermut2Grupos(ESTAD,INDEP,pb1,cb1,NPERM);
-            ncb1 = ones(size(cb1,2),size(cb1,3))*numel(size(cb1,1));  
+            ncb1 = ones(size(cb1,2),size(cb1,3))*numel(size(cb1,1));
             npb1 = ones(size(pb1,2),size(pb1,3))*numel(size(pb1,1));
         end
-        end
-        MeanG1 = squeeze(nanmean(cb1));
-        MeanG2 = squeeze(nanmean(pb1));
-        
-        
-        dir1 = job.e_statmatrixPath{1};
-        if ~isdir(dir1)
-            mkdir(dir1)
-        end
-        
-        
-        %WRITE IN A NEW FILE
-        infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
-        file = [name,'_',labelnode,num2str(NPERM),'permutation tstat','.mat'];
-        matcorr = Toij;
-        meancorr = Toij;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-        new = [{dir1},{file}, {ZONEid},{1} ];
-        infonew = [infonew;new];
-        
-        file = [name,'_',labelnode,num2str(NPERM),'permutation 1-pval','.mat'];
-        matcorr = 1-FUniv;
-        meancorr = 1-FUniv;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-        new = [{dir1},{file}, {ZONEid},{1} ];
-        infonew = [infonew;new];
-              
-        
-        file = [name,'_',labelnode,num2str(NPERM),'permutation G1-G2','.mat'];
-        matcorr = real(squeeze((nanmean(cb1,1)- nanmean(pb1,1))));
-        meancorr = real(squeeze((nanmean(cb1,1)- nanmean(pb1,1))));
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-        new = [{dir1},{file}, {ZONEid},{1} ];
-        infonew = [infonew;new];
-        
-
-        file = [name,'_',labelnode,num2str(NPERM),'permutation G2-G1','.mat'];
-        matcorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1)));
-        meancorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1)));
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-        new = [{dir1},{file}, {ZONEid},{1} ];
-        infonew = [infonew;new];
-        
-        file = [name,'_',labelnode,num2str(NPERM),'permutation G1-G2 p05','.mat'];
-        matcorr = real(squeeze(nanmean(cb1,1))-squeeze(nanmean(pb1,1))).*double(FUniv<0.05);
-        meancorr = real(squeeze(nanmean(cb1,1))-squeeze(nanmean(pb1,1))).*double(FUniv<0.05);
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-        new = [{dir1},{file}, {ZONEid},{1} ];
-        infonew = [infonew;new];
-        
-        file = [name,'_',labelnode,num2str(NPERM),'permutation G2-G1 p05','.mat'];
-        matcorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1))).*double(FUniv<0.05);
-        meancorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1))).*double(FUniv<0.05);
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-        new = [{dir1},{file}, {ZONEid},{1} ];
-        infonew = [infonew;new];
-        
-        file = [name,'_',labelnode,num2str(NPERM),'permutation mean G1','.mat'];
-        matcorr = real(squeeze(nanmean(cb1,1)));
-        meancorr = real(squeeze(nanmean(cb1,1)));
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-        new = [{dir1},{file}, {ZONEid},{1} ];
-        infonew = [infonew;new];
-
-        file = [name,'_',labelnode,num2str(NPERM),'permutation mean G2','.mat'];
-        matcorr = real(squeeze(nanmean(pb1,1)));
-        meancorr = real(squeeze(nanmean(pb1,1)));
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-        new = [{dir1},{file}, {ZONEid},{1} ];
-        infonew = [infonew;new];
-        
-        
-        file = [name,'_',labelnode,num2str(NPERM),'permutation N G1','.mat'];
-        matcorr = ncb1;
-        meancorr = ncb1;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-        new = [{dir1},{file}, {ZONEid},{1} ];
-        infonew = [infonew;new];
-       
- 
-        file = [name,'_',labelnode,num2str(NPERM),'permutation N G2','.mat'];
-        matcorr = npb1;
-        meancorr = npb1;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-        new = [{dir1},{file}, {ZONEid},{1} ];
-        infonew = [infonew;new];
-        
-        copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid))
+    end
+    MeanG1 = squeeze(nanmean(cb1));
+    MeanG2 = squeeze(nanmean(pb1));
+    
+    
+    dir1 = job.e_statmatrixPath{1};
+    if ~isdir(dir1)
+        mkdir(dir1)
+    end
+    
+    
+    %WRITE IN A NEW FILE
+    infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
+    file = [name,'_',labelnode,num2str(NPERM),'permutation tstat','.mat'];
+    matcorr = Toij;
+    meancorr = Toij;
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    new = [{dir1},{file}, {ZONEid},{1} ];
+    infonew = [infonew;new];
+    
+    file = [name,'_',labelnode,num2str(NPERM),'permutation 1-pval','.mat'];
+    matcorr = 1-FUniv;
+    meancorr = 1-FUniv;
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    new = [{dir1},{file}, {ZONEid},{1} ];
+    infonew = [infonew;new];
+    
+    
+    file = [name,'_',labelnode,num2str(NPERM),'permutation G1-G2','.mat'];
+    matcorr = real(squeeze((nanmean(cb1,1)- nanmean(pb1,1))));
+    meancorr = real(squeeze((nanmean(cb1,1)- nanmean(pb1,1))));
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    new = [{dir1},{file}, {ZONEid},{1} ];
+    infonew = [infonew;new];
+    
+    
+    file = [name,'_',labelnode,num2str(NPERM),'permutation G2-G1','.mat'];
+    matcorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1)));
+    meancorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1)));
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    new = [{dir1},{file}, {ZONEid},{1} ];
+    infonew = [infonew;new];
+    
+    file = [name,'_',labelnode,num2str(NPERM),'permutation G1-G2 p05','.mat'];
+    matcorr = real(squeeze(nanmean(cb1,1))-squeeze(nanmean(pb1,1))).*double(FUniv<0.05);
+    meancorr = real(squeeze(nanmean(cb1,1))-squeeze(nanmean(pb1,1))).*double(FUniv<0.05);
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    new = [{dir1},{file}, {ZONEid},{1} ];
+    infonew = [infonew;new];
+    
+    file = [name,'_',labelnode,num2str(NPERM),'permutation G2-G1 p05','.mat'];
+    matcorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1))).*double(FUniv<0.05);
+    meancorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1))).*double(FUniv<0.05);
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    new = [{dir1},{file}, {ZONEid},{1} ];
+    infonew = [infonew;new];
+    
+    file = [name,'_',labelnode,num2str(NPERM),'permutation mean G1','.mat'];
+    matcorr = real(squeeze(nanmean(cb1,1)));
+    meancorr = real(squeeze(nanmean(cb1,1)));
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    new = [{dir1},{file}, {ZONEid},{1} ];
+    infonew = [infonew;new];
+    
+    file = [name,'_',labelnode,num2str(NPERM),'permutation mean G2','.mat'];
+    matcorr = real(squeeze(nanmean(pb1,1)));
+    meancorr = real(squeeze(nanmean(pb1,1)));
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    new = [{dir1},{file}, {ZONEid},{1} ];
+    infonew = [infonew;new];
+    
+    
+    file = [name,'_',labelnode,num2str(NPERM),'permutation N G1','.mat'];
+    matcorr = ncb1;
+    meancorr = ncb1;
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    new = [{dir1},{file}, {ZONEid},{1} ];
+    infonew = [infonew;new];
+    
+    
+    file = [name,'_',labelnode,num2str(NPERM),'permutation N G2','.mat'];
+    matcorr = npb1;
+    meancorr = npb1;
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    new = [{dir1},{file}, {ZONEid},{1} ];
+    infonew = [infonew;new];
+    
+    copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid))
     if ismac
         % Code to run on Mac platform problem with xlswrite
         [filepath,name,ext] = fileparts(xlslistfile);
         writetxtfile(fullfile(dir1,[name,'_',labelnode,num2str(NPERM),'PermutationTtest.txt']),infonew);
         disp(['Result .txt file saved: ' fullfile(dir1,[name,'_',labelnode,num2str(NPERM),'PermutationTtest.txt'])])
-
+        
     else
         [filepath,name,ext] = fileparts(xlslistfile);
         xlswrite(fullfile(dir1,[name,'_',labelnode,num2str(NPERM),'PermutationTtest.xlsx']),infonew);
         disp(['Result .xlsx file saved ' fullfile(dir1,[name,'_',labelnode,num2str(NPERM),'PermutationTtest.xlsx'])])
-
+        
     end
     
 elseif isfield(job.c_statmatrix,'b_exportNBSformat')%
-    dir1 = job.e_statmatrixPath{1};    
+    dir1 = job.e_statmatrixPath{1};
     if ~isdir(dir1)
         mkdir(dir1)
     end
-
+    
     Mat = permute(MATall,[3,2,1])
     save(fullfile(dir1,'DATA.mat'),'Mat')
     design= double([ groupeall==1,groupeall==2])
     save(fullfile(dir1,'design.mat'),'design')
     contrast= [ 1,-1]
     save(fullfile(dir1,'G1higherG2contrast.mat'),'contrast','-mat')
-
-listelectrode = DATA{1}.ZoneList
-fid = fopen(fullfile(dir1,'nodeLabels.txt'),'w')
-for i=1:numel(listelectrode)
-    fprintf(fid,'%s',listelectrode{i})
-    if i<numel(listelectrode)
-        fprintf(fid,'\r')
+    
+    listelectrode = DATA{1}.ZoneList
+    fid = fopen(fullfile(dir1,'nodeLabels.txt'),'w')
+    for i=1:numel(listelectrode)
+        fprintf(fid,'%s',listelectrode{i})
+        if i<numel(listelectrode)
+            fprintf(fid,'\r')
+        end
     end
-end
-fclose(fid)
-%OUTOUT POUR NBSToolbox not realisitic position... to be built if needed
-fid = fopen(fullfile(dir1,'COG.txt'),'w')
-for i=1:numel(listelectrode)
-    fprintf(fid,'%2.3f %2.3f %2.3f\r',0,0,0 )
-end
-fclose(fid)
+    fclose(fid)
+    %OUTOUT POUR NBSToolbox not realisitic position... to be built if needed
+    fid = fopen(fullfile(dir1,'COG.txt'),'w')
+    for i=1:numel(listelectrode)
+        fprintf(fid,'%2.3f %2.3f %2.3f\r',0,0,0 )
+    end
+    fclose(fid)
 elseif isfield(job.c_statmatrix,'b_PearsonCorr_Mat')
     dir1 = job.e_statmatrixPath{1};
-     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
+    infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
     covariableall=[];
     covariablestring = job.c_statmatrix.b_PearsonCorr_Mat.b_Covariable_Mat;
     [token,remain] =strtok(covariablestring,',');
     covariableall =  [covariableall,{token}];
-    while ~isempty(remain)        
+    while ~isempty(remain)
         [token,remain] =strtok(remain,',');
         covariableall =  [covariableall,{token}];
     end
     
     for icov = 1:numel(covariableall)
         
-     Pearsony = covariableall{icov};
-     ycol = 0; 
-     for icol=1:size(info,2)  
-         if ~isnan(info{1,icol})
-            if strcmp(strtrim(upper(deblank(info{1,icol}))), strtrim(upper(Pearsony)))
-                ycol = icol;
-            end   
-         end
-     end
-     if ycol
-         id= 1;
-         for i=2:size(info,1)
-            score(id,1) = info{i,ycol };
-            id = id+1;
-         end
-         notfoundstophere = 1;
-     else
-         disp([Pearsony,' column not found'])
-         notfoundstophere = 0;
-     end 
-     if notfoundstophere
-     PearsonCoef = zeros(size(MATall,2),size(MATall,2));
-     PearsonCoefSig = zeros(size(MATall,2),size(MATall,2));
-    for i=1:size(MATall,2)
-        for j=1:size(MATall,2)
-            iduse = find(~isnan(score)& ~isnan(MATall(:,i,j)));
-            X = MATall(iduse,i,j);
-            y = score(iduse,1);
-            if ~isempty(iduse)
-             [rho,pval] = corr(X, y);
-             PearsonCoef(i,j)=rho;
-             PearsonCoefSig(i,j)=rho*double(pval< 0.05);
-            end            
-        end        
+        Pearsony = covariableall{icov};
+        ycol = 0;
+        for icol=1:size(info,2)
+            if ~isnan(info{1,icol})
+                if strcmp(strtrim(upper(deblank(info{1,icol}))), strtrim(upper(Pearsony)))
+                    ycol = icol;
+                end
+            end
+        end
+        if ycol
+            id= 1;
+            for i=2:size(info,1)
+                score(id,1) = info{i,ycol };
+                id = id+1;
+            end
+            notfoundstophere = 1;
+        else
+            disp([Pearsony,' column not found'])
+            notfoundstophere = 0;
+        end
+        if notfoundstophere
+            PearsonCoef = zeros(size(MATall,2),size(MATall,2));
+            PearsonCoefSig = zeros(size(MATall,2),size(MATall,2));
+            for i=1:size(MATall,2)
+                for j=1:size(MATall,2)
+                    iduse = find(~isnan(score)& ~isnan(MATall(:,i,j)));
+                    X = MATall(iduse,i,j);
+                    y = score(iduse,1);
+                    if ~isempty(iduse)
+                        [rho,pval] = corr(X, y);
+                        PearsonCoef(i,j)=rho;
+                        PearsonCoefSig(i,j)=rho*double(pval< 0.05);
+                    end
+                end
+            end
+            
+            %WRITE IN A NEW FILE
+            
+            file = [name,'_',Pearsony,'PEARSON','.mat'];
+            matcorr = PearsonCoef;
+            meancorr = PearsonCoef;
+            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+            new = [{dir1},{file}, {ZONEid},{1} ];
+            infonew = [infonew;new];
+            
+            
+            file = [name,'_',Pearsony,'PEARSONp05','.mat'];
+            matcorr = PearsonCoefSig;
+            meancorr = PearsonCoefSig;
+            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+            new = [{dir1},{file}, {ZONEid},{1} ];
+            infonew = [infonew;new];
+        end
     end
-    
-    %WRITE IN A NEW FILE
-      
-        file = [name,'_',Pearsony,'PEARSON','.mat'];
-        matcorr = PearsonCoef;
-        meancorr = PearsonCoef;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-        new = [{dir1},{file}, {ZONEid},{1} ];
-        infonew = [infonew;new];
-        
-
-        file = [name,'_',Pearsony,'PEARSONp05','.mat'];
-        matcorr = PearsonCoefSig;
-        meancorr = PearsonCoefSig;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-        new = [{dir1},{file}, {ZONEid},{1} ];
-        infonew = [infonew;new];     
-     end
-    end
-        copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
+    copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
     if ismac
         % Code to run on Mac platform problem with xlswrite
         [filepath,name,ext] = fileparts(xlslistfile);
@@ -542,43 +542,44 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
     covariablestring = job.c_statmatrix. b_GLM_Mat.b_Covariable_Mat;
     [token,remain] =strtok(covariablestring,',');
     covariableall =  [covariableall,{token}];
-    while ~isempty(remain)        
+    while ~isempty(remain)
         [token,remain] =strtok(remain,',');
         covariableall =  [covariableall,{token}];
     end
     
     for icov = 1:numel(covariableall)
-     notfoundstophere = 1;
-     Pearsony = covariableall{icov};
-     ycol = 0; 
-     for icol=1:size(info,2)  
-         if ~isnan(info{1,icol})
-            if strcmp(strtrim(upper(deblank(info{1,icol}))), strtrim(upper(Pearsony)))
-                ycol = icol;
-            end   
-         end
-     end
-     if ycol
-         id= 1;
-         for i=2:size(info,1)
-            score(id,icov) = info{i,ycol };
-            id = id+1;
-         end
-       
-     else
-         disp([Pearsony,' column not found, no regression could be compute'])
-         out='Stat tests';
-         return
-     end 
+        notfoundstophere = 1;
+        Pearsony = covariableall{icov};
+        ycol = 0;
+        for icol=1:size(info,2)
+            if ~isnan(info{1,icol})
+                if strcmp(strtrim(upper(deblank(info{1,icol}))), strtrim(upper(Pearsony)))
+                    ycol = icol;
+                end
+            end
+        end
+        if ycol
+            id= 1;
+            for i=2:size(info,1)
+                score(id,icov) = info{i,ycol };
+                id = id+1;
+            end
+            
+        else
+            disp([Pearsony,' column not found, no regression could be compute'])
+            out='Stat tests';
+            return
+        end
     end
     
-      
-        for icov = 1:numel(covariableall)
-            eval(['bCOV',num2str(icov),' = zeros(size(MATall,2),size(MATall,2));']);
-            eval(['bCOV',num2str(icov),'sig = zeros(size(MATall,2),size(MATall,2));']);
-        end
-  
-       for i=1:size(MATall,2)
+    
+    
+    for icov = 1:numel(covariableall)
+        eval(['bCOV',num2str(icov),' = zeros(size(MATall,2),size(MATall,2));']);
+        eval(['bCOV',num2str(icov),'sig = zeros(size(MATall,2),size(MATall,2));']);
+    end
+    
+    for i=1:size(MATall,2)
         for j=1:size(MATall,2)
             iduse = find(sum(~isnan(score),2)==size(score,2)& ~isnan(MATall(:,i,j)));
             X = score(iduse,:);
@@ -587,9 +588,9 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
                 %R2 statistic, the F-statistic and its p-value, and an estimate of the error variance.
                 [b,bint,r,rint,stats] = regress(y,X);
                 try
-                for icov = 1:numel(covariableall)
-                 eval(['bCOV',num2str(icov),'(',num2str(i),',',num2str(j),')=',num2str(b(icov)),';'])
-                end
+                    for icov = 1:numel(covariableall)
+                        eval(['bCOV',num2str(icov),'(',num2str(i),',',num2str(j),')=',num2str(b(icov)),';'])
+                    end
                 catch
                     1
                 end
@@ -598,27 +599,68 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
                         eval(['bCOV',num2str(icov),'sig(',num2str(i),',',num2str(j),')=',num2str(b(icov)),';'])
                     end
                 end
-            end            
-        end        
+                
+            end
+        end
+    end
+    if 1 %save residual covariable substracted
+        idcov2substract = 0;
+        for id=1:numel(covariableall)
+            if strcmp(covariableall{id},job.c_statmatrix.b_GLM_Mat.b_substractidCovariable_Mat )
+                idcov2substract = id; %indice de la covariable a soustraire, dans l'ordre d'entrée
+            end
+        end
+        if idcov2substract
+            residual = nan(size(MATall));
+            residualsig = nan(size(MATall));
+            
+            for i=1:size(MATall,2)
+                for j=1:size(MATall,2)
+                    iduse = find(sum(~isnan(score),2)==size(score,2)& ~isnan(MATall(:,i,j)));
+                    X = score(iduse,:);
+                    if i==8 & j==5
+                    figure
+                    hold on
+                    plot(X(:,idcov2substract),eval(['bCOV',num2str(1),'(i,j)'])*X(:,1)+eval(['bCOV',num2str(2),'(i,j)'])*X(:,2) ,'x')
+                    plot(X(:,idcov2substract), MATall(iduse,i,j),'xr')
+                    end
+                    residual(iduse,i,j) = MATall(iduse,i,j) - eval(['bCOV',num2str(idcov2substract),'(i,j)'])*X(:,idcov2substract);
+                    residualsig(iduse,i,j) = MATall(iduse,i,j) - eval(['bCOV',num2str(idcov2substract),'sig(i,j)'])*X(:,idcov2substract);
+
+                end
+            end
+            for isubject = 2:size(info,1)
+                matcorr = squeeze(residual(isubject-1,:,:));
+                meancorr = squeeze(residual(isubject-1,:,:));
+                save(fullfile(info{isubject,1},['res' info{isubject,2},'.mat']),'ZoneList','matcorr','meancorr');
+                matcorr = squeeze(residualsig(isubject-1,:,:));
+                meancorr = squeeze(residualsig(isubject-1,:,:));
+                save(fullfile(info{isubject,1},['ressig' info{isubject,2},'.mat']),'ZoneList','matcorr','meancorr');
+            end
+            disp(['Save residual by subtracting: ',fullfile(info{isubject,1}),' ' ,covariableall{idcov2substract}])
+        else
+        disp(['No subtracting residual '])
+        end
+  
     end
     
     %WRITE IN A NEW FILE
-      for icov = 1:numel(covariableall)
+    for icov = 1:numel(covariableall)
         file = [name,'_',covariableall{icov},'.mat'];
-         eval(['matcorr =','bCOV',num2str(icov),';'])
-         eval(['meancorr =','bCOV',num2str(icov),';'])
-         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-         new = [{dir1},{file}, {ZONEid},{1} ];
-         infonew = [infonew;new];
-          file = [name,'_',covariableall{icov},'p05.mat'];
-         eval(['matcorr =','bCOV',num2str(icov),'sig;'])
-         eval(['meancorr =','bCOV',num2str(icov),'sig;'])
-         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-         new = [{dir1},{file}, {ZONEid},{1} ];
-         infonew = [infonew;new];
-      end
-             
-        copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
+        eval(['matcorr =','bCOV',num2str(icov),';'])
+        eval(['meancorr =','bCOV',num2str(icov),';'])
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        new = [{dir1},{file}, {ZONEid},{1} ];
+        infonew = [infonew;new];
+        file = [name,'_',covariableall{icov},'p05.mat'];
+        eval(['matcorr =','bCOV',num2str(icov),'sig;'])
+        eval(['meancorr =','bCOV',num2str(icov),'sig;'])
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        new = [{dir1},{file}, {ZONEid},{1} ];
+        infonew = [infonew;new];
+    end
+    
+    copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
     if ismac
         % Code to run on Mac platform problem with xlswrite
         [filepath,name,ext] = fileparts(xlslistfile);
@@ -642,13 +684,13 @@ function [fdr, q, pi0, rs] = mafdr(p, varargin)
 %   object.
 %
 %   [FDR,Q] = MAFDR(P) returns the q-values. The q-value is a hypothesis
-%   testing error measure for each observation with respect to the pFDR. 
+%   testing error measure for each observation with respect to the pFDR.
 %
 %   [FDR,Q,PIO] = MAFDR(P) returns the estimated a-priori probability that
 %   the null hypothesis is true.
 %
 %   MAFDR(...,'LAMBDA',L) sets the tuning parameter lambda used in
-%   estimating the a-priori probability that the null hypotheses is true. L 
+%   estimating the a-priori probability that the null hypotheses is true. L
 %   can be a scalar or a vector with at least 4 elements. All the values in
 %   L must be greater than 0 and less than 1. If a vector is specified,
 %   MAFDR automatically chooses the tuning parameter lambda. L defaults to
@@ -656,7 +698,7 @@ function [fdr, q, pi0, rs] = mafdr(p, varargin)
 %
 %   MAFDR(...,'METHOD',METHOD) sets a method to automatically choose the
 %   tuning parameter lambda. METHOD can be 'bootstrap' (default) or
-%   'polynomial' (the cubic polynomial). 
+%   'polynomial' (the cubic polynomial).
 %
 %   [FDR,Q,PIO,RS] = MAFDR(...) returns the square of correlation
 %   coefficient RS if using the 'polynomial' method to choose lambda.
@@ -671,18 +713,18 @@ function [fdr, q, pi0, rs] = mafdr(p, varargin)
 %   using Storey procedure. If TF is set to true, and 'BHFDR' is true,
 %   MAFDR diplays the plot of FDR adjusted p-values vs. p-values. TF
 %   defaults to false.
-% 
+%
 %   Example:
 %       load prostatecancerexpdata;
 %       p = mattest(dependentData, independentData, 'permute', true);
 %       [fdr, q] = mafdr(p, 'showplot', true);
-%   
+%
 %   See also AFFYGCRMA, AFFYRMA, GCRMA, MAIRPLOT, MALOGLOG, MAPCAPLOT,
-%   MATTEST, MAVOLCANOPLOT, RMASUMMARY. 
+%   MATTEST, MAVOLCANOPLOT, RMASUMMARY.
 
 % Copyright 2006-2011 The MathWorks, Inc.
 
-% References: 
+% References:
 % [1] J.D. Storey. "A direct approach to false discovery rates",
 %     Journal of the Royal Statistical Society, B (2002), 64(3),
 %     pp.479-498.
@@ -741,7 +783,7 @@ if nargin > 1
                 case 1 % BH FDR
                     bhflag = bioinfoprivate.opttf(pval,okargs{k},mfilename);
                 case 2 % lambda
-                    if ~isnumeric(pval) && isvector(pval) 
+                    if ~isnumeric(pval) && isvector(pval)
                         error(message('bioinfo:mafdr:LambdaMustBeNumericAndVector'));
                     end
                     if numel(pval)> 1 && numel(pval) <4
@@ -784,7 +826,7 @@ if bhflag
     fdr(~nanidx) = bhfdr(p(~nanidx));
     
     if ~isempty(rownames)
-       fdr = bioma.data.DataMatrix(fdr, rownames, {'FDR'});
+        fdr = bioma.data.DataMatrix(fdr, rownames, {'FDR'});
     end
     
     if showplotflag
@@ -799,8 +841,8 @@ else
     q = fdr;
     [fdr(~nanidx), q(~nanidx), pi0_all, pi0, cs, rs] = storeyFDR(p(~nanidx), lambda, bootflag);
     if ~isempty(rownames)
-       fdr = bioma.data.DataMatrix(fdr, rownames, {'FDR'});
-       q = bioma.data.DataMatrix(q, rownames, {'q-values'});
+        fdr = bioma.data.DataMatrix(fdr, rownames, {'FDR'});
+        q = bioma.data.DataMatrix(q, rownames, {'q-values'});
     end
     
     if showplotflag
@@ -872,7 +914,7 @@ else
 end
 
 if pi0 > 1
-     warning(message('bioinfo:mafdr:PoorEstimatedPI0Value'));
+    warning(message('bioinfo:mafdr:PoorEstimatedPI0Value'));
 end
 pi0 = min(pi0, 1);
 
@@ -881,7 +923,7 @@ sd = std(pi0_all);
 n = numel(lambda) - 1;
 rs = 1 - s.normr^2/(n*sd^2);
 
-if rs < 0.90 
+if rs < 0.90
     warning(message('bioinfo:mafdr:PoorCubicPolynomialFit',sprintf('%0.4f',rs)));
 end
 
@@ -890,7 +932,7 @@ end
 function pi0 = bootstrapchooser(pi0, lambda, p)
 % Storey+Taylor+Siegmund(2004)
 % Choosing lambda for the estimate of pi0 using bootstrap sampling on
-% p-values. 
+% p-values.
 min_pi0 = min(pi0);
 
 B = 100; % number of bootstrap replicates
@@ -915,13 +957,13 @@ end
 mse = mse ./ mseCount .* max(mseCount);
 mse(mseCount<=(max(mseCount)./2)) = inf;
 
-% Find the minimum MSE. 
+% Find the minimum MSE.
 [~,minmse_idx] = min(mse);
 pi0 = pi0(minmse_idx);
 
 if pi0 > 1
-     warning(message('bioinfo:mafdr:PoorEstimatedPI0Value'));
-     pi0 = min(pi0,1);
+    warning(message('bioinfo:mafdr:PoorEstimatedPI0Value'));
+    pi0 = min(pi0,1);
 end
 
 %----------------------------------------------------------
@@ -979,7 +1021,7 @@ ht = title('');
 set([hx hy ht], 'interpreter', 'latex', 'FontSize', 12)
 set(hx,'string', '$\lambda$');
 set(hy, 'string', '$\hat\pi_0(\lambda)$')
-set(ht, 'string', ['$\hat\pi_0$=', sprintf('%.4f', pi0)]) 
+set(ht, 'string', ['$\hat\pi_0$=', sprintf('%.4f', pi0)])
 hold off
 set(gca,'Tag','PI0vslambdaAxes')
 
@@ -1019,7 +1061,7 @@ function bioinfochecknargin(numArgs,low,name)
 %   BIOINFOCHECKNARGIN(NUM,LOW,FUNCTIONNAME) throws an MException if the
 %   number of input arguments NUM to function FUNCTIONNAME is less than the
 %   minimum number of expected inputs LOW.
-% 
+%
 %   Example
 %      bioinfochecknargin(nargin, 3, mfilename)
 %
@@ -1027,10 +1069,10 @@ function bioinfochecknargin(numArgs,low,name)
 
 %   Copyright 2007-2012  The MathWorks, Inc.
 
-    
+
 if numArgs < low
     msg = getString(message('bioinfo:bioinfochecknargin:NotEnoughInputs'));
     msgId = sprintf('bioinfo:%s:NotEnoughInputs',name);
     x = MException(msgId,msg);
-    x.throwAsCaller;    
+    x.throwAsCaller;
 end

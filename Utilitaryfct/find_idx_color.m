@@ -16,7 +16,7 @@ function idxc = find_idx_color(ml,indml,nbcolor)
 ind = find(ml(:,1) == ml(indml,1) & ml(:,2) == ml(indml,2));
 idxc= mod(ind(1),nbcolor);
 if idxc == 0 
-     idxc=1;
+     idxc=nbcolor;
 end
 
 
