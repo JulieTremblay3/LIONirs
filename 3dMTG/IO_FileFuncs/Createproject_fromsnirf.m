@@ -13,7 +13,9 @@ elseif strcmp(ext, '.snirf')
     try
         snirf = SnirfClass(FileName);
     catch
+        msgbox('Please install https://github.com/fNIRS/snirf_homer3 to support snirf class compatibility ')
         disp('Please install https://github.com/fNIRS/snirf_homer3 to support snirf class compatibility ')
+        return
     end
     NIRS.SD.Lambda = snirf.probe.wavelengths; 
     NIRS.SD.SrcPos = snirf.probe.sourcePos2D;

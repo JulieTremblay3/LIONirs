@@ -22,7 +22,7 @@ load(job.NIRSmat{1})     % Matrice NIRS
 
     for i = 1:numel(NIRS.Dt.fir.pp(1,Sessionid).p)
        [pathstr, name, ext] = fileparts(NIRS.Dt.fir.pp(1,Sessionid).p{i});
-       nbf = sprintf('%02.0f',i)%nom du fichier data .nir
+       %nbf = sprintf('%02.0f',i)%nom du fichier data .nir
        d = fopen_NIR([pathstr,filesep,name,ext],nbch);       
        outfile= [pathstr,filesep,name,'.nirs'];
        
@@ -51,9 +51,10 @@ load(job.NIRSmat{1})     % Matrice NIRS
              for i = 1:size(aux5,1)
                  s(aux5(i,2),aux5(i,1))=1;
              end
-                 
+             t = t';
+             aux = zeros(size(s,1),1);
              SD.MeasList = ml;
-             save(outfile,'d','SD','t','s','-mat');
+             save(outfile,'d','SD','t','s','aux','-mat');
              fprintf('Saving %s ...\n', outfile);
     end
     end

@@ -45,7 +45,7 @@ for ifile =1:numel(rDtp)
     end
     
    
-    frametimes = 1/fs:1/fs:dur;
+    frametimes = 1/fs:1/fs:dur(1);
     param1=job.c_createAUXauto.b_HRFtriggeronset.e_TimetoPeak1;  
     param2=job.c_createAUXauto.b_HRFtriggeronset.e_FWHM1;
     param3=job.c_createAUXauto.b_HRFtriggeronset.e_TimetoPeak2;

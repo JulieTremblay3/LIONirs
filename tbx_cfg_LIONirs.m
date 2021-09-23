@@ -2203,12 +2203,12 @@ f_extractcomponent_glmlist.filter  = {'xlsx','xls','txt'};
 f_extractcomponent_glmlist.ufilter = '.*';
 f_extractcomponent_glmlist.num     = [1 Inf];     % Number of inputs required 
 f_extractcomponent_glmlist.help    = {'Enter the list xls to extract GLM, the list must include the following columns:',...
-    '''NIRS.mat folder'': directory of the NIRS.mat to use;',...
-    '''file'': number to identify the file to use;',...
-    '''tStart'': starting time in seconds to define the beginning of the period where the GLM will be applied;',...
-    '''tStop'': time stop in seconds to define the end of the period where the GLM will be applied;',...
-    '''Label'': Label identification to write in the event (useful to manage the export);',...
-    'Regressor(s) (''X0'', ''X1'',''X2'',''X3'',''X4''...): the regressor could be a name in the aux list, a channel zone (regressor zone 1 apply to zone 1). '}; 
+    '''NIRS.mat folder'': directory of the NIRS.mat to use as: C:\data\Analyse\C01;',...
+    '''file'': number to identify the file to use as: 1;',...
+    '''tStart'': starting time in seconds to define the beginning of the period where the GLM will be applied as; 10',...
+    '''tStop'': time stop in seconds to define the end of the period where the GLM will be applied as; 40',...
+    '''Label'': Label identification to write in the event (useful to manage the export)as HRF;',...
+    'Regressor(s) (''X0'', ''X1'',''X2'',''X3'',''X4''...): the regressor could be a name in the aux list, a channel zone (regressor zone 1 apply to zone 1) be realy picky on the spelling as; HRF task '}; 
 
 b_extractcomponent_glm          = cfg_branch;
 b_extractcomponent_glm.tag      = 'b_extractcomponent_glm';
@@ -2459,6 +2459,21 @@ function vout = nirs_cfg_vout_E_exportcomponent_zone(job)
     vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
 end
 
+m_statcomponent_saveoption        = cfg_menu;
+m_statcomponent_saveoption.name   = 'Save info.mat data and parameters';
+m_statcomponent_saveoption.tag    = 'm_statcomponent_saveoption';       
+m_statcomponent_saveoption.labels = {'Yes','No'};
+m_statcomponent_saveoption.values = {0,1};
+m_statcomponent_saveoption.val    = {0};
+m_statcomponent_saveoption.help   = {'Save in the result file a file with the data and parameters used to perform the test. Output file info.mat. These data could be used in external statistical software.'};
+
+e_statcomponent_alpha      = cfg_entry;
+e_statcomponent_alpha.name    = 'Alpha threshold p value < ';
+e_statcomponent_alpha.tag     = 'e_statcomponent_alpha';       
+e_statcomponent_alpha.strtype = 'r';
+e_statcomponent_alpha.num     = [1 inf];
+e_statcomponent_alpha.val     = {0.05}; 
+e_statcomponent_alpha.help    = {'Define the alpha threshold of significance to mask result map.'};
 
 % Folder selector.
 e_STATCOMPPath          = cfg_files; %path
@@ -2569,14 +2584,14 @@ c_ANOVAN.help    = {'N-way analysis of variance, the anova could be performed by
 c_statcomponent         = cfg_choice; 
 c_statcomponent.tag     = 'c_statcomponent';
 c_statcomponent.name    = 'Choose the statistical test';
-c_statcomponent.values  = {b_TtestOneSample, b_TtestUnpaired,c_ANOVAN, b_Ttestpaired};
+c_statcomponent.values  = {b_TtestOneSample, b_Ttestpaired,b_TtestUnpaired,c_ANOVAN};
 c_statcomponent.val     = {b_TtestOneSample}; %Default option
-c_statcomponent.help    = {'Four statistical tests are available: One sample t-test, Unpaired t-test, Paired t-test, and Anovan. The first step is to choose which test you want to perform.'};
+c_statcomponent.help    = {'Statistical tests are available: One sample t-test, Paired t-test, Unpaired t-test, Anovan (use matlab Statistics and Machine Learning Toolbox). The first step is to choose which test you want to perform.'};
 
 E_statcomponent      = cfg_exbranch;
 E_statcomponent.name = 'Stats components';
 E_statcomponent.tag  = 'E_statcomponent';
-E_statcomponent.val  = {c_statcomponent, e_STATCOMPPath};
+E_statcomponent.val  = {c_statcomponent,m_statcomponent_saveoption,e_statcomponent_alpha, e_STATCOMPPath};
 E_statcomponent.prog = @nirs_run_E_statcomponent;
 E_statcomponent.vout = @nirs_cfg_vout_E_statcomponent;
 E_statcomponent.help = {'Apply basic statistics on exported components.'};
@@ -3287,7 +3302,7 @@ zonemat.help    = {'Select zone to create channel list for verification, zone la
 
 % Executable Branch
 E_zone2channellist      = cfg_exbranch;      
-E_zone2channellist.name = 'Transfert .zone into a .txt list' ;            
+E_zone2channellist.name = 'Transfer .zone into a .txt list' ;            
 E_zone2channellist.tag  = 'E_zone2channellist'; 
 E_zone2channellist.val  = {zonemat, m_zonematformat};   
 E_zone2channellist.prog = @nirs_run_E_zone2channellist;  
@@ -3304,7 +3319,7 @@ zonetxt.help    = {'Select .txt list that contains zonelabel  to create channel 
 
 % Executable Branch
 E_channellist2zone      = cfg_exbranch;      
-E_channellist2zone.name = 'Transfert a .txt list into .zone' ;            
+E_channellist2zone.name = 'Transfer a .txt list into .zone' ;            
 E_channellist2zone.tag  = 'E_channellist2zone'; 
 E_channellist2zone.val  = {NIRSmat,zonetxt, m_zonematformat};   
 E_channellist2zone.prog = @nirs_run_E_channellist2zone;  
@@ -3515,7 +3530,7 @@ M_datawritenirs        =  cfg_choice;
 M_datawritenirs.name   = 'Write external file';
 M_datawritenirs.tag    = 'M_datawritenirs';
 M_datawritenirs.values = {E_writeNIRSHomer,  E_writeSNIRF, E_NIR_segment,E_writeHMR}; 
-M_datawritenirs.help   = {'These modules convert nir file in .nirs'};
+M_datawritenirs.help   = {'These modules convert nir file in .nirs, last module of data export, support the export of field such as data (d),coordinate (SD), trigger (s), time (t),do not support noise artifact marking or aux export'};
 
 %Module 7 Data Display GUI'
 M_GUI        = cfg_choice;

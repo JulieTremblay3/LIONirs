@@ -57,7 +57,7 @@ load(job.NIRSmat{1})     % Matrice NIRS
             aux = zeros(size(d,1),1);
     end
 
-         nirs= struct('d',d,'SD',SD,'t',t,'s',s,'aux',aux);
+         nirs= struct('d',d,'SD',SD,'t',t','s',s,'aux',aux);
         % Save SNIRF: Convert .nirs format data to SnirfClass object, save it to .snirf file (HDF5)
         fprintf('Saving %s ...\n', outfile);
         snirf_saved = SnirfClass(nirs);

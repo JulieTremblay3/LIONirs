@@ -56,7 +56,7 @@ function Draw_MRISurface( oDispOpt, oInterDlgComm, oMRI )
         vColor = get_ItemColor( oDispOpt, 'MRI_SurfaceSkin' );
         colormap([255/256 255/256 179/256]);
         vColor = [255/256 255/256 179/256];
-       
+
     else
         return;
     end
@@ -67,7 +67,7 @@ function Draw_MRISurface( oDispOpt, oInterDlgComm, oMRI )
     T = get_matTransform(oMRI);
     Vertex_tmp = VertexBuffer*T;   
     [m n] = size(IndexBuffer);
-     Vertex_tmp2 =  Vertex_tmp*T^-1;   
+%     Vertex_tmp2 =  Vertex_tmp*T^-1;   
 %     vColor = zeros(m,1); 
 
 
@@ -119,7 +119,9 @@ function Draw_MRISurface( oDispOpt, oInterDlgComm, oMRI )
                                      'SpecularStrength', 0.5, ...
                                      'FaceAlpha', 0.5, ...
                                      'AmbientStrength', 0.5);
+       
         else
+            
             v_hPrevDispItems = patch('Vertices',Vertex_tmp(:,1:3),...
                                      'Faces',IndexBuffer, ...
                                      'EdgeColor', 'none', ...
@@ -129,8 +131,8 @@ function Draw_MRISurface( oDispOpt, oInterDlgComm, oMRI )
                                      'SpecularColorReflectance', 0.5, ...
                                      'DiffuseStrength', 0.5, ...
                                      'SpecularStrength', 0.5, ...
-                                     'AmbientStrength', 0.5);
+                                     'AmbientStrength', 0.5);                                
         end
-              %  colormap([255/256 255/256 179/256]);
+               colormap([255/256 255/256 179/256]);
 
 end

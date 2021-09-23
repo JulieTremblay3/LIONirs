@@ -1,197 +1,144 @@
 function out = nirs_run_E_statcomponent(job)
-
+alphatr = job.e_statcomponent_alpha;
+ dir1 = job.e_STATCOMPPath{1}; 
+ if ~isdir(dir1)
+     mkdir(dir1);
+ end
 if isfield(job.c_statcomponent,'b_TtestOneSample')
     AllC = [];
     for i=1:numel(job.c_statcomponent.b_TtestOneSample.f_component)
         load(job.c_statcomponent.b_TtestOneSample.f_component{i},'-mat');
-        [dir1,file1,ext1]=fileparts(job.c_statcomponent.b_TtestOneSample.f_component{i});
         AllC = [AllC,A];
+        info.zonelistG1{i} = zonelist;
     end
-    A = A';
-
-     for ich=1:size(AllC,1)
-       % [h,p,ci,stats] = ttest(AllC(ich,:)); %do not suport nan 
-        tval(ich) =  nanmean(AllC(ich,:))./        (nanstd(AllC(ich,:)./sqrt(sum(~isnan(AllC(ich,:))))));
-        df = sum(~isnan(AllC(ich,:)))-1;
-        if job.c_statcomponent.b_TtestOneSample.m_TtestOneSample == 1
-            pval(ich) = 2 * tcdf(-abs(tval(ich)), df);
-            option = 'twotail';
-        elseif job.c_statcomponent.b_TtestOneSample.m_TtestOneSample == 2
-             pval(ich) = tcdf(+tval(ich), df);   
-            option = 'lefttail';
-        elseif job.c_statcomponent.b_TtestOneSample.m_TtestOneSample == 3
-            pval(ich) = tcdf(-tval(ich), df);
-            option = 'righttail';
+    info.AllG1 = AllC;
+    info.G1 = job.c_statcomponent.b_TtestOneSample.f_component;
+     for ich=1:size(AllC,1)       
+        if 1
+            if job.c_statcomponent.b_TtestOneSample.m_TtestOneSample == 1
+                 info.tail = 'both';
+            elseif job.c_statcomponent.b_TtestOneSample.m_TtestOneSample == 2                
+                info.tail = 'left';
+            elseif job.c_statcomponent.b_TtestOneSample.m_TtestOneSample == 3 ;
+                info.tail = 'right';
+            end
+            [h,p,ci,stats] = ttest(AllC(ich,:),0,'tail',info.tail); %Use from Matlab Statistics and Machine Learning Toolbox™
+            df(ich) = stats.df;
+            tval(ich) = stats.tstat;
+            pval(ich)= p;        
+            mval(ich) = nanmean(AllC(ich,:));
         end
-        mval(ich) = nanmean(AllC(ich,:));
      end
-     dir1 = job.e_STATCOMPPath{1};
+     NBSUJET = numel(job.c_statcomponent.b_TtestOneSample.f_component);
      A = mval;
-     save(fullfile(dir1,['ONESAMPLE_Mean n=',num2str(df+1),'.mat']),'A','zonelist','option')     
+     save(fullfile(dir1,['ONESAMPLE_Mean n=',num2str(NBSUJET),'.mat']),'A','zonelist')     
      A = tval;
-     save(fullfile(dir1,['ONESAMPLE_Tmap n=',num2str(df+1),'.mat']),'A','zonelist','option')
-
-     A = mval.*double(pval<0.05);
-     save(fullfile(dir1,['ONESAMPLE__mean05unc.mat']), 'A','zonelist','option')
-     A = mval.*double(pval<0.01);
-     save(fullfile(dir1,['ONESAMPLE__mean01unc.mat']),'A','zonelist','option')
-     A = mval.*double(pval<0.001);
-     save(fullfile(dir1,['ONESAMPLE__mean001unc.mat']),'A','zonelist','option')
-    
-     
-     [FDR,Q] = mafdr(pval);         
-     A = mval.*double(Q<0.05);
-     save(fullfile(dir1,['ONESAMPLE__mean05fdr.mat']),'A','zonelist','option')
-     [FDR,Q] = mafdr(pval);
-     A = mval.*double(Q<0.01);
-     save(fullfile(dir1,['ONESAMPLE__mean01fdr.mat']),'A','zonelist','option')
-     [FDR,Q] = mafdr(pval);
-     A = mval.*double(Q<0.001);
-     save(fullfile(dir1,['ONESAMPLE__mean001fdr.mat']),'A','zonelist','option')
-
-     
-elseif isfield(job.c_statcomponent,'b_TtestUnpaired')
-    
-    if job.c_statcomponent.b_TtestUnpaired.m_TtestOneSample == 1
-        option = 'twotail';
-    elseif job.c_statcomponent.b_TtestUnpaired.m_TtestOneSample == 2  
-        option = 'lefttail';
-    elseif job.c_statcomponent.b_TtestUnpaired.m_TtestOneSample == 3
-        option = 'righttail';
-    end
-    
-    AllG1 = [];
-    for i = 1:numel(job.c_statcomponent.b_TtestUnpaired.f_componentG1)
-        load(job.c_statcomponent.b_TtestUnpaired.f_componentG1{i},'-mat');
-        [dir1,file1,ext1]=fileparts(job.c_statcomponent.b_TtestUnpaired.f_componentG1{i});
-        AllG1 = [AllG1,A];
-    end 
-    
-     AllG2 = [];
-    for i = 1:numel(job.c_statcomponent.b_TtestUnpaired.f_componentG2)
-        load(job.c_statcomponent.b_TtestUnpaired.f_componentG2{i},'-mat');
-        [dir1,file1,ext1]=fileparts(job.c_statcomponent.b_TtestUnpaired.f_componentG2{i});
-        AllG2 = [AllG2,A];
-    end
-    
-     for ich = 1:size(AllG1,1)
-        stats       = testt(AllG1(ich,:),AllG2(ich,:)); %do not suport nan 
-        tval(ich)   = stats.tvalue;
-        df          = stats.tdf;
-        pval(ich)   = stats.tpvalue;      
-        mval(ich)   = nanmean(AllG1(ich,:)) - nanmean(AllG2(ich,:));
-     end
-     dir1 = job.e_STATCOMPPath{1};
-     
-     A = nanmean(AllG1);
-     save(fullfile(dir1,['TWOSAMPLE_Mean G1 n=',num2str(df+1),'.mat']),'A','zonelist','option')
-     
-     A = nanmean(AllG2);
-     save(fullfile(dir1,['TWOSAMPLE_Mean G2 n=',num2str(df+1),'.mat']),'A','zonelist','option')
-     
-     A = mval;
-     save(fullfile(dir1,['TWOSAMPLE_Mean G1-G2 n=',num2str(df+1),'.mat']),'A','zonelist','option')
-
-     A = tval;
-     save(fullfile(dir1,['TWOSAMPLE_Tmap n=',num2str(df+1),'.mat']),'A','zonelist','option')
-     
-     A = tval.*double(pval<0.05);
-     save(fullfile(dir1,['TWOSAMPLE_Tmap_05unc.mat']), 'A','zonelist','option')
-     
-     A = mval.*double(pval<0.05);
-     save(fullfile(dir1,['TWOSAMPLE__mean05unc.mat']),'A','zonelist','option')
-     
-     A = mval.*double(pval<0.01);
-     save(fullfile(dir1,['TWOSAMPLE__mean01unc.mat']),'A','zonelist','option')
-     
-     A = mval.*double(pval<0.001);
-     save(fullfile(dir1,['TWOSAMPLE__mean001unc.mat']),'A','zonelist','option')
-    
-     
-     [FDR,Q] = mafdr(pval);         
-     A = mval.*double(Q<0.05);
-     save(fullfile(dir1,['TWOSAMPLE__mean05fdr.mat']),'A','zonelist','option')
-     
-     [FDR,Q] = mafdr(pval);
-     A = mval.*double(Q<0.01);
-     save(fullfile(dir1,['TWOSAMPLE__mean01fdr.mat']),'A','zonelist','option')
-     
-     [FDR,Q] = mafdr(pval);
-     A = mval.*double(Q<0.001);
-     save(fullfile(dir1,['TWOSAMPLE_mean001fdr.mat']),'A','zonelist','option')
-     
-elseif isfield(job.c_statcomponent,'b_Ttestpaired')
-    paired = 1;
-    alpha = 0.05;
+     save(fullfile(dir1,['ONESAMPLE_Tmap.mat']),'A','zonelist')
+     A = mval.*double(pval<alphatr);
+     save(fullfile(dir1,['ONESAMPLE_mean_',  num2str(alphatr),'unc.mat']), 'A','zonelist')  
+     [FDR,Q] = mafdr(pval); %establish fdr among all channels results         
+     A = mval.*double(Q<alphatr);
+     save(fullfile(dir1,['ONESAMPLE_mean_',  num2str(alphatr),'fdr.mat']),'A','zonelist')
+elseif isfield(job.c_statcomponent,'b_Ttestpaired')   
     if job.c_statcomponent.b_Ttestpaired.m_TtestOneSample == 1
-        option = 'twotail';
-        tail = 2;
+        info.tail = 'both';
     elseif job.c_statcomponent.b_Ttestpaired.m_TtestOneSample == 2  
-        option = 'lefttail';
-        tail = 1;
+        info.tail = 'left';
     elseif job.c_statcomponent.b_Ttestpaired.m_TtestOneSample == 3
-        option = 'righttail';
-        tail = 1;
+        info.tail = 'right';
     end
     AllG1 = [];
     for i = 1:numel(job.c_statcomponent.b_Ttestpaired.f_componentG1)
         load(job.c_statcomponent.b_Ttestpaired.f_componentG1{i},'-mat');
-        [dir1, file1, ext1] = fileparts(job.c_statcomponent.b_Ttestpaired.f_componentG1{i});
-        AllG1 = [AllG1, A];
+        AllG1 = [AllG1, A];   
+        info.zonelistG1{i} = zonelist;
     end 
-    
+ 
     AllG2 = [];
     for i = 1:numel(job.c_statcomponent.b_Ttestpaired.f_componentG2)
-        load(job.c_statcomponent.b_Ttestpaired.f_componentG2{i},'-mat');
-        [dir1, file1, ext1]=fileparts(job.c_statcomponent.b_Ttestpaired.f_componentG2{i});
+        load(job.c_statcomponent.b_Ttestpaired.f_componentG2{i},'-mat');    
         AllG2 = [AllG2, A];
+        info.zonelistG2{i} = zonelist;
     end
- 
-    for ich = 1:size(AllG1,1)
-        stats       = testt(AllG1(ich,:),AllG2(ich,:), paired, alpha, tail); 
-        tval(ich)   = stats.tvalue;
-        df          = stats.tdf;
-        pval(ich)   = stats.tpvalue;      
+        info.G1 = job.c_statcomponent.b_Ttestpaired.f_componentG1;
+        info.G2 = job.c_statcomponent.b_Ttestpaired.f_componentG2;
+        info.AllG1 = AllG1;
+        info.AllG2 = AllG2;
+    for ich = 1:size(AllG1,1) 
+       [h,p,ci,stats] = ttest(AllG1(ich,:),AllG2(ich,:), 'tail',info.tail); % from Matlab Statistics and Machine Learning Toolbox™
+        tval(ich)   = stats.tstat;
+        df          = stats.df;
+        pval(ich)   = p;      
         mval(ich)   = nanmean(AllG1(ich,:)) - nanmean(AllG2(ich,:));
     end
+    [FDR,Q] = mafdr(pval); %establish fdr among all channels results   
     
-    dir1 = job.e_STATCOMPPath{1};
-    
+    NBSUJET = numel(job.c_statcomponent.b_Ttestpaired.f_componentG1); 
     A = nanmean(AllG1);
-    save(fullfile(dir1,['TWOSAMPLE_Mean G1 n=',num2str(df+1),'.mat']),'A','zonelist','option')
-    
+    save(fullfile(dir1,['PAIRED_Mean G1 n=',num2str(NBSUJET),'.mat']),'A','zonelist')    
     A = nanmean(AllG2);
-    save(fullfile(dir1,['TWOSAMPLE_Mean G2 n=',num2str(df+1),'.mat']),'A','zonelist','option')
-     
+    save(fullfile(dir1,['PAIRED_Mean G2 n=',num2str(NBSUJET),'.mat']),'A','zonelist')     
     A = mval;
-    save(fullfile(dir1,['TWOSAMPLE_Mean G1-G2 n=',num2str(df+1),'.mat']),'A','zonelist','option')
-    
+    save(fullfile(dir1,['PAIRED_Mean G1-G2','.mat']),'A','zonelist')    
     A = tval;
-    save(fullfile(dir1,['TWOSAMPLE_Tmap n=',num2str(df+1),'.mat']),'A','zonelist','option')
+    save(fullfile(dir1,['PAIRED_Tmap.mat']),'A','zonelist')    
+    A = tval.*double(pval<alphatr);
+    save(fullfile(dir1,['PAIRED_Tmap_',num2str(alphatr),'unc.mat']), 'A','zonelist')    
+    A = mval.*double(pval<alphatr);
+    save(fullfile(dir1,['PAIRED_mean G1-G2_',num2str(alphatr),'unc.mat']),'A','zonelist')      
+    A = mval.*double(Q<alphatr);
+    save(fullfile(dir1,['PAIRED_mean G1-G2_',  num2str(alphatr),'fdr.mat']),'A','zonelist')
+elseif isfield(job.c_statcomponent,'b_TtestUnpaired')    
+    if job.c_statcomponent.b_TtestUnpaired.m_TtestOneSample == 1
+        info.tail = 'both';
+    elseif job.c_statcomponent.b_TtestUnpaired.m_TtestOneSample == 2  
+        info.tail = 'left';
+    elseif job.c_statcomponent.b_TtestUnpaired.m_TtestOneSample == 3
+        info.tail ='right'; 
+    end
+    AllG1 = [];
+    for i = 1:numel(job.c_statcomponent.b_TtestUnpaired.f_componentG1)
+        load(job.c_statcomponent.b_TtestUnpaired.f_componentG1{i},'-mat');        
+        AllG1 = [AllG1,A];
+        info.zonelistG1{i} = zonelist;
+    end 
     
-    A = tval.*double(pval<0.05);
-    save(fullfile(dir1,['TWOSAMPLE_Tmap_05unc.mat']), 'A','zonelist','option')
-    
-    A = mval.*double(pval<0.05);
-    save(fullfile(dir1,['TWOSAMPLE__mean05unc.mat']),'A','zonelist','option')
-    
-    A = mval.*double(pval<0.01);
-    save(fullfile(dir1,['TWOSAMPLE__mean01unc.mat']),'A','zonelist','option')
-    
-    A = mval.*double(pval<0.001);
-    save(fullfile(dir1,['TWOSAMPLE__mean001unc.mat']),'A','zonelist','option')
-         
-    [FDR,Q] = mafdr(pval);         
-    A = mval.*double(Q<0.05);
-    save(fullfile(dir1,['TWOSAMPLE__mean05fdr.mat']),'A','zonelist','option')
-    
-    [FDR,Q] = mafdr(pval);
-    A = mval.*double(Q<0.01);
-    save(fullfile(dir1,['TWOSAMPLE__mean01fdr.mat']),'A','zonelist','option')
-    
-    [FDR,Q] = mafdr(pval);
-    A = mval.*double(Q<0.001);
-    save(fullfile(dir1,['TWOSAMPLE_mean001fdr.mat']),'A','zonelist','option')
+     AllG2 = [];
+    for i = 1:numel(job.c_statcomponent.b_TtestUnpaired.f_componentG2)
+        load(job.c_statcomponent.b_TtestUnpaired.f_componentG2{i},'-mat');      
+        AllG2 = [AllG2,A];
+        info.zonelistG2{i}=zonelist;
+    end
+     info.AllG1=AllG1;
+     info.G1=job.c_statcomponent.b_TtestUnpaired.f_componentG1;
+     info.AllG2=AllG2;
+     info.G2=job.c_statcomponent.b_TtestUnpaired.f_componentG2;
+ 
+     for ich = 1:size(AllG1,1)
+        [h,p,ci,stats] = ttest2(AllG1(ich,:),AllG2(ich,:),'tail', info.tail ); 
+        tval(ich)   = stats.tstat;
+        df          = stats.df;
+        pval(ich)   = p;      
+        mval(ich)   = nanmean(AllG1(ich,:)) - nanmean(AllG2(ich,:));
+     end 
+     NBSUJET = numel(job.c_statcomponent.b_TtestUnpaired.f_componentG2)+numel(job.c_statcomponent.b_TtestUnpaired.f_componentG1);
+     A = nanmean(AllG1);
+     save(fullfile(dir1,['TWOSAMPLE_Mean G1 n=',num2str(numel(job.c_statcomponent.b_TtestUnpaired.f_componentG1)),'.mat']),'A','zonelist')
+     A = nanmean(AllG2);
+     save(fullfile(dir1,['TWOSAMPLE_Mean G2 n=',num2str(numel(job.c_statcomponent.b_TtestUnpaired.f_componentG2)),'.mat']),'A','zonelist')
+     A = mval;
+     save(fullfile(dir1,['TWOSAMPLE_Mean G1-G2_','.mat']),'A','zonelist')
+     A = tval;
+     save(fullfile(dir1,['TWOSAMPLE_Tmap','.mat']),'A','zonelist')
+     A = tval.*double(pval<alphatr);
+     save(fullfile(dir1,['TWOSAMPLE_Tmap_', num2str(alphatr),'unc.mat']), 'A','zonelist')
+     A = mval.*double(pval<alphatr);
+     save(fullfile(dir1,['TWOSAMPLE_mean_', num2str(alphatr),'unc.mat']),'A','zonelist')    
+     [FDR,Q] = mafdr(pval);         
+     A = mval.*double(Q<alphatr);
+     save(fullfile(dir1,['TWOSAMPLE_mean_',num2str(alphatr),'fdr.mat']),'A','zonelist')
+ 
+     
 
 elseif isfield(job.c_statcomponent,'c_ANOVAN')
     if isfield(job.c_statcomponent.c_ANOVAN,'b_ANOVAN') %by channel     
@@ -208,15 +155,15 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
 
     AllCOM = [];
     for i=2:size(raw,1)
-        tmp         = load(fullfile(raw{i,1},raw{i,2}),'-mat');      
-        fid         = fopen(fullfile(raw{i,1},raw{i,3}));
+        tmp         = load(fullfile(raw{i,1},raw{i,2}),'-mat'); % Load data    
+        fid         = fopen(fullfile(raw{i,1},raw{i,3}));        %Load channel list
         chlist      = textscan(fid, '%s%s');
         fclose(fid); 
         %find zone list index
         srs         = chlist{1};
         det         = chlist{2};
         idactual    = [];
-        
+        %verify the order is constant with the list export 
         for ichlist = 1:numel(chlist{1})
             id = strmatch([srs{ichlist},' ', det{ichlist}],tmp.zonelist,'exact');
             if ~isempty(id)
@@ -224,6 +171,7 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
             end
         end
         AllCOM = [AllCOM,tmp.A(idactual)];
+        info.zonelist{i-1} = tmp.zonelist;
      end
      
      zonelist = tmp.zonelist(idactual);
@@ -236,11 +184,11 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
         groupedef{i} = ( groupcell(:,i));
     end
     
-    
-    dir1 = job.e_STATCOMPPath{1};
     if ~isdir(fullfile(dir1,'ch'))
         mkdir(fullfile(dir1,'ch'))
     end
+    info.groupedef =  groupedef{i}
+    info.AllCOMP = AllCOM;
     for ich = 1:size(AllCOM,1)
         y = AllCOM(ich,:);          
         [p,tbl,stats,terms] = anovan(y',groupedef,'model','interaction','varnames',name,'display','off' );
@@ -290,8 +238,8 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
         save(fullfile( dir1,['anovan_1-p',label,'.mat']),'A','zonelist'); 
          A = double( Fval(:,idim));
         save(fullfile( dir1,['anovan_F ',label,'.mat']),'A','zonelist'); 
-          A = double(FDR(:,idim)<0.05);
-        save(fullfile( dir1,['anovan_FDRq0.05 ',label,'.mat']),'A','zonelist') ;
+          A = double(FDR(:,idim)<alphatr);
+        save(fullfile( dir1,['anovan_FDRq',num2str(alphatr),label,'.mat']),'A','zonelist') ;
          A = double(1- FDR(:,idim));
         save(fullfile( dir1,['anovan_FDR1-q ',label,'.mat']),'A','zonelist'); 
         for icomp = 1:size(mult,1)
@@ -302,8 +250,8 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
             fileout =fullfile(dir1,['posthoc mdiff ',gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},'.mat']);
             save(fileout,'A','zonelist');
             eval(['ptmp = p',gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},';']);  
-            A = A.*(ptmp<0.05);
-            fileout =fullfile(dir1,['posthoc mdiffp05 ',gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},'.mat']);
+            A = A.*(ptmp<alphatr);
+            fileout =fullfile(dir1,['posthoc mdiffp',num2str(alphatr),gnames{mult(icomp,1)},'_',gnames{mult(icomp,2)},'.mat']);
             save(fileout,'A','zonelist');  
        end
     end 
@@ -341,6 +289,11 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
         plotLst = zone.zone.plotLst{goodzone};
         AllCOM = [AllCOM,nanmax(tmp.A(plotLst))];
      end
+ 
+     info.AllCOMP = AllCOM; 
+     info.ROI =   raw(2:end,4);
+     info.groupedef = raw(2:end,2);
+     info.zone =  raw(2:end,3);
      
      groupcell = raw(2:end, 5:end);
      name = raw(1, 5:end);%conditioni  could be a number or a zone label to identify region if zone ! 
@@ -349,7 +302,6 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
      for i = 1:size(groupcell ,2)
         groupedef{i} = ( groupcell(:,i));
      end
-    dir1 = job.e_STATCOMPPath{1}; 
     for ich = 1:size(AllCOM,1)         
          y = AllCOM(ich,:);         
          [p,tbl,stats,terms] = anovan(y',groupedef,'model','interaction','varnames',name,'display','off' );
@@ -367,11 +319,13 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
 
     end
 end
-try
-    out = {srsfile};
-catch
-    out = 'no dependancy';
+if job.m_statcomponent_saveoption==0
+    save(fullfile(dir1,['info.mat']),'info')
 end
+ disp(['Results saved in: ', dir1])
+
+out = 'no NIRS.mat dependancy';
+
 
 function [fdr, q, pi0, rs] = mafdr(p, varargin)
 %MAFDR estimates false discovery rates (FDR) of multiple-hypothesis testing.

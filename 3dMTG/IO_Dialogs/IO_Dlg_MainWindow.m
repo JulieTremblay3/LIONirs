@@ -1336,7 +1336,7 @@ function oInterDlgComm = Refresh_All( oDispOpt, oInterDlgComm, oPrjData )
     Draw_CoordSysAxes(            oDispOpt, oInterDlgComm );
     Draw_DigFiducials(            oDispOpt, oInterDlgComm, oHelmet );
     Draw_HelmetRef(               oDispOpt, oInterDlgComm, oHelmet  );
-    Draw_Lights(                  oDispOpt );
+   
     Draw_MRIFiducials(            oDispOpt, oInterDlgComm, oMRI );
     Draw_MRISurface(              oDispOpt, oInterDlgComm, oMRI );
     Draw_HelmetHoles(             oDispOpt, oInterDlgComm, oHelmet );
@@ -1350,7 +1350,7 @@ function oInterDlgComm = Refresh_All( oDispOpt, oInterDlgComm, oPrjData )
     Draw_MuxChannels(             oDispOpt, oInterDlgComm, oHelmet );
     Draw_ROIMarkers(              oDispOpt, oInterDlgComm, oMRI );
     Draw_DigTestMarkers(          oDispOpt, oInterDlgComm, oHelmet );
- 
+    Draw_Lights(                  oDispOpt );
     
 %Redessiner seulement les elements qui ont un rapport avec la position de
 %la camera

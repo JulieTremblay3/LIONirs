@@ -938,7 +938,12 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                     %d'un jump au début fin, Laura l'a modifie par
                     %downsample - environ le meme fonctionnement - voir la
                     %photo Guide DownsampleEEgdata dans GITHUB student
-                     tmpr=downsample( tmp , q);
+                    
+                    %not always integer factor then resample is be back as
+                    %default option it crash with downsample %Julie
+                  
+                    tmpr=resample( tmp , p, q);
+              
                     
                     % we cut aux to the data initial size
                     if numel(tmpr)<numel(tHRF)
@@ -971,6 +976,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
             for ilist = 1:numel(tmpGLM.AUX.label)
                 if numel(strfind(tmpGLM.AUX.label{ilist},Regressorlist{iReg})) %strcmp(tmpGLM.AUX.label{ilist},Regressorlist{iReg})
                     idreg = [idreg,ilist];
+                    disp([Regressorlist{iReg},' regressor find'])
                 end
             end
             
@@ -1086,7 +1092,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                     b = zeros(size(X,2),1);
                     beta(:,idch) = 0;
                     bstd(:,idch) = 0;
-                    R2(:,idch) = 0;
+                    R2(:,idch) = 0; 
                 else
                     [b,bint,r,rint,stats]=  regress(y,X);
                     beta(:,idch) = b;
