@@ -123,6 +123,7 @@ function IO_DisplayHelmet(PrjStruct,PMI,DispParameter)
     if DispParameter.viewskin & DispParameter.reset | DispParameter.viewcortex & DispParameter.reset | DispParameter.viewatlas & DispParameter.reset
         displayMRI(oMRI,DispParameter);
     end
+
 %     up = get(DispParameter.axes1,'cameraupvector')
 %     Ry = makehgtform('yrotate',pi/2);
 %     up(4) = 1
@@ -289,6 +290,7 @@ DispParameter.viewd1chcolor = 1;
             end   
         end 
   end   
+
 end 
 
 function display_holescortex(DispHelm, CameraPosition,DispParameter)

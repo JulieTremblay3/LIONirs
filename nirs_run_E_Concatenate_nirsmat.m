@@ -199,7 +199,7 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
                     SDdetL = StrBoxy2SDDet(DetL{i});
                      tmp = SrsL{i};
                      SDsrsL =str2num(tmp(2:end));
-                case 'NIRS FILE HOMER'
+                case 'nirs'
                      SDdetL = StrBoxy2SDDet(DetL{i});
                      tmp = SrsL{i};
                      SDsrsL =str2num(tmp(2:end));

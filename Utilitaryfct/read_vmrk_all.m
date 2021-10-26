@@ -6,6 +6,9 @@ function [label,ind_dur_ch] = read_vmrk_all(varargin)
 
 file = varargin{1};
 fid = fopen(file,'r');
+if fid==-1
+    disp(['Verify file: ',file, ' could not be open.'])
+end
 label = [];
 ind_dur_ch = [];
 ind = [];
@@ -15,7 +18,10 @@ N=1;
 i=4;
 labellist = [];
 %Get the markers infos
+
 fline = fgetl(fid);
+
+    
 while ischar(fline)
     fline = fgetl(fid);
     if ischar(fline) && ~strcmp(fline,'');

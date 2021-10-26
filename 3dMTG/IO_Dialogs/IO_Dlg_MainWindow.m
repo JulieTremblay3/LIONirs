@@ -125,8 +125,9 @@ function MenuFileExport_Callback(hObject, eventdata, handles)
 % --------------------------------------------------------------------
 function MenuFilePrint_Callback(hObject, eventdata, handles)
     %printpreview(handles.figure_MainWindow);
-    print -depsc2 -painters -r300 'tmpPrint.eps';
-    system(sprintf( '%s\\%s', pwd, 'tmpPrint.eps' ));
+    saveas(gcf,'test.tif','tif')
+    %print -depsc2 -painters -r300 'tmpPrint.eps';
+    %system(sprintf( '%s\\%s', pwd, 'tmpPrint.eps' ));
 
 % --------------------------------------------------------------------
 function MenuFileExit_Callback(hObject, eventdata, handles)
@@ -368,7 +369,6 @@ function MenuMontageParams_Callback(hObject, eventdata, handles)
 function MenuHelpIOMtgHelp_Callback(hObject, eventdata, handles)
     [filepath, ~, ~] = fileparts(mfilename('fullpath')); % Get the path absolute path of the IOMtg main window and only keep filepath.
     system(fullfile(filepath, '..', 'IO_Help', 'Help.doc' )); % Construct the absolute path to the help document and open it.
-
 % --------------------------------------------------------------------
 function MenuHelpAboutIOMtg_Callback(hObject, eventdata, handles)
     iconData = zeros(5,5);
@@ -435,8 +435,9 @@ function toolbar_Export_Callback(hObject, eventdata, handles)
 
 % --------------------------------------------------------------------
 function toolbar_Print_Callback(hObject, eventdata, handles)    
-    print -depsc2 -painters -r300 'tmpPrint.eps';
-    system(sprintf( '%s\\%s', pwd, 'tmpPrint.eps' ));
+    saveas(gcf,'test.tif','tif')
+%     print -depsc2 -painters -r300 'tmpPrint.eps';
+%     system(sprintf( '%s\\%s', pwd, 'tmpPrint.eps' ));
     
 % --------------------------------------------------------------------
 function toolbar_CamOrbit_Callback(hObject, eventdata, handles)
@@ -1446,14 +1447,14 @@ function Update_ItemInformationPanel( oInterDlgComm, oHelmet,oMRI)
         
         h = findobj('Tag','static1_ItemInfo');       
         set(  h, 'String', [  {sprintf( '%s  %s x,y,z', 'Item Name:',strIDH )};...   
-             {sprintf( '%s%0.3f,%0.3f,%0.3f', 'Coord: ',vHoles(p).Coord.x,vHoles(p).Coord.y,vHoles(p).Coord.z)};...
-             {sprintf( '%s%0.3f,%0.3f,%0.3f', 'Norm : ',vHoles(p).Normal.x,vHoles(p).Normal.y,vHoles(p).Normal.z)};... 
-             {sprintf( '%s%0.3f,%0.3f,%0.3f', 'Skin : ', SkinFit.x, SkinFit.y, SkinFit.z)};... 
-             {sprintf( '%s%0.3f,%0.3f,%0.3f', 'Tai :', TalSkin.x,TalSkin.y,TalSkin.z)};...
-             {sprintf( '%s%0.3f', 'Depth :', vHoles(p).SkinDepth )};...            
-             {sprintf( '%s%0.3f,%0.3f,%0.3f', 'Cortex : ',CortexFit.x,CortexFit.y,CortexFit.z)};...
-             {sprintf( '%s%0.3f,%0.3f,%0.3f', 'Tai :', TalCortex.x,TalCortex.y,TalCortex.z)};...
-             {sprintf( '%s%0.3f', 'Depth :', vHoles(p).CortexDepth )}]);%;...
+             {sprintf( '%s%0.3f,%0.3f,%0.3f', 'Coord: ',vHoles(p).Coord.x,vHoles(p).Coord.y,vHoles(p).Coord.z)}]);%;...;...
+%              {sprintf( '%s%0.3f,%0.3f,%0.3f', 'Norm : ',vHoles(p).Normal.x,vHoles(p).Normal.y,vHoles(p).Normal.z)};... 
+%              {sprintf( '%s%0.3f,%0.3f,%0.3f', 'Skin : ', SkinFit.x, SkinFit.y, SkinFit.z)};... 
+%              {sprintf( '%s%0.3f,%0.3f,%0.3f', 'Tai :', TalSkin.x,TalSkin.y,TalSkin.z)};...
+%              {sprintf( '%s%0.3f', 'Depth :', vHoles(p).SkinDepth )};...            
+%              {sprintf( '%s%0.3f,%0.3f,%0.3f', 'Cortex : ',CortexFit.x,CortexFit.y,CortexFit.z)};...
+%              {sprintf( '%s%0.3f,%0.3f,%0.3f', 'Tai :', TalCortex.x,TalCortex.y,TalCortex.z)};...
+%              {sprintf( '%s%0.3f', 'Depth :', vHoles(p).CortexDepth )}
   
 %              {sprintf( '%s%0.3f,%0.3f,%0.3f', 'IRM : ',matFidsIRM(3,1),matFidsIRM(3,2),matFidsIRM(3,3))};...
 %              {sprintf( '%s%0.3f', [vHoles(p).Label ' Distance NAS :'] ,dist)};...
@@ -1705,7 +1706,7 @@ function btn_right_view_Callback(hObject, eventdata, handles)
 % hObject    handle to btn_Autoattribute_srs_ace_right_view (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-axes(handles.axes_Helmet)
+axes(handles.axes_Helmet);
 set(handles.axes_Helmet,'CameraTarget',[0,0,0]);
 set(handles.axes_Helmet,'CameraPosition',[0,-3,0]);
 set(handles.axes_Helmet,'CameraUpVector',[0,0,1]);
@@ -1755,10 +1756,14 @@ alpha = str2num(get(handles.edit_alpha,'string'))*pi/180;
 delta = str2num(get(handles.edit_delta,'string'))/1000;
 oMRI = get_MRI_Data(  handles.m_oProjectData );
 dimvoxel = 0.001;
-movehole = get(handles.radio_moveHole,'value')
+movehole = get(handles.radio_moveHole,'value');
 Helm = get_Helmet(handles.m_oProjectData );
 sHelmetAxeDisp = get_HelmetAxeDisp( handles.m_oInterDlgComm );
 p = sHelmetAxeDisp.pIdentification;
+if p==0 & movehole==1
+    disp('First, select a hole using ''inf'' button');
+    return
+end
 vHoles = get_vHoles(Helm);
 T = get_matTransform(oMRI);
 if type == 1;
@@ -1853,14 +1858,14 @@ end
 
 %Helm = Fit_Helmet_OnMRISegmentations( Helm, oMRI, 1, 1, false );
     if movehole
-        Helm = set_vHoles(Helm,vHoles)
+        Helm = set_vHoles(Helm,vHoles);
     else
         mat_transform = T * mRpa';  %ini tested
         oMRI = set_matTransform(oMRI,mat_transform);
          if type==1|type==2|type==3|type==4|type==5|type==6|type==7|type==8|type==9|type==10|type==11|type==12|type==13
             matTransformManual = get_matTransformManual(oMRI);
             matTransformManual = matTransformManual*mMan;
-            oMRI = set_matTransformManual(oMRI, matTransformManual )
+            oMRI = set_matTransformManual(oMRI, matTransformManual );
          end
 %         Helm = Fit_Helmet_OnMRISegmentations_TF( Helm, oMRI, 1, 1, false,mat_transform );
 %         %Apply same transform on fiducial also (as the fit on skin export

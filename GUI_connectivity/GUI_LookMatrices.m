@@ -236,7 +236,15 @@ for igroupe = 1:max(groupeall)
                        case 'NIRx'                          
                            strDet = SDDet2strboxy(ML(ich,2));
                            strSrs = SDPairs2strboxy(ML(ich,1));
-                           idch = strmatch([strDet, ' ',strSrs ],List,'exact');                                                            
+                           idch = strmatch([strDet, ' ',strSrs ],List,'exact');
+                        case 'snirf'                          
+                            strDet = SDDet2strboxy(ML(ich,2));
+                            strSrs = SDPairs2strboxy(ML(ich,1));
+                            idch = strmatch([strDet, ' ',strSrs ],List,'exact');
+                        case 'nirs'                          
+                            strDet = SDDet2strboxy(ML(ich,2));
+                            strSrs = SDPairs2strboxy(ML(ich,1));
+                           idch = strmatch([strDet, ' ',strSrs ],List,'exact');           
                        otherwise                            
                            strDet = SDDet2strboxy_ISS(ML(ich,2));
                            strSrs = SDPairs2strboxy_ISS(ML(ich,1));
@@ -264,6 +272,14 @@ for igroupe = 1:max(groupeall)
                               strDet = SDDet2strboxy(ML(ich,2));
                             strSrs = SDPairs2strboxy(ML(ich,1));
                             idch = strmatch([strDet, ' ',strSrs ],List,'exact');  
+                       case 'snirf'                          
+                            strDet = SDDet2strboxy(ML(ich,2));
+                            strSrs = SDPairs2strboxy(ML(ich,1));
+                            idch = strmatch([strDet, ' ',strSrs ],List,'exact');
+                        case 'nirs'                          
+                            strDet = SDDet2strboxy(ML(ich,2));
+                            strSrs = SDPairs2strboxy(ML(ich,1));
+                           idch = strmatch([strDet, ' ',strSrs ],List,'exact');        
                         otherwise
                            strDet = SDDet2strboxy_ISS(ML(ich,2));
                             strSrs = SDPairs2strboxy_ISS(ML(ich,1));

@@ -17,24 +17,23 @@ function Draw_MRISurface( oDispOpt, oInterDlgComm, oMRI )
         if isempty(vColor)
             return
         end
+        
         if nb_color == 0
             colormap([88/256 88/256 88/256]);
         else
             mapcolorcube = colorcube(nb_color*2);
             map = mapcolorcube(1:nb_color,:); 
-            map(18,:)=[0,64/256,0];
-            map(19,:)=[0,0,1];
-            map(20,:)=[1,0,0];
+%             map(18,:)=[0,64/256,0];
+%             map(19,:)=[0,0,1];
+%             map(20,:)=[1,0,0];
             caxis([0,nb_color]);
         end
-      if ~isempty(atlas_zone)
-          map = lines(100) %ones(nb_color,3)*(159/256); 
+      if ~isempty(atlas_zone) %grey background and color for listed zone
+          map = ones(nb_color,3)*(159/256);         
           nb_enumatlas = numel(atlas_zone);
           mixcolor = lines(nb_enumatlas); 
-          for ind_map = 1:numel(atlas_zone)
+          for ind_map = 1:numel(atlas_zone)         
               map(atlas_zone(ind_map)+1,:) = mixcolor(ind_map,:);
-%               if ind_map == 17
-%                    map(atlas_zone(ind_map)+1,:)= 
           end
           colormap(map);      
       else
@@ -132,7 +131,5 @@ function Draw_MRISurface( oDispOpt, oInterDlgComm, oMRI )
                                      'DiffuseStrength', 0.5, ...
                                      'SpecularStrength', 0.5, ...
                                      'AmbientStrength', 0.5);                                
-        end
-               colormap([255/256 255/256 179/256]);
-
+        end             
 end

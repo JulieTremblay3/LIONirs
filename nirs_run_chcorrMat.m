@@ -52,7 +52,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                     SDdetL = StrBoxy2SDDet(DetL{i});
                     tmp = SrsL{i};
                     SDsrsL =str2num(tmp(2:end));
-                case 'NIRS FILE HOMER'
+                case 'nirs'
                     SDdetL = StrBoxy2SDDet(DetL{i});
                     tmp = SrsL{i};
                     SDsrsL =str2num(tmp(2:end));

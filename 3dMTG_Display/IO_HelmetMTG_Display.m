@@ -134,7 +134,7 @@ dcm_obj = datacursormode(handles.IO_HelmetMTG);
 set(dcm_obj,'UpdateFcn',@myupdatefcn)
 set(dcm_obj,'SnapToDataVertex','on')
 set(dcm_obj,'DisplayStyle','window')
-
+ 
 try %Vérifier la validiter du casque de données
     PrjData_file = PMI{currentsub}.prj_name;
     set(handles.IO_HelmetMTG,'name',['IO_Helmet  : ' , PrjData_file])
@@ -156,6 +156,7 @@ setappdata(handles.IO_HelmetMTG,'PrjStruct',PrjStruct);
 guidata(handles.IO_HelmetMTG, handles);
 
 cameratoolbar(handles.IO_HelmetMTG,'Show','SetMode','nomode');
+
 resetview(handles);
 
 p = mfilename('fullpath');
@@ -174,6 +175,7 @@ strBmp =[path,'Pause.jpg'];
 matpix = imread( strBmp,'jpg' );
 set(handles.btn_stop, 'CData', matpix );
 colormap jet;
+
 
 
 % --- Outputs from this function are returned to the command line.

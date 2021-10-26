@@ -29,7 +29,7 @@ function  [ listHBOch, listHBRch, listnameHbO, listnameHbR, zonelist]= findchinC
                 SDdetL = StrBoxy2SDDet(DetL{i});
                  tmp = SrsL{i};
                  SDsrsL = str2num(tmp(2:end));
-            elseif strcmp(Devicename,'NIRS FILE HOMER')
+            elseif strcmp(Devicename,'nirs')
                  SDdetL = StrBoxy2SDDet(DetL{i});
                  tmp = SrsL{i};
                  SDsrsL = str2num(tmp(2:end));

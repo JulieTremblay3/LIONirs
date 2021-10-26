@@ -323,7 +323,7 @@ for filenb = 1:size(job.NIRSmat,1)
                             NIRS.Dt.Audio.pp(moduleAudio+1).p{ifile} = NIRS.Dt.Audio.pp(moduleAudio).p{f};
                             NIRS.Dt.Audio.pp(moduleAudio+1).sync_timesec{ifile} = (indstim_EEG(istim)-pretimeEEG)*1/fsEEG + offset;
                             catch
-                                msgbox('Video segmentation could not be done using EEG trigger')
+                                msgbox('Audio segmentation could not be done using EEG trigger')
                                 return
                             end
                      
@@ -368,7 +368,7 @@ for filenb = 1:size(job.NIRSmat,1)
                 end
                 catch
                        % msgbox('AUX could not be segment')
-                       fprintf('AUX could not be segment');
+                       fprintf('AUX could not be segmented');
                  end
                 %dnorm=log(dnorm)
                 %WRITE THE RESEGMENTATION

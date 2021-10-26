@@ -23,9 +23,13 @@ load(job.NIRSmat{1})     % Matrice NIRS
     for i = 1:numel(NIRS.Dt.fir.pp(1,Sessionid).p)
        [pathstr, name, ext] = fileparts(NIRS.Dt.fir.pp(1,Sessionid).p{i});
        d = fopen_NIR([pathstr,filesep,name,ext],nbch);       
-       outfile= [pathstr,filesep,name,'.snirf'];
-       
-       
+        if ~isdir(job.f_writeNIRSdir{1})
+           mkdir(job.f_writeNIRSdir{1})
+       end
+       if ~isdir([job.f_writeNIRSdir{1},filesep,name])
+           mkdir([job.f_writeNIRSdir{1},filesep,name])
+       end       
+        outfile= [job.f_writeNIRSdir{1},filesep,name,filesep,name,'.snirf'];
         d = d'; %data time point x channels
 
             SD = [];

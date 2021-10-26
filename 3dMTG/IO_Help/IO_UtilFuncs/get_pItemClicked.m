@@ -16,10 +16,7 @@ function pClosest = get_pItemClicked( oInterDlgComm, oHelmet, CurrentLine )
     pClosest = 0;
 
     for( p=1:numel(vHoles))
-        if p==79
-            1
-        end
-        if( vHoles(p).Type == 400 )
+         if( vHoles(p).Type == 400 )
             %1)Projection orthogonale
             %
             %               ->          ->

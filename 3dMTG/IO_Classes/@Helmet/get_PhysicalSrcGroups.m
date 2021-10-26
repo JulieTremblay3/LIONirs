@@ -91,4 +91,3 @@ function [PhysicalSrcGroupSyncNo,PhysicalSrcCombinations] = get_PhysicalSrcGroup
             
         end
     end
-    1

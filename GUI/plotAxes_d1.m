@@ -784,8 +784,16 @@ if isfield(handles,'selected_trig')
             if trig_ind <=numel(PMI{currentsub}.data(cf).HRF.tHRF)
                trig_ind = PMI{currentsub}.data(cf).HRF.tHRF(trig_ind);
                if isfield(handles.NIRS.Dt.fir,['auxtrig',num2str(trig_val)]) 
-                   colornew = eval(['handles.NIRS.Dt.fir.','auxtrig',num2str(trig_val),'.color']);
-                   labelnew= eval(['handles.NIRS.Dt.fir.','auxtrig',num2str(trig_val),'.label']);                  
+                   if isfield(eval(['handles.NIRS.Dt.fir.','auxtrig',num2str(trig_val)]),'color')                       
+                        colornew = eval(['handles.NIRS.Dt.fir.','auxtrig',num2str(trig_val),'.color']);
+                   else
+                       colornew = [0,1,0];
+                   end
+                   if isfield(eval(['handles.NIRS.Dt.fir.','auxtrig',num2str(trig_val)]),'.label')
+                        labelnew= eval(['handles.NIRS.Dt.fir.','auxtrig',num2str(trig_val),'.label']);       
+                   else 
+                       labelnew=  num2str(selected_trig(i,1));
+                   end
                    h = plot([trig_ind, trig_ind],[yli(1), yli(2)],'displayname',labelnew, 'color',colornew,'uicontextmenu',handles.Context_removetrigger);   
                    text(trig_ind,yli(2),  labelnew)
                else

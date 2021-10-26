@@ -13,7 +13,7 @@ function out = nirs_run_readSNIRF(job)
 % function has the 1 argument switched to 2).
 
 %PARAMETRE D'AQUISITION
-NIRS.Cf.dev.n = 'SNIRF FILE';
+NIRS.Cf.dev.n = 'snirf';
 
 NIRS.Cf.H.n = 'SainteJustine prj'
 

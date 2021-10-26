@@ -6,7 +6,7 @@ function out = nirs_run_readhomerfile(job)
 %fileOut: .nir, .mat, .vhdr, .vmkr
 
 %PARAMETRE D'AQUISITION 
-NIRS.Cf.dev.n = 'nirs FILE HOMER';
+NIRS.Cf.dev.n = 'nirs';
 
 
 

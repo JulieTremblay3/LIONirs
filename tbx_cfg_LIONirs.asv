@@ -311,7 +311,7 @@ STD_amp.name    = 'STD';
 STD_amp.strtype = 'r';       
 STD_amp.num     = [1 1];     
 STD_amp.val     = {0.1};
-STD_amp.help    = {'Standard deviation threshold value.'};
+STD_amp.help    = {'Reject channels with higher STD variation higher than STD amplitude (in normalized intensity).'};
 
 
 STD_menu        = cfg_menu;
@@ -338,17 +338,17 @@ DC_enable.help      = {'Remove channels with low DC intensity.'};
 
 DC_amp          = cfg_entry;
 DC_amp.tag      = 'DC_amp';
-DC_amp.name     = 'Amplitude (DC';
+DC_amp.name     = 'DC amplitude';
 DC_amp.strtype  = 'r';       
 DC_amp.num      = [1 1];     
 DC_amp.val      = {100};
-DC_amp.help     = {'Remove channel with light intensity lower than a value. DC refer to light intensity level in contrast to AC or Phase measure also available in ISS sytem'}';
+DC_amp.help     = {'Remove channel with DC intensity lower than a DC amplitude value.'}';
 
 DC_amp_choice         = cfg_branch;
 DC_amp_choice.tag     = 'DC_amp_choice';
-DC_amp_choice.name    = 'Light intensity (DC) criteria';
+DC_amp_choice.name    = 'DC intensity criteria';
 DC_amp_choice.val     = {DC_enable DC_amp};
-DC_amp_choice.help    = {'Defines a minimal light intensity to keep the data.'};
+DC_amp_choice.help    = {'Criteria to reject noisy channels based on DC amplitude.'};
 
 
 

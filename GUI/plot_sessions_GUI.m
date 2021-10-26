@@ -10407,12 +10407,20 @@ function context_listbox_Component_rename_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 label = get(handles.listbox_Component,'string');
 id = get(handles.listbox_Component,'value');
-
+ 
 prompt = {'New name'};
 name = 'Rename Component';
 numlines = 1;
 defaultanswer = {''};
 answer = inputdlg(prompt,name,numlines,defaultanswer);
+
+ [pathstr, name, ext] = fileparts(handles.NIRSpath{1});
+ load(fullfile(pathstr,'SelectedFactors.mat'));
+idcomp = get(handles.listbox_CorrectionDecomposition,'value');
+PARCOMP(idcomp).label = answer{1};
+ save(fullfile(pathstr,'SelectedFactors.mat'),'PARCOMP');
+
+
 
 label(id) = answer;
 set(handles.listbox_Component, 'string', label);
@@ -10491,6 +10499,12 @@ name = 'Rename Component';
 numlines = 1;
 defaultanswer = {''};
 answer = inputdlg(prompt,name,numlines,defaultanswer);
+
+ [pathstr, name, ext] = fileparts(handles.NIRSpath{1});
+ load(fullfile(pathstr,'CorrectionApply.mat'));
+ idcomp = get(handles.listbox_CorrectionDecomposition,'value');
+ PARCORR(idcomp).label = answer{1};
+save(fullfile(pathstr,'CorrectionApply.mat'),'PARCORR')
 
 label(id) = answer;
 set(handles.listbox_CorrectionDecomposition, 'string', label);
@@ -10828,7 +10842,12 @@ for j = 1:ntopo
         case 'NIRx'                          
             strDet = SDDet2strboxy(ML(ichannel,2));
             strSrs = SDPairs2strboxy(ML(ichannel,1));
-                                                                 
+        case 'snirf'                          
+            strDet = SDDet2strboxy(ML(ichannel,2));
+            strSrs = SDPairs2strboxy(ML(ichannel,1));
+        case 'nirs'                          
+            strDet = SDDet2strboxy(ML(ichannel,2));
+            strSrs = SDPairs2strboxy(ML(ichannel,1));                                                         
         otherwise                            
             strDet = SDDet2strboxy_ISS(ML(ichannel,2));
             strSrs = SDPairs2strboxy_ISS(ML(ichannel,1));
@@ -10886,7 +10905,12 @@ for j = 1:ntopo
         case 'NIRx'                          
             strDet = SDDet2strboxy(ML(ichannel,2));
             strSrs = SDPairs2strboxy(ML(ichannel,1));
-                                                                 
+         case 'snirf'                          
+            strDet = SDDet2strboxy(ML(ichannel,2));
+            strSrs = SDPairs2strboxy(ML(ichannel,1));
+        case 'nirs'                          
+            strDet = SDDet2strboxy(ML(ichannel,2));
+            strSrs = SDPairs2strboxy(ML(ichannel,1));                                                                
         otherwise                            
             strDet = SDDet2strboxy_ISS(ML(ichannel,2));
             strSrs = SDPairs2strboxy_ISS(ML(ichannel,1));
