@@ -5,7 +5,7 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
     try 
          pca(rand(10)); %is pca function is install ?
     catch
-         disp('Uncomplete Extract PCA, Please Install Matlab Statistics and Machine Learning Toolbox')
+         disp('Incomplete Extract PCA, Please Install Statistics and Machine Learning Toolbox')
          out.NIRSmat = job.c_extractcomponent.b_extractcomponent_PCA.NIRSmat;
          return
     end
@@ -852,7 +852,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
     
 elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
     try
-       regress(ones(10,1),ones(10,1));
+       regress(rand(10,1),rand(10,1));
     catch
         disp('Incomplete Extract GLM, Please Install Statistics and Machine Learning Toolbox or regress function')
         return

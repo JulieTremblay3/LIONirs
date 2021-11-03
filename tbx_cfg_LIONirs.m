@@ -326,7 +326,7 @@ STD_amp_choice         = cfg_branch;
 STD_amp_choice.tag     = 'STD_amp_choice';
 STD_amp_choice.name    = 'Standard deviation (STD) criteria';
 STD_amp_choice.val     = {STD_enable STD_amp,STD_menu};
-STD_amp_choice.help    = {'Defines STD minimal to keep the data. Channels having a higher STD will be excluded. Noise causes abnormally high variation in the data for a specific channel. '};
+STD_amp_choice.help    = {'Defines STD minimal to avoid channels measuring an abnormally noisy and high variation signal in the data. High STD channels will be marked as rejected. '};
 
 DC_enable           = cfg_menu;
 DC_enable.tag       = 'DC_enable';
@@ -348,7 +348,7 @@ DC_amp_choice         = cfg_branch;
 DC_amp_choice.tag     = 'DC_amp_choice';
 DC_amp_choice.name    = 'Light intensity (DC) criteria';
 DC_amp_choice.val     = {DC_enable DC_amp};
-DC_amp_choice.help    = {'Defines a minimal light intensity to keep the data.'};
+DC_amp_choice.help    = {'Defines a minimal light intensity to ensure good signal detection. Low light intensity channels will be marked as rejected.'};
 
 
 

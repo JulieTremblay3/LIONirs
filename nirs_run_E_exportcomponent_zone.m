@@ -88,6 +88,7 @@ for filenb=1:size(NIRSDtp,1)
                      alllabel = [alllabel,{PARCOMP(icomp).label}];                  
                      allbHbO = [allbHbO,A];
                      save(fullfile(pathoutlist,['TopoHbO',PARCOMP(icomp).label,'.mat']),'A' ,'zonelist','srsfile' );
+                     disp(['Create export: ', fullfile(pathoutlist,['TopoHbO',PARCOMP(icomp).label,'.mat'])])
                      clear A
                      %HBR parafac
                      topo=  PARCOMP(icomp).FacB(:,k) * PARCOMP(icomp).FacC(2,k);
@@ -97,6 +98,7 @@ for filenb=1:size(NIRSDtp,1)
                      alllabel = [alllabel,{PARCOMP(icomp).label}];                  
                      allbHbR = [allbHbR,A];    
                      save(fullfile(pathoutlist,['TopoHbR',PARCOMP(icomp).label,'.mat']),'A','zonelist','srsfile' );
+                     disp(['Create export: ', fullfile(pathoutlist,['TopoHbR',PARCOMP(icomp).label,'.mat'])])
                      clear A
                     alllabel = [alllabel,{PARCOMP(icomp).label}];
                     ncomp = ncomp +1
@@ -135,6 +137,7 @@ for filenb=1:size(NIRSDtp,1)
                       alllabel = [alllabel,{PARCOMP(icomp).label}];                  
                       allbHbO = [allbHbO,A];
                       save(fullfile(pathoutlist,['TopoHbO',PARCOMP(icomp).label,'.mat']),'A' ,'zonelist','srsfile' );
+                      disp(['Create export: ', fullfile(pathoutlist,['TopoHbO',PARCOMP(icomp).label,'.mat']))
                       clear A
                    
                       A= nan(size(listHBRch,1),1);
@@ -142,6 +145,7 @@ for filenb=1:size(NIRSDtp,1)
                       A(idok,1)=topo(listHBRch(idok));               
                       allbHbR = [allbHbR,A];
                       save(fullfile(pathoutlist,['TopoHbR',PARCOMP(icomp).label,'.mat']),'A','zonelist','srsfile' );
+                      disp(['Create export: ', fullfile(pathoutlist,['TopoHbR',PARCOMP(icomp).label,'.mat']))
                       clear A            
                       ncomp = ncomp +1;
               end             
@@ -149,7 +153,6 @@ for filenb=1:size(NIRSDtp,1)
         end
     end
 end 
-1
   
     rawxls = [labelall',  [zonelabel';   num2cell( allbHbO)']]; 
     try

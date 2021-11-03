@@ -26,8 +26,14 @@ too_small_step_dur  =2;
 %Test 4 nombre de canaux minimaux à avoir un artefact en même temps
 minpourcentage = job.b_minpourcentagebad.minpourcentagebad;
 option_minpourcentage = job.b_minpourcentagebad.m_minpourcentagebad;
-
-   
+%check 
+try
+    zscore(rand(10))
+catch
+    disp('Uncomplete Artifact Detection, Please install the Matlab Statistics and Machine Learning Toolbox™')
+    out.NIRSmat = job.NIRSmat;  
+    return
+end
    h=figure;
    set(h,'visible','off');
    fprintf('%s\n','File processed');
@@ -129,6 +135,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                        stepmat_temp = stepmat(Idx,:); %Remember already found steps to avoid passing through correlation again              
                     if NIRS.Cf.H.C.ok(Idx, f)==1        
                             mean_diff = diff(meantot(Idx,:)); 
+                              
                            %  mean_diffall(:,Idx) =mean_diff;  
                             if 0 %use zscore whole recording
                             figure;

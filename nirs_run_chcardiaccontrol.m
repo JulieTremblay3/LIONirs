@@ -103,10 +103,17 @@ pourcentagetr = job.i_minch_cardiac/100;
                 for ifr=startF:stopF%freq
 %                     nmean = mean(power(ifr,ich,:)))
 %                     nstr = std(power(ifr,ich,:)))
+                    try
                     list =find(abs(zscore(power(ifr,ich,:)))>outliertreshold  );
+                    catch
+                        disp('Uncomplete Cardiac Detection, Please install the Matlab Statistics and Machine Learning Toolbox™')
+                        out.NIRSmat = job.NIRSmat;  
+                        return
+                    end
                     if ~isempty(list)
                         removetrial(list)=1;
                     end
+
                 end
                 idbad = find(removetrial);
                 yall(startF:stopF,ich, idbad)=nan;

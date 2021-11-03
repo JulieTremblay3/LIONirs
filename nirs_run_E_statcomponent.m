@@ -4,6 +4,14 @@ alphatr = job.e_statcomponent_alpha;
  if ~isdir(dir1)
      mkdir(dir1);
  end
+try
+    ttest(ones(20,1),zeros(20,1))   
+catch
+         disp('Uncomplete Stats components, Please Install Matlab Statistics and Machine Learning Toolbox')
+         return
+end
+     
+ 
 if isfield(job.c_statcomponent,'b_TtestOneSample')
     AllC = [];
     for i=1:numel(job.c_statcomponent.b_TtestOneSample.f_component)
@@ -21,8 +29,8 @@ if isfield(job.c_statcomponent,'b_TtestOneSample')
                 info.tail = 'left';
             elseif job.c_statcomponent.b_TtestOneSample.m_TtestOneSample == 3 ;
                 info.tail = 'right';
-            end
-            [h,p,ci,stats] = ttest(AllC(ich,:),0,'tail',info.tail); %Use from Matlab Statistics and Machine Learning Toolbox™
+            end      
+            [h,p,ci,stats] = ttest(AllC(ich,:),0,'tail',info.tail); %Use from Matlab Statistics and Machine Learning Toolbox™  
             df(ich) = stats.df;
             tval(ich) = stats.tstat;
             pval(ich)= p;        
