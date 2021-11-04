@@ -38,9 +38,9 @@ dirout = job.output_path ;
     end
     
 if isfield(job.c_createImportProjectSnirf,'b_createProject')
-    LoadedStruct = Createproject_fromsnirf(job.inputrawhomer{1})
+    LoadedStruct = Createproject_fromsnirf(job.inputrawhomer{1});
     SaveStruct = Create_PrjStruct( LoadedStruct );
-    [filepath,name,ext] =fileparts(job.inputrawhomer{1})
+    [filepath,name,ext] =fileparts(job.inputrawhomer{1});
     save(fullfile(dirout,[name,'.prj']), 'SaveStruct');
     prjfile = fullfile(dirout,[name,'.prj'])
 elseif isfield(job.c_createImportProjectSnirf,'b_importProject')
@@ -97,7 +97,7 @@ NIRS.Cf.H.prj = prjfile;
 fprintf('%s\n','File processed');
 for Idx_File=1:numel(job.inputrawhomer)
      [dir1,fil1,ext1] = fileparts(job.inputrawhomer{Idx_File});
-  
+     disp(['Read file: ' job.inputrawhomer{Idx_File}])
      
      NIRS.Dt.s.p = [dir1,'/'];%RAW NIRS PATH
      fileOut_nir = fullfile(dirout ,[fil1,'.nir']);
@@ -160,7 +160,7 @@ for Idx_File=1:numel(job.inputrawhomer)
    if isempty(aux5)
            aux5  =[1 1]; %at least have one trig at the begining of the file
    end
-   NIRS.Dt.fir.aux5{1} = aux5
+   NIRS.Dt.fir.aux5{1} = aux5;
     NIRS.Dt.fir.rons = [];     
 %     if isfield(DATA,'aux')
 %         if ~isempty(DATA.aux)        

@@ -37,9 +37,9 @@ for ifile =1:numel(rDtp)
     for itrig = 1:numel(trigtofind) %multiple trig support 
        id=  find(sum(aux5(:,1)==trigtofind(itrig),2));
        if ~isempty(id) 
-        onset =[onset;aux5(id,2).*1./fs];
-        dur = [dur;repmat(job.c_createAUXauto.b_HRFtriggeronset.e_HRFduration,numel(onset),1)] ;
-        weight =[weight;repmat(1,numel(onset),1)] ;
+        onset =[onset,aux5(id,2).*1./fs];
+        dur = repmat(job.c_createAUXauto.b_HRFtriggeronset.e_HRFduration,numel(onset),1) ;
+        weight =repmat(1,numel(onset),1) ;
        end
     end
     eventV =zeros(size(EEG.data,1),1);  
