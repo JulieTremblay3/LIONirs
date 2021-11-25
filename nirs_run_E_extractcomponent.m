@@ -851,12 +851,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
     
     
 elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
-    try
-       regress(ones(10,1),ones(10,1));
-    catch
-        disp('Incomplete Extract GLM, Please Install Statistics and Machine Learning Toolbox or regress function')
-        return
-    end
+ 
     [~,~,ext] =fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
     if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
         [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
@@ -898,6 +893,15 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
     catch
         msgbox(['Please verify the GLM extract xls file : ', job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1},...
             ' have the following column information : NIRS.mat folder, File, tStart, tStop, label and Xn regressors'])
+    end
+    
+    try
+       regress(ones(10,1),ones(10,1));
+    catch
+        disp('Uncomplete Extract GLM, Please Install Matlab Statistics and Machine Learning Toolbox or regress.m function')
+        NIRSmat = fullfile(NIRSDtp{1},'NIRS.mat');
+        out.NIRSmat = {NIRSmat};
+        return
     end
     %Load data and aux for regression
     for ievent=1:size(NIRSDtp,1)
@@ -1139,7 +1143,8 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                 label =  [name,ext];
                 
             else
-                Xm = tmpGLM.AUX.data{idreg(iselected)}*beta(iselected,:);
+               % Xm = tmpGLM.AUX.data{idreg(iselected)}*beta(iselected,:);
+                Xm = tmpGLM.AUX.data{idreg(iselected)}; %compress multiply by beta later
                 label = tmpGLM.AUX.label{idreg(iselected)};
             end
             try
@@ -1158,8 +1163,9 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                 PARCOMP.R2 = tmpGLM.R2;
                 PARCOMP.AUX =  tmpGLM.AUX;
                 PARCOMP.indt = tmpGLM.indt(1):tmpGLM.indt(end); %indice de temps.
-                PARCOMP.data = d1(tmpGLM.indt(1):tmpGLM.indt(end),tmpGLM.listgood) ;%data(:,listgood,:);
+                PARCOMP.data = [];%d1(tmpGLM.indt(1):tmpGLM.indt(end),tmpGLM.listgood) ;%data(:,listgood,:);
                 PARCOMP.Xm = Xm;
+                %to large data file with data and xm remove them
                 PARCOMP.ComponentToKeep = tmpGLM.selected;
                 PARCOMP.idreg = tmpGLM.idreg;
                 labelid  = labelDtp{ievent} ;
@@ -1183,7 +1189,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                 PARCOMP(id+1).R2 = tmpGLM.R2;
                 PARCOMP(id+1).AUX =  tmpGLM.AUX;
                 PARCOMP(id+1).indt = tmpGLM.indt(1):tmpGLM.indt(end); %indice de temps.
-                PARCOMP(id+1).data = d1(tmpGLM.indt(1):tmpGLM.indt(end),tmpGLM.listgood) ;%data(:,listgood,:);
+                PARCOMP(id+1).data = [];%d1(tmpGLM.indt(1):tmpGLM.indt(end),tmpGLM.listgood) ;%data(:,listgood,:);
                 PARCOMP(id+1).Xm = Xm;
                 PARCOMP(id+1).ComponentToKeep = tmpGLM.selected;
                 PARCOMP(id+1).idreg = tmpGLM.idreg;

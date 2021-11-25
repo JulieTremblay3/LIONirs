@@ -22,7 +22,7 @@ end
 
 V1 = [];
 %h = waitbar(0,'Computing Permutations...'); %aussi ligne 102 et 104
-disp('Computing Permutations...')
+fprintf('%s\n',['Computing Permutations...'])
 for iperm = 1:NPERM
    
    %%   Calculo del vector de permutaciones
@@ -32,7 +32,7 @@ for iperm = 1:NPERM
    case 1
       [vg1,vg2] = GenVecPermInDep(n1,n2);
    end
-   
+ %  fprintf('%s ',num2str(iperm))
    V1 = [V1,vg1];
    
    switch(estadigrafo)
@@ -103,7 +103,7 @@ end
 %waitbar(iperm/NPERM,h)      
 end
 %close(h)
-
+ %  fprintf('\n ')
 %disp(V1)   %%%%   Para ver las permutaciones generadas
 % bar(V1(6,:))
 

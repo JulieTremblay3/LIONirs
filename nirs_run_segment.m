@@ -93,7 +93,10 @@ for filenb = 1:size(job.NIRSmat,1)
                 indstim  = [indstim  ;idstim ];
                 ind = [1; idstim; size(d,2)];
                 itrigger =[itrigger, ones(1,numel(idstim)).*trigger(itypestim)];
+                disp(['Search trigger: ', num2str(trigger(itypestim))])  
             end
+            disp(['Find NIRS onset time: ', sprintf('%.2f ',1/fs*indstim),'seconds to segment' ])
+            
             if numel(indstim)==1
                 %trig could be ajuste to start and end of the bloc no need
                 %to define fix start stop cause only one trigger exist. 
@@ -111,13 +114,24 @@ for filenb = 1:size(job.NIRSmat,1)
                 
               switch job.pretime
                   case 'start'
-                      pretime = indstim - 1 ;
+                       if numel(indstim)==1
+                            pretime = indstim - 1 ;
+                       else
+                          disp('Warning using pretime ''start'', only one trigger are recommand for this special option, multi-segment imply equal pretime.')
+                          pretime =indstim(1) - 1 ;
+                      end
                   otherwise
                       pretime  = round(fs*str2num(job.pretime));
+                      
               end
               switch job.posttime
                   case 'end'
-                      posttime = size(d,2)- indstim;
+                      if numel(indstim)==1
+                           posttime = size(d,2)- indstim;
+                      else
+                          disp('Warning using posttime ''end '', only one trigger are recommand for this special option, multi-segment imply equal posttime.')
+                          posttime = size(d,2)- indstim(1);
+                      end
                   otherwise
                       posttime = round(fs*str2num(job.posttime));
               end
@@ -154,6 +168,7 @@ for filenb = 1:size(job.NIRSmat,1)
                     idtrigEEG = ['S',sprintf('%3.0f',trigger)];
                     if numel(indstim)==numel(idstimEEG) %gerer les cas stim agree dimention only
                         indstim_EEG = EEG.ind_dur_ch(idstimEEG,1);
+                        disp(['Find EEG onset time: ', sprintf('%.2f ',EEG.infoBV.SamplingInterval/1000000*indstim_EEG),'seconds to sync' ])
                     else
                         msgbox('unequal EEG trigger identification')
                         indstim_EEG = EEG.ind_dur_ch(idstimEEG(1:5),1);
@@ -201,6 +216,7 @@ for filenb = 1:size(job.NIRSmat,1)
                      %itrigger =[itrigger, ones(1,numel(idstim)).*trigger(itypestim)];
                     if numel(indstim)==numel(idstimAUX{iaux}) %gerer les cas stim agree dimention only
                         indstim_AUX{iaux} = AUX(iaux).ind_dur_ch(idstimAUX{iaux},1);
+                        disp(['Find AUX onset time: ', sprintf('%.2f ',AUX.infoBV.SamplingInterval/1000000*indstim_AUX{iaux}),'seconds to sync' ])
                     else
                         idtocheckAUX = AUX(iaux).ind_dur_ch(idstimAUX{iaux},1);
                         timetrig = idtocheckAUX * AUX(iaux).infoBV.SamplingInterval/1000000;
@@ -229,7 +245,7 @@ for filenb = 1:size(job.NIRSmat,1)
 %             msgbox('AUX could not be segment')
 %         end
         end
-        
+        disp(['PreTime: ',num2str(pretime*1/fs), ' s ,PostTime: ' ,num2str(posttime*1/fs), ' s Apply to create ', num2str(numel(indstim)),' segments']);
         nstim = posttime + pretime + 1;
          
         t = 1/fs:1/fs:1/fs*size(d,2);

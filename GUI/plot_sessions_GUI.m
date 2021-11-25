@@ -171,11 +171,18 @@ if isempty(strfind(NIRS.Dt.fir.pp(s).pre,'Manual Gui'))|~strcmp(upper(dir1),uppe
         SamplingInterval,...%SamplingInterval in microseconds
         size(d,2)); %Number Sample in microseconds
      %UPDATE SelectedFactors to the last module
-    try
+    %if the module is already the last module do not try to increment
+    %try to increment only if you are in the previous module to modify the
+    %data on the current step.
+     try 
      load(fullfile(dir2,'SelectedFactors.mat'));
      for ifactor=1:numel(PARCOMP)
-        PARCOMP(ifactor).module =  PARCOMP(ifactor).module+1;
-        PARCOMP(ifactor).modulestr= ['Manual Gui ', NIRS.Dt.fir.pp(s).pre];
+         if  PARCOMP(ifactor).module ==  (numel(NIRS.Dt.fir.pp)-1)
+            PARCOMP(ifactor).module =  PARCOMP(ifactor).module+1;
+            PARCOMP(ifactor).modulestr= ['Manual Gui ', NIRS.Dt.fir.pp(s).pre];
+         else
+             %keep module as it is if is old change or avoid over modify
+         end
      end
      save(fullfile(dir2,'SelectedFactors.mat'),'PARCOMP');
     catch
@@ -487,6 +494,7 @@ handles = btn_savenoise_Callback(0,0,handles);
 set(handles.popupmenu_file,'value',handles.chosenfile);
 
 
+
 lst = length(handles.NIRS.Dt.fir.pp); %get the number of processing step
 %Get all the processing steps (modules)
 handles.module_list = [];
@@ -546,6 +554,8 @@ updatedata(handles,1,1);
 handles.newlist = 1; %Reactualiser la liste de canaux de 3DHelmet
 updatedisplay(handles);
 handles.oldfile = handles.chosenfile; %get(handles.popupmenu_file, 'Value');
+idfile = get(handles.popupmenu_file,'value');
+set(handles.context_warning_noise,'label', ['File: ',num2str(idfile) ]);
 guidata(hObject, handles);
 
 
@@ -1311,7 +1321,7 @@ if 0 %numel(handles.NIRS.Dt.fir.pp)==oldmodule
     end
     
 end %fin vérification
-try
+%try
     if loadnir==1 %Standard
         %LOAD DATA
         % NIRS.Dt.AUX.pp(2).p{ifile,1}=outfileAUX;
@@ -1353,7 +1363,16 @@ try
         %  xname =fullfile(pathstr,[name,'_events',ext]);
         %         figure;plot(PMI{currentsub}.data(cf).HRF.AvgC)
         if get(handles.popup_typeDC,'value')==1     %DC
-            PMI{currentsub}.data(cf).HRF.AvgC = fopen_NIR(xname,NC)';
+            try
+                disp(['Load: ' xname]);     
+                PMI{currentsub}.data(cf).HRF.AvgC = fopen_NIR(xname,NC)';
+            catch           
+                idmodule= numel(get(handles.popupmenu_module,'string'));
+                set(handles.popupmenu_module,'value',idmodule);
+                xname = handles.NIRS.Dt.fir.pp(idmodule).p{idfile};
+                PMI{currentsub}.data(cf).HRF.AvgC = fopen_NIR(xname,NC)';
+                disp(['File could not be loaded, last module is loaded instead: ' xname]);              
+             end
         elseif get(handles.popup_typeDC,'value')==2 %PH
             xname = [xname(1:end-4),'ph.nir'];
             PMI{currentsub}.data(cf).HRF.AvgC = fopen_NIR([xname],NC)';
@@ -1581,11 +1600,11 @@ try
     end
     idfile=get(handles.popupmenu_file,'value');
     PMI{1}.idfile=idfile ;
-catch
-    h=msgbox(['Data ',xname,' can''t be loaded']);
-    uiwait(h)
-    return
-end
+% catch
+%     h=msgbox(['Data ',xname,' can''t be loaded']);
+%     uiwait(h)
+%     return
+% end
 set(guiHOMER,'UserData',PMI);
 
 try
@@ -1786,7 +1805,7 @@ x = handles.NIRS.Dt.fir.pp(end).p{fileid};
 vmrk_path = [x(1:end-3),'vmrk'];
 [label,ind_dur_ch] = read_vmrk_all(vmrk_path);
 if get(handles.popupmenu_module,'value')~=numel(handles.NIRS.Dt.fir.pp);
-    if strcmp(get(handles.context_warning_noise,'checked'),'off')
+    if 1 %strcmp(get(handles.context_warning_noise,'checked'),'off')
         choice = questdlg(['You are not working in ''Manual module''',...
             'This will reset your previous manual selection with the current module. Do you want to continue ?'],'Warning','Yes','No','No');
         if strcmp(choice,'No')
@@ -2848,6 +2867,7 @@ elseif get(handles.popup_view,'value')==5 %Mode zone
     minlist = min(list);
     if minlist >= 1
         set(handles.edit_zonelist,'string',num2str(list))
+        set(handles.popupmenu_zone,'value',list);
     end
 end
 updatedisplay(handles)
@@ -2897,7 +2917,8 @@ elseif get(handles.popup_view,'value')==5 %Mode zone
     PMI = get(guiHOMER,'UserData');
     maxlist = max(list);
     if maxlist <=numel(PMI{currentsub}.zone.plotLst)
-        set(handles.edit_zonelist,'string',num2str(list))
+        set(handles.edit_zonelist,'string',num2str(list));
+        set(handles.popupmenu_zone,'value',list);
     end
 end
 updatedisplay(handles)
@@ -4703,11 +4724,13 @@ function context_warning_noise_Callback(hObject, eventdata, handles)
 % hObject    handle to context_warning_noise (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-if strcmp(get(handles.context_warning_noise,'checked'),'on')
-    set(handles.context_warning_noise,'checked','off')
-else
-    set(handles.context_warning_noise,'checked','on')
-end
+
+
+% if strcmp(get(handles.context_warning_noise,'checked'),'on')
+%     set(handles.context_warning_noise,'checked','off')
+% else
+%     set(handles.context_warning_noise,'checked','on')
+% end
 
 
 % --------------------------------------------------------------------
@@ -8809,15 +8832,15 @@ else
 end
 
 for i=1:numel(PARCORR(1,id).listgood)
- idxc = find_idx_color(PMI{currentsub}.data(cf).MeasList, PARCORR(1,id).listgood(i),...
+    idxc = find_idx_color(PMI{currentsub}.data(cf).MeasList, PARCORR(1,id).listgood(i),...
             numel(PMI{currentsub}.color)/3);
-h=plot(PMI{currentsub}.data(cf).HRF.tHRF(PARCORR(1,id).indt(1):PARCORR(1,id).indt(end)),PARCORR(1,id).Xm(:,i,1)+step,'color', PMI{currentsub}.color(idxc,:));
+    h=plot(PMI{currentsub}.data(cf).HRF.tHRF(PARCORR(1,id).indt(1):PARCORR(1,id).indt(end)),PARCORR(1,id).Xm(:,i,1)+step,'color', PMI{currentsub}.color(idxc,:));
        srs = SDPairs2strboxy(PMI{currentsub}.data(cf).MeasList(PARCORR(1,id).listgood(i),1));
         det = SDDet2strboxy(PMI{currentsub}.data(cf).MeasList(PARCORR(1,id).listgood(i),2));
-set(h,'displayname',['ch',num2str(PARCORR(1,id).listgood(i)),'_',srs, '_', det]);
-set(h,'linewidth',2);
-%set(gca,'fontsize',12)
-xlabel('Time (s)');
+    set(h,'displayname',['ch',num2str(PARCORR(1,id).listgood(i)),'_',srs, '_', det]);
+    set(h,'linewidth',2);
+    %set(gca,'fontsize',12)
+    xlabel('Time (s)');
 
 
 end
@@ -9023,7 +9046,7 @@ else
 end
 try
 for i=1:numel(PARCOMP(1,id).listgood)
- idxc = find_idx_color(PMI{currentsub}.data(cf).MeasList, PARCOMP(1,id).listgood(i),...
+        idxc = find_idx_color(PMI{currentsub}.data(cf).MeasList, PARCOMP(1,id).listgood(i),...
             numel(PMI{currentsub}.color)/3);
          h=plot(PMI{currentsub}.data(cf).HRF.tHRF(PARCOMP(1,id).indt(1):PARCOMP(1,id).indt(end)),PARCOMP(1,id).Xm(:,i,1)+step,'color',PMI{currentsub}.color(idxc,:));
         srs = SDPairs2strboxy(PMI{currentsub}.data(cf).MeasList(PARCOMP(1,id).listgood(i),1));
@@ -9031,6 +9054,7 @@ for i=1:numel(PARCOMP(1,id).listgood)
         set(h,'displayname',['ch',num2str(PARCOMP(1,id).listgood(i)),'_',srs, '_', det]);
 end
 catch
+    disp('Catch: Figure component could not be plot')
 end
 guidata(handles.figure1, handles);
 % % %PLOTALEJANDRA
@@ -10440,10 +10464,10 @@ function Context_MenuExportZone_All_Callback(hObject, eventdata, handles)
 % hObject    handle to Context_MenuExportZone_All (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-if strcmp(get(handles.Context_MenuExportZone_All,'checked'),'on')
-    set(handles.Context_MenuExportZone_All,'checked','off')
+if strcmp(get(handles.Context_MenuExportZone_All,'checked'),'on');
+    set(handles.Context_MenuExportZone_All,'checked','off');
 else
-  set(handles.Context_MenuExportZone_All,'checked','on')
+    set(handles.Context_MenuExportZone_All,'checked','on');
 end
 
 
@@ -10470,11 +10494,11 @@ function context_listbox_Correction_newfigure_Callback(hObject, eventdata, handl
 % handles    structure with handles and user data (see GUIDATA)
 
 if strcmp(get(handles.context_listbox_Correction_newfigure,'checked'),'on')
-    set(handles.context_listbox_Correction_newfigure,'checked','off')
+    set(handles.context_listbox_Correction_newfigure,'checked','off');
 else
-    set(handles.context_listbox_Correction_newfigure,'checked','on')
+    set(handles.context_listbox_Correction_newfigure,'checked','on');
 end
-listbox_CorrectionDecomposition_Callback(hObject, eventdata, handles)
+listbox_CorrectionDecomposition_Callback(hObject, eventdata, handles);
 % --------------------------------------------------------------------
 function context_listbox_Correction_Copy_Callback(hObject, eventdata, handles)
 % hObject    handle to context_listbox_Correction_Copy (see GCBO)
@@ -10744,7 +10768,7 @@ function menu_Auxlistview_copy_Callback(hObject, eventdata, handles)
 AUXCH = get(handles.listbox_AUXCH,'string');
 iAUXCH = get(handles.listbox_AUXCH,'value');
 a = AUXCH{iAUXCH};
-clipboard('copy', a);
+clipboard('copy', a(1:end-4)); %sans le on ou off ! 
 
 
 % --------------------------------------------------------------------

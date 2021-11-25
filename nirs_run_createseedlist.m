@@ -55,6 +55,6 @@ for filenb=1:size(job.NIRSmat,1) %JT
                     end
                     fclose(fid);
         end
- 
+    disp(['Channel list save: ', [path,file]])
 end
 out.NIRSmat = job.NIRSmat;

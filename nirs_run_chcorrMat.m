@@ -112,7 +112,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                 end
                 %close(hwaitbar);
              else
-                disp(['Failed to nullify bad intervals for Subject ',int2str(filenb),', file ',int2str(f),'. No markers found in the .vmrk file. If you have already used the Step Detection function, your data may have no bad steps in it.']);
+                disp(['Unable to nullify bad intervals for Subject ',int2str(filenb),', file ',int2str(f),'. No markers found in the .vmrk file. If you have already used the Step Detection function, your data may have no bad steps in it.']);
             end
         
         
@@ -266,13 +266,14 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
             else
                 totaltrialgood = size(Bloc,1);
             end
-                
+                 fprintf('%s ',['Run pearson correlation ', num2str(size(Bloc,1)), ' random blocs: '])   
          for ibloc = 1:size(Bloc,1)
-                ibloc                 
+                fprintf('%d ',ibloc)    
+                if ~mod(ibloc,40)
+                   fprintf('\r') 
+                end
+                pause(0.001)
                 dat = d1(:,Bloc(ibloc,1):Bloc(ibloc,2));
-                
-%                 figure; plot(d1')
-%                 figure;plot(dat')
            for i=1:numel(listHBO)
                 if listHBO(i)
                     j = 1;
@@ -304,7 +305,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
             end
          
          end
-                
+         fprintf('\r')        
             end
                 
          %zscore outlier on matcorr matcorrHbR trial distribution ensure no outlier due to forget artifact.            
@@ -394,9 +395,13 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
             else
                 totaltrialgood = size(Bloc,1);
             end
+            fprintf('%s',['Run Hilbert ', num2str(size(Bloc,1)),' random blocs: ',]);
                 for ibloc = 1:size(Bloc,1)
-                    ibloc
-                    tic
+                    fprintf('%d ',ibloc);
+                    if ~mod(ibloc,40)
+                         fprintf('\r') 
+                    end
+                    pause(0.001);
                     dat = d1(:,Bloc(ibloc,1):Bloc(ibloc,2));
                    hil = hilbert(dat);
                     for i=1:numel(listHBO)
@@ -428,11 +433,10 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                                 end
                             end
                         end
-                    end
-                    toc
+                    end           
                     clear dat                    
                 end       
-                
+                fprintf('\r') 
                 %zscore outlier on matcorr matcorrHbR trial distribution ensure no outlier due to forget artifact.
                 meantrial =  nanmean(matcorr(:,:,:),3);
                 stdtrial =  nanstd(matcorr(:,:,:),0,3);
@@ -694,11 +698,14 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
             end
             saveas(hplot,  [pathout,filloutput,sprintf('%03.0f', f),'FFTPLOT.fig'],'fig')
             saveas(hplot,  [pathout,filloutput,sprintf('%03.0f', f),'FFTPLOT.jpg'],'jpg')
+            disp(['Save power spectrum figure: ', [pathout,filloutput,sprintf('%03.0f', f),'FFTPLOT.fig']]);  
             if job.I_chcorrlist_type.b_crossspectrum.m_savefft_crossspectrum
                 if  isfield(job.b_nodelist,'I_zonecorrlist') 
                     save([pathout,filloutput,'ComplexFFT.mat'],'yall','f_fft','ML_new','Bloc','ZoneList')
+                    disp(['Save crossspectrum zone: ', [pathout,filloutput,'ComplexFFT.mat']]);
                 elseif isfield(job.b_nodelist,'I_chcorrlist') 
                     save([pathout,filloutput,'ComplexFFT.mat'],'yall','f_fft','listHBOch','listHBRch','ML_new','Bloc')
+                    disp(['Save crossspectrum list: ', [pathout,filloutput,'ComplexFFT.mat']]);                    
                 end
             end
             %close(hplot)
@@ -1242,6 +1249,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
         zone.ml = MLfake;
         zone.chMAT = plotLst;
         save(fullfile(pathout,['avg',filezone,'.zone']),'zone','-mat')
+        disp(['Save avg zone: ',  fullfile(pathout,['avg',filezone,'.zone'])])
         meancorr=nanmean(matcorr,3);
         meancorrHbR=nanmean(matcorrHbR,3);  
     elseif isfield(job.b_nodelist,'I_chcorrlist')       %Channel list
@@ -1264,12 +1272,16 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
         end
         
         save(fullfile(pathout,[filloutput,'_HBO','_Pearson','.mat']),'ZoneList','matcorr','meancorr');
+        disp(['Save Pearson matrix: ',  fullfile(pathout,[filloutput,'_HBO','_Pearson','.mat'])])
         matcorr = matcorrHbR; meancorr = meancorrHbR;
         save(fullfile(pathout,[filloutput,'_HBR','_Pearson','.mat']),'ZoneList','matcorr','meancorr');
+        disp(['Save Pearson matrix: ',  fullfile(pathout,[filloutput,'_HBR','_Pearson','.mat'])])
     elseif isfield(job.I_chcorrlist_type,'b_Hilbert')
         save(fullfile(pathout,[filloutput,'_HBO','_Hilbert','.mat']),'ZoneList','matcorr','meancorr');
+        disp(['Save Hilbert matrix: ',  fullfile(pathout,[filloutput,'_HBO','_Hilbert','.mat'])])
         matcorr = matcorrHbR; meancorr = meancorrHbR;
         save(fullfile(pathout,[filloutput,'_HBR','_Hilbert','.mat']),'ZoneList','matcorr','meancorr');
+        disp(['Save Hilbert matrix: ',  fullfile(pathout,[filloutput,'_HBR','_Hilbert','.mat'])])
     elseif isfield(job.I_chcorrlist_type,'b_Granger')
         save(fullfile(pathout,[filloutput,'_HBO','_MVARGranger','.mat']),'ZoneList','matcorr','meancorr');
         matcorr = matcorrHbR; meancorr = meancorrHbR;
@@ -1297,9 +1309,11 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
 
         RecordDevice = NIRS.Cf.dev.n;
         save(fullfile(pathout,[filloutput,'_HBO','_COH FFT','.mat']),'ZoneList','matcorr','meancorr', 'totaltrialgood'  );
+        disp(['Save crosspectrum matrix: ',  fullfile(pathout,[filloutput,'_HBO','_COH FFT','.mat'])]);        
         matcorr = matcorrHbR; meancorr = meancorrHbR;
         save(fullfile(pathout,[filloutput,'_HBR','_COH FFT','.mat']),'ZoneList','matcorr','meancorr', 'totaltrialgood' );
-        save(fullfile(pathout,[filloutput,'peakfft','.mat']), 'tablepeak', '-mat')
+        disp(['Save crosspectrum matrix: ',  fullfile(pathout,[filloutput,'_HBR','_COH FFT','.mat'])]);
+        save(fullfile(pathout,[filloutput,'peakfft','.mat']), 'tablepeak', '-mat');
     elseif isfield(job.I_chcorrlist_type, 'b_waveletcluster')
         %CLUSTER MATHIEU  wavelet
         %         Args.ZoneList = ZoneList;
@@ -1317,6 +1331,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
         matcorr = matcorrHbR;
         meancorr = matcorrHbR;
         save(fullfile(pathout,[filloutput,'_HBR','_COH FFT','.mat']),'ZoneList','matcorr','meancorr', 'idwindow','fs'  );
+       
         %msgbox('Wavelet decomposition is save, use checkcluster.m to create connectivity matrix for cluster window')
     end
     
@@ -1693,7 +1708,13 @@ end
 
 pnames = {'type'  'rows' 'tail'};
 dflts  = {'p'     'a'    'both'};
+try
 [type,rows,tail] = internal.stats.parseArgs(pnames,dflts,varargin{:});
+catch
+    type = 'p';
+    rows = 'a';
+    tail = 'both';
+end
 
 % Validate the rows parameter.
 rowsChoices = {'all' 'complete' 'pairwise'};
@@ -1883,9 +1904,9 @@ else
         coef = bsxfun(@rdivide,coef,d); coef = bsxfun(@rdivide,coef,d'); % coef = coef ./ d*d';
     else
         y = bsxfun(@minus,y,sum(y,1)/n);  % Remove mean
-        coef = x' * y; % 1/(n-1) doesn't matter, renormalizing anyway
-        dx = vecnorm(x,2,1);
-        dy = vecnorm(y,2,1);
+        coef = x' * y; % 1/(n-1) doesn't matter, renormalizing anyway      
+        dx = norm(x);    %dx = vecnorm(x,2,1);
+        dy = norm(y);      %vecnorm(y,2,1);
         coef = bsxfun(@rdivide,coef,dx'); coef = bsxfun(@rdivide,coef,dy); % coef = coef ./ dx'*dy;
     end
 end
@@ -2548,4 +2569,58 @@ if nargin < 2
 end
 y = repmat(sumx,size(x));
 y(2:end) = sumx - cumsum(x(1:end-1));
+end
+
+function [z,mu,sigma] = zscore(x,flag,dim)
+%ZSCORE Standardized z score.
+%   Z = ZSCORE(X) returns a centered, scaled version of X, the same size as X.
+%   For vector input X, Z is the vector of z-scores (X-MEAN(X)) ./ STD(X). For
+%   matrix X, z-scores are computed using the mean and standard deviation
+%   along each column of X.  For higher-dimensional arrays, z-scores are
+%   computed using the mean and standard deviation along the first
+%   non-singleton dimension.
+%
+%   The columns of Z have sample mean zero and sample standard deviation one
+%   (unless a column of X is constant, in which case that column of Z is
+%   constant at 0).
+%
+%   [Z,MU,SIGMA] = ZSCORE(X) also returns MEAN(X) in MU and STD(X) in SIGMA.
+%
+%   [...] = ZSCORE(X,1) normalizes X using STD(X,1), i.e., by computing the
+%   standard deviation(s) using N rather than N-1, where N is the length of
+%   the dimension along which ZSCORE works.  ZSCORE(X,0) is the same as
+%   ZSCORE(X).
+%
+%   [...] = ZSCORE(X,FLAG,'all') standardizes X by working on all the
+%   elements of X. Pass in FLAG==0 to use the default normalization by N-1,
+%   or 1 to use N.
+%
+%   [...] = ZSCORE(X,FLAG,DIM) standardizes X by working along the dimension
+%   DIM of X.
+%
+%   [...] = ZSCORE(X,FLAG,VECDIM) standardizes X by working along the all the
+%   dimensions of X specified in VECDIM.
+%
+%   See also MEAN, STD.
+
+%   Copyright 1993-2018 The MathWorks, Inc. 
+% [] is a special case for std and mean, just handle it out here.
+if isequal(x,[]), z = x; return; end
+
+if nargin < 2
+    flag = 0;
+end
+if nargin < 3
+    % Figure out which dimension to work along.
+    dim = find(size(x) ~= 1, 1);
+    if isempty(dim), dim = 1; end
+end
+
+% Compute X's mean and sd, and standardize it
+mu = mean(x,dim);
+sigma = std(x,flag,dim);
+sigma0 = sigma;
+sigma0(sigma0==0) = 1;
+z = bsxfun(@minus,x, mu);
+z = bsxfun(@rdivide, z, sigma0);
 end

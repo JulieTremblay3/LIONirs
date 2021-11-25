@@ -28,16 +28,19 @@ try
             end
         
             save(location,'d','SD','ml','t','s','aux','-mat');
+            disp(['Write: ',location ]); 
         else
             save(location,'d','-mat');
+            disp(['Write: ',location ]); 
         end
     else
         %open a NIR data file and save the data 
         fid = fopen(location,'w');
+        disp(['Write: ',location ]); 
         d = d(:);
         fwrite(fid,d,'float32',0,'ieee-le');
         fclose(fid);             
     end
 catch
-    disp('Failed to write file'); 
+    disp('Failed to write .nirs associate file'); 
 end

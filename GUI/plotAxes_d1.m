@@ -816,6 +816,10 @@ if get(handles.radio_3dmontageupdate,'value')
     IO_HelmetMTG_Display(handles, option)
 end
 idmodule = get(handles.popupmenu_module, 'value');
+if idmodule>numel(handles.NIRS.Dt.fir.pp)
+    set(handles.popupmenu_module,'value',numel(handles.NIRS.Dt.fir.pp));
+    idmodule = numel(handles.NIRS.Dt.fir.pp);
+end
 fileid=get(handles.popupmenu_file,'value');
     nbhalf=numel(PMI{currentsub}.data(cf).MeasListAct)/2;
     ch1 = find(PMI{currentsub}.data(cf).MeasListAct);%(1);

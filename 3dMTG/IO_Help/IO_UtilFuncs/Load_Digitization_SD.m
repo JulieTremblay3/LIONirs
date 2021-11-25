@@ -18,14 +18,14 @@ function oDig = Load_Digitization_SD(NIRS)
     %project unit must be in meter here
     if isfield(NIRS.SD,'SpatialUnit')
         if   strcmp(NIRS.SD.SpatialUnit,'mm')
-            convscale = 0.001
+            convscale = 0.001;
         elseif  strcmp(NIRS.SD.SpatialUnit,'cm')
-            convscale = 0.01
+            convscale = 0.01;
         else
-            convscale = 1
+            convscale = 1;
         end
     else
-        convscale = 1
+        convscale = 1;
     end
 
     for i = 1:numel(NIRS.SD.SrcPos)/3

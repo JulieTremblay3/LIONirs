@@ -2,12 +2,18 @@ function out = nirs_run_E_statmatrix(job)
 
 xlslistfile = job.f_matrix{1};
 [~,~,ext] =fileparts([xlslistfile]);
+try
 if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
     [raw, txt, info]=xlsread([xlslistfile]);
 elseif strcmp(ext,'.txt')
     [num, txt, info] = readtxtfile_asxlsread([xlslistfile])
 end
-%Load the matrices same as any
+catch
+    disp(['Error could not read file: ',xlslistfile])
+    disp(['Verify the file location or if the file is already open'])
+    return
+end
+    %Load the matrices same as any
 groupeall = [];
 for isubject=2:size(info,1)
     id = isubject-1;
@@ -190,6 +196,7 @@ if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     totaltrialgood = mean(dfall(:));
     file = [name,labelnode,'OneSampleTtest mean','.mat'];
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
@@ -200,6 +207,7 @@ if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     totaltrialgood = mean(dfall(:));
     file = [name,labelnode,'OneSampleTtest tval','.mat'];
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
@@ -207,6 +215,7 @@ if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     matcorr = tval.*double(pval<0.05);
     meancorr = tval.*double(pval<0.05);
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     [FDR,Q] = mafdr(pval(:));
@@ -217,6 +226,7 @@ if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     matcorr = meanall.*double(pval<0.05);
     meancorr = meanall.*double(pval<0.05);
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
@@ -224,6 +234,7 @@ if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     matcorr = tval.*double(Q<0.05);
     meancorr = tval.*double(Q<0.05);
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
@@ -234,18 +245,23 @@ if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     matcorr = tval.*double(Q<0.01);
     meancorr = tval.*double(Q<0.01);
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    disp(['Save: ', fullfile(dir1,[file])]);
+      
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid))
     %  dir1 = job.e_statmatrixPath{1};
-    
+    try
     if ismac
         % Code to run on Mac platform problem with xlswrite
         writetxtfile(fullfile(dir1,[name,labelnode,'SimpleTtest.txt']),infonew);
         disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'SimpleTtest.txt'])]);
     else
         xlswrite(fullfile(dir1,[name,labelnode,'SimpleTtest.xlsx']),infonew);
-        disp(['Result .xlsx file saved' fullfile(dir1,[name,labelnode,'SimpleTtest.xlsx'])])
+        disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,'SimpleTtest.xlsx'])])
+    end
+    catch
+        disp(['Error could not save .xlsx file: ' fullfile(dir1,[name,labelnode,'SimpleTtest.xlsx'])])
     end
 elseif isfield(job.c_statmatrix,'b_PermutationTest')
     ESTAD = 4;
@@ -298,8 +314,8 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
                 for j=1:size(cb1,3) %col
                     tmpcb1 = cb1(:,i,j);
                     tmppb1 = pb1(:,i,j);
-                    idnan = find(isnan(tmpcb1));
-                    if ~isempty(idnan)
+                    idnan = find(isnan(tmpcb1)); 
+                    if ~isempty(idnan) 
                         tmpcb1(idnan)=[];
                     end
                     idnan = find(isnan(tmppb1));
@@ -343,6 +359,7 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
     matcorr = Toij;
     meancorr = Toij;
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
@@ -350,6 +367,7 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
     matcorr = 1-FUniv;
     meancorr = 1-FUniv;
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
@@ -358,6 +376,7 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
     matcorr = real(squeeze((nanmean(cb1,1)- nanmean(pb1,1))));
     meancorr = real(squeeze((nanmean(cb1,1)- nanmean(pb1,1))));
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+     disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
@@ -366,6 +385,7 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
     matcorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1)));
     meancorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1)));
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
@@ -373,6 +393,7 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
     matcorr = real(squeeze(nanmean(cb1,1))-squeeze(nanmean(pb1,1))).*double(FUniv<0.05);
     meancorr = real(squeeze(nanmean(cb1,1))-squeeze(nanmean(pb1,1))).*double(FUniv<0.05);
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+     disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
@@ -380,6 +401,7 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
     matcorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1))).*double(FUniv<0.05);
     meancorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1))).*double(FUniv<0.05);
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
@@ -387,6 +409,7 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
     matcorr = real(squeeze(nanmean(cb1,1)));
     meancorr = real(squeeze(nanmean(cb1,1)));
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
@@ -394,6 +417,7 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
     matcorr = real(squeeze(nanmean(pb1,1)));
     meancorr = real(squeeze(nanmean(pb1,1)));
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
@@ -402,6 +426,7 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
     matcorr = ncb1;
     meancorr = ncb1;
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
@@ -410,6 +435,7 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
     matcorr = npb1;
     meancorr = npb1;
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
@@ -434,6 +460,7 @@ elseif isfield(job.c_statmatrix,'b_exportNBSformat')%
     end
     
     Mat = permute(MATall,[3,2,1])
+    disp(['Save file to NBS: ', fullfile(dir1,'DATA.mat')])
     save(fullfile(dir1,'DATA.mat'),'Mat')
     design= double([ groupeall==1,groupeall==2])
     save(fullfile(dir1,'design.mat'),'design')
@@ -511,6 +538,7 @@ elseif isfield(job.c_statmatrix,'b_PearsonCorr_Mat')
             matcorr = PearsonCoef;
             meancorr = PearsonCoef;
             save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+            disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{1} ];
             infonew = [infonew;new];
             
@@ -519,6 +547,7 @@ elseif isfield(job.c_statmatrix,'b_PearsonCorr_Mat')
             matcorr = PearsonCoefSig;
             meancorr = PearsonCoefSig;
             save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+            disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{1} ];
             infonew = [infonew;new];
         end

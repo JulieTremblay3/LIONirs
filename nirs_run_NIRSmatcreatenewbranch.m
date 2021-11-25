@@ -1,21 +1,23 @@
 function out = nirs_run_NIRSmatcreatenewbranch(job)
 
 load(job.NIRSmat{1,1});
-job.e_NIRSmatdirnewbranch
 [NIRSmatnewdir,name,ext] = fileparts(job.NIRSmat{1,1});
 
-
+   
 
 dir2 = [NIRSmatnewdir,filesep,job.e_NIRSmatdirnewbranch];
 file2= fullfile(dir2,'NIRS.mat' );
+disp(['Create new branch: ',file2 ])
+
 if ~isdir(dir2)
     mkdir(dir2);
 else
     try
         rmdir(dir2, 's');
         mkdir(dir2);
+        
     catch
-        disp(['Error unable to remove' , dir2])
+        disp(['Error unable to write to ' , dir2, ' verify access or open file'])
         return
     end
 end
@@ -25,15 +27,20 @@ if job.m_newbranchcomponent
         infileSelectedfactors = fullfile(NIRSmatnewdir,'SelectedFactors.mat');
         outfileSelectedfactors = fullfile(dir2,'SelectedFactors.mat');
         copyfile(infileSelectedfactors,outfileSelectedfactors);
+        disp(['Copy components: ',outfileSelectedfactors])
     catch
+        disp(['No components to copy: ',outfileSelectedfactors]);
     end
     try
-        infileCorrectionApply = fullfile(NIRSmatnewdir,'CorrectionApply.mat');
+        infileCorrectionApply = fullfile(NIRSmatnewdir,'Apply.mat');
         outfileCorrectionApply = fullfile(dir2,'CorrectionApply.mat');
         copyfile(infileCorrectionApply,outfileCorrectionApply);
+        disp(['Copy corrections: ',outfileCorrectionApply])
     catch
+        disp(['No corrections to copy: ',outfileCorrectionApply]);     
     end
-    
+else
+    disp(['Clean components & corrections in the new branch'])
 end
 
 out.NIRSmat = {file2};

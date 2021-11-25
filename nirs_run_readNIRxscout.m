@@ -85,12 +85,12 @@ NIRS.Dt.ana.T1 = ''; %FICHIER DE IRM
 
 %FILE
 %NIRS.Dt.fir.pp.p %read and process tdms file 
-fprintf('%s\n','File processed');
+fprintf('%s\n','File open: ');
     inputrawscout = job.inputNIRxscout;
 for Idx_File=1:numel(inputrawscout)
 
     [dir1,fil1,ext1] = fileparts(inputrawscout{Idx_File});
-     
+    fprintf('%s\n', inputrawscout{Idx_File})
     filehdr = fullfile(dir1,[fil1,ext1]);
     info = NIRxreadHDR(filehdr);
     filewav1 = fullfile(dir1,[fil1,'.wl1']);
@@ -292,7 +292,7 @@ for Idx_File=1:numel(inputrawscout)
            ishort = ishort+1;
        end             
         save( [pathout,filesep, 'SHORTDISTANCE.zone'],'zone');
-        
+        disp(['Save zone: ',  pathout,filesep, 'SHORTDISTANCE.zone'])
         clear zone
          distancemat = zeros(size(pos,1)/2,numel(SHORTmlid ));       
         %DISTANCE BETWEEN CHANNEL FOR CLUSTERING
@@ -333,6 +333,8 @@ for Idx_File=1:numel(inputrawscout)
          zone.plot{2} = [DATA.ml(DATA.ml(: ,4)==1,1), DATA.ml(DATA.ml(: ,4)==1,2)];
          zone.plotLst{2} =  [find(DATA.ml(: ,4)==1)];
          save( [pathout, filesep,'AllShortDistance.zone'],'zone')
+        disp(['Save zone: ',  pathout, filesep,'AllShortDistance.zone']);
+              
           clear zone
     end
     
@@ -354,7 +356,7 @@ for Idx_File=1:numel(inputrawscout)
     zone.plot{2} = [DATA.ml(DATA.ml(: ,4)==1,1), DATA.ml(DATA.ml(: ,4)==1,2)];
     zone.plotLst{2} =  [find(DATA.ml(: ,4)==1)];
     save( [pathout, filesep,'Global.zone'],'zone');
-    
+    disp(['Save zone: ',  pathout, filesep,'Global.zone']);
 if numel(evt)>0 % Verify that the event matrix is not empty.
     NIRS.Dt.fir.aux5{Idx_File} = [ones(size(evt,1),1),evt(:,1)]; %valeur 1 internal trigger
     NIRS.Dt.fir.aux5{Idx_File} = [ones(size(evt,1),1),evt(:,1)]; %valeur 1 internal trigger
@@ -421,7 +423,7 @@ end
     fileOutRoot_vmrk = fullfile(pathout,[fileout,'.vmrk']);
     
     fwrite_NIR(fileOut_nir,DATA.d');
-    
+    disp(['File processed: ',fileOut_nir])
     
     nirs_boxy_write_vhdr(fileOutRoot_vhdr,... %Output file
         fileOut_nir,... %DataFile

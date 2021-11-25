@@ -23,7 +23,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
     clear PARCORR
     clear NIRS
     load(job.NIRSmat{filenb,1});
-    [dirmat,~,~] = fileparts(job.NIRSmat{filenb,1})
+    [dirmat,~,~] = fileparts(job.NIRSmat{filenb,1});
     lst = length(NIRS.Dt.fir.pp);
     rDtp = NIRS.Dt.fir.pp(lst).p; % path for files to be processed
     NC = NIRS.Cf.H.C.N;
@@ -39,14 +39,17 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 outfile = fullfile(dirmat,[prefix fil1 ext1]);
                 infilevmrk = fullfile(dir1,[fil1 '.vmrk']);
                 outfilevmrk = fullfile(dirmat,[prefix fil1 '.vmrk']);
-                copyfile(infilevmrk,outfilevmrk);        
+                copyfile(infilevmrk,outfilevmrk);    
+                infilevhdr = fullfile(dir1,[fil1 '.vhdr']);
+                outfilevhdr = fullfile(dirmat,[prefix fil1 '.vhdr']);
+                copyfile(infilevhdr,outfilevhdr);  
             
         
         if f == 1
             NIRS.Dt.fir.pp(lst+1).pre = 'Manual Gui Substract Component ';
             NIRS.Dt.fir.pp(lst+1).job = job;
         end
-        fwrite_NIR(outfile,d);
+        fwrite_NIR(outfile,d);     
         NIRS.Dt.fir.pp(lst+1).p{f,1} = outfile;
   
     end
@@ -77,7 +80,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
     end
     
     ifile = zeros(size(PARCOMP));
-    for icomp = 1:numel(PARCOMP)
+    for icomp = 1:numel(PARCOMP) 
         ifile(icomp) = PARCOMP(icomp ).file;
     end
     [ifile, iorder]=sort(ifile);
@@ -99,8 +102,9 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
             end
         end
         type = job.i_substractcomponent_label;
-        PARCOMP(icomp).label
+
         if ~isempty(strfind(PARCOMP(icomp).label, type))%si bon label
+           fprintf('%s',['Substract: ', PARCOMP(icomp).label]);
             if strfind(PARCOMP(icomp).type,'PARAFAC')
                 toremove = [toremove,icomp];
                 samp_length = size(d,2);
@@ -128,7 +132,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 data = cat(3,d(indt,1:end/2),d(indt,end/2+1:end));
                 data(:,listgood,:) = data(:,listgood,:)-Xm;
                 d(indt,:) = reshape(data,[numel(indt),size(d,2)]);
-                
+                 %new value substracted with xm
                 try
                     load(outfileCorrectionApply)
                     newfile = 0;
@@ -191,6 +195,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 temp = u(:,lstSV)*s(lstSV,lstSV)*v(:,lstSV)';
                 data(:,listgood) = data(:,listgood)- temp;
                  d(indt,listgood) = data(:,listgood) ;
+                 %new value substracted with xm
                 try
                     load(outfileCorrectionApply)
                     newfile = 0;
@@ -236,7 +241,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
             elseif strcmp(PARCOMP(icomp).type,'GLM')
                    toremove = [toremove,icomp];                  
                 try
-                    load(outfileCorrectionApply)
+                    load(outfileCorrectionApply);
                     newfile = 0;
                 catch
                     %donot exist create the stucture                 
@@ -278,10 +283,14 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                     PARCORR(id+1).topo = PARCOMP(icomp).topo;
                 end
                  save(outfileCorrectionApply,'PARCORR');
-
                 d(PARCOMP(icomp).indt(1):PARCOMP(icomp).indt(end) ,PARCOMP(icomp).listgood) = d(PARCOMP(icomp).indt(1):PARCOMP(icomp).indt(end) ,PARCOMP(icomp).listgood) -PARCOMP(icomp).Xm;
-                
+                %new value substracted with xm
             end
+            
+            if job.m_substract_and_offsetcorrection==2
+                    fprintf('%s\r',[' done']); 
+            end
+            
             if job.m_substract_and_offsetcorrection==1   
                 %listgood must be for the 2 wavelenght for the offset
                 %correction 
@@ -291,25 +300,31 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                     listgood2wv = PARCOMP(icomp).listgood;
                 end
                 indstart = PARCOMP(icomp).indt(1);
-                indstop = PARCOMP(icomp).indt(end);
+                indstop = PARCOMP(icomp).indt(end); 
                 intensnorm = d(PARCOMP(icomp).indt(1):PARCOMP(icomp).indt(end) ,listgood2wv);
                 X = 1:1:size(intensnorm,1);
                 Mb1 =  ((intensnorm(end,:)-intensnorm(1,:))./numel(X))';
                 Mb2 =  intensnorm(1,:)'; %offset
                 A = reshape(X,numel(X),1)*reshape( Mb1,1,numel(Mb1)) +ones(numel(X),1)*reshape( Mb2,1,numel(Mb2));
                 spar = intensnorm - A;
-                Xm = A-1;
-                if indstop>=size(d,1)
-                    1
-                end
+                Xm = A-1;              
                 if indstart == 1 
-                d(PARCOMP(icomp).indt(1):PARCOMP(icomp).indt(end) ,listgood2wv) = spar + ones(numel(indt),1)*d(indstart,listgood2wv) ;
-                 d(indstop+1:end,listgood2wv) =  d(indstop+1:end,listgood2wv)-...
-                    ones(size(d(indstop+1:end,1)))* (d(indstop+1,listgood2wv) - d(indstart,listgood2wv) );
+                    d(PARCOMP(icomp).indt(1):PARCOMP(icomp).indt(end) ,listgood2wv) = spar + ones(numel(PARCOMP(icomp).indt),1)*d(indstart,listgood2wv) ;
+                    d(indstop+1:end,listgood2wv) =  d(indstop+1:end,listgood2wv)-...
+                        ones(size(d(indstop+1:end,1)))* (d(indstop+1,listgood2wv) - d(indstart,listgood2wv) ); %offset adjustement
+                    fprintf('%s\r',[' done and offset adjustement']); 
+                elseif (indstop+1)>= size(d,1)
+                    d(PARCOMP(icomp).indt(1):PARCOMP(icomp).indt(end) ,listgood2wv) = spar + ones(numel(PARCOMP(icomp).indt),1)*d(indstart-1,listgood2wv) ;
+                    fprintf('%s\r',[' done and no offset adjustement (end)']);
                 else
+                    try
                     d(PARCOMP(icomp).indt(1):PARCOMP(icomp).indt(end) ,listgood2wv) = spar + ones(numel(PARCOMP(icomp).indt),1)*d(indstart-1,listgood2wv) ;
                     d(indstop+1:end,listgood2wv) =  d(indstop+1:end,listgood2wv)-...
                     ones(size(d(indstop+1:end,1)))* (d(indstop+1,listgood2wv) - d(indstart-1,listgood2wv) );
+                    fprintf('%s\r',[' done and offset adjustement']); 
+                    catch
+                        fprintf('%s\r',[' Error']); 
+                    end
                 end
                
             
@@ -325,9 +340,12 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                     PARCORR.indt = indstart:indstop;%indice de temps.
                     PARCORR.Xm = Xm; 
                     if indstart == 1
-                    PARCORR.Offset =  (d(indstop+1,:) - d(indstart,:) );
+                        PARCORR.Offset =  (d(indstop+1,:) - d(indstart,:) );
+                        fprintf('%s\r',[' Offset Corrected ']); 
+                    elseif (indstop+1)>size(d,1)
+                        PARCORR.Offset =  (d(end,:) - d(indstart-1,:) );
                     else
-                    PARCORR.Offset =  (d(indstop+1,:) - d(indstart-1,:) );
+                        PARCORR.Offset =  (d(indstop+1,:) - d(indstart-1,:) );
                     end
                     newfile = 1;
                     PARCORR.label= ['Offset Adjustment' sprintf('%03.0f',size(PARCORR,2)),' ',PARCOMP(icomp).filestr];
@@ -343,9 +361,11 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                     PARCORR(1+id).indt = indstart:indstop;
                     PARCORR(1+id).Xm = Xm; %indice de temps.
                     if indstart == 1
-                    PARCORR(1+id).Offset =  (d(indstop+1,:) - d(indstart,:) );
+                        PARCORR(1+id).Offset =  (d(indstop+1,:) - d(indstart,:) );
+                    elseif (indstop+1)>size(d,1)
+                        PARCORR(1+id).Offset =  (d(end,:) - d(indstart-1,:) );
                     else
-                    PARCORR(1+id).Offset =  (d(indstop+1,:) - d(indstart-1,:) );
+                        PARCORR(1+id).Offset =  (d(indstop+1,:) - d(indstart-1,:) );
                     end
                     newfile = 1;
                     PARCORR(1+id).label= ['Offset Adjustment' sprintf('%03.0f',size(PARCORR,2)),' ',PARCOMP(icomp).filestr];
@@ -359,13 +379,15 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
         if icomporder < numel(PARCOMP) %save if the next one is different
             if ifile(icomporder)~= ifile(icomporder+1)
                 outfile = rDtp{file,1};
-                fwrite_NIR(rDtp{file},d')                
+                fwrite_NIR(rDtp{file},d');   
+                   disp(['Save: ', outfile]);
             end
         end
         
         if icomporder == numel(PARCOMP)%save if last one
             outfile = rDtp{file,1};
             fwrite_NIR(rDtp{file,1},d');
+             disp(['Save: ', outfile]);
         end
 
     end

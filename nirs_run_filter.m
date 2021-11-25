@@ -80,7 +80,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                         if applylowcut
                             Wn = lowcut*2/fs;
                             [fb,fa]=butter(filt_ord,Wn);
-                            dfilt(Idx,:) = filtfilt(fb,fa,dinterp(Idx,:));
+                            dfilt(Idx,:) = filtfilt(fb,fa,dinterp(Idx,:));                 
                         else
                             dfilt(Idx,:) = dinterp(Idx,:);
                         end
@@ -93,6 +93,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                         end
                     end
                 end
+                %plot response
                 if paddingsym
                     dfilt = dfilt(:,tstart:tstop);
                 end

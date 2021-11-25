@@ -6,7 +6,7 @@ function newPrj=Createproject_fromsnirf(FileName)
 %FileName : .nirs with SD structure or snirf file 
 
 
-[filepath,name,ext] = fileparts(FileName)
+[filepath,name,ext] = fileparts(FileName);
 if strcmp(ext, '.nirs')
     NIRS= load(FileName,'-mat');
 elseif strcmp(ext, '.snirf') 
@@ -50,16 +50,16 @@ for i = 1:numel(NIRS.SD.DetPos)/3
    new_Mtg.v_pDet = [new_Mtg.v_pDet,p];
    p = p+1;
 end
-new_Mtg.Gen_Params.Nb_Sources_Disp =  64
-new_Mtg.Gen_Params.Nb_Detect_Disp = 300
+new_Mtg.Gen_Params.Nb_Sources_Disp =  64;
+new_Mtg.Gen_Params.Nb_Detect_Disp = 300;
 new_Mtg.Gen_Params.AcqSystem = 'NIRx';
 oHelmet = set_Mtg(oHelmet, new_Mtg);
 newPrj = set_Helmet( newPrj, oHelmet );
 
 %add flat2d surface as mri skin template file are located with the 3dMTG
 %code
-p = mfilename('fullpath')
-[filepath,name,ext] =fileparts(p)
+p = mfilename('fullpath');
+[filepath,name,ext] =fileparts(p);
 
 % VOXfile = fullfile([filepath,filesep, 'Template_Flat_2dsurface_fid'],'Flatd2fid.VOX')
 % VOXhdrfile = fullfile([filepath,filesep, 'Template_Flat_2dsurface_fid'],'Flatd2fid.hdr')

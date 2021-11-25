@@ -19,8 +19,9 @@ DelPreviousData = job.DelPreviousData;
 trig = job.choiceave.trigger; %List of triggers for averaging
 pretime = str2num(job.choiceave.pretime);
 posttime = str2num(job.choiceave.posttime);
-avtype = job.choiceave.avtype;
-nirsformat = job.savenirs;
+avtype = 1; %job.choiceave.avtype; remove the option 
+%nirsformat = job.savenirs;
+nirsformat = 0;
 badintervalratio = job.choiceave.badintervalratio;
 helpmemoryprob = 0 ;%job.choiceave.helpmemoryprob;
 
@@ -315,6 +316,7 @@ if avtype == 1 %save data file for average over many files
 %                    end
                     saveas(hreport,[filereport,'.jpg'],'jpg');  
                     saveas(hreport,[filereport,'.fig'],'fig');   
+                    disp(['Save event report: ',filereport])
                 end
                 close(hreport)
         end
@@ -403,7 +405,8 @@ if avtype == 1 %save data file for average over many files
 %    end 
     title(['Channel with nb Trial >= ', num2str(job.choiceave.badchannelratio*100), '% are keeped (green one are rejected)' ])
     saveas(hnbtrial,[filereport,'.jpg'],'jpg');  
-    saveas(hnbtrial,[filereport,'.fig'],'fig');  
+    saveas(hnbtrial,[filereport,'.fig'],'fig'); 
+    disp(['Save event report: ',filereport])
     close(hnbtrial)
     
 %     figure;plot(tval')
@@ -413,7 +416,7 @@ if avtype == 1 %save data file for average over many files
     %.nirs format
     if nirsformat
         location = [dir1, filesep, 'av_ep_subject',num2str(f),'file1-', num2str(f), '_trig', num2str(trig), '.nirs'];
-        fwrite_NIR_homer(location,av_tot,NIRS);
+        fwrite_NIR_homer(location,av,NIRS);
     end
     %.nir format
 %     if NewDirCopyNIRS
@@ -444,6 +447,7 @@ if avtype == 1 %save data file for average over many files
     fwrite_NIR(outfile2,stdav);
     fwrite_NIR(outfile3,nbevents);
     fwrite_NIR(outfile4,tval);
+    disp(['Save average data: ',outfile])
 
 
     temp_markers{1}.Type = 'NewSegment';

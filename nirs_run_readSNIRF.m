@@ -15,7 +15,7 @@ function out = nirs_run_readSNIRF(job)
 %PARAMETRE D'AQUISITION
 NIRS.Cf.dev.n = 'snirf';
 
-NIRS.Cf.H.n = 'SainteJustine prj'
+NIRS.Cf.H.n = 'SainteJustine prj';
 
 inputsnirf = job.inputSNIRF;
 
@@ -34,6 +34,7 @@ inputsnirf = job.inputSNIRF;
                  rmdir(dirout);
             catch
                 msgbox(['Please remove ' , dirout,' manually'])
+                disp(['Please remove ' , dirout,' manually, output could not be write'])
                 return
             end
     end
@@ -43,15 +44,17 @@ inputsnirf = job.inputSNIRF;
 
     %Create or load a .prj file
 if isfield(job.c_createImportProjectSnirf,'b_createProject')
-    LoadedStruct = Createproject_fromsnirf(inputsnirf{1})
+    LoadedStruct = Createproject_fromsnirf(inputsnirf{1});
     SaveStruct = Create_PrjStruct( LoadedStruct );
-    [filepath,name,ext] =fileparts(inputsnirf{1})
+    [filepath,name,ext] =fileparts(inputsnirf{1});
     save(fullfile(dirout,[name,'.prj']), 'SaveStruct');
-    prjfile = fullfile(dirout ,[name,'.prj'])
+    prjfile = fullfile(dirout ,[name,'.prj']);
+    disp(['Create automatic 2d: ', prjfile])
 elseif isfield(job.c_createImportProjectSnirf,'b_importProject')
     prjfile = job.c_createImportProjectSnirf.b_importProject.prjfile{1};
     LoadedStruct = load( prjfile,'-mat');
     LoadedStruct = Load_PrjStruct(LoadedStruct,false);
+    disp(['Import: ', prjfile])
 end
     
 % MISC. DATA

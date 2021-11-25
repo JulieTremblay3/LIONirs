@@ -212,7 +212,7 @@ distmin.tag     = 'distmin';
 distmin.strtype = 'r';       
 distmin.num     = [1 Inf];    
 distmin.val     = {1}; 
-distmin.help    = {'Cutoff: Minimum Cartesian channel distance in centimeters.'}; 
+distmin.help    = {'Defines a minimal geometric distance between a source and a detector for data to be included (in centimeter).'}; 
 
 %Maximum distance
 distmax         = cfg_entry; 
@@ -221,7 +221,7 @@ distmax.tag     = 'distmax';
 distmax.strtype = 'r';       
 distmax.num     = [1 1];     
 distmax.val     = {6};
-distmax.help    = {'Cutoff: Maximum Cartesian channel distance in centimeters.'}; 
+distmax.help    = {'Defines the maximal geometric distance between a source and a detector for data to be included (in centimeter).'}; 
 
 %Number of MUX 
 nb_Mux         = cfg_entry; %nb_Mux
@@ -1233,7 +1233,7 @@ filterorder.tag     = 'filterorder';
 filterorder.strtype = 'r';
 filterorder.num     = [1 Inf];
 filterorder.val     = {4};
-filterorder.help    = {'Butterworth filter order.'};
+filterorder.help    = {'Butterworth filter order. Design a Butterworth digital filter and apply using a zero-phase digital filtering (filtfilt.m). '};
 
 % Executable Branch
 E_filter      = cfg_exbranch;
@@ -1243,7 +1243,7 @@ E_filter.val  = {NIRSmat DelPreviousData lowcutfreq highcutfreq filterorder padd
 E_filter.prog = @nirs_run_filter;
 E_filter.vout = @nirs_cfg_vout_filter;
 E_filter.help = {'Bandpass filtering of the data. Bad intervals are interpolated prior to filtering.',...
-    'Input & Output: Normalized intensity or concentrations.'};
+    'Input: Normalized intensity or concentrations. Design a Butterworth digital filter and apply using a zero-phase digital filtering (filtfilt.m).'};
 
 function vout = nirs_cfg_vout_filter(job)
     vout = cfg_dep;                    
@@ -1523,14 +1523,14 @@ c_rejecttrial.help    = {''};
 choiceave         = cfg_branch;
 choiceave.tag     = 'choiceave';
 choiceave.name    = 'Averaging options: ';
-choiceave.val     = {avtype trigger pretime posttime badintervalratio badchannelratio,avg_datatype,c_baseline_corr,c_rejecttrial,m_Tvalueoption};
-choiceave.help    = {''}';
+choiceave.val     = {trigger pretime posttime badintervalratio badchannelratio,avg_datatype,c_baseline_corr,c_rejecttrial,m_Tvalueoption};
+choiceave.help    = {''}'; %avtype 
 
 % Executable Branch
 E_average      = cfg_exbranch;
 E_average.name = 'Epoch averaging';
 E_average.tag  = 'E_average';
-E_average.val  = {NIRSmat DelPreviousData savenirs choiceave};
+E_average.val  = {NIRSmat DelPreviousData choiceave}; % savenirs
 E_average.prog = @nirs_run_average;
 E_average.vout = @nirs_cfg_vout_average;
 E_average.help = {'Average over many epochs.',...

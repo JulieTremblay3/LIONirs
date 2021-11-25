@@ -39,12 +39,12 @@ try
         data = reshape(data, infoBV.NumberOfChannels,infoBV.DataPoints)';     
     end
       if tstart<0
-            padding = zeros(abs(tstart)./((infoBV.SamplingInterval)*1e-6),size(data,2))
+            padding = zeros(round(abs(tstart)./((infoBV.SamplingInterval)*1e-6)),size(data,2));
             data = [padding; data];
       end
     if numel(varargin)>2 
         pstart = round(tstart/((infoBV.SamplingInterval)*1e-6));
-        if pstart == 0
+        if pstart <= 0
             pstart = 1;
         end
         pstop = round(tstop/((infoBV.SamplingInterval)*1e-6));

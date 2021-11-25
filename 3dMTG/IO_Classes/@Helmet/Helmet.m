@@ -1,4 +1,4 @@
-function obj = Helmet(args)
+function obj = Helmet(args);
     %HELMET class constructor - Gestion des informations et des matrices de 
     %                           coordonnées du casque.
 

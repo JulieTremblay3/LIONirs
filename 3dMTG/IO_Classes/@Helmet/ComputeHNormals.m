@@ -98,13 +98,14 @@ function oHelmet = ComputeHNormals( oHelmet, PlaneRange )
                     oHelmet.v_Holes(p).Normal.y = v_Holes(p).Coord.y/norm;
                     oHelmet.v_Holes(p).Normal.z = v_Holes(p).Coord.z/norm;
                 else %2d
-                    oHelmet.v_Holes(p).Normal.x = 0.001
-                    oHelmet.v_Holes(p).Normal.y = 0.001
-                    oHelmet.v_Holes(p).Normal.z = 0.1
+                    oHelmet.v_Holes(p).Normal.x = 0.001;
+                    oHelmet.v_Holes(p).Normal.y = 0.001;
+                    oHelmet.v_Holes(p).Normal.z = 0.1;
                 end
             end
         end % for
     end %for 
+    1;
     %oHelmet = FilterNormals( oHelmet );
 
     

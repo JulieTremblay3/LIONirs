@@ -985,6 +985,7 @@ elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
         echantillon_time = echantillon_time(1);
     elseif strcmp(typelabel{type}, 'Projection Channel .cp')  %load D1 matrix 'Projection Channel .cp',
         [name,path]= uigetfile({'*.mat';'Select channel projection *.cp'});
+        disp(['Project: ',[path,name]])
         d1 = load('-mat',[path name]);
         if isfield(d1,'zonelist')
         zonelist = d1.zonelist;
@@ -992,7 +993,7 @@ elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
         d1 = zeros( size(PMI{1}.data.MeasList,1)/2,1);     
         for i=1:numel(zonelist)
                        
-            [DetL,SrsL]=strtok(zonelist{i},' ')
+            [DetL,SrsL]=strtok(zonelist{i},' ');
             if numel(DetL)>=2 %nirx           
                 SDdetL = StrBoxy2SDDet(DetL);
                 SDsrsL = str2num(SrsL(3:end));
@@ -1011,15 +1012,13 @@ elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
                 listname{i,1} = [DetL ' ' SrsL];    
             end
         end
-         d1(listHBOch) = val
+         d1(listHBOch) = val;
         else
-             d1 = d1.A;            
-            
+             d1 = d1.A;                   
         end            
-      
-        set(handles.edit_D1matrix,'string',[path,name]) 
-        get(handles.edit_D1matrix,'position') 
-         set(handles.edit_D1matrix,'value',1)
+        set(handles.edit_D1matrix,'string',[path,name]) ;
+        get(handles.edit_D1matrix,'position'); 
+         set(handles.edit_D1matrix,'value',1);
          guidata(hObject,handles);
     elseif strcmp(typelabel{type}, 'PARAFAC')  %PARAFAC FACTOR
          FacSpatial = PMI{currentsub}.tmpPARAFAC.Factors{2}

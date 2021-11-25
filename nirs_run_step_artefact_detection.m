@@ -28,7 +28,7 @@ minpourcentage = job.b_minpourcentagebad.minpourcentagebad;
 option_minpourcentage = job.b_minpourcentagebad.m_minpourcentagebad;
 %check 
 try
-    zscore(rand(10))
+    zscore(rand(10));
 catch
     disp('Uncomplete Artifact Detection, Please install the Matlab Statistics and Machine Learning Toolbox™')
     out.NIRSmat = job.NIRSmat;  
@@ -67,7 +67,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 [pathstr, name, ext] = fileparts(NIRS.Dt.fir.pp(lst).p{f});
                                             %exclure already marked artefact from mean_diff
                             %to get zscore without artefact.     
-                            vmrk_path = fullfile(pathstr,[name,'.vmrk'])
+                            vmrk_path = fullfile(pathstr,[name,'.vmrk']);
                             noise = logical(zeros(size(d')));
                             mrk_type_arr = cellstr('bad_step');
                             mrks = [];
@@ -233,14 +233,19 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                                 ylabel('Original data (a.u.)')
                                 set(gca,'fontsize',12)
                                 saveas(h,[dirmat,filesep,'ArtifactDetection_Report',filesep,'EachCh',filesep,name,filesep,name,'_ch_',num2str(Idx),'tr',num2str(thr_ind),'.jpg'],'jpg')                  
-                                saveas(h,[dirmat,filesep,'ArtifactDetection_Report',filesep,'EachCh',filesep,name,filesep,name,'_ch_',num2str(Idx),'tr',num2str(thr_ind),'.fig'],'fig')                  
+                                saveas(h,[dirmat,filesep,'ArtifactDetection_Report',filesep,'EachCh',filesep,name,filesep,name,'_ch_',num2str(Idx),'tr',num2str(thr_ind),'.fig'],'fig') 
                                 close(h)
                            
                        end         
                     end
-                    end
+                  end
+                  if printreportthreshold 
+                  disp(['Create channel artifact report in:                   ',dirmat,filesep,'ArtifactDetection_Report',filesep,'EachCh',filesep]);
+                  end
                 end
-             
+                
+                        
+               
                 if difference_of_means
                 if job.PrintReport
                     hsummary = figure;
@@ -261,8 +266,9 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                     set(gca,'fontsize',12)
                     xlim([time(1),time(end)])
                     ylim([1,100])
-                    saveas(hsummary,[dirmat,filesep,'ArtifactDetection_Report',filesep,'Report', name,'__01zscore_','tr',num2str(thr_ind),'.jpg'],'jpg')  
-                    saveas(hsummary,[dirmat,filesep,'ArtifactDetection_Report',filesep,'Report', name,'__01zscore_','tr',num2str(thr_ind),'.fig'],'fig')  
+                    saveas(hsummary,[dirmat,filesep,'ArtifactDetection_Report',filesep,'Report', name,'__01zscore_','tr',num2str(thr_ind),'.jpg'],'jpg');  
+                    saveas(hsummary,[dirmat,filesep,'ArtifactDetection_Report',filesep,'Report', name,'__01zscore_','tr',num2str(thr_ind),'.fig'],'fig');  
+                    disp(['Save moving average report:                        ', dirmat,filesep,'ArtifactDetection_Report',filesep,'Report', name,'__01zscore_','tr',num2str(thr_ind),'.jpg']);
                     close(hsummary);
 
                 end
@@ -307,6 +313,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                         ylim([1,100])
                         saveas(hsummary,[dirmat,filesep,'ArtifactDetection_Report',filesep,'Report' name,'__02percentagemin_',num2str(minpourcentage),'.jpg'],'jpg')  
                         saveas(hsummary,[dirmat,filesep,'ArtifactDetection_Report',filesep,'Report' name,'__02percentagemin_',num2str(minpourcentage),'.fig'],'fig')  
+                        disp(['Save minimal percentage of bad channels report:    ', dirmat,filesep,'ArtifactDetection_Report',filesep,'Report' name,'__02percentagemin_',num2str(minpourcentage),'.jpg']);
                         close(hsummary);
                    end   
                   end
@@ -383,6 +390,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                         ylim([1,100])
                         saveas(hsummary,[dirmat,filesep,'ArtifactDetection_Report',filesep,'Report' name,'__03minsubinterval_',num2str(min_subinterval),'.jpg'],'jpg')  
                         saveas(hsummary,[dirmat,filesep,'ArtifactDetection_Report',filesep,'Report' name,'__03minsubinterval_',num2str(min_subinterval),'.fig'],'fig')  
+                        disp(['Save minimal subinterval report:                   ', dirmat,filesep,'ArtifactDetection_Report',filesep,'Report' name,'__03minsubinterval_',num2str(min_subinterval),'.jpg']);
                         close(hsummary);
                     end 
                 end
@@ -454,7 +462,6 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                     subplot(3,1,3)
                     plot(time, sum(stepmat)/size(stepmat,1)*100)
                     perc_criterion4 = sum(stepmat)/size(stepmat,1)*100;
-
                     xlabel('Time (s)','fontsize',12)
                     ylabel('Noisy channels (%)','fontsize',12)
                     title('Percentage of channel noisy in function of time','fontsize',12)
@@ -463,15 +470,11 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                     ylim([1,100])
                     saveas(hsummary,[dirmat,filesep,'ArtifactDetection_Report',filesep,'Report' name,'__04correlation_',num2str(corr_thr),'.jpg'],'jpg')  
                     saveas(hsummary,[dirmat,filesep,'ArtifactDetection_Report',filesep,'Report' name,'__04correlation_',num2str(corr_thr),'.fig'],'fig')  
+                    disp(['Save correlation report:                           ', dirmat,filesep,'ArtifactDetection_Report',filesep,'Report' name,'__04correlation_',num2str(corr_thr),'.jpg']);
                     close(hsummary);
                 end
                  end
             
-               
-          
-                                
-
-
                 %WRITE DATA
                 %save steps info in ind_dur_ch (same code as above)
                 stepmat = (copy_channel_noise(stepmat'))';
@@ -503,9 +506,9 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                     %Writing bad points and sufficient step intervals in
                     %.wmrk file
                     [dir1,fil1,ext1] = fileparts(rDtp{f});
-                    infilewmrk = fullfile(dir1,[fil1 '.vmrk']);
+                    infilevmrk = fullfile(dir1,[fil1 '.vmrk']);
                     outfilevmrk = fullfile(dirmat,[prefix fil1 '.vmrk']);
-                    copyfile(infilewmrk,outfilevmrk);
+                    copyfile(infilevmrk,outfilevmrk);
                     description = ['thr_ind',num2str(thr_ind)];
                     write_vmrk(outfilevmrk,'bad_step',description,ind_dur_ch(ind_dur_ch(:,4)==0,1:3));
                     infilevhdr = fullfile(dir1,[fil1 '.vhdr']);
@@ -515,9 +518,9 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 else
                     disp(['No steps found for Subject ',int2str(filenb),', file ',int2str(f),'.']);
                     [dir1,fil1,ext1] = fileparts(rDtp{f});
-                    infilewmrk = fullfile(dir1,[fil1 '.vmrk']);
+                    infilevmrk = fullfile(dir1,[fil1 '.vmrk']);
                     outfilevmrk = fullfile(dirmat,[prefix fil1 '.vmrk']);
-                    copyfile(infilewmrk,outfilevmrk);         
+                    copyfile(infilevmrk,outfilevmrk);         
                     infilevhdr = fullfile(dir1,[fil1 '.vhdr']);
                     outfilevhdr = fullfile(dirmat,[prefix fil1 '.vhdr']);
                     copyfile(infilevhdr,outfilevhdr);    
@@ -530,7 +533,16 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 outfile = fullfile(dirmat,[prefix fil1 ext1]);
            
                 if DelPreviousData
-                    delete(rDtp{f,1});
+                    delete(rDtp{f,1});           
+                    delete(infilevmrk);
+                    delete(infilevhdr);
+%                     try
+%                         infileAC = fullfile(dir1,[fil1 'AC' '.nir']);
+%                         delete(infileAC)
+%                         infilePH = fullfile(dir1,[fil1 'PH' '.nir']);
+%                         delete(infilePH)
+%                     catch
+%                     end
                 end
                 fwrite_NIR(outfile,d);                                
                 %add outfile name to NIRS
