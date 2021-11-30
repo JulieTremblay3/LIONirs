@@ -42,7 +42,8 @@ if isfield(job.c_createImportProjectSnirf,'b_createProject')
     SaveStruct = Create_PrjStruct( LoadedStruct );
     [filepath,name,ext] =fileparts(job.inputrawhomer{1});
     save(fullfile(dirout,[name,'.prj']), 'SaveStruct');
-    prjfile = fullfile(dirout,[name,'.prj'])
+    prjfile = fullfile(dirout,[name,'.prj']);
+    disp(['Create: ', prjfile]);
 elseif isfield(job.c_createImportProjectSnirf,'b_importProject')
     prjfile = job.c_createImportProjectSnirf.b_importProject.prjfile{1};
     LoadedStruct = load( prjfile,'-mat');
@@ -206,6 +207,7 @@ for Idx_File=1:numel(job.inputrawhomer)
                 SD.Markers);
     %FIRST STEP OF PROCESSING PP1
     NIRS.Dt.fir.pp(1).p{Idx_File,1} = fileOut_nir; 
+    disp(['Save: ', fileOut_nir])
     NIRS.Dt.fir.pp(1).pre = 'READ_RAW_NIRS';
     NIRS.Dt.fir.pp(1).job = job;   
 end
@@ -251,7 +253,7 @@ end
     zone.plot{2} = [ml(ml(: ,4)==1,1), ml(ml(: ,4)==1,2)];
     zone.plotLst{2} =  [find(ml(: ,4)==1)];
     save( [dirout, filesep,'Global.zone'],'zone');
-
+    disp(['Save: ', fullfile(dirout,'Global.zone')])
     save(fullfile(dirout,'NIRS.mat'),'NIRS');
     job.NIRSmat{1} =fullfile(dirout,'NIRS.mat');
 

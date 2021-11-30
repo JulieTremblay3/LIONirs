@@ -79,8 +79,8 @@ if ~isempty(snirf.stim)
     DATA.s = zeros(size(DATA.d,1), numel(snirf.stim));
     for istim = 1 : numel(snirf.stim)
         for idata=1:size(snirf.stim(istim).data,1)
-            snirf.stim(1,istim).name
-            round(fq*snirf.stim(1,istim).data(idata,1))
+            snirf.stim(1,istim).name;
+            round(fq*snirf.stim(1,istim).data(idata,1));
             DATA.s(round(fq*snirf.stim(1,istim).data(idata,1)),istim) = 1;
         end
     end
@@ -293,6 +293,7 @@ for Idx_File=1:numel(job.inputSNIRF)
                 SD.Markers);
     %FIRST STEP OF PROCESSING PP1
     NIRS.Dt.fir.pp(1).p{Idx_File,1} = fileOut_nir; 
+    disp(['Save: ', fileOut_nir])
     NIRS.Dt.fir.pp(1).pre = 'READ_RAW_NIRS';
     NIRS.Dt.fir.pp(1).job = job;   
 end
@@ -338,7 +339,7 @@ end
     zone.plot{2} = [ml(ml(: ,4)==1,1), ml(ml(: ,4)==1,2)];
     zone.plotLst{2} =  [find(ml(: ,4)==1)];
     save( [dirout, filesep,'Global.zone'],'zone');
-
+    disp(['Save: ', fullfile(dirout,'Global.zone')])
     save(fullfile(dirout,'NIRS.mat'),'NIRS');
     job.NIRSmat{1} =fullfile(dirout,'NIRS.mat');
 

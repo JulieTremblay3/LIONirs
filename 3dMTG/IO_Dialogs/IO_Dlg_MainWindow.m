@@ -368,7 +368,7 @@ function MenuMontageParams_Callback(hObject, eventdata, handles)
 % --------------------------------------------------------------------
 function MenuHelpIOMtgHelp_Callback(hObject, eventdata, handles)
     [filepath, ~, ~] = fileparts(mfilename('fullpath')); % Get the path absolute path of the IOMtg main window and only keep filepath.
-    system(fullfile(filepath(1:end-16), 'Documation_ToolboxLIONirs.pdf' )); % Construct the absolute path to the help document and open it.
+    system(fullfile(filepath(1:end-16), 'DocumentationToolboxLIONirs.pdf' )); % Construct the absolute path to the help document and open it.
 % --------------------------------------------------------------------
 function MenuHelpAboutIOMtg_Callback(hObject, eventdata, handles)
     iconData = zeros(5,5);

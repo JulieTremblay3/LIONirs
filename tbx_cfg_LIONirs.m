@@ -3205,7 +3205,7 @@ I_ConnectivityMATName.help    = {'OutputName for the matrix. Use an identifier a
 
 
 E_chcorrMat      = cfg_exbranch;      
-E_chcorrMat.name = 'Connectivity matrix using channel list (NIRS.mat)' ;            
+E_chcorrMat.name = 'Connectivity matrix' ;            
 E_chcorrMat.tag  = 'E_chcorrMat'; 
 E_chcorrMat.val  = {NIRSmat, b_nodelist I_chcorrlist_type I_chcorrlistoutpath I_ConnectivityMATName};   
 E_chcorrMat.prog = @nirs_run_chcorrMat;  
