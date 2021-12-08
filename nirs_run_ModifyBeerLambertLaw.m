@@ -160,7 +160,7 @@ for Idx=1:size(job.NIRSmat,1)
         end
         save(fullfile(dir2,'NIRS.mat'),'NIRS');         
     catch
-        disp(['Conversion of optical intensities to hemoglobin ',...
+        disp(['Error Conversion of optical intensities to hemoglobin ',...
             'concentrations failed for subject ' int2str(Idx)]);
     end
 end

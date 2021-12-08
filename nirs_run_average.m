@@ -618,7 +618,7 @@ if avtype==0 %save data file for multiple subjects average %NON vérifier
             title('Multiple subjects Averaged Intensity')
         end
     catch
-        disp('Failed to average over multiple subjects. Check if all subjects have the same montage and/or triggers.');
+        disp('Error to average over multiple subjects. Check if all subjects have the same montage and/or triggers.');
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

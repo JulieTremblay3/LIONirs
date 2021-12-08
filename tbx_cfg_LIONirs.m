@@ -445,11 +445,27 @@ e_shortdistancesrs.num     = [1 Inf];
 e_shortdistancesrs.val     = {[1,2,3,4,5,6,7,8]}; 
 e_shortdistancesrs.help    = {'Identify the short distance localization on the helmet, as an example if the probes are placed in source 1 and source 2, write 1,2.'};
 
+%use10_10system
+b_shortdistancenewproject          = cfg_menu;
+b_shortdistancenewproject.tag      = 'b_shortdistancenewproject';
+b_shortdistancenewproject.name     = 'Create project SD';
+b_shortdistancenewproject.labels   = {'True','False'};
+b_shortdistancenewproject.values   = {1,0};
+b_shortdistancenewproject.val      = {0};
+b_shortdistancenewproject.help     = {'NIRx short distance probes record additional detectors next to a source.',...
+    'During data recording, these multiple detector probes are encoded in the data of last detector D24.',...  
+    'If you set this option to yes, a new project is created to display additional detector ',...
+    'close to the associated source where they were place.If you set this option to not, the actual project with detector D24 is kept' }';
+
+
 b_shortdistanceavailable         = cfg_branch;
 b_shortdistanceavailable.tag     = 'b_shortdistanceavailable';
 b_shortdistanceavailable.name    = 'Yes';
-b_shortdistanceavailable.val     = {e_shortdistancesrs e_shortdistancedet};
+b_shortdistanceavailable.val     = {e_shortdistancesrs e_shortdistancedet b_shortdistancenewproject };
 b_shortdistanceavailable.help    = {'Short distance are available in the recording (det 16 will be associate).'}';
+
+
+
 
 c_shortdistance         = cfg_choice;
 c_shortdistance.tag     = 'c_shortdistance';

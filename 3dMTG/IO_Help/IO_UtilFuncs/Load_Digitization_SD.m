@@ -1,4 +1,8 @@
 function oDig = Load_Digitization_SD(NIRS)
+% Description:  add the information of the digitalization (coordinate) include in .nirs
+% data file the filed SD.SrcPos and SD.DetPos already include de coordinate
+% these coordinates are usually in 2d and will be used to create the vHoles
+% field of the anatomy project (.prj).
 
     %Nouveau casque
     oDig = Digitization;

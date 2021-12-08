@@ -188,7 +188,7 @@ for filenb = 1:size(NIRSDtp,1)
         disp(['Create export: ', fullfile(pathoutlist,['HBRmean',labelout,'.mat'])])
         disp(['Export data from: '   srsfile]);
     catch
-        disp(['Could not export data from: '   srsfile]);
+        disp(['Error Could not export data from: '   srsfile]);
     end
 end
 
@@ -211,6 +211,7 @@ if 0
         try
             writetxtfile_asxlsfile(fullfile(pathoutlist,['Component' type,label,'.txt']),tmp);
         catch
+            disp(['Error ','File ', fullfile(pathoutlist,['Component' type,label,'.txt']),' could not be written' ])
             msgbox(['File ', fullfile(pathoutlist,['Component' type,label,'.txt']),' could not be written'])
         end
     else 

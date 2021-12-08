@@ -23,6 +23,7 @@ NIRS.Cf.dev.n = 'NIRx'; %'ISS Imagent' %'NIRSx';
                  mkdir(pathout);
             catch
                 msgbox(['Please remove ' , pathout,' manually'])
+                disp(['Please remove: ' , pathout]);
                 return
             end
     end
@@ -39,6 +40,7 @@ LoadedStruct = Load_PrjStruct(LoadedStruct,false);
 DispHelm = get_Helmet( LoadedStruct );
 sMtg = get_Mtg( DispHelm );
 vHoles = get_vHoles( DispHelm );
+
 NIRS.Cf.H.prj = job.prjfile{1};
 
 %ASSOCIATION SOURCE ML 1 = SOURCE HELMET 018001
@@ -77,7 +79,7 @@ for i=1:numel(listdet)
 end
 
 
-
+ 
 
 %PARAMETRE
 NIRS.Dt.s.age =job.age1 ;
@@ -248,6 +250,57 @@ for Idx_File=1:numel(inputrawscout)
              distancemat(i,j) = sqrt((x2-x1)^2+(y2-y1)^2+ (z2-z1)^2);
             end
         end
+        
+           %Create a project where short distance are displayed as
+          %independant detector. 
+          if  job.c_shortdistance.b_shortdistanceavailable.b_shortdistancenewproject   
+ 
+               srsmtg = listsrs(SSHORT);            
+               vHoles = get_vHoles( DispHelm );
+               sMtg = get_Mtg( DispHelm );
+               %remove actual 24 detector place randomly on the helmet
+               id = find(sMtg.v_HolesMtg ==24000000);
+               if ~isempty(id)
+                    sMtg.v_HolesMtg(id)=0;
+                    id24 = find(sMtg.v_pDet==id);
+                    sMtg.v_pDet(id24)=[];
+               end
+               %ICI FINALISER LES NOUVELLES ATRIBUTION DE DÉTECTEUR 
+               iddet24 = find(NIRS.Cf.H.C.id(3,:)==24);
+                 for i=1:numel(srsmtg)
+                       newDet = (23+i) * 1000000;
+                       p =  find(sMtg.v_HolesMtg== srsmtg(i));
+                       newHole = vHoles(p);
+                       newHole.Label = ['SD_',newHole.Label];
+                       newHole.Coord.x = newHole.Coord.x+0.005;
+                       newHole.Coord.y = newHole.Coord.y+0.005;
+                       newHole.Coord.z = newHole.Coord.z+0.005;
+                       vHoles  =   [vHoles ,newHole];
+                       sMtg.v_HolesMtg =  [sMtg.v_HolesMtg, newDet];
+                       sMtg.v_pDet= [sMtg.v_pDet,numel(sMtg.v_HolesMtg)];
+                       idsourceshort =  find(NIRS.Cf.H.C.id(2,:)==SSHORT(i) & NIRS.Cf.H.C.id(3,:)==24);  %source 
+                       NIRS.Cf.H.C.id(3,idsourceshort)=(23+i);  % New Detector
+                 end
+                 DispHelm = set_Mtg(DispHelm, sMtg);
+                 DispHelm = set_vHoles( DispHelm,vHoles );
+                 LoadedStruct  = set_Helmet( LoadedStruct ,  DispHelm );
+                DATA.ml(:,2)= NIRS.Cf.H.C.id(3,:); %replace by new det;
+%                 DispHelm = get_Helmet( LoadedStruct );
+%                 sMtg = get_Mtg( DispHelm );
+
+               SaveStruct = Create_PrjStruct( LoadedStruct );
+               [PathName,FileName,ext]=  fileparts(job.prjfile{1});
+               save(fullfile(PathName,['SD_',FileName,ext]), 'SaveStruct');
+               disp(['Create: ', fullfile(PathName,['SD_',FileName,ext])]);
+               NIRS.Cf.H.prj = fullfile(PathName,['SD_',FileName,ext]);
+               job.prjfile{1} = fullfile(PathName,['SD_',FileName,ext]); %use for 3dMTG display
+          end 
+        
+        
+        
+        
+        
+        
     %take the closest from the regressor to create zone each channel is
     %take only once                  
        zone.SD.Lambda = NIRS.Cf.dev.wl;
@@ -292,7 +345,7 @@ for Idx_File=1:numel(inputrawscout)
            ishort = ishort+1;
        end             
         save( [pathout,filesep, 'SHORTDISTANCE.zone'],'zone');
-        disp(['Save zone: ',  pathout,filesep, 'SHORTDISTANCE.zone'])
+        disp(['Save zone with short distance channels separated: ',  pathout,filesep, 'SHORTDISTANCE.zone'])
         clear zone
          distancemat = zeros(size(pos,1)/2,numel(SHORTmlid ));       
         %DISTANCE BETWEEN CHANNEL FOR CLUSTERING
@@ -308,7 +361,13 @@ for Idx_File=1:numel(inputrawscout)
              distancemat(i,j) = sqrt((x2-x1)^2+(y2-y1)^2+ (z2-z1)^2);
             end
         end
-    %take the closest from the regressor to create zone each channel is
+
+             
+          clear zone
+                  
+        
+    
+        %take the closest from the regressor to create zone each channel is
     %take only once                  
        zone.SD.Lambda = NIRS.Cf.dev.wl;
        zone.SD.SrcPos = NIRS.Cf.H.S.r.o.mm.p';
@@ -333,22 +392,21 @@ for Idx_File=1:numel(inputrawscout)
          zone.plot{2} = [DATA.ml(DATA.ml(: ,4)==1,1), DATA.ml(DATA.ml(: ,4)==1,2)];
          zone.plotLst{2} =  [find(DATA.ml(: ,4)==1)];
          save( [pathout, filesep,'AllShortDistance.zone'],'zone')
-        disp(['Save zone: ',  pathout, filesep,'AllShortDistance.zone']);
-              
-          clear zone
+         disp(['Save zone with short distance channels grouped: ',  pathout, filesep,'AllShortDistance.zone']);
     end
     
-     zone.SD.Lambda = NIRS.Cf.dev.wl;
-     zone.SD.SrcPos = NIRS.Cf.H.S.r.o.mm.p';
-     zone.SD.DetPos = NIRS.Cf.H.D.r.o.mm.p';
-     zone.SD.nSrcs  = numel(zone.SD.SrcPos)/3;
-     zone.SD.nDets  = numel(zone.SD.DetPos)/3;
-     zone.SD.SrcAmp = ones(zone.SD.nSrcs ,2);
-     zone.SD.DetAmp = ones(zone.SD.nDets,2);
-     zone.color = [lines(8);lines(8)];     
-     zone.ml = DATA.ml;
-     zone.peak = [];
-     zone.pos = pos;
+    find(NIRS.Cf.H.C.id(3,:)==24);
+    zone.SD.Lambda = NIRS.Cf.dev.wl;
+    zone.SD.SrcPos = NIRS.Cf.H.S.r.o.mm.p';
+    zone.SD.DetPos = NIRS.Cf.H.D.r.o.mm.p';
+    zone.SD.nSrcs  = numel(zone.SD.SrcPos)/3;
+    zone.SD.nDets  = numel(zone.SD.DetPos)/3;
+    zone.SD.SrcAmp = ones(zone.SD.nSrcs ,2);
+    zone.SD.DetAmp = ones(zone.SD.nDets,2);
+    zone.color = [lines(8);lines(8)];     
+    zone.ml = DATA.ml;
+    zone.peak = [];
+    zone.pos = pos;
     zone.label{1} = ['Regressor All'];
     zone.plot{1} = [DATA.ml(DATA.ml(: ,4)==1,1), DATA.ml(DATA.ml(: ,4)==1,2)];
     zone.plotLst{1} =  [find(DATA.ml(: ,4)==1)];
@@ -356,14 +414,14 @@ for Idx_File=1:numel(inputrawscout)
     zone.plot{2} = [DATA.ml(DATA.ml(: ,4)==1,1), DATA.ml(DATA.ml(: ,4)==1,2)];
     zone.plotLst{2} =  [find(DATA.ml(: ,4)==1)];
     save( [pathout, filesep,'Global.zone'],'zone');
-    disp(['Save zone: ',  pathout, filesep,'Global.zone']);
+    disp(['Save zone with all channels grouped: ',  pathout, filesep,'Global.zone']);
 if numel(evt)>0 % Verify that the event matrix is not empty.
     NIRS.Dt.fir.aux5{Idx_File} = [ones(size(evt,1),1),evt(:,1)]; %valeur 1 internal trigger
     NIRS.Dt.fir.aux5{Idx_File} = [ones(size(evt,1),1),evt(:,1)]; %valeur 1 internal trigger
     trigdec = evt(:,2)*2^0+  evt(:,3)*2^1+evt(:,4)*2^2+evt(:,5)*2^3; % Convert the trigger identifier byte to decimal.
     NIRS.Dt.fir.aux5{Idx_File} = [trigdec ,evt(:,1)]; % Concatenate the decimal trigger identifier with the time collumn of the event file.
 else
-     NIRS.Dt.fir.aux5{Idx_File} = [1 1]; % Create a row of two ones if no event is provided.
+    NIRS.Dt.fir.aux5{Idx_File} = [1 1]; % Create a row of two ones if no event is provided.
 end
 if isfield(job.c_nameconvention_NIRxscout   ,'b_defaultname_NIRxscout')
     fileout = fil1;    

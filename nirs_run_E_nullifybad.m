@@ -90,7 +90,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 end
                 %close(hwaitbar);
              else
-                disp(['Failed to nullify bad intervals for Subject ',int2str(filenb),', file ',int2str(f),'. No markers found in the .vmrk file. If you have already used the Step Detection function, your data may have no bad steps in it.']);
+                disp(['Error to nullify bad intervals for Subject ',int2str(filenb),', file ',int2str(f),'. No markers found in the .vmrk file. If you have already used the Step Detection function, your data may have no bad steps in it.']);
             end
             
 

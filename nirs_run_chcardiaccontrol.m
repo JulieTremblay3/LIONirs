@@ -342,7 +342,8 @@ pourcentagetr = job.i_minch_cardiac/100;
             xlswrite(fullfile(filepath,['CardiacCHSNR.xls']),xlsallSNR);
         end
     end
-    disp(['Cardiac report : ', fullfile(filepath,['CardiacCHCOH',num2str(f),'.jpg']), ' and ', fullfile(filepath,['CardiacCHCOH.xls']), ' are created'])
+    disp(['Save Cardiac report COH figure: ', fullfile(filepath,[nametmp,'CardiacCHCOH',num2str(f),'.jpg'])]);
+    disp(['Save Cardiac xls channels rejected: ', fullfile(filepath,['CardiacCHCOH.xls'])]);
     save(job.NIRSmat{1},'NIRS');
     out.NIRSmat = job.NIRSmat;
 end

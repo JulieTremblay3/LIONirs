@@ -5,7 +5,9 @@ function out = nirs_run_segment(job)
 %filename prefix 
 prefix = 's'; %for "segment"
 DelPreviousData  = job.DelPreviousData;
-flagsegmentAUX = 0; %write offset time instead off create a copy of the data segmented 0 keep whole original segment 1 segment
+
+ %write offset time in the AUX and EEG structure and do not create a copy of the data segmented 0 keep whole original segment 1 segment
+flagsegmentAUX = 0;
 flagsegmentEEG = 0;
 for filenb = 1:size(job.NIRSmat,1)
     NIRS = [];
@@ -68,7 +70,8 @@ for filenb = 1:size(job.NIRSmat,1)
             end
         end
         catch
-            msgbox('AUX could not be segment')
+           % msgbox('AUX could not be segment')
+           disp('Error AUX could not be segment')
         end
         
         trigger = job.trigger;
@@ -95,8 +98,12 @@ for filenb = 1:size(job.NIRSmat,1)
                 itrigger =[itrigger, ones(1,numel(idstim)).*trigger(itypestim)];
                 disp(['Search trigger: ', num2str(trigger(itypestim))])  
             end
-            disp(['Find NIRS onset time: ', sprintf('%.2f ',1/fs*indstim),'seconds to segment' ])
-            
+            disp(['Find ', num2str(numel(indstim)), ' NIRS trigger ', sprintf('S%3.0f, ',trigger),sprintf('\n'),...
+                'Time: ', sprintf('%.2f ',1/fs*indstim),'seconds to segment',sprintf('\n'),...
+                'Sample: ',sprintf('%.0f ', indstim )]);
+                
+            %disp(['Find ', num2str(numel(indstim_EEG)), ' EEG trigger ',idtrigEEG , sprintf('\n'),'Time: ', sprintf('%.2f, ',EEG.infoBV.SamplingInterval/1000000*indstim_EEG),'seconds to sync', sprintf('\n'),'Sample: ',sprintf('%d, ',indstim_EEG) ])
+             
             if numel(indstim)==1
                 %trig could be ajuste to start and end of the bloc no need
                 %to define fix start stop cause only one trigger exist. 
@@ -168,19 +175,23 @@ for filenb = 1:size(job.NIRSmat,1)
                     idtrigEEG = ['S',sprintf('%3.0f',trigger)];
                     if numel(indstim)==numel(idstimEEG) %gerer les cas stim agree dimention only
                         indstim_EEG = EEG.ind_dur_ch(idstimEEG,1);
-                        disp(['Find EEG onset time: ', sprintf('%.2f ',EEG.infoBV.SamplingInterval/1000000*indstim_EEG),'seconds to sync' ])
+                        disp(['Find ', num2str(numel(indstim_EEG)), ' EEG trigger ',idtrigEEG , sprintf('\n'),'Time: ', sprintf('%.2f, ',EEG.infoBV.SamplingInterval/1000000*indstim_EEG),'seconds to sync', sprintf('\n'),'Sample: ',sprintf('%d, ',indstim_EEG) ])
                     else
-                        msgbox('unequal EEG trigger identification')
-                        indstim_EEG = EEG.ind_dur_ch(idstimEEG(1:5),1);
+                        %msgbox('unequal EEG trigger identification')
+                        indstim_EEG = EEG.ind_dur_ch(idstimEEG,1);
+                        disp('Error unequal EEG trigger identification review vmrk')
+                        disp(['Find ', num2str(numel(indstim_EEG)), ' EEG trigger ',idtrigEEG , sprintf('\n'),'Time: ', sprintf('%.2f, ',EEG.infoBV.SamplingInterval/1000000*indstim_EEG),'seconds to sync', sprintf('\n'),'Sample: ',sprintf('%d, ',indstim_EEG) ])   
                     end
                     fsEEG = 1/(EEG.infoBV.SamplingInterval/1000000); %uS en seconde
                     pretimeEEG = round(fsEEG*pretime/fs)-1;
                     posttimeEEG = round(fsEEG*posttime/fs);
                 catch
+                    disp('Error EEG could not be open and synchronised')
                 end
             end
-            %   try
+           
             if isfield(NIRS.Dt,'AUX')
+                    try
                 %ISS SYSTEM or create trig via GUI_AUXedit USE
                 %'trigger' as marker name column 1
                 %NIRX
@@ -216,23 +227,28 @@ for filenb = 1:size(job.NIRSmat,1)
                      %itrigger =[itrigger, ones(1,numel(idstim)).*trigger(itypestim)];
                     if numel(indstim)==numel(idstimAUX{iaux}) %gerer les cas stim agree dimention only
                         indstim_AUX{iaux} = AUX(iaux).ind_dur_ch(idstimAUX{iaux},1);
-                        disp(['Find AUX onset time: ', sprintf('%.2f ',AUX.infoBV.SamplingInterval/1000000*indstim_AUX{iaux}),'seconds to sync' ])
+                         % disp(['Find AUX onset time: ', sprintf('%.2f ',AUX.infoBV.SamplingInterval/1000000*indstim_AUX{iaux}),'seconds to sync' ])
+                        disp(['Find ', num2str(numel( indstim_AUX{iaux})), ' AUX trigger ', sprintf('S%3.0f, ',trigger) ,...
+                            sprintf('\n'),'Time: ', sprintf('%.2f, ',AUX.infoBV.SamplingInterval/1000000*indstim_AUX{iaux}),'seconds to sync', sprintf('\n'),'Sample: ',sprintf('%d, ',indstim_AUX{iaux}) ]);
+
                     else
-                        idtocheckAUX = AUX(iaux).ind_dur_ch(idstimAUX{iaux},1);
-                        timetrig = idtocheckAUX * AUX(iaux).infoBV.SamplingInterval/1000000;
-                        timestim = indstim*1/NIRS.Cf.dev.fs;
-                        if 0
-                        figure;hold on;
-                        for i=1:numel(timetrig)
-                            plot( timetrig(i),1,'+r','displayname',['AUX',num2str(i)])
-                        end                 
-                        for i=1:numel(timestim)
-                            plot(timestim(i),1,'+b','displayname',['NIRS',num2str(i)])
-                        end
-                        
-                        title(['Error in number of trig ',num2str(trigger) ,' between AUX ', NIRS.Dt.AUX(iaux).label,' and NIRS, Please Ajust trig manualy or in VMRK file to make them match before segmentation.'])
-                        return
-                        end
+%                         idtocheckAUX = AUX(iaux).ind_dur_ch(idstimAUX{iaux},1);
+%                         timetrig = idtocheckAUX * AUX(iaux).infoBV.SamplingInterval/1000000;
+%                         timestim = indstim*1/NIRS.Cf.dev.fs;
+%                         if 0
+%                         figure;hold on;
+%                         for i=1:numel(timetrig)
+%                             plot( timetrig(i),1,'+r','displayname',['AUX',num2str(i)])
+%                         end                 
+%                         for i=1:numel(timestim)
+%                             plot(timestim(i),1,'+b','displayname',['NIRS',num2str(i)])
+%                         end
+%                         title(['Error in number of trig ',num2str(trigger) ,' between AUX ', NIRS.Dt.AUX(iaux).label,' and NIRS, Please Ajust trig manualy or in VMRK file to make them match before segmentation.']);
+%                         end
+                        indstim_AUX{iaux} = AUX(iaux).ind_dur_ch(idstimAUX{iaux},1);
+                        disp('Error unequal AUX trigger identification review vmrk')
+                        disp(['Find ', num2str(numel( indstim_AUX{iaux})), ' AUX trigger ', sprintf('S%3.0f, ',trigger) ,...
+                        sprintf('\n'),'Time: ', sprintf('%.2f, ',AUX.infoBV.SamplingInterval/1000000*indstim_AUX{iaux}),'seconds to sync', sprintf('\n'),'Sample: ',sprintf('%d, ',indstim_AUX{iaux}) ]);
                     end
                     
                     fsAUX{iaux} = 1/(AUX(iaux).infoBV.SamplingInterval/1000000); %uS en seconde
@@ -240,10 +256,10 @@ for filenb = 1:size(job.NIRSmat,1)
                     posttimeAUX{iaux} = round(fsAUX{iaux}*posttime/fs);
                     
                 end
-            end
-%              catch
-%             msgbox('AUX could not be segment')
-%         end
+                catch
+                    disp('Error AUX could not be open and synchronised')
+                end
+            end   
         end
         disp(['PreTime: ',num2str(pretime*1/fs), ' s ,PostTime: ' ,num2str(posttime*1/fs), ' s Apply to create ', num2str(numel(indstim)),' segments']);
         nstim = posttime + pretime + 1;
@@ -253,14 +269,15 @@ for filenb = 1:size(job.NIRSmat,1)
         for istim = 1:numel(indstim)
              dnorm = zeros(NC,nstim);
             if find((indstim(istim)-pretime) <= 0)
-                 disp('Could not be process : Segment pretime before stim out of range use 0 or negative value to take from the trig or la ')
+                 disp('Warning could not be process : Segment pretime before stim out of range use 0 or negative value to take from the trig or la ')
                  return
                 % indstim(:) = indstim(:) + size(d,2) ;
                 % d =[fliplr(d),d];
             end
            
             if (max(indstim)+posttime)>size(d,2)              
-                msgbox('Warning out of range padding in the last bloc')
+               % msgbox('Warning out of range padding in the last bloc')
+                disp('Warning out of range mirror padding for fNIRS data in the last bloc to apply PostTime lenght')
                 d = [d,fliplr(d)]; 
                 noise = [noise,fliplr(noise)];                
             end
@@ -278,28 +295,30 @@ for filenb = 1:size(job.NIRSmat,1)
                 fileOutRoot_vmrk= fullfile(dir2,[prefix fil1 bloc '.vmrk']);
                 fileOutRoot_vhdr = fullfile(dir2,[prefix fil1 bloc '.vhdr']) ;
                 if isfield(NIRS.Dt,'EEG')
+                    try
                     %WRITE IN SUB FILE.... or add sync_timesec
-                    [dirEEG,filEEG,extEEG]= fileparts(NIRS.Dt.EEG.pp(end).p{f});
-                    
+                    [dirEEG,filEEG,extEEG]= fileparts(NIRS.Dt.EEG.pp(end).p{f});                    
                     outfileEEG = fullfile(dirEEG,[filEEG bloc '.dat']);
-                    stimlist=indstim_EEG;
-                    %write and segment EEG file in homologous bloc
-                    if (max(stimlist)+posttimeEEG)>size(EEG.data,1)
-                        msgbox('Warning out of range padding in the last bloc aux')
-                        EEG.data= [EEG.data;flipud(EEG.data)];
-                        %  figure;plot(AUX(iAUX).data)
-                    end
-                                       
-                    if flagsegmentEEG
+                    stimlist=indstim_EEG;                      
+                    if flagsegmentEEG %not used create copy of EEG file segmented
+                        %write and segment EEG file in homologous bloc
+                        if (max(stimlist)+posttimeEEG)>size(EEG.data,1)
+                            %msgbox('Warning out of range padding in the last bloc aux')
+                            disp('Warning out of range mirror padding for EEG data in the last bloc to apply PostTime lenght')
+                            EEG.data= [EEG.data;flipud(EEG.data)];
+                            %  figure;plot(AUX(iAUX).data)
+                        end
                         datasegR = EEG.data(indstim_EEG(istim)-pretimeEEG:indstim_EEG(istim)+posttimeEEG,:);
                         fwrite_EEG(outfileEEG,EEG,indstim_EEG(istim)-pretimeEEG,indstim_EEG(istim)+posttimeEEG);
                         bloc                       
                         NIRS.Dt.EEG.pp(moduleEEG+1).p{ifile,1}=outfileEEG;                            
-                    else
+                    else  %apply reference to file and indicate offset time
                         NIRS.Dt.EEG.pp(moduleEEG+1).p{ifile} = NIRS.Dt.EEG.pp(moduleEEG).p{f};
                         NIRS.Dt.EEG.pp(moduleEEG+1).sync_timesec{ifile} = (indstim_EEG(istim)-pretimeEEG)*1/fsEEG;                        
                     end
-                    
+                    catch
+                        disp('Error Segment EEG could not be open and synchronised')
+                    end
                     
                 end
                 if isfield(NIRS.Dt,'Video')
@@ -314,20 +333,26 @@ for filenb = 1:size(job.NIRSmat,1)
                             NIRS.Dt.Video.pp(moduleVideo+1).p{ifile} = NIRS.Dt.Video.pp(moduleVideo).p{f};
                             NIRS.Dt.Video.pp(moduleVideo+1).sync_timesec{ifile} = (indstim_EEG(istim)-pretimeEEG)*1/fsEEG + offset;
                             catch
-                                msgbox('Video segmentation could not be done using EEG trigger')
-                                return
+                                disp('Error Video segmentation could not be done using EEG trigger')                                
                             end
                      
                         case 'NIRS'
+                            try 
                             NIRS.Dt.Video.pp(moduleVideo+1).p{ifile} = NIRS.Dt.Video.pp(moduleVideo).p{f};
                             NIRS.Dt.Video.pp(moduleVideo+1).sync_timesec{ifile} = (indstim(istim)-pretime)*1/fs  + offset;
+                            catch
+                                disp('Error Video segmentation could not be done using NIRS trigger') 
+                            end
                          case 'AUX'
-                            NIRS.Dt.Video.pp(moduleVideo+1).p{ifile} = NIRS.Dt.Video.pp(moduleVideo).p{f};
-                            indstim_AUXval = indstim_AUX{1}; %synchronisation will refere to file 1 
-                            pretimeAUXval = pretimeAUX{1};
-                            fsAUXval = fsAUX{1};
-                            
-                            NIRS.Dt.Video.pp(moduleVideo+1).sync_timesec{ifile} = (indstim_AUXval(istim)- pretimeAUXval)*1/fsAUXval  + offset;
+                             try
+                                NIRS.Dt.Video.pp(moduleVideo+1).p{ifile} = NIRS.Dt.Video.pp(moduleVideo).p{f};
+                                indstim_AUXval = indstim_AUX{1}; %synchronisation will refere to file 1 
+                                pretimeAUXval = pretimeAUX{1};
+                                fsAUXval = fsAUX{1};                            
+                                NIRS.Dt.Video.pp(moduleVideo+1).sync_timesec{ifile} = (indstim_AUXval(istim)- pretimeAUXval)*1/fsAUXval  + offset;
+                             catch
+                                 disp('Error Video segmentation could not be done using AUX trigger') 
+                             end
                     end
                     
                 end
@@ -339,38 +364,48 @@ for filenb = 1:size(job.NIRSmat,1)
                             NIRS.Dt.Audio.pp(moduleAudio+1).p{ifile} = NIRS.Dt.Audio.pp(moduleAudio).p{f};
                             NIRS.Dt.Audio.pp(moduleAudio+1).sync_timesec{ifile} = (indstim_EEG(istim)-pretimeEEG)*1/fsEEG + offset;
                             catch
-                                msgbox('Audio segmentation could not be done using EEG trigger')
-                                return
+                                %msgbox('Audio segmentation could not be done using EEG trigger')
+                                disp('Error Audio segmentation could not be done using EEG trigger')
                             end
                      
                         case 'NIRS'
+                            try
                             NIRS.Dt.Audio.pp(moduleAudio+1).p{ifile} = NIRS.Dt.Audio.pp(moduleAudio).p{f};
                             NIRS.Dt.Audio.pp(moduleAudio+1).sync_timesec{ifile} = (indstim(istim)-pretime)*1/fs  + offset;
-                         case 'AUX'
+                            catch
+                                disp('Error Audio segmentation could not be done using fNIRS trigger')
+                            end
+                        case 'AUX'
+                            try
                             NIRS.Dt.Audio.pp(moduleAudio+1).p{ifile} = NIRS.Dt.Audio.pp(moduleAudio).p{f};
                             indstim_AUXval = indstim_AUX{1}; %synchronisation will refere to file 1 
                             pretimeAUXval = pretimeAUX{1};
-                            fsAUXval = fsAUX{1};
-                            
+                            fsAUXval = fsAUX{1};                            
                             NIRS.Dt.Audio.pp(modulemoduleAudio+1).sync_timesec{ifile} = (indstim_AUXval(istim)- pretimeAUXval)*1/fsAUXval  + offset;
+                            catch
+                                disp('Error Audio segmentation could not be done using AUX trigger')
+                            end
                     end
                     
                 end
                 
-                try
+              
                 if isfield(NIRS.Dt,'AUX')
+                    try
                     for iAUX = 1:numel(NIRS.Dt.AUX)
                         
                         [dirAUX,filAUX,extAUX]= fileparts(NIRS.Dt.AUX(iAUX).pp(moduleaux).p{f});
                         outfileAUX{iAUX} = fullfile(dirAUX,[filAUX bloc '.dat']);
                         %write and segment EEG file in homologous bloc
                         stimlist=indstim_AUX{iAUX};
-                        if (max(stimlist)+posttimeAUX{iAUX})>size(AUX(iAUX).data,1)
-                            msgbox('Warning out of range padding in the last bloc aux')
+                        
+                        if flagsegmentAUX
+                            if (max(stimlist)+posttimeAUX{iAUX})>size(AUX(iAUX).data,1)
+                            %msgbox('Warning out of range padding in the last bloc aux')
+                            disp('Warning aux data out of range regard to NIRS size, mirror padding in the last bloc aux')
                             AUX(iAUX).data= [AUX(iAUX).data;flipud(AUX(iAUX).data)];
                             %  figure;plot(AUX(iAUX).data)
-                        end
-                        if flagsegmentAUX
+                            end
                             datasegR = AUX(iAUX).data(stimlist(istim)-pretimeAUX{iAUX}:stimlist(istim)+posttimeAUX{iAUX},:);
                             fwrite_EEG(outfileAUX{iAUX},AUX(iAUX),stimlist(istim)-pretimeAUX{iAUX},stimlist(istim)+posttimeAUX{iAUX});
                             NIRS.Dt.AUX(iAUX).pp(moduleaux+1).p{ifile,1}=outfileAUX{iAUX};
@@ -381,11 +416,12 @@ for filenb = 1:size(job.NIRSmat,1)
                         bloc;
                     end
                     
-                end
+               
                 catch
                        % msgbox('AUX could not be segment')
-                       fprintf('AUX could not be segmented');
-                 end
+                       disp('Error AUX could not be segmented');
+                end
+                  end
                 %dnorm=log(dnorm)
                 %WRITE THE RESEGMENTATION
                 NIRS.Dt.fir.sizebloc{ifile}=size(dnorm,2);
@@ -416,7 +452,7 @@ for filenb = 1:size(job.NIRSmat,1)
                 
                 % NIRS.Dt.fir.aux5{ifile,1} = NIRS.Dt.fir.aux5{ifile,1}
             
-                fprintf('%s\n',outfile);
+                fprintf('%s\n',['Create: ', outfile]);
                 %             %write new .vmrk file
                 %             infilewmrk = fullfile(dir1,[fil1 '.vmrk']);
                 %             outfilevmrk = fullfile(dir1,[prefix fil1 '.vmrk']);
