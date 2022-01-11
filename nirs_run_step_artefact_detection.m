@@ -500,6 +500,15 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                         end
                     end
                 end
+                %Check boarder limite marker to avoid out of range noise 
+              if ~isempty(ind_dur_ch)  
+                maxpoint  = ind_dur_ch(:,1)+ind_dur_ch(:,2);
+                badind = find(maxpoint>size(noise,1));
+                if ~isempty(badind)
+                    ind_dur_ch(badind,2)=size(noise,1)- ind_dur_ch(badind,1);
+                end 
+              end
+                
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 if ~isempty(ind_dur_ch)
                     [ind_dur_ch] = detect_subintervals_dur(ind_dur_ch);
@@ -536,13 +545,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                     delete(rDtp{f,1});           
                     delete(infilevmrk);
                     delete(infilevhdr);
-%                     try
-%                         infileAC = fullfile(dir1,[fil1 'AC' '.nir']);
-%                         delete(infileAC)
-%                         infilePH = fullfile(dir1,[fil1 'PH' '.nir']);
-%                         delete(infilePH)
-%                     catch
-%                     end
+                    disp(['Delete previous .nir data file: ',rDtp{f,1}])
                 end
                 fwrite_NIR(outfile,d);                                
                 %add outfile name to NIRS

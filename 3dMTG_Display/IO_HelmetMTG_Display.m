@@ -1151,6 +1151,9 @@ elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
              d1(listgoodHbO,1)=sum(topoHbR,2);
          end
    
+ 
+    elseif strcmp(typelabel{type}, 'SUBTRACT')%Selected component topo
+            1
     end
 elseif get(handles.radio_guiSPMnirsHSJ,'value')==3
     d1=selectimagetype(echantillon_time,type,dconc,get(handles.radio_guiSPMnirsHSJ,'value'));

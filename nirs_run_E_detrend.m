@@ -17,7 +17,8 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
         rDtp = NIRS.Dt.fir.pp(lst).p; % path for files to be processed
         NC = NIRS.Cf.H.C.N;
         fs = NIRS.Cf.dev.fs;
-        fprintf('%s\n','File processed');
+        fprintf('%s\n','File processed remove linear trend on whole file (detrend)');
+        
         for f=1:size(rDtp,1) %Loop over all files of a NIRS.mat 
 %             try
                 d = fopen_NIR(rDtp{f,1},NC);              
@@ -67,6 +68,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                     delete(rDtp{f,1});
                     delete(infilevmrk)
                     delete(infilevhdr)
+                    disp(['Delete previous .nir data file: ',rDtp{f,1}]);
                 end
                 %add outfile name to NIRS
                 if f == 1

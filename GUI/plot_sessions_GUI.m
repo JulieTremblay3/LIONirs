@@ -22,7 +22,7 @@ function varargout = plot_sessions_GUI(varargin)
 
 % Edit the above text to modify the response to help plot_sessions_GUI
 
-% Last Modified by GUIDE v2.5 10-Aug-2020 15:35:57
+% Last Modified by GUIDE v2.5 10-Jan-2022 08:00:24
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -70,7 +70,7 @@ handles.filepath = [];
 module_list = [];
 for i = 1:nb_file
     [dir1,fil1,ext1]= fileparts(NIRS.Dt.fir.pp(end).p{i,1});
-    handles.filepath = [handles.filepath {['Blocks' sprintf('%03.0f',i),' ',fil1]}];
+    handles.filepath = [handles.filepath {[fil1]}]; %'Blocks' sprintf('%03.0f',i),' ',
 end
 handles.module_list = [];
 handles.module_path = [];
@@ -197,6 +197,7 @@ if isempty(strfind(NIRS.Dt.fir.pp(s).pre,'Manual Gui'))|~strcmp(upper(dir1),uppe
             delete(infilenir);
             delete(infilevmrk);
             delete(infilevhdr);
+               disp(['Delete previous .nir data file: ',infilenir]);
         end
         
     end
@@ -247,7 +248,7 @@ currentsub = 1;
 PMI{currentsub}.currentFile = 1;
 cf = 1;
 if isfield(NIRS.Cf.H,'p')
-    PMI{currentsub}.prj_name = NIRS.Cf.H.p{1};
+    PMI{currentsub}.prj_name = NIRS.Cf.H.prj;
 end
 PMI{currentsub}.data(cf).MeasList = [NIRS.Cf.H.C.id(2:3,:)',...
     ones(size(NIRS.Cf.H.C.id,2),1),...
@@ -793,7 +794,7 @@ guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
 currentsub=1;
 PMI = get(guiHOMER,'UserData');
 try
-    PMI{currentsub}.prj_name=handles.NIRS.Dt.fir.pp(1).job.prjfile{1};
+    PMI{currentsub}.prj_name=NIRS.Cf.H.prj;
 catch
 end
 set(guiHOMER,'UserData',PMI);
@@ -1192,8 +1193,10 @@ function context_newfigure_Callback(hObject, eventdata, handles)
 % hObject    handle to context_newfigure (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-plotAxes_d1(handles,1)
-
+plotAxes_d1(handles,1);
+val = get(handles.popupmenu_file,'value');
+string = get(handles.popupmenu_file,'string');
+title(['Data: ',string{val} ] );
 
 % --------------------------------------------------------------------
 function context_Start_Callback(hObject, eventdata, handles)
@@ -1627,7 +1630,7 @@ try
             if ~isempty(badind)
                 disp(['Warning file ' vmrk_path ' marker : ' num2str(badind') ' are out of range in the data file'])
                 ind_dur_ch(badind,2)=size(noise,1)- ind_dur_ch(badind,1);
-            end
+            end 
             for Idx = 1:size(noise,2)
                 mrks = find(ind_dur_ch(:,3)==Idx);
                 ind = ind_dur_ch(mrks,1);
@@ -1653,11 +1656,6 @@ catch
     set(guiHOMER,'UserData',PMI);
 end
 
-
-
-
-
-
 function edit_start_Callback(hObject, eventdata, handles)
 % hObject    handle to edit_start (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -1678,8 +1676,6 @@ function edit_start_CreateFcn(hObject, eventdata, ~)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
 
 function edit_duration_Callback(hObject, eventdata, handles)
 % hObject    handle to edit_duration (see GCBO)
@@ -6026,7 +6022,7 @@ if isfield(handles.NIRS.Dt,'EEG')
     if isfield(handles.NIRS.Dt.EEG.pp(end),'sync_timesec')
         tstart = handles.NIRS.Dt.EEG.pp(end).sync_timesec{ifile};
         tstop = tstart+PMI{currentsub}.data(cf).HRF.tHRF(end);
-        offset = tstart + time_start
+        offset = tstart + time_start;
             try              
                  set(handles.text_Advice,'string',['Time ',sprintf('%02.0f',offset),' ', filelist ]);
          catch
@@ -6057,12 +6053,12 @@ if strcmp(ext,'.dat')| strcmp(ext,'.eeg')%Generic Data export analyser
     aux5 = handles.NIRS.Dt.fir(end).aux5{ifile};%trig  indice time
     fs = handles.NIRS.Cf.dev.fs;
     %infoBV = read_vhdr_BV(fullfile(pathstr,[name,'.vhdr']));
-    aux5t=aux5(:,2).*1/fs
+    aux5t=aux5(:,2).*1/fs;
     idtrig = find(aux5t(:,1)>time_start & aux5t(:,1)<time_stop);
     if ~isempty(idtrig)
-        trig=  [aux5(idtrig,1), aux5t(idtrig,1) - time_start]
+        trig=  [aux5(idtrig,1), aux5t(idtrig,1) - time_start];
     else
-        trig = [255,1]
+        trig = [1,1];
     end
     % dall = fopen_NIR(filelist,infoBV.NumberOfChannels);
     [dall,info,label,ind_dur_ch] = fopen_EEG(filelist, tstart, tstop);
@@ -6070,6 +6066,33 @@ if strcmp(ext,'.dat')| strcmp(ext,'.eeg')%Generic Data export analyser
     tall = info.SamplingInterval/1e6:info.SamplingInterval/1e6:size(dall,1)*info.SamplingInterval/1e6;
     idstart = find(tall<=time_start);
     idstop =  find(tall<=time_stop);
+    %Add online filter to view.... 
+    if 0 %NIRS.Cf.H.C.ok(Idx,f) ~= 0;  %If the channel was not previously flagged. %DO ALL
+        for Idx=1:size(dall,2)
+           dinterp =  dall;
+                        %LOWPASS
+                        filt_ord = 4;
+                        fs = 1/(info.SamplingInterval/1e6);
+                        lowcut = 1;
+                        highcut = 30;
+                        if 1
+                            Wn = lowcut*2/fs;
+                            [fb,fa]=butter(filt_ord,Wn,'low');
+                             dall(:,Idx) = filtfilt(fb,fa,dinterp(:,Idx));                 
+                        else
+                             dall(:,Idx) = dinterp(:,Idx);
+                        end
+                        %HIGHPASS
+                        if 1
+                            Wn = highcut*2/fs;
+                            [fb,fa]=butter(filt_ord,Wn,'high');
+                            dall(:,Idx) = filtfilt(fb,fa,dall(:,Idx));
+                            dall(:,Idx) = dall(:,Idx);
+                        end
+        end
+    end
+
+    
     
     PMI{currentsub}.data(cf).EEG.data= dall(idstart(end):idstop(end),:);
     PMI{currentsub}.data(cf).EEG.time = tall(idstart(end):idstop(end));
@@ -6105,13 +6128,13 @@ if strcmp(ext,'.dat')| strcmp(ext,'.eeg')%Generic Data export analyser
         var{1,11} = 'eloc_file';
         for i=1:numel(PMI{currentsub}.data(cf).EEG.label)
             A(i).labels = PMI{currentsub}.data(cf).EEG.label{i};
-            A(i).ref    = ' '
+            A(i).ref    = ' ';
             A(i).theta = [];
             A(i).radius = [];
             A(i).X   = [];
             A(i).Y = [];
             A(i).Z = [];
-            A(i).ref    = ' '
+            A(i).ref    = ' ';
             A(i).sph_theta = [];
             A(i).sph_phi = [];
             A(i).sph_rad = [];
@@ -6122,7 +6145,7 @@ if strcmp(ext,'.dat')| strcmp(ext,'.eeg')%Generic Data export analyser
         var{1,13}='winlength';
         var{1,14}=size(PMI{currentsub}.data(cf).EEG.data,1)*1/PMI{currentsub}.data(cf).EEG.SamplingRateHz; %time lenght
         eegplot(-single(PMI{currentsub}.data(cf).EEG.data(:,:)'),var{1},var{2},var{3},var{4},var{5},var{6},var{7},var{8},var{9},var{10},var{11},var{12},var{13},var{14});
-        t = get(gca,'xtick')
+        t = get(gca,'xtick');
         
     else %ADVANCE VIEW TO BE DEVELOP
         gui_EEGIO;
@@ -8475,13 +8498,13 @@ function btn_Video_Callback(hObject, eventdata, handles)
 
 guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
 currentsub=1;
-cf = 1
+cf = 1;
 PMI = get(guiHOMER,'UserData');
    
 topbar = max(max(PMI{1}.data.HRF.AvgC(:,PMI{1}.plotLst)));
-val = get(handles.btn_Video,'string')
+val = get(handles.btn_Video,'string');
 if str2num(val(end)) %,'on') %si déjà en court le fermer ne pas redémaré attendre
-    set(handles.btn_Video,'string','Video 0')
+    set(handles.btn_Video,'string','Video 0');
         return 
 %     close(h)
 %     guidata(hObject,handles);
@@ -8495,7 +8518,7 @@ else
     if isfield(handles.NIRS.Dt.Video.pp(end),'sync_timesec')
          offset =  handles.NIRS.Dt.Video.pp(end).sync_timesec{id};
          if isnan(offset)
-             msgbox('No synchronised by trig')
+             disp('Warning video where not synchronised by any trig');
              return
          end
     end
@@ -8507,18 +8530,18 @@ else
          set(handles.text_Advice,'string',['Time ', num2str(round(offset+time_start)),'s']);
      end
      if ~isfield(PMI{1},'videoview') 
-         PMI{1}.videoview = 1
+         PMI{1}.videoview = 1;
      end
     if PMI{1}.videoview
-        h= figure
-        text(0.2, 0.5, 'Please wait video is loading','fontsize',14)
+        h= figure;
+        text(0.2, 0.5, 'Please wait video is loading','fontsize',14);
     else
         return
     end
- 
+  
     
      if isempty(offset)
-        msgbox('Segment first to synchronised video with NIRS')
+        disp('Please segment the data to synchronised video with NIRS using commun triger')
         return
      end
      if isempty(time_start)|isempty(time_stop)
@@ -8538,13 +8561,13 @@ else
     
     if isfield(PMI{1},'videooption')
         if ~isfield( PMI{1}.videooption,'brighness')
-            PMI{1}.videooption.brighness = 0
+            PMI{1}.videooption.brighness = 0;
         end
         if ~isfield( PMI{1}.videooption,'codec')
              PMI{1}.videooption.codec = 'VideoReader'; 
         end
     else
-        PMI{1}.videooption.brighness = 0
+        PMI{1}.videooption.brighness = 0;
         PMI{1}.videooption.codec = 'VideoReader'; 
     end
 
@@ -8567,31 +8590,31 @@ else
         try
         [video_example,audio_example]=mmread(filenamevideo,[],[offset+time_start,offset+time_stop]);
         catch
-            msgbox(['Unable to read video ', filenamevideo])
+            disp(['Unable to read video ', filenamevideo])
             return
         end
     elseif strcmp( PMI{1}.videooption.codec,'VideoReader') 
         [video_example,audio_example]=ReadMyAudioVideo(filenamevideo,[offset+time_start,offset+time_stop]);
     end
     
-    set(handles.btn_Video,'string','Video 1')
-     nbframe = numel(video_example.frames)
+    set(handles.btn_Video,'string','Video 1');
+     nbframe = numel(video_example.frames);
     
     if ~isempty(audio_example)%& iframe==1
          sound(audio_example.data(:,1),audio_example.rate);
     end    
-     set(gca,'xticklabel','')
+     set(gca,'xticklabel','');
 %     set(gca,'yticklabel','')
     for iframe=1:nbframe        
-     tic
+     tic;
      ini = video_example.frames(iframe).cdata+PMI{1}.videooption.brighness;
      image(ini);%PMI{1}.videooption.brighness
-     drawnow      
+     drawnow ;     
      a=toc;
-      pause(1/video_example.rate-a)
+     pause(1/video_example.rate-a);
     end
-    close(h)
-    set(handles.btn_Video,'string','Video 0')    
+    close(h);
+    set(handles.btn_Video,'string','Video 0');    
 end    
     
     
@@ -8802,6 +8825,7 @@ set(handles.edit_time_stop,'string', num2str(PMI{currentsub}.data(cf).HRF.tHRF(P
 if isfield(PARCORR(1,id),'topo')
     PMI{currentsub}.tmptopo =  PARCORR(1,id).topo;
     PMI{currentsub}.tmplistgood =  PARCORR(1,id).listgood;
+    disp('Select component topo: ')
 else
     PMI{currentsub}.tmptopo = [0 ,0];
     PMI{currentsub}.tmplistgood = [1,2];
@@ -9014,9 +9038,10 @@ set(handles.edit_time_stop,'string', num2str(PMI{currentsub}.data(cf).HRF.tHRF(P
 if isfield(PARCOMP(1,id),'topo')
     PMI{currentsub}.tmptopo =  PARCOMP(1,id).topo;
     PMI{currentsub}.tmplistgood =  PARCOMP(1,id).listgood;
+    disp('Select component topo: ')
 else
     PMI{currentsub}.tmptopo =  zeros(numel(PARCOMP(1,id).listgood),1);
-    PMI{currentsub}.tmplistgood =  PARCOMP(1,id).listgood;
+    PMI{currentsub}.tmplistgood =  PARCOMP(1,id).listgood;     
 end
 set(guiHOMER,'UserData',PMI)
 guidata(hObject, handles);
@@ -9797,7 +9822,9 @@ function menu_axesPhysiologie_newfigure_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-plotAxes_physiologie(handles,1)
+plotAxes_physiologie(handles,1);
+title(['Auxiliary ', handles.NIRS.Dt.AUX.label ]);
+
 % --------------------------------------------------------------------
 function menuAxes_Physiologie_Callback(hObject, eventdata, handles)
 % hObject    handle to menuAxes_Physiologie (see GCBO)
@@ -9811,7 +9838,7 @@ function btn_SortComponent_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 [pathstr, name, ext] = fileparts(handles.NIRSpath{1});
-load(fullfile(pathstr,'SelectedFactors.mat'));
+load(fullfile(pathstr,'SelectedFactors.mat')); 
 for i=1:numel(PARCOMP)
     filelist(i) = PARCOMP(i).file;
     timelist(i) = PARCOMP(i).indt(1);
@@ -10246,19 +10273,19 @@ id = get(handles.popupmenu_file,'value');
 filenameaudio = handles.NIRS.Dt.Audio.pp(end).p{id};
 offset =  handles.NIRS.Dt.Audio.pp(end).sync_timesec{id};
 try
-  [h,m,s] = hms(seconds(offset+time_start))
-   set(handles.text_Advice,'string',['Time ',sprintf('%02.0f',h),':',sprintf('%02.0f',m),':',sprintf('%02.0f',s),' ', filenameaudio])
+  [h,m,s] = hms(seconds(offset+time_start));
+   set(handles.text_Advice,'string',['Time ',sprintf('%02.0f',h),':',sprintf('%02.0f',m),':',sprintf('%02.0f',s),' ', filenameaudio]);
 catch
-   set(handles.text_Advice,'string',['Time ', num2str(round(offset+time_start)),'s ', filenameaudio])
+   set(handles.text_Advice,'string',['Time ', num2str(round(offset+time_start)),'s ', filenameaudio]);
 end
  if isempty(offset)
-        msgbox('Segment first to synchronised video with NIRS')
+        msgbox('Segment first to synchronised video with NIRS');
         return
  end   
   if isempty(time_start)|isempty(time_stop)
         CreateStruct.Interpreter = 'tex';
         CreateStruct.WindowStyle = 'modal';
-        msgbox({'\fontsize{14} Enter time start and time stop'}, '','help', CreateStruct)
+        msgbox({'\fontsize{14} Enter time start and time stop'}, '','help', CreateStruct);
         return
   end
    if (  time_stop- time_start  )>60
@@ -10267,19 +10294,24 @@ end
         msgbox({'\fontsize{14} Please select an interval time' ; 'start and stop shorter than 30 seconds'}, '','help', CreateStruct)
         return
    end
-    
-   info = audioinfo(filenameaudio);
+   try 
+        info = audioinfo(filenameaudio);
+   catch
+       disp(['Could not find or open ',filenameaudio])
+       return
+   end
+   
    [y,Fs] = audioread(filenameaudio,round(([time_start time_stop] +offset)*info.SampleRate));
-   sound(y,Fs)
-   axes(handles.display_axes)
+   sound(y,Fs);
+   axes(handles.display_axes);
    for i=time_start:0.25:time_stop
          t = (i);
          if i==time_start
-             hline = plot([time_start time_start],[0,1],'k')
+             hline = plot([time_start time_start],[0,1],'k');
          else
-            set(hline, 'xdata',[t t])
+            set(hline, 'xdata',[t t]);
          end
-         pause(0.25)
+         pause(0.25);
    end
   delete(hline);
    
@@ -10696,6 +10728,8 @@ waitfor(h);
 
  load(NIRSpath{1}) ;
  handles.NIRS = NIRS;
+ updatedata(handles,1,1);
+ updatedisplay(handles);
 guidata(hObject, handles);
 
 
@@ -11010,4 +11044,23 @@ for f=1:size(rDtp,1)
     set(gca,'fontsize',8)
 end
 
+
+
+
+
+% --------------------------------------------------------------------
+function Context_DisplayNIRSMAT_Callback(hObject, eventdata, handles)
+% hObject    handle to Context_DisplayNIRSMAT (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function Context_CopyNIRSmat_Callback(hObject, eventdata, handles)
+% hObject    handle to Context_CopyNIRSmat (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+ data = get(handles.edit_nirsmat,'string');
+ value = get(handles.edit_nirsmat,'value');
+clipboard('copy', data{value});
 

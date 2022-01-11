@@ -17,7 +17,26 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
     rDtp = NIRS.Dt.fir.pp(lst).p; % path for files to be processed
     NC = NIRS.Cf.H.C.N;
     fs = NIRS.Cf.dev.fs;
-    fprintf('%s\n','File processed');
+    fprintf('%s\n','File processed convert raw intensity in delta optical density dOD=log(I/Io)');
+    if isfield(job.normtype,'b_choicenormstim')
+        fprintf('%s\n', ['Define piecewise normalization around trigger: ',num2str(job.normtype.b_choicenormstim.trigger),', interval I include from PreTime= ', job.normtype.b_choicenormstim.pretime ,' sec to PostTime= ', job.normtype.b_choicenormstim.posttime,' sec'])
+        if job.normtype.b_choicenormstim.m_choiceNan
+             fprintf('%s\n', ['Exclude artifacts in the Io definition']);
+        else
+            fprintf('%s\n', ['Keep artifacts in the Io definition']);
+        end
+        if job.normtype.b_choicenormstim.m_NormType==0
+            fprintf('%s\n','Io define from trigger-Pretime to trigger onset'); 
+        elseif job.normtype.b_choicenormstim.m_NormType==1
+             fprintf('%s\n','Io define from trigger-Pretime to trigger+Posttime onset');             
+        end
+    end
+    if  isfield(job.normtype,'b_choiceglobal')
+        fprintf('%s\n', ['Define Io as the whole file average'])
+    end
+    if isfield(job.normtype,'b_choiceinternan')
+        fprintf('%s\n', 'Define Io as the clean period between 2 artifact identify in yellow')   
+    end
     ifile = 1; %Utiliser si on remets chaque stim normaliser dans des fichier différent
     for f=1:numel(rDtp) %Loop over all files of a NIRS.mat 
         d = fopen_NIR(rDtp{f},NC);
@@ -200,6 +219,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 delete(infilePH)
             catch
             end
+            disp(['Delete previous .nir data file: ',rDtp{f,1}]);
         end
         NIRS.Dt.fir.pp(lst+1).pre = 'Normalization';
         NIRS.Dt.fir.pp(lst+1).job = job;

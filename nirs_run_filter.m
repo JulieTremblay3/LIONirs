@@ -12,7 +12,7 @@ DelPreviousData  = job.DelPreviousData;
 
 filt_ord = job.filterorder;
 paddingsym = job.paddingsymfilter; %symetrie padding on the signal to avoid edge on the filtering
-interpolate = job.interpolatebadfilter;  %symetrie padding on the signal to avoid edge on the filtering
+interpolate = job.interpolatebadfilter;  %interpolate bad interval
 for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
     %Load NIRS.mat information
         NIRS = [];
@@ -29,7 +29,10 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
         [dir2,tmp,tmp] = fileparts(job.NIRSmat{filenb,1});
 
         
-        fprintf('%s\n','File processed');
+        fprintf('%s\n',['File processed using filter low pass=', num2str(lowcut) ,' high pass=' , num2str(highcut),' order=', num2str(filt_ord),'  butterword zero phase filter (function butter.m and filtfilt.m)']);
+        if paddingsym
+            fprintf('%s\n','Using mirror padding')
+        end
         for f=1:size(rDtp,1) %Loop over all files of a NIRS.mat 
 %             try
         figon=0;
@@ -71,7 +74,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 end 
                 if figon
                     subplot(3,1,2);plot(d')
-                   subplot(3,1,3);plot(dinterp')
+                    subplot(3,1,3);plot(dinterp')
                 end
 
                 for Idx = 1:NC %Loop over all channels
@@ -135,11 +138,14 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 catch
                 end
                  if DelPreviousData
-                     try
-                    delete(rDtp{f,1});
-                     catch;   end
-                    delete(infilevmrk)
-                    delete(infilevhdr)
+                    try
+                    delete(rDtp{f,1});                    
+                    delete(infilevmrk);
+                    delete(infilevhdr);
+                    disp(['Delete previous .nir data file: ',rDtp{f,1}]);
+                    catch                        
+                    end
+                     
                 end
                 %add outfile name to NIRS
                 if f == 1
@@ -153,6 +159,3 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
 
 end
 out.NIRSmat = job.NIRSmat;
-                        
-                        
-                        

@@ -511,11 +511,20 @@ for filenb = 1:size(job.NIRSmat,1)
                 delete(fullfile(dir1,[fil1,'.vhdr']));
                 try
                     infileAC = fullfile(dir1,[fil1 'AC' '.nir']);
-                    delete(infileAC)
-                    infilePH = fullfile(dir1,[fil1 'PH' '.nir']);
-                    delete(infilePH)
+                     fid=fopen(infileAC)~=-1;
+                    if fid~=-1
+                        fclose(fid);
+                        delete(infileAC);
+                    end
+                      infilePH = fullfile(dir1,[fil1 'PH' '.nir']);
+                      fid=fopen(infilePH);
+                    if fid~=-1
+                        fclose(fid);
+                        delete(infilePH);
+                    end
                 catch
                 end
+                disp(['Delete previous .nir data file: ',rDtp{f,1}])
             end
        end
         %add outfile name to NIRS

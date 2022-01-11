@@ -22,7 +22,7 @@ function varargout = ModifyMultimodalName(varargin)
 
 % Edit the above text to modify the response to help ModifyMultimodalName
 
-% Last Modified by GUIDE v2.5 17-Jan-2020 15:46:18
+% Last Modified by GUIDE v2.5 10-Jan-2022 12:59:32
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -56,20 +56,32 @@ function ModifyMultimodalName_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 NIRSpath = varargin{1};
 load(NIRSpath {1});
+filepath = [];
+for i = 1:numel(NIRS.Dt.fir.pp(end).p)
+   filepath = [filepath NIRS.Dt.fir.pp(end).p(i)];
+end
+
+set(handles.popupmenu_NIRS, 'String', filepath); %Set the file pop-up menu
+set(handles.popupmenu_NIRS, 'Value', 1);
+
 if isfield(NIRS.Dt,'EEG')
-    set(handles.listbox_EEGLIST,'string', NIRS.Dt.EEG.pp(end).p )
+    set(handles.listbox_EEGLIST,'string', NIRS.Dt.EEG.pp(end).p{1} );
+    set(handles.edit_offsetEEG,'string', num2str(NIRS.Dt.EEG.pp(end).sync_timesec{1}) );
 end
 if isfield(NIRS.Dt,'AUX')
-    set(handles.listbox_AUXLIST,'string', NIRS.Dt.AUX.pp(end).p )
+    set(handles.listbox_AUXLIST,'string', NIRS.Dt.AUX.pp(end).p{1} );
+    set(handles.edit_offsetAUX,'string', num2str(NIRS.Dt.AUX.pp(end).sync_timesec{1}));
 end
 if isfield(NIRS.Dt,'Video')
-    set(handles.listbox_Video,'string', NIRS.Dt.Video.pp(end).p )
+    set(handles.listbox_Video,'string', NIRS.Dt.Video.pp(end).p{1} );
+    set(handles.edit_offsetVideo,'string', num2str(NIRS.Dt.Video.pp(end).sync_timesec{1}));
 end
 if isfield(NIRS.Dt,'Audio')
-    set(handles.listbox_Audio,'string',NIRS.Dt.Audio.pp(end).p )
+    set(handles.listbox_Audio,'string',NIRS.Dt.Audio.pp(end).p{1} );    
+    set(handles.edit_offsetAudio,'string', num2str(NIRS.Dt.Audio.pp(end).sync_timesec{1}));
 end
 if isfield(NIRS.Cf.H,'prj')
-    set(handles.listbox_MTG,'string',NIRS.Cf.H.prj )
+    set(handles.listbox_MTG,'string',NIRS.Cf.H.prj);
 end  
    
 handles.NIRSpath = NIRSpath; 
@@ -100,7 +112,12 @@ function listbox_EEGLIST_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns listbox_EEGLIST contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from listbox_EEGLIST
 
-
+load(handles.NIRSpath{1}); 
+id = get(handles.popupmenu_NIRS,'value');
+NIRS.Dt.Video.pp(end).p{id} = get(handles.listbox_EEGLIST,'string');
+save(handles.NIRSpath{1},'NIRS'); 
+disp(['Adjust EEG file: ', get(handles.listbox_EEGLIST,'string')]);
+ 
 % --- Executes during object creation, after setting all properties.
 function listbox_EEGLIST_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to listbox_EEGLIST (see GCBO)
@@ -120,12 +137,14 @@ function btn_modify_EEG_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 temp = get(handles.listbox_EEGLIST,'string' );
-
-[file,path] = uigetfile(temp{1});
-load(handles.NIRSpath{1});
-NIRS.Dt.EEG.pp(end).p{1} = fullfile(path,file);
-save(handles.NIRSpath{1},'NIRS');
-set(handles.listbox_EEGLIST,'string',  NIRS.Dt.EEG.pp(end).p);
+[file,path] = uigetfile(temp);
+if ~file==0
+    load(handles.NIRSpath{1});
+    NIRS.Dt.EEG.pp(end).p{1} = fullfile(path,file);
+    save(handles.NIRSpath{1},'NIRS');
+    set(handles.listbox_EEGLIST,'string',  NIRS.Dt.EEG.pp(end).p);
+    disp(['Adjust EEG file: ', fullfile(path,file)]);
+end
 
 % --- Executes on selection change in listbox_AUXLIST.
 function listbox_AUXLIST_Callback(hObject, eventdata, handles)
@@ -135,7 +154,10 @@ function listbox_AUXLIST_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns listbox_AUXLIST contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from listbox_AUXLIST
-
+load(handles.NIRSpath{1}); 
+NIRS.Dt.AUX.pp(end).p{1} = get(handles.listbox_AUXLIST,'string');
+save(handles.NIRSpath{1},'NIRS'); 
+disp(['Adjust AUX file: ', get(handles.listbox_AUXLIST,'string')]);
 
 % --- Executes during object creation, after setting all properties.
 function listbox_AUXLIST_CreateFcn(hObject, eventdata, handles)
@@ -155,13 +177,16 @@ function btn_Modify_AUX_Callback(hObject, eventdata, handles)
 % hObject    handle to btn_Modify_AUX (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-temp = get(handles.listbox_AUXLIST,'string' )
-[file,path] = uigetfile(temp{1})
+temp = get(handles.listbox_AUXLIST,'string' );
+[file,path] = uigetfile(temp);
+if ~file==0
 load(handles.NIRSpath{1});
-NIRS.Dt.AUX.pp(end).p{1} = fullfile(path,file)
-save(handles.NIRSpath{1},'NIRS')
-set(handles.listbox_AUXLIST,'string',  NIRS.Dt.AUX.pp(end).p)
-
+id = get(handles.popupmenu_NIRS,'value');
+NIRS.Dt.AUX.pp(end).p{id} = fullfile(path,file);
+save(handles.NIRSpath{1},'NIRS');
+set(handles.listbox_AUXLIST,'string',  NIRS.Dt.AUX.pp(end).p);
+disp(['Adjust AUX file: ', fullfile(path,file)])
+end
 % --- Executes on selection change in listbox_Video.
 function listbox_Video_Callback(hObject, eventdata, handles)
 % hObject    handle to listbox_Video (see GCBO)
@@ -170,7 +195,11 @@ function listbox_Video_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns listbox_Video contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from listbox_Video
-
+load(handles.NIRSpath{1}); 
+id = get(handles.popupmenu_NIRS,'value');
+NIRS.Dt.Video.pp(end).p{id} = get(handles.listbox_Video,'string');
+save(handles.NIRSpath{1},'NIRS'); 
+disp(['Adjust Video file: ', get(handles.listbox_Video,'string')]);
 
 % --- Executes during object creation, after setting all properties.
 function listbox_Video_CreateFcn(hObject, eventdata, handles)
@@ -190,13 +219,16 @@ function btn_Modify_Video_Callback(hObject, eventdata, handles)
 % hObject    handle to btn_Modify_Video (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-temp = get(handles.listbox_Video,'string' )
-[file,path] = uigetfile(temp{1})
+temp = get(handles.listbox_Video,'string' );
+[file,path] = uigetfile(temp);
+if ~file==0
 load(handles.NIRSpath{1});
-NIRS.Dt.Video.pp(end).p{1} = fullfile(path,file)
-save(handles.NIRSpath{1},'NIRS')
-set(handles.listbox_Video,'string',  NIRS.Dt.Video.pp(end).p)
-
+id = get(handles.popupmenu_NIRS,'value');
+NIRS.Dt.Video.pp(end).p{id} = fullfile(path,file);
+save(handles.NIRSpath{1},'NIRS');
+set(handles.listbox_Video,'string',  NIRS.Dt.Video.pp(end).p);
+disp(['Adjust Video file: ' ,fullfile(path,file) ]);
+end
 
 % --- Executes on selection change in listbox_Audio.
 function listbox_Audio_Callback(hObject, eventdata, handles)
@@ -206,7 +238,11 @@ function listbox_Audio_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns listbox_Audio contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from listbox_Audio
-
+load(handles.NIRSpath{1}); 
+id = get(handles.popupmenu_NIRS,'value');
+NIRS.Dt.Audio.pp(end).p{id} = get(handles.listbox_Audio,'string');
+save(handles.NIRSpath{1},'NIRS'); 
+disp(['Adjust Audio file: ', get(handles.listbox_Audio,'string')]);
 
 % --- Executes during object creation, after setting all properties.
 function listbox_Audio_CreateFcn(hObject, eventdata, handles)
@@ -226,13 +262,16 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton4 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-temp = get(handles.listbox_Audio,'string' )
-[file,path] = uigetfile(temp{1})
-load(handles.NIRSpath{1});
-NIRS.Dt.Audio.pp(end).p{1} = fullfile(path,file)
-save(handles.NIRSpath{1},'NIRS')
-set(handles.listbox_Audio,'string',  NIRS.Dt.Audio.pp(end).p)
-
+temp = get(handles.listbox_Audio,'string' );
+[file,path] = uigetfile(temp);
+if  ~file==0
+    load(handles.NIRSpath{1});
+    id = get(handles.popupmenu_NIRS,'value');
+    NIRS.Dt.Audio.pp(end).p{id} = fullfile(path,file);
+    save(handles.NIRSpath{1},'NIRS');
+    set(handles.listbox_Audio,'string',  NIRS.Dt.Audio.pp(end).p);
+    disp(['Adjust Audio file: ' fullfile(path,file)])
+end
 
 % --- Executes on selection change in listbox_MTG.
 function listbox_MTG_Callback(hObject, eventdata, handles)
@@ -242,6 +281,14 @@ function listbox_MTG_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns listbox_MTG contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from listbox_MTG
+
+
+temp = get(handles.listbox_MTG,'string' );
+load(handles.NIRSpath{1});
+NIRS.Cf.H.prj = temp;
+save(handles.NIRSpath{1},'NIRS');
+disp(['Adjust MTG file: ', temp]);
+
 
 
 % --- Executes during object creation, after setting all properties.
@@ -262,3 +309,163 @@ function pushbutton5_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton5 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+temp = get(handles.listbox_MTG,'string' );
+[file,path] = uigetfile(temp);
+if ~file==0
+    load(handles.NIRSpath{1});
+    NIRS.Cf.H.prj = fullfile(path,file);
+    save(handles.NIRSpath{1},'NIRS');
+    set(handles.listbox_MTG,'string',  fullfile(path,file));
+    disp(['Adjust MTG file: ', fullfile(path,file)]);
+end
+
+
+function edit_offsetVideo_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_offsetVideo (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_offsetVideo as text
+%        str2double(get(hObject,'String')) returns contents of edit_offsetVideo as a double
+load(handles.NIRSpath{1});
+id = get(handles.popupmenu_NIRS,'value');
+NIRS.Dt.Video.pp(end).sync_timesec{id} = str2num( get( handles.edit_offsetVideo,'string'));
+save(handles.NIRSpath{1},'NIRS'); 
+disp(['Adjust offset Video: ', get( handles.edit_offsetVideo,'string'),' seconds']);
+
+% --- Executes during object creation, after setting all properties.
+function edit_offsetVideo_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_offsetVideo (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit_offsetAudio_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_offsetAudio (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_offsetAudio as text
+%        str2double(get(hObject,'String')) returns contents of edit_offsetAudio as a double
+load(handles.NIRSpath{1});
+id = get(handles.popupmenu_NIRS,'value');
+NIRS.Dt.Audio.pp(end).sync_timesec{id} = str2num( get( handles.edit_offsetAudio,'string'));
+save(handles.NIRSpath{1},'NIRS'); 
+disp(['Adjust offset Audio: ', get( handles.edit_offsetAudio,'string'),' seconds']);
+
+% --- Executes during object creation, after setting all properties.
+function edit_offsetAudio_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_offsetAudio (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit_offsetAUX_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_offsetAUX (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_offsetAUX as text
+%        str2double(get(hObject,'String')) returns contents of edit_offsetAUX as a double
+load(handles.NIRSpath{1});
+id = get(handles.popupmenu_NIRS,'value');
+NIRS.Dt.AUX.pp(end).sync_timesec{id} = str2num( get( handles.edit_offsetAUX,'string'));
+save(handles.NIRSpath{1},'NIRS');
+disp(['Adjust offset AUX: ', get( handles.edit_offsetAUX,'string'),' seconds']);
+
+% --- Executes during object creation, after setting all properties.
+function edit_offsetAUX_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_offsetAUX (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit_offsetEEG_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_offsetEEG (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_offsetEEG as text
+%        str2double(get(hObject,'String')) returns contents of edit_offsetEEG as a double
+
+load(handles.NIRSpath{1});
+id = get(handles.popupmenu_NIRS,'value');
+NIRS.Dt.EEG.pp(end).sync_timesec{id} = str2num(get( handles.edit_offsetEEG,'string'));
+save(handles.NIRSpath{1},'NIRS'); 
+disp(['Adjust offset EEG: ', get( handles.edit_offsetEEG,'string'),' seconds']); 
+
+% --- Executes during object creation, after setting all properties.
+function edit_offsetEEG_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_offsetEEG (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in popupmenu_NIRS.
+function popupmenu_NIRS_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu_NIRS (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu_NIRS contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu_NIRS
+
+id = get(handles.popupmenu_NIRS,'value');
+load(handles.NIRSpath{1});
+set(handles.listbox_EEGLIST,'string', NIRS.Dt.EEG.pp(end).p{id} );
+set(handles.listbox_AUXLIST,'string', NIRS.Dt.AUX.pp(end).p{id} );
+set(handles.listbox_Video,'string', NIRS.Dt.Video.pp(end).p{id} );
+set(handles.listbox_Audio,'string',NIRS.Dt.Audio.pp(end).p{id} );   
+
+set(handles.edit_offsetEEG,'string',num2str(NIRS.Dt.EEG.pp(end).sync_timesec{id}));
+set(handles.edit_offsetAUX,'string',num2str(NIRS.Dt.AUX.pp(end).sync_timesec{id}));
+set(handles.edit_offsetVideo,'string',num2str(NIRS.Dt.Video.pp(end).sync_timesec{id}));
+set(handles.edit_offsetAudio,'string',num2str(NIRS.Dt.Audio.pp(end).sync_timesec{id}));
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu_NIRS_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu_NIRS (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in pushbutton_OK.
+function pushbutton_OK_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton_OK (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+close(gcf)

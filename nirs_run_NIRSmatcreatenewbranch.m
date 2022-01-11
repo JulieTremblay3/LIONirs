@@ -29,7 +29,7 @@ if job.m_newbranchcomponent
         copyfile(infileSelectedfactors,outfileSelectedfactors);
         disp(['Copy components: ',outfileSelectedfactors])
     catch
-        disp(['No components to copy: ',outfileSelectedfactors]);
+        disp(['No components to copy empty: ',outfileSelectedfactors]);
     end
     try
         infileCorrectionApply = fullfile(NIRSmatnewdir,'Apply.mat');
@@ -37,10 +37,10 @@ if job.m_newbranchcomponent
         copyfile(infileCorrectionApply,outfileCorrectionApply);
         disp(['Copy corrections: ',outfileCorrectionApply])
     catch
-        disp(['No corrections to copy: ',outfileCorrectionApply]);     
+        disp(['No corrections to copy empty: ',outfileCorrectionApply]);     
     end
 else
-    disp(['Clean components & corrections in the new branch'])
+    disp(['No components & corrections in the new branch'])
 end
 
 out.NIRSmat = {file2};

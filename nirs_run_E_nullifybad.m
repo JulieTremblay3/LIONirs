@@ -57,7 +57,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
         lst = length(NIRS.Dt.fir.pp);
         rDtp = NIRS.Dt.fir.pp(lst).p; % path for files to be processed
         NC = NIRS.Cf.H.C.N;
-        fprintf('%s\n','File processed');
+        fprintf('%s\n','File processed apply nan value for each interval marked as artifact');
         for f=1:size(rDtp,1) %Loop over all files of a NIRS.mat
             d = fopen_NIR(rDtp{f,1},NC);            
             %erase previous matrices
@@ -70,9 +70,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
             [ind_dur_ch] = read_vmrk_find(vmrk_path,mrk_type_arr);
 
             if ~isempty(ind_dur_ch)
-                %hwaitbar = waitbar(0);
                 for Idx = 1:NC %Loop over all channels
-                   % waitbar(Idx/NC,hwaitbar,'Nullifying bad intervals...');
                     mrks = find(ind_dur_ch(:,3)==Idx | ind_dur_ch(:,3)==0);
                     
                     ind = ind_dur_ch(mrks,1);
@@ -88,9 +86,9 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                         d(Idx,ind(i)-padtime:indf(i)+padtime) = NaN;
                     end
                 end
-                %close(hwaitbar);
+               disp(['Artifacts replace by NAN']);
              else
-                disp(['Error to nullify bad intervals for Subject ',int2str(filenb),', file ',int2str(f),'. No markers found in the .vmrk file. If you have already used the Step Detection function, your data may have no bad steps in it.']);
+               disp(['No markers artifact found']);
             end
             
 
@@ -104,22 +102,19 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                     outfile = fullfile(dir2,[prefix fil1 ext1]);   
                     outfilevmrk = fullfile(dir2,[prefix fil1 '.vmrk']);
                     outfilevhdr = fullfile(dir2,[prefix fil1  '.vhdr']);
-
-%                 else
-%                     outfile = fullfile(dir1,[prefix fil1 ext1]);
-%                     outfilevmrk = fullfile(dir1,[prefix fil1 '.vmrk']);
-%                     outfilevhdr = fullfile(dir1,[prefix fil1  '.vhdr']);
-%                 end
+                    fwrite_NIR(outfile,d);                 
+                    try
+                       copyfile(infilevmrk,outfilevmrk);
+                       copyfile(infilevhdr,outfilevhdr); 
+                    catch
+                    end
                 if DelPreviousData
                     delete(rDtp{f,1});
+                    delete(infilevmrk);
+                    delete(infilevhdr);
+                    disp(['Delete previous .nir data file: ',rDtp{f,1}]);
                 end
-                fwrite_NIR(outfile,d);                 
-                copyfile(infilevmrk,outfilevmrk);
-                try
-                   copyfile(infilevhdr,outfilevhdr); 
-                catch
-                end
-            
+
                 %add outfile name to NIRS
                 if f == 1
                     NIRS.Dt.fir.pp(lst+1).pre = 'Nullify Bad Intervals';
@@ -129,16 +124,9 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 fprintf('%s\n',outfile);
         end
         
-%        if NewDirCopyNIRS
-            save(fullfile(dir2,'NIRS.mat'),'NIRS');   
-            job.NIRSmat{filenb,1}=fullfile(dir2,'NIRS.mat');
-%         else
-%             save(job.NIRSmat{filenb,1},'NIRS');
-%             job.NIRSmat{1} = fullfile(dir1,'NIRS.mat');
-%         end
-%     catch
-%         disp(['Failed to nullify bad intervals for Subject ',int2str(filenb)]);
-%     end
+        save(fullfile(dir2,'NIRS.mat'),'NIRS');   
+        job.NIRSmat{filenb,1}=fullfile(dir2,'NIRS.mat');
+
 end
             
 out.NIRSmat = job.NIRSmat;

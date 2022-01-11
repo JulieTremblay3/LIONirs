@@ -8,7 +8,7 @@ function [data,infoBV,label,ind_dur_ch] = fopen_EEG(varargin)
 %data matrix for the whole file
 %info (vhdr information)
 %vmrk 
-try
+try 
   if numel(varargin) >= 1
     filename = varargin{1};
   end
@@ -24,20 +24,45 @@ try
     [pathdata, filenametot, ext]=fileparts(filename);
     [label,ind_dur_ch] = read_vmrk_all(fullfile(pathdata,[filenametot,'.vmrk' ]));
     %open a EEG data file and return the data
-
-    fid=fopen(fullfile(pathdata,[filenametot,ext]));
-    data= fread(fid,inf,'float32',0,'ieee-le');
-    fclose(fid);
-        
-   % indlist =findelevhdr([elefile],[pathdata,filenametot(1:end-3),'vhdr' ]);
     infoBV = read_vhdr(fullfile(pathdata,[filenametot,'.vhdr' ]));
-    if strcmp(infoBV.DataOrientation,'VECTORIZED')       
-      infoBV.DataPoints =numel(data)/infoBV.NumberOfChannels;
-      data = reshape(data, infoBV.DataPoints,infoBV.NumberOfChannels);
-    elseif strcmp(infoBV.DataOrientation,'MULTIPLEXED') 
-        infoBV.DataPoints =numel(data)/infoBV.NumberOfChannels;
-        data = reshape(data, infoBV.NumberOfChannels,infoBV.DataPoints)';     
-    end
+        fid=fopen(fullfile(pathdata,[filenametot,ext]));
+        if isfield(infoBV,'DataFormat')
+            if strcmp(infoBV.DataFormat,'ASCII')
+                 data = [];
+                if strcmp(infoBV.DataOrientation,'VECTORIZED')
+                    while ~feof(fid)
+                        tline = fgetl(fid);
+                        [token,remain] =  strtok(tline,' ');
+                        k = strfind(remain,',');
+                        remain(k)='.';
+                        data = [data,str2num(remain)'];
+                    end
+                elseif strcmp(infoBV.DataOrientation,'MULTIPLEXED')
+                     tline = fgetl(fid); %first line to discart label of data
+%                      while ~feof(fid)
+%                          tline = fgetl(fid);
+                        A = fscanf(fid,'%c');
+                         k = strfind(A,','); %ensure comma tranfer in dot 
+                         A(k)='.';
+                         data = [data,str2num(A)];
+                        
+    %                 end
+                end
+                
+                1
+            elseif strcmp(infoBV.DataFormat,'BINARY')
+                data= fread(fid,inf,'float32',0,'ieee-le');
+                if strcmp(infoBV.DataOrientation,'VECTORIZED')
+                    infoBV.DataPoints =numel(data)/infoBV.NumberOfChannels;
+                    data = reshape(data, infoBV.DataPoints,infoBV.NumberOfChannels);
+                elseif strcmp(infoBV.DataOrientation,'MULTIPLEXED')
+                    infoBV.DataPoints =numel(data)/infoBV.NumberOfChannels;
+                    data = reshape(data, infoBV.NumberOfChannels,infoBV.DataPoints)';
+                end
+            end
+        end
+    fclose(fid);
+   
       if tstart<0
             padding = zeros(round(abs(tstart)./((infoBV.SamplingInterval)*1e-6)),size(data,2));
             data = [padding; data];
@@ -84,7 +109,7 @@ while  ~feof(fid)
     elseif strcmp(rem,'DataType')
         infoBV.DataType = tok(2:end);
     elseif strcmp(rem,'DataFormat')
-        infoBV.dataformat = (tok(2:end));
+        infoBV.DataFormat = (tok(2:end));
     elseif strcmp(rem,'DataOrientation')
         infoBV.DataOrientation = (tok(2:end)); 
     elseif strcmp(rem,'BinaryFormat')
@@ -93,6 +118,8 @@ while  ~feof(fid)
         infoBV.DataPoints = str2num(tok(2:end));
     elseif strcmp(rem,'SamplingInterval')
         infoBV.SamplingInterval=str2num(tok(2:end));
+    elseif strcmp(rem,'DecimalSymbol')
+        infoBV.DecimalSymbol=str2num(tok(2:end)); 
     elseif strcmp(rem,'Layers')
         infoBV.Layers=str2num(tok(2:end));
     elseif strcmp(rem,'SegmentDataPoints')

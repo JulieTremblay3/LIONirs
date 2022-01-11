@@ -74,7 +74,11 @@ for Idx=1:size(job.NIRSmat,1)
        job.PVF = PVF;
        job.exs = exs(:,1:2);
         inv_exs = pinv(exs(:,1:2));
-        
+        fprintf('%s\n',['File processed Modify Beer-Lambert law ', num2str(wl(1)),'nm ' 'DPF=',num2str(DPF(1)),' PVF=' ,num2str(PVF(1)),...
+           ' ', num2str(wl(2)),'nm ' 'DPF=',num2str(DPF(2)),' PVF=' ,num2str(PVF(2))]);
+        fprintf('%s\n', ['Extinction coef ua ','HbO', num2str(wl(1)),'=', num2str(job.exs(1,1)),' HbR',num2str(wl(1)),'=', num2str(job.exs(1,2)) ,...
+          ' HbO',num2str(wl(2)),'=', num2str(job.exs(2,1)),' HbR', num2str(wl(2)),'=', num2str(job.exs(2,2)),' [cm-1/(moles/liter)]']);
+
 
         %try 
         %loop over data files
@@ -150,6 +154,7 @@ for Idx=1:size(job.NIRSmat,1)
                 delete(rDtp{f,1});
                 delete(infilevhdr);
                 delete(infilewmrk);
+                disp(['Delete previous .nir data file: ',rDtp{f,1}]);
             end
             %add outfile name to NIRS
             if f == 1
