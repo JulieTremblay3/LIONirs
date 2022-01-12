@@ -110,7 +110,7 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
         av_ind = zeros(2,numel(istart));
         av_ind(1,:) = istart;
         av_ind(2,:) = istop;
-        %             try
+        %             try 
         if ~helpmemoryprob %Help memory problem == no
             try
             if job.choiceave.avg_datatype == 2 % Open DC                
@@ -130,6 +130,39 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
                 return
             end 
             
+        %LOAD NOISE IN VMRK
+        noise = logical(zeros(size(d)));
+        mrk_type_arr = cellstr('bad_step');
+        mrks = [];
+        ind = [];
+        dur = [];
+        vmrk_path = [namefile(1:end-3),'vmrk'];
+        [ind_dur_ch] = read_vmrk_find(vmrk_path,mrk_type_arr);
+        if ~isempty(ind_dur_ch)
+            maxpoint  = ind_dur_ch(:,1)+ind_dur_ch(:,2);
+            badind = find(maxpoint>size(noise,2));
+            if ~isempty(badind)
+                disp(['Warning file ' vmrk_path ' marker : ' num2str(badind') ' are out of range in the data file'])
+                ind_dur_ch(badind,2)=size(noise,2)- ind_dur_ch(badind,1);
+            end 
+            for Idx = 1:size(noise,1)
+                mrks = find(ind_dur_ch(:,3)==Idx);
+                ind = ind_dur_ch(mrks,1);
+                indf = ind + ind_dur_ch(mrks,2) - 1;
+                if ~isempty(ind)
+                    try
+                        for i = 1:numel(ind)
+                            noise(Idx,ind(i):indf(i)) = 1;
+                        end
+                    catch
+                        msgbox('Noise reading problem')
+                    end
+                end
+            end
+        end
+         figure;imagesc(double(noise))
+        %END LOAD NOISE FROM VMRK
+       
             %Enlever les indices des trigs qui sont en dehors des donnees
             maxsample = size(d,2);            
             listtoremove = find(maxsample<av_ind(2,:)|av_ind(1,:)<1);
@@ -176,10 +209,10 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
                                  A(Ich,:,trialnb) = d(Ich,av_ind(1,atrig):av_ind(2, atrig));
                                 
                             end
-                            
-                            if numel(find(isnan(A(Ich,:,trialnb))))/numel(A(Ich,:,trialnb)) >= badintervalratio %For epochs with too many artefacts
+                             Anoise(Ich,:,trialnb) = noise(Ich,av_ind(1,atrig):av_ind(2, atrig));
+                            if numel(find(isnan(A(Ich,:,trialnb))))/numel(A(Ich,:,trialnb)) >= badintervalratio | sum(Anoise(Ich,:,trialnb))./numel(A(Ich,:,trialnb))>= badintervalratio %For epochs with too many artefacts
                                 A(Ich,:,trialnb) = NaN;
-                                disp(['File ', num2str(f), ', Channel ', num2str(Ich), ', Epoch ', num2str(atrig), ' was not used for averaging due to poor quality.']);
+                                disp(['File ', num2str(f), ', Channel ', num2str(Ich), ', Epoch ', num2str(atrig), ' was not used for averaging due to poor quality reject channel ratio higher than.', num2str(badintervalratio )]);
                                  
                             end
                         else %If the channel is bad (flagged in NIRS.Cf.H.C.ok)
@@ -503,7 +536,7 @@ if avtype == 1 %save data file for average over many files
     if filenb > 1
         for jfile = 1:filenb
             [dir2,~,~] = fileparts(job.NIRSmat{jfile,1});
-            path = fullfile(dir2,['Report_Blocks_Used_for_Averaging_File',num2str(jfile)]);
+            path = fullfile(dir2,['Report_Files_Used_for_Averaging_File',num2str(jfile)]);
             if ismac
                 writetxtfile_asxlswrite(path, report)
             else

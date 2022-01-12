@@ -911,7 +911,6 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
         try
         if strcmp(tmp(end-7:end),'NIRS.mat')
             NIRSmat = NIRSDtp{ievent};
-            NIRSDtp{ievent} = tmp(1:end-8);
         else
             NIRSmat = fullfile(NIRSDtp{ievent},'NIRS.mat');
         end
@@ -969,9 +968,9 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                     
                     %not always integer factor then resample is be back as
                     %default option it crash with downsample %Julie
-                   if ~isempty(tmp)
-                    tmpr=resample( tmp , p, q); %copy resample function here to avoid using different version of the resample function which have change with years... 
-                   end
+                  
+                    tmpr=resample( tmp , p, q);
+              
                     
                     % we cut aux to the data initial size
                     if numel(tmpr)<numel(tHRF)
@@ -1516,84 +1515,230 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_AVG')
 end
 out.NIRSmat = {NIRSmat};
 
-
-function  [y, h] = resample( x, p, q, N, bta )
-%RESAMPLE  Change the sampling rate of a signal.
-%   Y = RESAMPLE(X,P,Q) resamples the sequence in vector X at P/Q times
-%   the original sample rate using a polyphase implementation.  Y is P/Q 
-%   times the length of X (or the ceiling of this if P/Q is not an integer).  
-%   P and Q must be positive integers.
-%
-%   RESAMPLE applies an anti-aliasing (lowpass) FIR filter to X during the 
-%   resampling process, and compensates for the filter's delay.  The filter 
-%   is designed using FIRLS.  RESAMPLE provides an easy-to-use alternative
-%   to UPFIRDN, relieving the user of the need to supply a filter or
-%   compensate for the signal delay introduced by filtering.
+function  varargout = resample(varargin)
+%RESAMPLE  Resample uniform or nonuniform data to a new fixed rate.
+%   Y = RESAMPLE(X,P,Q) resamples the values, X, of a uniformly sampled
+%   signal at P/Q times the original sample rate using a polyphase
+%   anti-aliasing filter. If X is a matrix, then RESAMPLE treats each
+%   column as an independent channel.
 %
 %   In its filtering process, RESAMPLE assumes the samples at times before
 %   and after the given samples in X are equal to zero. Thus large
 %   deviations from zero at the end points of the sequence X can cause
 %   inaccuracies in Y at its end points.
 %
-%   Y = RESAMPLE(X,P,Q,N) uses a weighted sum of 2*N*max(1,Q/P) samples of X 
-%   to compute each sample of Y.  The length of the FIR filter RESAMPLE applies
-%   is proportional to N; by increasing N you will get better accuracy at the 
-%   expense of a longer computation time.  If you don't specify N, RESAMPLE uses
-%   N = 10 by default.  If you let N = 0, RESAMPLE performs a nearest
-%   neighbor interpolation; that is, the output Y(n) is X(round((n-1)*Q/P)+1)
-%   ( Y(n) = 0 if round((n-1)*Q/P)+1 > length(X) ).
+%   [Y,Ty] = RESAMPLE(X,Tx) resamples the values, X, of a signal sampled at
+%   the instants specified in vector Tx. RESAMPLE interpolates X linearly
+%   onto a vector of uniformly spaced instants, Ty, with the same endpoints
+%   and number of samples as Tx.  Tx may either be a numeric vector
+%   expressed in seconds or a datetime object.  NaNs and NaTs (for datetime
+%   objects) are treated as missing data and are ignored.
 %
-%   Y = RESAMPLE(X,P,Q,N,BTA) uses BTA as the BETA design parameter for the 
-%   Kaiser window used to design the filter.  RESAMPLE uses BTA = 5 if
+%   [Y,Ty] = RESAMPLE(X,Tx,Fs) uses interpolation and an anti-aliasing
+%   filter to resample the signal at a uniform sample rate, Fs, expressed
+%   in hertz (Hz).
+%
+%   [Y,Ty] = RESAMPLE(X,Tx,Fs,P,Q) interpolates X to an intermediate
+%   uniform grid with sample rate equal Q*Fs/P and filters the result
+%   using UPFIRDN to upsample by P and downsample by Q.  Specify P and Q
+%   so that Q*Fs/P is least twice as large as the highest frequency in the
+%   input signal.
+%
+%   [Y,Ty] = RESAMPLE(X,Tx,...,METHOD) specifies the interpolation method.
+%   The default is linear interpolation.  Available methods are:
+%     'linear' - linear interpolation
+%     'pchip'  - shape-preserving piecewise cubic interpolation
+%     'spline' - piecewise cubic spline interpolation
+%
+%   Y = RESAMPLE(...,P,Q,N) uses a weighted sum of 2*N*max(1,Q/P) samples
+%   of X to compute each sample of Y.  The length of the FIR filter
+%   RESAMPLE applies is proportional to N; by increasing N you will get
+%   better accuracy at the expense of a longer computation time.  If you
+%   don't specify N, RESAMPLE uses N = 10 by default.  If you let N = 0,
+%   RESAMPLE performs a nearest neighbor interpolation; that is, the output
+%   Y(n) is X(round((n-1)*Q/P)+1) ( Y(n) = 0 if round((n-1)*Q/P)+1 >
+%   length(X) ).
+%
+%   Y = RESAMPLE(...,P,Q,N,BTA) uses BTA as the BETA design parameter for
+%   the Kaiser window used to design the filter.  RESAMPLE uses BTA = 5 if
 %   you don't specify a value.
 %
-%   Y = RESAMPLE(X,P,Q,B) uses B to filter X (after upsampling) if B is a 
+%   Y = RESAMPLE(...,P,Q,B) uses B to filter X (after upsampling) if B is a
 %   vector of filter coefficients.  RESAMPLE assumes B has odd length and
-%   linear phase when compensating for the filter's delay; for even length 
-%   filters, the delay is overcompensated by 1/2 sample.  For non-linear 
+%   linear phase when compensating for the filter's delay; for even length
+%   filters, the delay is overcompensated by 1/2 sample.  For non-linear
 %   phase filters consider using UPFIRDN.
 %
 %   [Y,B] = RESAMPLE(X,P,Q,...) returns in B the coefficients of the filter
 %   applied to X during the resampling process (after upsampling).
 %
-%   If X is a matrix, RESAMPLE resamples the columns of X.
+%   [Y,Ty,B] = RESAMPLE(X,Tx,...) returns in B the coefficients of the
+%   filter applied to X during the resampling process (after upsampling).
 %
-%   See also UPFIRDN, INTERP, DECIMATE, FIRLS, KAISER, INTFILT,
-%   MFILT/FIRSRC in the Filter Design Toolbox.
+%   % Example 1:
+%   %   Resample a sinusoid at 3/2 the original rate.
+%
+%   tx = 0:3:300-3;         % Time vector for original signal
+%   x = sin(2*pi*tx/300);   % Define a sinusoid
+%   ty = 0:2:300-2;         % Time vector for resampled signal
+%   y = resample(x,3,2);    % Change sampling rate
+%   plot(tx,x,'+-',ty,y,'o:')
+%   legend('original','resampled');
+%   xlabel('Time')
+%
+%   % Example 2:
+%   %   Resample a non-uniformly sampled sinusoid to a uniform 50 Hz rate.
+%
+%   Fs = 50;
+%   tx = linspace(0,1,21) + .012*rand(1,21);
+%   x = sin(2*pi*tx);
+%   [y, ty] = resample(x, tx, Fs);
+%   plot(tx,x,'+-',ty,y,'o:')
+%   legend('original','resampled');
+%   xlabel('Time')
+%   axis tight
+%
+%   See also UPFIRDN, INTERP, INTERP1, DECIMATE, FIRLS, KAISER, INTFILT.
 
-%   NOTE-1: digital anti-alias filter is desiged via windowing
+%   NOTE-1: digital anti-alias filter is designed via windowing
 
 %   Author(s): James McClellan, 6-11-93
 %              Modified to use upfirdn, T. Krauss, 2-27-96
-%   Copyright 1988-2005 The MathWorks, Inc.
-%   $Revision: 1.9.4.7 $  $Date: 2007/12/14 15:05:59 $
+%   Copyright 1988-2018 The MathWorks, Inc.
+%
 
-if nargin < 5,  bta = 5;  end   %--- design parameter for Kaiser window LPF
-if nargin < 4,   N = 10;   end
-if abs(round(p))~=p || p==0, error(generatemsgid('MustBePosInteger'),'P must be a positive integer.'), end
-if abs(round(q))~=q || q==0, error(generatemsgid('MustBePosInteger'),'Q must be a positive integer.'), end
+narginchk(2,8);
+try
+[varargin{:}] = convertStringsToChars(varargin{:});
+catch
+end
 
-[p,q] = rat( p/q, 1e-12 );  %--- reduce to lowest terms 
-   % (usually exact, sometimes not; loses at most 1 second every 10^12 seconds)
+% fetch the users desired interpolation method (if any)
+[method, varargin] = getInterpMethod(varargin);
+
+if isscalar(varargin{2})
+    % [...] = RESAMPLE(X,P,Q,...)
+    if nargin < 3
+        error(message('signal:resample:MissingQ'));
+    end
+    % interpolation is not performed when using uniformly sampled data
+    if ~strcmp(method,'')
+        error(message('signal:resample:UnexpectedInterpolation',method));
+    end
+    [varargout{1:max(1,nargout)}] = uniformResample(varargin{:});
+else
+    % [...] = RESAMPLE(X,Tx,...)
+    if strcmp(method,'')
+        % use linear method by default
+        method = 'linear';
+    end
+    [varargout{1:max(1,nargout)}] = nonUniformResample(method,varargin{:});
+end
+
+
+function [y, ty, h] = nonUniformResample(method,varargin)
+
+% fetch non-NaN input samples in time-sorted order
+[x, tx] = getSamples(varargin{1:2});
+
+% obtain sample rate
+if numel(varargin)>2
+    fs = varargin{3};
+    validateFs(fs);
+elseif isdatetime(tx)
+    % compute the average sample rate if unspecified
+    fs = (numel(tx)-1) / seconds(tx(end)-tx(1));
+else
+    fs = (numel(tx)-1) / (tx(end)-tx(1));
+end
+
+% get rational sample ratio
+if numel(varargin)>4
+    p = varargin{4};
+    q = varargin{5};
+    validateResampleRatio(p,q);
+elseif numel(varargin)>3
+    error(message('signal:resample:MissingQ'));
+else
+    % get a close rational approximation of the ratio between the desired
+    % sampling rate and the average sample rate
+    [p, q] = getResampleRatio(tx,fs);
+end
+
+% use cubic spline interpolation onto a uniformly sampled grid
+% with a target sample rate of Q*Fs/P
+tsGrid = p/(q*fs);
+if isdatetime(tx)
+    tGrid = tx(1):seconds(tsGrid):tx(end);
+else
+    tGrid = tx(1):tsGrid:tx(end);
+end
+
+
+if isreal(x)
+    xGrid = matInterp1(tx,x,tGrid,method);
+else
+    % compute real and imaginary channels independently
+    realGrid = matInterp1(tx,real(x),tGrid,method);
+    imagGrid = matInterp1(tx,imag(x),tGrid,method);
+    xGrid = complex(realGrid,imagGrid);
+end
+
+% recover the desired sampling rate by resampling the grid at the
+% specified ratio
+[y, h] = uniformResample(xGrid,p,q,varargin{6:end});
+
+% create output time vector
+if isvector(y)
+    ny = length(y);
+else
+    ny = size(y,1);
+end
+
+if isdatetime(tx)
+    ty = tx(1) + seconds((0:ny-1)/fs);
+else
+    ty = tx(1) + (0:ny-1)/fs;
+end
+
+% match dimensionality of output time vector to input
+if iscolumn(tx)
+    ty = ty(:);
+end
+
+%-------------------------------------------------------------------------
+function  [y, h] = uniformResample( x, p, q, N, bta )
+
+if nargin < 5
+    bta = 5;
+end   %--- design parameter for Kaiser window LPF
+if nargin < 4
+    N = 10;
+end
+
+validateResampleRatio(p, q);
+
+[p,q] = rat( p/q, 1e-12 );  %--- reduce to lowest terms
+% (usually exact, sometimes not; loses at most 1 second every 10^12 seconds)
 if (p==1) && (q==1)
-    y = x; 
+    y = x;
     h = 1;
     return
 end
 pqmax = max(p,q);
 if length(N)>1      % use input filter
-   L = length(N);
-   h = N;
+    L = length(N);
+    h = N;
 else                % design filter
-   if( N>0 )
-      fc = 1/2/pqmax;
-      L = 2*N*pqmax + 1;
-      h = p*firls( L-1, [0 2*fc 2*fc 1], [1 1 0 0]).*kaiser(L,bta)' ;
-      % h = p*fir1( L-1, 2*fc, kaiser(L,bta)) ;
-   else
-      L = p;
-      h = ones(1,p);
-   end
+    if( N>0 )
+        fc = 1/2/pqmax;
+        L = 2*N*pqmax + 1;
+        h = firls( L-1, [0 2*fc 2*fc 1], [1 1 0 0]).*kaiser(L,bta)' ;
+        h = p*h/sum(h);
+    else
+        L = p;
+        h = ones(1,p);
+    end
 end
 
 Lhalf = (L-1)/2;
@@ -1610,7 +1755,7 @@ z = zeros(1,nz);
 h = [z h(:).'];  % ensure that h is a row vector.
 Lhalf = Lhalf + nz;
 
-% Number of samples removed from beginning of output sequence 
+% Number of samples removed from beginning of output sequence
 % to compensate for delay of linear phase filter:
 delay = floor(ceil(Lhalf)/q);
 
@@ -1637,606 +1782,233 @@ else
     y(Ly+1:end,:) = [];
 end
 
-h([1:nz (end-nz1+1):end]) = [];  % get rid of leading and trailing zeros 
-                                 % in case filter is output
-function [h,a]=firls(N,F,M,W,ftype)
-% FIRLS Linear-phase FIR filter design using least-squares error minimization.
-%   B=FIRLS(N,F,A) returns a length N+1 linear phase (real, symmetric
-%   coefficients) FIR filter which has the best approximation to the
-%   desired frequency response described by F and A in the least squares
-%   sense. F is a vector of frequency band edges in pairs, in ascending
-%   order between 0 and 1. 1 corresponds to the Nyquist frequency or half
-%   the sampling frequency. A is a real vector the same size as F
-%   which specifies the desired amplitude of the frequency response of the
-%   resultant filter B. The desired response is the line connecting the
-%   points (F(k),A(k)) and (F(k+1),A(k+1)) for odd k; FIRLS treats the
-%   bands between F(k+1) and F(k+2) for odd k as "transition bands" or
-%   "don't care" regions. Thus the desired amplitude is piecewise linear
-%   with transition bands.  The integrated squared error is minimized.
-%
-%   For filters with a gain other than zero at Fs/2, e.g., highpass
-%   and bandstop filters, N must be even.  Otherwise, N will be
-%   incremented by one. Alternatively, you can use a trailing 'h' flag to
-%   design a type 4 linear phase filter and avoid incrementing N.
-%
-%   B=FIRLS(N,F,A,W) uses the weights in W to weight the error. W has one
-%   entry per band (so it is half the length of F and A) which tells
-%   FIRLS how much emphasis to put on minimizing the integral squared error
-%   in each band relative to the other bands.
-%
-%   B=FIRLS(N,F,A,'Hilbert') and B=FIRLS(N,F,A,W,'Hilbert') design filters
-%   that have odd symmetry, that is, B(k) = -B(N+2-k) for k = 1, ..., N+1.
-%   A special case is a Hilbert transformer which has an approx. amplitude
-%   of 1 across the entire band, e.g. B=FIRLS(30,[.1 .9],[1 1],'Hilbert').
-%
-%   B=FIRLS(N,F,A,'differentiator') and B=FIRLS(N,F,A,W,'differentiator')
-%   also design filters with odd symmetry, but with a special weighting
-%   scheme for non-zero amplitude bands. The weight is assumed to be equal
-%   to the inverse of frequency, squared, times the weight W. Thus the
-%   filter has a much better fit at low frequency than at high frequency.
-%   This designs FIR differentiators.
-%
-%   % Example of a length 31 lowpass filter.
-%   h=firls(30,[0 .1 .2 .5]*2,[1 1 0 0]);
-%   fvtool(h);
-%
-%   % Example of a length 45 lowpass differentiator.
-%   h=firls(44,[0 .3 .4 1],[0 .2 0 0],'differentiator');
-%   fvtool(h);
-%
-%   % Example of a length 26 type 4 highpass filter.
-%   h=firls(25,[0 .4 .5 1],[0 0 1 1],'h');
-%   fvtool(h);
-%
-%   See also FIRPM, FIR1, FIR2, FREQZ and FILTER.
+h([1:nz (end-nz1+1):end]) = [];  % get rid of leading and trailing zeros
+% in case filter is output
 
-%       Author(s): T. Krauss
-%   History: 10-18-91, original version
-%            3-30-93, updated
-%            9-1-95, optimize adjacent band case
-%   Copyright 1988-2004 The MathWorks, Inc.
-%   $Revision: 1.11.4.7 $  $Date: 2009/05/23 08:13:29 $
-
-% check number of arguments, set up defaults.
-error(nargchk(3,5,nargin,'struct'));
-
-if (max(F)>1) || (min(F)<0)
-    error(generatemsgid('InvalidRange'),'Frequencies in F must be in range [0,1].')
-end
-if (rem(length(F),2)~=0)
-    error(generatemsgid('InvalidDimensions'),'F must have even length.');
-end
-if (length(F) ~= length(M))
-    error(generatemsgid('InvalidDimensions'),'F and A must be equal lengths.');
-end
-if (nargin==3),
-    W = ones(length(F)/2,1);
-    ftype = '';
-end
-if (nargin==4),
-    if ischar(W),
-        ftype = W; W = ones(length(F)/2,1);
-    else
-        ftype = '';
-    end
-end
-if (nargin==5),
-    if isempty(W),
-        W = ones(length(F)/2,1);
-    end
-end
-if isempty(ftype)
-    ftype = 0;  differ = 0;
+%-------------------------------------------------------------------------
+function [x, tx] = removeMissingTime(x,tx)
+if isdatetime(tx)
+    idx = isnat(tx);
 else
-    ftype = lower(ftype);
-    if strcmpi(ftype,'h') || strcmpi(ftype,'hilbert')
-        ftype = 1;  differ = 0;
-    elseif strcmpi(ftype,'d') || strcmpi(ftype,'differentiator')
-        ftype = 1;  differ = 1;
+    idx = isnan(tx);
+end
+
+if ~isempty(idx)
+    tx(idx) = [];
+    if isvector(x)
+        x(idx) = [];
     else
-        error(generatemsgid('InvalidEnum'),'Requires symmetry to be ''Hilbert'' or ''differentiator''.')
+        x(idx,:) = [];
     end
 end
 
-% Check for valid filter length
-[N,msg1,msg2] = firchk(N,F(end),M,ftype);
-if ~isempty(msg1)
-    error(generatemsgid('InvalidFilterOrder'),msg1);
-end
+%-------------------------------------------------------------------------
+function y = matInterp1(tin, xin, tout, method)
 
-if ~isempty(msg2),
-    msg2 = sprintf([msg2,'\r',...
-        '\nAlternatively, you can pass a trailing ''h'' argument,\r',...
-        'as in firls(N,F,A,W,''h''), to design a type 4 linear phase filter.']);
-    warning(generatemsgid('OrderIncreasedByOne'),msg2); 
-end
+% by default specify tout as a column to obtain column matrix output
+tout = tout(:);
 
-
-
-N = N+1;                   % filter length
-F=F(:)/2;  M=M(:);  W=sqrt(W(:));  % make these guys columns
-dF = diff(F);
-
-if (length(F) ~= length(W)*2)
-    error(generatemsgid('InvalidDimensions'),'There should be one weight per band.');
-end;
-if any(dF<0),
-    error(generatemsgid('InvalidFreqVec'),'Frequencies in F must be nondecreasing.')
-end
-
-% Fix for 67187
-if all(dF(2:2:length(dF)-1)==0) && length(dF) > 1,
-    fullband = 1;
+if isvector(xin)
+    if isrow(xin)
+        % preserve orientation of input vector
+        tout = tout.';
+    end
+    % interpolate, excluding NaN
+    idx = find(~isnan(xin));
+    y = vecInterp1(tin(idx), xin(idx), tout, method);
 else
-    fullband = 0;
+    % initialize matrix output
+    nRows = size(tout,1);
+    nCols = size(xin,2);
+    y = zeros(nRows,nCols);
+    
+    % loop through each column of input x
+    for col=1:nCols
+        % interpolate, excluding NaN
+        idx = find(~isnan(xin(:,col)));
+        y(:,col) = vecInterp1(tin(idx), xin(idx,col), tout, method);
+    end
 end
-if all((W-W(1))==0)
-    constant_weights = 1;
+
+%-------------------------------------------------------------------------
+function y = vecInterp1(tin, xin, tout, method)
+
+% check sample times for duplicate entries
+iDup = find(diff(tin)==0);
+
+% copy indices to point to the repeated locations in xin/tin
+iRepeat = 1 + iDup;
+
+while ~isempty(iDup)
+    % find the number of successive equal sample times
+    numEqual = find(diff(iDup)~=1,1,'first');
+    if isempty(numEqual)
+        numEqual = numel(iDup);
+    end
+    
+    % replace leading x with mean value of all duplicates
+    xSelect = xin(iDup(1) + (0:numEqual));
+    xMean = mean(xSelect(~isnan(xSelect)));
+    xin(iDup(1)) = xMean;
+    
+    % move to next block of conflicting sample times
+    iDup = iDup(2+numEqual:end);
+end
+
+% remove duplicates
+xin(iRepeat) = [];
+tin(iRepeat) = [];
+
+% call interp
+y = interp1(tin, xin, tout, method, 'extrap');
+
+%-------------------------------------------------------------------------
+function [x, tx] = getSamples(x, tx)
+
+validateattributes(x, {'numeric'},{'2d'}, ...
+    'resample','X',1);
+
+if isvector(x) && numel(x)~=numel(tx)
+    error(message('signal:resample:TimeVectorMismatch'));
+end
+
+if ~isvector(x) && size(x,1)~=numel(tx)
+    error(message('signal:resample:TimeRowMismatch'));
+end
+
+if isdatetime(tx)
+    validateattributes(tx, {'datetime'},{'vector'}, ...
+        'resample','Tx',2);
 else
-    constant_weights = 0;
+    validateattributes(tx, {'numeric'},{'real','vector'}, ...
+        'resample','Tx',2);
 end
 
-L=(N-1)/2;
+[x, tx] = removeMissingTime(x, tx);
 
-Nodd = rem(N,2);
-
-if (ftype == 0),  % Type I and Type II linear phase FIR
-    % basis vectors are cos(2*pi*m*f) (see m below)
-    if ~Nodd
-        m=(0:L)+.5;   % type II
-    else
-        m=(0:L);      % type I
-    end
-    k=m';
-    need_matrix = (~fullband) || (~constant_weights);
-    if need_matrix
-        I1=k(:,ones(size(m)))+m(ones(size(k)),:);    % entries are m + k
-        I2=k(:,ones(size(m)))-m(ones(size(k)),:);    % entries are m - k
-        G=zeros(size(I1));
-    end
-
-    if Nodd
-        k=k(2:length(k));
-        b0=0;       %  first entry must be handled separately (where k(1)=0)
-    end;
-    b=zeros(size(k));
-    for s=1:2:length(F),
-        m=(M(s+1)-M(s))/(F(s+1)-F(s));    %  slope
-        b1=M(s)-m*F(s);                   %  y-intercept
-        if Nodd
-            b0 = b0 + (b1*(F(s+1)-F(s)) + m/2*(F(s+1)*F(s+1)-F(s)*F(s)))...
-                * abs(W((s+1)/2)^2) ;
-        end
-        b = b+(m/(4*pi*pi)*(cos(2*pi*k*F(s+1))-cos(2*pi*k*F(s)))./(k.*k))...
-            * abs(W((s+1)/2)^2);
-        b = b + (F(s+1)*(m*F(s+1)+b1)*sinc(2*k*F(s+1)) ...
-            - F(s)*(m*F(s)+b1)*sinc(2*k*F(s))) ...
-            * abs(W((s+1)/2)^2);
-        if need_matrix
-            G = G + (.5*F(s+1)*(sinc(2*I1*F(s+1))+sinc(2*I2*F(s+1))) ...
-                - .5*F(s)*(sinc(2*I1*F(s))+sinc(2*I2*F(s))) ) ...
-                * abs(W((s+1)/2)^2);
-        end
-    end;
-    if Nodd
-        b=[b0; b];
-    end;
-
-    if need_matrix
-        a=G\b;
-    else
-        a=(W(1)^2)*4*b;
-        if Nodd
-            a(1) = a(1)/2;
-        end
-    end
-    if Nodd
-        h=[a(L+1:-1:2)/2; a(1); a(2:L+1)/2].';
-    else
-        h=.5*[flipud(a); a].';
-    end;
-elseif (ftype == 1),  % Type III and Type IV linear phase FIR
-    %  basis vectors are sin(2*pi*m*f) (see m below)
-    if (differ),      % weight non-zero bands with 1/f^2
-        do_weight = ( abs(M(1:2:length(M))) +  abs(M(2:2:length(M))) ) > 0;
-    else
-        do_weight = zeros(size(F));
-    end
-
-    if Nodd
-        m=(1:L);      % type III
-    else
-        m=(0:L)+.5;   % type IV
-    end;
-    k=m';
-    b=zeros(size(k));
-
-    need_matrix = (~fullband) || (any(do_weight)) || (~constant_weights);
-    if need_matrix
-        I1=k(:,ones(size(m)))+m(ones(size(k)),:);    % entries are m + k
-        I2=k(:,ones(size(m)))-m(ones(size(k)),:);    % entries are m - k
-        G=zeros(size(I1));
-    end
-
-    i = sqrt(-1);
-    for s=1:2:length(F),
-        if (do_weight((s+1)/2)),      % weight bands with 1/f^2
-            if F(s) == 0, F(s) = 1e-5; end     % avoid singularities
-            m=(M(s+1)-M(s))/(F(s+1)-F(s));
-            b1=M(s)-m*F(s);
-            snint1 = sineint(2*pi*k*F(s+1)) - sineint(2*pi*k*F(s));
-            %snint1 = (-1/2/i)*(expint(i*2*pi*k*F(s+1)) ...
-            %    -expint(-i*2*pi*k*F(s+1)) -expint(i*2*pi*k*F(s)) ...
-            %    +expint(-i*2*pi*k*F(s)) );
-            % csint1 = cosint(2*pi*k*F(s+1)) - cosint(2*pi*k*F(s)) ;
-            csint1 = (-1/2)*(expint(i*2*pi*k*F(s+1))+expint(-i*2*pi*k*F(s+1))...
-                -expint(i*2*pi*k*F(s))  -expint(-i*2*pi*k*F(s)) );
-            b=b + ( m*snint1 ...
-                + b1*2*pi*k.*( -sinc(2*k*F(s+1)) + sinc(2*k*F(s)) + csint1 ))...
-                * abs(W((s+1)/2)^2);
-            snint1 = sineint(2*pi*F(s+1)*(-I2));
-            snint2 = sineint(2*pi*F(s+1)*I1);
-            snint3 = sineint(2*pi*F(s)*(-I2));
-            snint4 = sineint(2*pi*F(s)*I1);
-            G = G - ( ( -1/2*( cos(2*pi*F(s+1)*(-I2))/F(s+1)  ...
-                - 2*snint1*pi.*I2 ...
-                - cos(2*pi*F(s+1)*I1)/F(s+1) ...
-                - 2*snint2*pi.*I1 )) ...
-                - ( -1/2*( cos(2*pi*F(s)*(-I2))/F(s)  ...
-                - 2*snint3*pi.*I2 ...
-                - cos(2*pi*F(s)*I1)/F(s) ...
-                - 2*snint4*pi.*I1) ) ) ...
-                * abs(W((s+1)/2)^2);
-        else      % use usual weights
-            m=(M(s+1)-M(s))/(F(s+1)-F(s));
-            b1=M(s)-m*F(s);
-            b=b+(m/(4*pi*pi)*(sin(2*pi*k*F(s+1))-sin(2*pi*k*F(s)))./(k.*k))...
-                * abs(W((s+1)/2)^2) ;
-            b = b + (((m*F(s)+b1)*cos(2*pi*k*F(s)) - ...
-                (m*F(s+1)+b1)*cos(2*pi*k*F(s+1)))./(2*pi*k)) ...
-                * abs(W((s+1)/2)^2) ;
-            if need_matrix
-                G = G + (.5*F(s+1)*(sinc(2*I1*F(s+1))-sinc(2*I2*F(s+1))) ...
-                    - .5*F(s)*(sinc(2*I1*F(s))-sinc(2*I2*F(s)))) * ...
-                    abs(W((s+1)/2)^2);
-            end
-        end;
-    end
-
-    if need_matrix
-        a=G\b;
-    else
-        a=-4*b*(W(1)^2);
-    end
-    if Nodd
-        h=.5*[flipud(a); 0; -a].';
-    else
-        h=.5*[flipud(a); -a].';
-    end
-    if differ, h=-h; end
-end
-
-if nargout > 1
-    a = 1;
-end
-
-%----------------------------------------------------------------------------
-function y = sineint(x)
-% SINEINT (a.k.a. SININT)   Numerical Sine Integral
-%   Used by FIRLS in the Signal Processing Toolbox.
-%   Untested for complex or imaginary inputs.
-%
-%   See also SININT in the Symbolic Toolbox.
-
-%   Was Revision: 1.5, Date: 1996/03/15 20:55:51
-
-i1 = find(real(x)<0);   % this equation is not valid if x is in the
-% left-hand plane of the complex plane.
-% use relation Si(-z) = -Si(z) in this case (Eq 5.2.19, Abramowitz
-%  & Stegun).
-x(i1) = -x(i1);
-y = zeros(size(x));
-ind = find(x);
-% equation 5.2.21 Abramowitz & Stegun
-%  y(ind) = (1/(2*i))*(expint(i*x(ind)) - expint(-i*x(ind))) + pi/2;
-y(ind) = imag(expint(i*x(ind))) + pi/2;
-y(i1) = -y(i1);
-function [n,msg1,msg2] = firchk(n,Fend,a,exception)
-%FIRCHK   Check if specified filter order is valid.
-%   FIRCHK(N,Fend,A) checks if the specified order N is valid given the
-%   final frequency point Fend and the desired magnitude response vector A.
-%   Type 2 linear phase FIR filters (symmetric, odd order) must have a
-%   desired magnitude response vector that ends in zero if Fend = 1.  This
-%   is because type 2 filters necessarily have a zero at w = pi.
-%
-%   If the order is not valid, a warning is given and the order
-%   of the filter is incremented by one.
-%
-%   If A is a scalar (as when called from fircls1), A = 0 is
-%   interpreted as lowpass and A = 1 is interpreted as highpass.
-%
-%   FIRCHK(N,Fend,A,EXCEPTION) will not warn or increase the order
-%   if EXCEPTION = 1.  Examples of EXCEPTIONS are type 4 filters
-%   (such as differentiators or hilbert transformers) or non-linear
-%   phase filters (such as minimum and maximum phase filters).
-
-%   Author : R. Losada
-%   Copyright 1988-2004 The MathWorks, Inc.
-%   $Revision: 1.7.4.5 $  $Date: 2007/12/14 15:15:06 $
-
-error(nargchk(3,4,nargin,'struct'));
-
-if nargin == 3,
-    exception = false;
-end
-
-msg1 = '';
-msg2 = '';
-oddord = false; % Flag, initially we assume even order
-
-if isempty(n) || length(n) > 1 || ~isnumeric(n) || ~isreal(n) || n~=round(n) || n<=0,
-    msg1 = 'Filter order must be a real, positive integer.';
-    return
-end
-
-if rem(n,2) == 1,
-    oddord = true; % Overwrite flag
-end
- 
-if (a(end) ~= 0) && Fend == 1 && oddord && ~exception,
-    str = ['Odd order symmetric FIR filters must have a gain of zero \n'...
-     'at the Nyquist frequency. The order is being increased by one.'];
-    msg2 = sprintf(str);
-    n = n+1;
-end
-
-function y=sinc(x)
-%SINC Sin(pi*x)/(pi*x) function.
-%   SINC(X) returns a matrix whose elements are the sinc of the elements 
-%   of X, i.e.
-%        y = sin(pi*x)/(pi*x)    if x ~= 0
-%          = 1                   if x == 0
-%   where x is an element of the input matrix and y is the resultant
-%   output element.
-%
-%   % Example of a sinc function for a linearly spaced vector:
-%   t = linspace(-5,5);
-%   y = sinc(t);
-%   plot(t,y);
-%   xlabel('Time (sec)');ylabel('Amplitude'); title('Sinc Function')
-%
-%   See also SQUARE, SIN, COS, CHIRP, DIRIC, GAUSPULS, PULSTRAN, RECTPULS,
-%   and TRIPULS.
-
-%   Author(s): T. Krauss, 1-14-93
-%   Copyright 1988-2004 The MathWorks, Inc.
-%   $Revision: 1.7.4.1 $  $Date: 2004/08/10 02:11:27 $
-
-i=find(x==0);                                                              
-x(i)= 1;      % From LS: don't need this is /0 warning is off                           
-y = sin(pi*x)./(pi*x);                                                     
-y(i) = 1;   
-function w = kaiser(n_est,bta)
-%KAISER Kaiser window.
-%   W = KAISER(N) returns an N-point Kaiser window in the column vector W.
-% 
-%   W = KAISER(N,BTA) returns the BETA-valued N-point Kaiser window.
-%       If omitted, BTA is set to 0.500.
-%
-%   See also CHEBWIN, GAUSSWIN, TUKEYWIN, WINDOW.
-
-%   Author(s): L. Shure, 3-4-87
-%   Copyright 1988-2005 The MathWorks, Inc.
-%   $Revision: 1.17.4.4 $  $Date: 2007/12/14 15:05:16 $
-
-error(nargchk(1,2,nargin,'struct'));
-
-% Default value for the BETA parameter.
-if nargin < 2 || isempty(bta), 
-    bta = 0.500;
-end
-
-[nn,w,trivialwin] = check_order(n_est);
-if trivialwin, return, end;
-
-nw = round(nn);
-bes = abs(besseli(0,bta));
-odd = rem(nw,2);
-xind = (nw-1)^2;
-n = fix((nw+1)/2);
-xi = (0:n-1) + .5*(1-odd);
-xi = 4*xi.^2;
-w = besseli(0,bta*sqrt(1-xi/xind))/bes;
-w = abs([w(n:-1:odd+1) w])';
-
-function [n_out, w, trivalwin] = check_order(n_in)
-%CHECK_ORDER Checks the order passed to the window functions.
-% [N,W,TRIVALWIN] = CHECK_ORDER(N_ESTIMATE) will round N_ESTIMATE to the
-% nearest integer if it is not already an integer. In special cases (N is
-% [], 0, or 1), TRIVALWIN will be set to flag that W has been modified.
-
-%   Copyright 1988-2002 The MathWorks, Inc.
-%   $Revision: 1.6.4.2 $  $Date: 2009/05/23 08:16:17 $
-
-w = [];
-trivalwin = 0;
-
-if ~(isnumeric(n_in) & isfinite(n_in)),
-    error(generatemsgid('InvalidOrder'),'The order N must be finite.');
-end
-
-% Special case of negative orders:
-if n_in < 0,
-   error(generatemsgid('InvalidOrder'),'Order cannot be less than zero.');
-end
-
-% Check if order is already an integer or empty
-% If not, round to nearest integer.
-if isempty(n_in) | n_in == floor(n_in),
-   n_out = n_in;
+% for efficiency, place samples in time-sorted order
+[tx, idx] = sort(tx);
+if isvector(x)
+    % handle row vector input
+    x = x(idx);
 else
-   n_out = round(n_in);
-   warning(generatemsgid('InvalidOrder'),'Rounding order to nearest integer.');
+    x = x(idx,:);
 end
 
-% Special cases:
-if isempty(n_out) | n_out == 0,
-   w = zeros(0,1);               % Empty matrix: 0-by-1
-   trivalwin = 1; 
-elseif n_out == 1,
-   w = 1;
-   trivalwin = 1;   
-end
-% [EOF] kaiser.m
-function Y = upfirdn(x,h,varargin)
-%UPFIRDN  Upsample, apply a specified FIR filter, and downsample a signal.
-%   UPFIRDN(X,H,P,Q) is a cascade of three systems applied to input signal X:
-%         (1) Upsampling by P (zero insertion).  P defaults to 1 if not 
-%             specified.
-%         (2) FIR filtering with the filter specified by the impulse response 
-%             given in H.
-%         (3) Downsampling by Q (throwing away samples).  Q defaults to 1 if not 
-%             specified.
-%   UPFIRDN uses an efficient polyphase implementation.
-%
-%   Usually X and H are vectors, and the output is a (signal) vector. 
-%   UPFIRDN permits matrix arguments under the following rules:
-%   If X is a matrix and H is a vector, each column of X is filtered through H.
-%   If X is a vector and H is a matrix, each column of H is used to filter X.
-%   If X and H are both matrices with the same number of columns, then the i-th
-%      column of H is used to filter the i-th column of X.
-%
-%   Specifically, these rules are carried out as follows.  Note that the length
-%   of the output is Ly = ceil( ((Lx-1)*P + Lh)/Q ) where Lx = length(X) and 
-%   Lh = length(H). 
-%
-%      Input Signal X    Input Filter H    Output Signal Y   Notes
-%      -----------------------------------------------------------------
-%   1) length Lx vector  length Lh vector  length Ly vector  Usual case.
-%   2) Lx-by-Nx matrix   length Lh vector  Ly-by-Nx matrix   Each column of X
-%                                                            is filtered by H.
-%   3) length Lx vector  Lh-by-Nh matrix   Ly-by-Nh matrix   Each column of H is
-%                                                            used to filter X.
-%   4) Lx-by-N matrix    Lh-by-N matrix    Ly-by-N matrix    i-th column of H is
-%                                                            used to filter i-th
-%                                                            column of X.
-%
-%   For an easy-to-use alternative to UPFIRDN, which does not require you to 
-%   supply a filter or compensate for the signal delay introduced by filtering,
-%   use RESAMPLE.
-%
-%   EXAMPLE: Sample-rate conversion by a factor of 147/160. It is used to
-%            % downconvert from 48kHz to 44.1kHz.
-%            L = 147; M = 160;                   % Interpolation/decimation factors.
-%            Lp = 24;                            % Filter length of each phase
-%            N = Lp*L-1;                         % Filter Order
-%            h = fir1(N,1/M,kaiser(N+1,7.8562));
-%            h = L*h; % Passband gain = L
-%            Fs = 48e3;                          % Original sampling frequency: 48kHz
-%            n = 0:10239;                        % 10240 samples, 0.213 seconds long
-%            x  = sin(2*pi*1e3/Fs*n);            % Original signal, sinusoid at 1kHz
-%            y = upfirdn(x,h,L,M);               % 9408 samples, still 0.213 seconds
-%
-%            % Overlay original (48kHz) with resampled signal (44.1kHz) in red.
-%            stem(n(1:49)/Fs,x(1:49)); hold on 
-%            stem(n(1:45)/(Fs*L/M),y(12:56),'r','filled'); 
-%            xlabel('Time (sec)');ylabel('Signal value');
-%    
-%   See also RESAMPLE, INTERP, DECIMATE, FIR1, INTFILT, MFILT/FIRSRC in the
-%   Filter Design Toolbox.
-  
-%   Author(s): Paul Pacheco
-%   Copyright 1988-2008 The MathWorks, Inc.
-%   $Revision: 1.6.4.5 $  $Date: 2008/09/13 07:14:26 $
-
-%   This M-file validates the inputs, sets defaults, and then calls the C MEX-file.
-
-% Validate number of I/O args.
-error(nargchk(2,4,nargin,'struct'));
-error(nargoutchk(0,1,nargout,'struct'));
-
-% Force to be a column if input is a vector
-[mx,nx] = size(x);
-if find([mx nx]==1),
-  x = x(:);  % columnize it.
-end
-[Lx,nChans] = size(x);
-
-% Force to be a column if filter is a vector
-if find(size(h)==1),
-    h = h(:);  % columnize it.
-end
-[Lh,hCols] = size(h);
-
-% Validate input args and define defaults.
-[p,q,errid,errmsg] = validateinput(x,h,varargin);
-if ~isempty(errmsg), error(errid,errmsg); end
-
-% Call the MEX-file
-Y = upfirdnmex(x,h,p,q,Lx,Lh,hCols,nChans);
-
-% Convert output to be a row vector (if x was a row and H is NOT a matrix)
-if (mx==1) && (hCols == 1)
-    Y = Y(:).';
+% check finite behavior after sorting and NaN removal
+if ~isdatetime(tx)
+    validateattributes(tx, {'numeric'},{'finite'}, ...
+        'resample','Tx',2);
 end
 
+%-------------------------------------------------------------------------
+function validateFs(fs)
+validateattributes(fs, {'numeric'},{'real','finite','scalar','positive'}, ...
+    'resample','Fs',3);
 
-%----------------------------------------------------------------------
-function [p,q,errid,errmsg] = validateinput(x,h,opts)
+%-------------------------------------------------------------------------
+function validateResampleRatio(p, q)
+validateattributes(p, {'numeric'},{'integer','positive','finite','scalar'}, ...
+    'resample','P');
+validateattributes(q, {'numeric'},{'integer','positive','finite','scalar'}, ...
+    'resample','Q');
 
-% Default values
-p = 1;
-q = 1;
-errid = '';
-errmsg = '';
+%-------------------------------------------------------------------------
+function [p, q] = getResampleRatio(t, fs)
 
-% Validate 1st two input args: signal and filter.
-if isempty(x) || issparse(x) || ~isa(x,'double'),
-    errid = generatemsgid('invalidInput');
-    errmsg = 'The input signal X must be a double-precision vector.';
-    return;
-end
-if isempty(h) || issparse(h) || ~isa(h,'double'),
-    errid = generatemsgid('invalidFilter');
-    errmsg = 'The filter H must be a double-precision vector.';
-    return;
-end
-
-% The following check is for case 4 (as seen on the reference page), i.e., 
-% x and h are matrices, check that they both have the same number of
-% columns. 
-nChans = size(x, 2);
-hCols  = size(h, 2);
-if (nChans > 1) && (hCols > 1) && (hCols ~= nChans),
-    errid = generatemsgid('xNhSizemismatch');
-    errmsg = 'Signal X and filter H must have the same number of columns.';
-    return;
+% compute the average sampling interval
+tsAvg = (t(end)-t(1))/(numel(t)-1);
+if isduration(tsAvg)
+    tsAvg = seconds(tsAvg);
 end
 
-% Validate optional input args: upsample and downsample factors.
-nopts = length(opts);
-if (nopts >= 1),
-    p = opts{1};
-    if isempty(p) || ~isa(p,'double') || p<1 || ~isequal(round(p),p),
-        errid = generatemsgid('invalidP');
-        errmsg = 'The upsample factor P must be a positive, double-precision, integer.';
-        return;
+% get a rational approximation of the ratio of the desired to the average
+% sample rate
 
-    elseif (nopts == 2),
-        q = opts{2};
-        if isempty(q) || ~isa(q,'double') || q<1 || ~isequal(round(q),q),
-            errid = generatemsgid('invalidQ');
-            errmsg = 'The downsample factor Q must be a positive, double-precision, integer.';
-            return;
-        end
-    end
-    if p*q > intmax('int32'),
-        errid = generatemsgid('ProdPNQTooLarge');
-        errmsg = ['The product of the downsample factor Q and the upsample factor P must be',...
-            ' less than 2^31.'];
-        return;
+[p, q] = rat(tsAvg*fs,.01);
+
+if p < 2
+    % sample rate too small for input
+    p = 1;
+    q = round(1/(tsAvg*fs));
+end
+
+%-------------------------------------------------------------------------
+function [method, arglist] = getInterpMethod(arglist)
+
+method = '';
+supportedMethods = {'linear','pchip','spline'};
+
+iFound = 0;
+
+for i=1:numel(arglist)
+    if ischar(arglist{i})
+        method = validatestring(arglist{i},supportedMethods,'resample','METHOD');
+        iFound = i;
     end
 end
 
-% [EOF]
+if iFound
+    arglist(iFound) = [];
+end
 
+% Copyright (C) 1995, 1996, 1997 Kurt Hornik <Kurt.Hornik@ci.tuwien.ac.at>
+% Copyright (C) 2000 Paul Kienzle <pkienzle@users.sf.net>
+%
+% This program is free software; you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation; either version 3 of the License, or (at your option) any later
+% version.
+%
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+% FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+% details.
+%
+% You should have received a copy of the GNU General Public License along with
+% this program; if not, see <http://www.gnu.org/licenses/>.
+%
+% usage:  kaiser (L, beta)
+%
+% Returns the filter coefficients of the L-point Kaiser window with
+% parameter beta.
+%
+% For the definition of the Kaiser window, see A. V. Oppenheim &
+% R. W. Schafer, 'Discrete-Time Signal Processing'.
+%
+% The continuous version of width L centered about x=0 is:
+%
+%         besseli(0, beta * sqrt(1-(2*x/L).^2))
+% k(x) =  -------------------------------------,  L/2 <= x <= L/2
+%                besseli(0, beta)
+%
+% See also: kaiserord
+
+function w = kaiser (L, beta)
+
+if nargin<2
+  beta = 0.5;
+end
+
+
+if (nargin < 1)
+  help(mfilename);
+elseif ~(isscalar (L) && (L == round (L)) && (L > 0))
+  error ('kaiser:  L has to be a positive integer');
+elseif ~(isscalar (beta) && (beta == real (beta)))
+  error ('kaiser:  beta has to be a real scalar');
+end % if
+
+if (L == 1)
+  w = 1;
+else
+  m = L - 1;
+  k = (0 : m)';
+  k = 2 * beta / m * sqrt (k .* (m - k));
+  w = besseli (0, k) / besseli (0, beta);
+end % if
+
+end
+
+%!demo
+%! % use demo('kaiserord');
