@@ -907,7 +907,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
     for ievent=1:size(NIRSDtp,1)
         %try
         warning off
-        tmp=NIRSDtp{ievent}
+        tmp=NIRSDtp{ievent};
         try
         if strcmp(tmp(end-7:end),'NIRS.mat')
             NIRSmat = NIRSDtp{ievent};
@@ -1214,7 +1214,15 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
         end
         %disp(['Error unable to GLM on ' , NIRSmat])
     end
-    
+    try
+        filenamexls = fullfile(NIRSDtp{ievent},'ExportHRF.xlsx');  
+        A = {'NIRS.mat folder', 'Type', 'Label', 'Channel List','Name'}
+        %CREATE XLS here
+        VAL = {NIRSDtp{ievent},'GLM', Regressorlist{1}, [NIRSDtp{ievent}, 'channellist.txt'],Regressorlist{1} }
+        xlswrite(filenamexls,[A;VAL]);
+        disp(['Create xls example file: ',filenamexls,' to help you to configure the Export list function to export component'])
+    catch
+    end
 elseif isfield(job.c_extractcomponent,'b_extractcomponent_PARAFAC')
     [~,~,ext] =fileparts(job.c_extractcomponent.b_extractcomponent_PARAFAC.f_component_PARAFAClist{1});
     if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')

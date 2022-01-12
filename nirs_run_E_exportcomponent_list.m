@@ -45,11 +45,11 @@ Rall = [];
 labelall = [{'Detector'},{'Source'} ];
 for filenb = 1:size(NIRSDtp,1)
     try
-        srsfile = [NIRSDtp{filenb},filesep,'NIRS.mat'];
+        srsfile = fullfile(NIRSDtp{filenb},'NIRS.mat');
         alltb = []; 
-        allb = [];
+        allb = []; 
         allbHbO = [];
-        allbHbR = [];
+        allbHbR = []; 
         Tglm = [];
         Rval = [];
         load(fullfile(NIRSDtp{filenb},'NIRS.mat'));
@@ -58,9 +58,9 @@ for filenb = 1:size(NIRSDtp,1)
         catch
             disp(['Unable to load component from location: '  fullfile(NIRSDtp{filenb},'SelectedFactors.mat'),' to be exported'])
         end
-        disp(['Load ',NIRSDtp{filenb},filesep,'NIRS.mat'])
+        disp(['Load ',fullfile(NIRSDtp{filenb},'NIRS.mat')]);
         try
-            labelout = labeloutDtp{filenb};
+            labelout = labeloutDtp{filenb}; 
         catch
             labelout = COMPDtp{filenb};
         end
