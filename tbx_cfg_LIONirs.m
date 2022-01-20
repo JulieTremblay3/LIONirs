@@ -977,8 +977,8 @@ thresholdstep.help    = {'The difference (D) between M1 and M2 over time is conv
 m_thresholdstepzscore        = cfg_menu;
 m_thresholdstepzscore.tag      = 'm_thresholdstepzscore';
 m_thresholdstepzscore.name     = 'Z-score option';
-m_thresholdstepzscore.labels   = {'All-time points','Valid time points'};
-m_thresholdstepzscore.values   = {1,0};
+m_thresholdstepzscore.labels   = {'All-time points','Valid time points','Old version - using median value threshold'};
+m_thresholdstepzscore.values   = {1,0,2};
 m_thresholdstepzscore.val      = {1}; 
 m_thresholdstepzscore.help     = {'The z-score is used to define the threshold for artifact detection. You may calculate the z-score for each channel using all-time points or using only valid time points (excluding ones identified as an artifact).'};
 

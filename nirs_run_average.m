@@ -160,7 +160,7 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
                 end
             end
         end
-         figure;imagesc(double(noise))
+        % figure;imagesc(double(noise))
         %END LOAD NOISE FROM VMRK
        
             %Enlever les indices des trigs qui sont en dehors des donnees

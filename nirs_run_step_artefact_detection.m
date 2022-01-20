@@ -153,14 +153,30 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                             plot(zsc,'b','displayname','zscore with nan');
                             elseif job.b_meandiff.m_thresholdstepzscore ==1 %use all-time point
                                 zsc = zscore(mean_diff);
+                                mean_diff = zsc;
+                                ind = find(abs(zsc) >thr_ind);
                             elseif job.b_meandiff.m_thresholdstepzscore ==0 %use valid time point
                                 nandiff = ones(size(mean_diff));
                                 nandiff(find(noisestep(:,Idx)))=nan;
                                 mean_diffnan= mean_diff.*nandiff;
-                                zsc = (mean_diff - nanmean(mean_diffnan))/nanstd(mean_diffnan);     
+                                zsc = (mean_diff - nanmean(mean_diffnan))/nanstd(mean_diffnan);    
+                                mean_diff = zsc;
+                                ind = find(abs(zsc) >thr_ind); 
+                            elseif  job.b_meandiff.m_thresholdstepzscore ==2 %old version using median
+                                 %Etape 2 Definition du threshold en fonction des données                        
+                                    zsc = zscore(abs(mean_diff));
+                                    indok = find(abs(zsc)<3);
+                                    valdata = median(abs(mean_diff(indok)));
+                                    threshold = valdata*thr_ind;                              
+                                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%           
+                                    threshold_all(Idx)=threshold;
+                                    if threshold < thr_min_val
+                                        threshold = thr_min_val;
+                                    end
+                                    ind = find(abs(mean_diff) > threshold);       
+
                             end
-                            mean_diff = zsc;
-                            ind = find(abs(zsc) >thr_ind); 
+                           
                             threshold = thr_ind;
                             %ajout
 
@@ -400,6 +416,9 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                  %TEST 4 Correlation between channels
                  if option_find_correlation 
                  compte = 1;
+                 try 
+                     corr(rand(10,1),rand(10,1))                    
+               
                  for Idx = 1:NC %find_correlation
                      largernpoint = 10;
                     try
@@ -444,8 +463,16 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                     catch
                            disp('Error to use correlation between channels.');
                     end
+                   
                  end
+                
+                  catch
+                        disp('Error to use correlation between channels.');
+                        disp('Please install the Matlab Statistics and Machine Learning Toolbox™ to achieved correlation between channel')
+                        option_find_correlation = 0;
+                   end
                  end
+             
                  if option_find_correlation 
 
                  if job.PrintReport

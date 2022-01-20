@@ -23,7 +23,7 @@ function varargout = gui_EEGIO(varargin)
 
 % Edit the above text to modify the response to help gui_EEGIO
 
-% Last Modified by GUIDE v2.5 01-Nov-2018 16:20:14
+% Last Modified by GUIDE v2.5 13-Jan-2022 08:03:13
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;

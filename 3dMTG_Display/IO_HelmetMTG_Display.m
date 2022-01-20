@@ -1050,9 +1050,9 @@ elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
          temp = u(:,lstSV)*s(lstSV,lstSV)*v(:,lstSV)';
 %          figure;plot(u(:,lstSV))
 %           figure;plot(temp)
-         ampl= s(lstSV,lstSV)*v(:,lstSV)'
-         id830 = find(listgood<=size(PMI{1}.data.MeasListAct,1)/2)
-         id690 = find(listgood>(size(PMI{1}.data.MeasListAct,1)/2))
+         ampl= s(lstSV,lstSV)*v(:,lstSV)';
+         id830 = find(listgood<=size(PMI{1}.data.MeasListAct,1)/2);
+         id690 = find(listgood>(size(PMI{1}.data.MeasListAct,1)/2));
          if dconc==1
              d1 = zeros( size(PMI{1}.data.MeasListAct,1)/2,1);
             d1(PMI{1}.tmpPCA.listgood(id830),1) =ampl(id830);
@@ -1153,7 +1153,7 @@ elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
    
  
     elseif strcmp(typelabel{type}, 'SUBTRACT')%Selected component topo
-            1
+            1;
     end
 elseif get(handles.radio_guiSPMnirsHSJ,'value')==3
     d1=selectimagetype(echantillon_time,type,dconc,get(handles.radio_guiSPMnirsHSJ,'value'));
@@ -2056,14 +2056,14 @@ else
     exportview.taille = 0;
     exportview.titlefigure = 1;
     exportview.autotitle = 1;
-    exportview.setcolor = [1 1 1]
+    exportview.setcolor = [1 1 1];
 end
 Colormapfig = get(handles.IO_HelmetMTG,'colormap');
 set(h,'colormap',Colormapfig);
 set(h, 'renderer','zbuffer');
 size_screen=get(0,'ScreenSize');
-set(h,'unit','pixel','position',[30,30,pixelx,pixely])
-newaxesh = gca
+set(h,'unit','pixel','position',[30,30,pixelx,pixely]);
+newaxesh = gca;
 prop = get(handles.axes_Mtg2,'CameraTarget');
 set(newaxesh,'CameraTarget',prop);
 clear prop
@@ -2102,7 +2102,7 @@ DispParameter.axes1 = newaxesh;
 DispParameter.viewhelmet = get(handles.radio_holes,'value');
 DispParameter.reset = 1;
 DispParameter.channel = get(handles.radio_Channel,'value');
-DispParameter.viewfront = 1 %get(handles.radio_viewfront,'value');
+DispParameter.viewfront = 1; %get(handles.radio_viewfront,'value');
 if get(handles.radio_viewdistance,'value')& get(handles.popup_labelch,'value')==1
     DispParameter.D1label = 1;
     DispParameter.dist = 0;
@@ -2160,19 +2160,19 @@ DispParameter.backgroundcolor = str{id};
 %     ymax = max(abs(PMI{1}.SD.SrcPos(:,2)))*0.01+0.02;
 %     zmax = max(abs(PMI{1}.SD.SrcPos(:,3)))*0.01+0.02;
 
-set(newaxesh,'unit','normalize')
+set(newaxesh,'unit','normalize');
 %     set(newaxesh,'Position',[0,0,0.8,0.8]);
 %     set(newaxesh,'OuterPosition',[0,0,0.8,0.8])
 set(newaxesh,'Position',[0,0,1,1]);
-set(newaxesh,'OuterPosition',[0,0,1,1])
+set(newaxesh,'OuterPosition',[0,0,1,1]);
 set(newaxesh,'Xlim',[-xmax,xmax]);
 set(newaxesh,'Ylim',[-ymax,ymax]);
 set(newaxesh,'Zlim',[-zmax/3, zmax]);
-set(newaxesh,'xtick',[])
-set(newaxesh,'ytick',[])
-set(newaxesh,'ztick',[])
-set(h,'color',exportview.setcolor)
-set(newaxesh,'Color',exportview.setcolor)
+set(newaxesh,'xtick',[]);
+set(newaxesh,'ytick',[]);
+set(newaxesh,'ztick',[]);
+set(h,'color',exportview.setcolor);
+set(newaxesh,'Color',exportview.setcolor);
 
 IO_displayHelmet(PrjStruct,PMI,DispParameter);
 guidata(handles.IO_HelmetMTG, handles);

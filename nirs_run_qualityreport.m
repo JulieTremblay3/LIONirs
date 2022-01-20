@@ -9,18 +9,16 @@ xlsout{idrow,5}='Nb independent intervals rejected';
 xlsout{idrow,6}='Ratio time corrected/time total';
 xlsout{idrow,7}='Nb independant intervals corrected';
 xlsout{idrow,8}='Maximal duration interval corrected (s)';
-
-for filenb=1:size(job.NIRSmat,1) %JT
-    idrow = idrow + 1;
+for filenb=1:size(job.NIRSmat,1) 
     NIRS = [];
     load(job.NIRSmat{filenb,1});
-
     lst = length(NIRS.Dt.fir.pp);
     rDtp = NIRS.Dt.fir.pp(lst).p; % path for files to be processed
     NC = NIRS.Cf.H.C.N;
     fs = NIRS.Cf.dev.fs;
     fprintf('%s\n',['File processed: ',job.NIRSmat{filenb,1}] );
     for f=1:size(rDtp,1) %Loop over all files of a NIRS.mat   
+         idrow = idrow + 1;
          d = fopen_NIR(rDtp{f,1},NC);
          [dir1,fil1,~] = fileparts(rDtp{f});
          vmrk_path = fullfile(dir1,[fil1 '.vmrk']);
@@ -94,7 +92,10 @@ end
 folderout = job.f_qualityreport{1};
 if ismac
     writetxtfile_asxlswrite(fullfile(folderout,'QualityReport.txt'), xlsout);
+    disp(['File created: ', fullfile(folderout,'QualityReport.txt')]);
+
 else
     xlswrite(fullfile(folderout,'QualityReport.xlsx'),xlsout);
+    disp(['File created: ', fullfile(folderout,'QualityReport.xlsx')]);
 end
 out.NIRSmat = job.NIRSmat;

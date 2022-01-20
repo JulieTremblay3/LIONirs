@@ -247,7 +247,7 @@ fprintf('%s\n','File processed');
     NIRS.Cf.dev.fs = SD.fs; 
     %Information on Helmet
     NIRS.Cf.H.n = 'Sainte-Justine'; %HOLE NAMING SOURCE a1b2, detector A
-    NIRS.Cf.H.p =  job.prjfile;
+    NIRS.Cf.H.prj = job.prjfile{1};
     %Information on stimuli triggers
     if isfield(SD,'auxtrig')
         NIRS.Dt.fir.pp(1).aux5 = SD.auxtrig;

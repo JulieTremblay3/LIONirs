@@ -202,10 +202,7 @@ for ch = 1:size(ml,1)/2 %Passage 1 coordonné
     % Coordonnées du canal à tracer
     if PMI{currentsub}.data(cf).MeasListAct(ch)& ml(ch,1)~= 0;
         Srs_n = SDpairs2Srs_n(ml(ch,1),1);
-        Det_n = SDpairs2Srs_n(ml(ch,2),2);
-        if ch==57
-            1
-        end
+        Det_n = SDpairs2Srs_n(ml(ch,2),2);     
         pSrs = find( Srs_n == sMtg.v_HolesMtg);
         pDet = find( Det_n == sMtg.v_HolesMtg);
         if ~isempty(pSrs)&~isempty(pDet)
@@ -270,7 +267,7 @@ for ch = 1:size(ml,1)/2 %Passage 1 coordonné
                 end
             end
             else
-                1
+               
             end
         end
     end

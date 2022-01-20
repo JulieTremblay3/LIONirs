@@ -1179,8 +1179,8 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                 PARCOMP.ComponentToKeep = tmpGLM.selected;
                 PARCOMP.idreg = tmpGLM.idreg;
                 labelid  = labelDtp{ievent} ;
-                PARCOMP.label= [labelid,'GLM',label, sprintf('%03.0f',size(PARCOMP,2))];
-                disp([labelid,'GLM',label, sprintf('%03.0f',size(PARCOMP,2))]);
+                PARCOMP.label= [labelid,'_', label,'GLM', sprintf('%03.0f',size(PARCOMP,2))];
+                disp([labelid,'_',label, 'GLM', sprintf('%03.0f',size(PARCOMP,2))]);
                 PARCOMP.type = 'GLM';
                 PARCOMP.topo =  beta(iselected,:);
                 newfile = 1;
@@ -1204,8 +1204,8 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                 PARCOMP(id+1).ComponentToKeep = tmpGLM.selected;
                 PARCOMP(id+1).idreg = tmpGLM.idreg;
                 labelid  = labelDtp{ievent} ;
-                PARCOMP(id+1).label= [labelid,'GLM',label, sprintf('%03.0f',size(PARCOMP,2))];
-                disp([labelid,'GLM',label , sprintf('%03.0f',size(PARCOMP,2))]);
+                PARCOMP(id+1).label= [labelid,'_',label,'GLM', sprintf('%03.0f',size(PARCOMP,2))];
+                disp([labelid,'_',label ,'GLM', sprintf('%03.0f',size(PARCOMP,2))]);
                 PARCOMP(id+1).type = 'GLM';
                 PARCOMP(id+1).topo =  beta(iselected,:);
                 newfile = 1;
@@ -1215,10 +1215,12 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
         %disp(['Error unable to GLM on ' , NIRSmat])
     end
     try
-        filenamexls = fullfile(NIRSDtp{ievent},'ExportHRF.xlsx');  
-        A = {'NIRS.mat folder', 'Type', 'Label', 'Channel List','Name'}
+        filenamexls = fullfile(NIRSDtp{ievent},['Export ', labelid,'.xlsx']);  
+        A = {'NIRS.mat folder', 'Type', 'Label', 'Channel List','Name'};
         %CREATE XLS here
-        VAL = {NIRSDtp{ievent},'GLM', Regressorlist{1}, [NIRSDtp{ievent}, 'channellist.txt'],Regressorlist{1} }
+        namefilter=[labelid,'_',Regressorlist{1}]; 
+        disp(['Suggested filter name ',  namefilter,' to export'])
+        VAL = {NIRSDtp{ievent},'GLM', namefilter, [NIRSDtp{ievent}, 'channellist.txt'],namefilter};
         xlswrite(filenamexls,[A;VAL]);
         disp(['Create xls example file: ',filenamexls,' to help you to configure the Export list function to export component'])
     catch

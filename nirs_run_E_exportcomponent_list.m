@@ -91,8 +91,8 @@ for filenb = 1:size(NIRSDtp,1)
                         A(idok,1) = topo(listHBOch(idok));
                         alllabel = [alllabel,{PARCOMP(icomp).label}];
                         allbHbO = [allbHbO,A];
-                        save(fullfile(pathoutlist,['TopoHbO',labelout,PARCOMP(icomp).label,'.mat']),'A' ,'zonelist','srsfile' );
-                        disp(['Create export: ', fullfile(pathoutlist,['TopoHbO',labelout,PARCOMP(icomp).label,'.mat'])])
+                        save(fullfile(pathoutlist,['TopoHbO ',labelout,PARCOMP(icomp).label,'.mat']),'A' ,'zonelist','srsfile' );
+                        disp(['Create export: ', fullfile(pathoutlist,['TopoHbO ',labelout,PARCOMP(icomp).label,'.mat'])])
                         clear A
                         %HBR parafac
                         topo =  PARCOMP(icomp).FacB(:,k) * PARCOMP(icomp).FacC(2,k);
@@ -101,8 +101,8 @@ for filenb = 1:size(NIRSDtp,1)
                         A(idok,1) = topo(listHBOch(idok));
                         alllabel = [alllabel,{PARCOMP(icomp).label}];                  
                         allbHbR = [allbHbR,A];    
-                        save(fullfile(pathoutlist,['TopoHbR',labelout,PARCOMP(icomp).label,'.mat']),'A','zonelist','srsfile' );
-                        disp(['Create export: ', fullfile(pathoutlist,['TopoHbR',labelout,PARCOMP(icomp).label,'.mat'])])
+                        save(fullfile(pathoutlist,['TopoHbR ',labelout,PARCOMP(icomp).label,'.mat']),'A','zonelist','srsfile' );
+                        disp(['Create export: ', fullfile(pathoutlist,['TopoHbR ',labelout,PARCOMP(icomp).label,'.mat'])])
                         clear A
                         alllabel = [alllabel,{PARCOMP(icomp).label}];
                         ncomp = ncomp +1
@@ -123,16 +123,16 @@ for filenb = 1:size(NIRSDtp,1)
                         A(idok,1) = topo(listHBOch(idok));
                         alllabel = [alllabel,{PARCOMP(icomp).label}];                  
                         allbHbO = [allbHbO,A];
-                        save(fullfile(pathoutlist,['TopoHbO',labelout,PARCOMP(icomp).label,'.mat']),'A' ,'zonelist','srsfile' );
-                        disp(['Create export: ', fullfile(pathoutlist,['TopoHbO',labelout,PARCOMP(icomp).label,'.mat'])])
+                        save(fullfile(pathoutlist,['TopoHbO ',labelout,PARCOMP(icomp).label,'.mat']),'A' ,'zonelist','srsfile' );
+                        disp(['Create export: ', fullfile(pathoutlist,['TopoHbO ',labelout,PARCOMP(icomp).label,'.mat'])])
                         clear A
                    
                         A = nan(size(listHBRch,1),1);
                         idok = find(~isnan(listHBRch));
                         A(idok,1) = topo(listHBRch(idok));               
                         allbHbR = [allbHbR,A];
-                        save(fullfile(pathoutlist,['TopoHbR',labelout,PARCOMP(icomp).label,'.mat']),'A' ,'zonelist','srsfile' );
-                        disp(['Create export: ', fullfile(pathoutlist,['TopoHbR',labelout,PARCOMP(icomp).label,'.mat'])])
+                        save(fullfile(pathoutlist,['TopoHbR ',labelout,PARCOMP(icomp).label,'.mat']),'A' ,'zonelist','srsfile' );
+                        disp(['Create export: ', fullfile(pathoutlist,['TopoHbR ',labelout,PARCOMP(icomp).label,'.mat'])])
                         clear A        
                         ncomp = ncomp +1;
                     elseif strcmp(upper(PARCOMP(icomp).type),'AVG')
@@ -149,16 +149,16 @@ for filenb = 1:size(NIRSDtp,1)
                         A(idok,1) = topo(listHBOch(idok));
                         alllabel = [alllabel,{PARCOMP(icomp).label}];                  
                         allbHbO = [allbHbO,A];
-                        save(fullfile(pathoutlist,['TopoHbO',labelout,PARCOMP(icomp).label,'.mat']),'A' ,'zonelist','srsfile' );
-                        disp(['Create export: ', fullfile(pathoutlist,['TopoHbO',labelout,PARCOMP(icomp).label,'.mat'])])
+                        save(fullfile(pathoutlist,['TopoHbO ',labelout,PARCOMP(icomp).label,'.mat']),'A' ,'zonelist','srsfile' );
+                        disp(['Create export: ', fullfile(pathoutlist,['TopoHbO ',labelout,PARCOMP(icomp).label,'.mat'])])
                         clear A
                    
                         A = nan(size(listHBRch,1),1);
                         idok = find(~isnan(listHBRch));
                         A(idok,1) = topo(listHBRch(idok));               
                         allbHbR = [allbHbR,A];
-                        save(fullfile(pathoutlist,['TopoHbR',labelout,PARCOMP(icomp).label,'.mat']),'A','zonelist','srsfile' );
-                        disp(['Create export: ', fullfile(pathoutlist,['TopoHbR',labelout,PARCOMP(icomp).label,'.mat'])])
+                        save(fullfile(pathoutlist,['TopoHbR ',labelout,PARCOMP(icomp).label,'.mat']),'A','zonelist','srsfile' );
+                        disp(['Create export: ', fullfile(pathoutlist,['TopoHbR ',labelout,PARCOMP(icomp).label,'.mat'])])
                         clear A            
                         ncomp = ncomp +1;
                     end
@@ -179,13 +179,13 @@ for filenb = 1:size(NIRSDtp,1)
         Amean = nanmean(allbHbO,2);
         allsubjectHBO = [allsubjectHBO,allbHbO];
         A = [Amean];
-        save(fullfile(pathoutlist,['HBOmean',labelout,'.mat']),'A' ,'zonelist','srsfile' );  
-        disp(['Create export: ', fullfile(pathoutlist,['HBOmean',labelout,'.mat'])])
+        save(fullfile(pathoutlist,['HBOmean ',labelout,'.mat']),'A' ,'zonelist','srsfile' );  
+        disp(['Create export: ', fullfile(pathoutlist,['HBOmean ',labelout,'.mat'])])
         Amean = nanmean(allbHbR,2);
         A = [Amean];
         allsubjectHBR = [allsubjectHBR,allbHbR];
-        save(fullfile(pathoutlist,['HBRmean',labelout,'.mat']),'A' ,'zonelist','srsfile' );
-        disp(['Create export: ', fullfile(pathoutlist,['HBRmean',labelout,'.mat'])])
+        save(fullfile(pathoutlist,['HBRmean ',labelout,'.mat']),'A' ,'zonelist','srsfile' );
+        disp(['Create export: ', fullfile(pathoutlist,['HBRmean ',labelout,'.mat'])])
         disp(['Export data from: '   srsfile]);
     catch
         disp(['Error Could not export data from: '   srsfile]);

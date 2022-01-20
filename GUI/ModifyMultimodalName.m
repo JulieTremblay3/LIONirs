@@ -22,7 +22,7 @@ function varargout = ModifyMultimodalName(varargin)
 
 % Edit the above text to modify the response to help ModifyMultimodalName
 
-% Last Modified by GUIDE v2.5 10-Jan-2022 12:59:32
+% Last Modified by GUIDE v2.5 13-Jan-2022 14:31:01
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -69,8 +69,13 @@ if isfield(NIRS.Dt,'EEG')
     set(handles.edit_offsetEEG,'string', num2str(NIRS.Dt.EEG.pp(end).sync_timesec{1}) );
 end
 if isfield(NIRS.Dt,'AUX')
-    set(handles.listbox_AUXLIST,'string', NIRS.Dt.AUX.pp(end).p{1} );
-    set(handles.edit_offsetAUX,'string', num2str(NIRS.Dt.AUX.pp(end).sync_timesec{1}));
+    AUXname = [];
+    for i=1:numel(NIRS.Dt.AUX) 
+        AUXname= [AUXname;  NIRS.Dt.AUX(i).pp(end).p(1)] ;
+    end
+        set(handles.listbox_AUXLIST,'string', AUXname);
+        set(handles.listbox_AUXLIST,'value', 1);
+        set(handles.edit_offsetAUX,'string', num2str(NIRS.Dt.AUX(1).pp(end).sync_timesec{1}));
 end
 if isfield(NIRS.Dt,'Video')
     set(handles.listbox_Video,'string', NIRS.Dt.Video.pp(end).p{1} );
@@ -154,10 +159,14 @@ function listbox_AUXLIST_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns listbox_AUXLIST contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from listbox_AUXLIST
-load(handles.NIRSpath{1}); 
-NIRS.Dt.AUX.pp(end).p{1} = get(handles.listbox_AUXLIST,'string');
-save(handles.NIRSpath{1},'NIRS'); 
-disp(['Adjust AUX file: ', get(handles.listbox_AUXLIST,'string')]);
+
+load(handles.NIRSpath{1});
+val = get(handles.listbox_AUXLIST,'value');
+set(handles.edit_offsetAUX,'string', num2str(NIRS.Dt.AUX(val).pp(end).sync_timesec{1}));
+ 
+% NIRS.Dt.AUX.pp(end).p{1} = get(handles.listbox_AUXLIST,'string');
+% save(handles.NIRSpath{1},'NIRS'); 
+% disp(['Adjust AUX file: ', get(handles.listbox_AUXLIST,'string')]);
 
 % --- Executes during object creation, after setting all properties.
 function listbox_AUXLIST_CreateFcn(hObject, eventdata, handles)
@@ -178,13 +187,19 @@ function btn_Modify_AUX_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 temp = get(handles.listbox_AUXLIST,'string' );
-[file,path] = uigetfile(temp);
+value = get(handles.listbox_AUXLIST,'value');
+[file,path] = uigetfile(temp{value});
 if ~file==0
 load(handles.NIRSpath{1});
 id = get(handles.popupmenu_NIRS,'value');
-NIRS.Dt.AUX.pp(end).p{id} = fullfile(path,file);
+NIRS.Dt.AUX(value).pp(end).p{id} = fullfile(path,file);
 save(handles.NIRSpath{1},'NIRS');
-set(handles.listbox_AUXLIST,'string',  NIRS.Dt.AUX.pp(end).p);
+ AUXname = [];
+ for i=1:numel(NIRS.Dt.AUX) 
+      AUXname= [AUXname;  NIRS.Dt.AUX(i).pp(end).p(1)] ;
+ end
+set(handles.listbox_AUXLIST,'string', AUXname);
+
 disp(['Adjust AUX file: ', fullfile(path,file)])
 end
 % --- Executes on selection change in listbox_Video.
@@ -383,7 +398,8 @@ function edit_offsetAUX_Callback(hObject, eventdata, handles)
 %        str2double(get(hObject,'String')) returns contents of edit_offsetAUX as a double
 load(handles.NIRSpath{1});
 id = get(handles.popupmenu_NIRS,'value');
-NIRS.Dt.AUX.pp(end).sync_timesec{id} = str2num( get( handles.edit_offsetAUX,'string'));
+val = get(handles.listbox_AUXLIST,'value');
+NIRS.Dt.AUX(val).pp(end).sync_timesec{id} = str2num( get( handles.edit_offsetAUX,'string'));
 save(handles.NIRSpath{1},'NIRS');
 disp(['Adjust offset AUX: ', get( handles.edit_offsetAUX,'string'),' seconds']);
 
