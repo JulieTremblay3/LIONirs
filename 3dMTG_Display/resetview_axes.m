@@ -37,5 +37,7 @@ function resetview_axes(haxes)
     DispParameter.enumaltas = str2num(get(handles.edit_atlasview,'string'));
     DispParameter.viewcortexandatlas  = get(handles.radio_cortexandatlas,'value'); 
     DispParameter.HideNotCover = get(handles.radio_show_cover,'value');
+    DispParameter.LineWidth = 4;
+    DispParameter.D1label = 0;
     IO_displayHelmet(PrjStruct,PMI,DispParameter);
     guidata(handles.IO_HelmetMTG, handles); 

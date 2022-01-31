@@ -1925,10 +1925,19 @@ NIRS_datatype.values    = {1,2,3,4};
 NIRS_datatype.val       = {1};
 NIRS_datatype.help      = {'Epoch averaging mean, Epoch averaging mean over time the period start : start+steptime, Epoch averaging mean Tval '};
 
+NIRS_dataHemo           = cfg_menu;
+NIRS_dataHemo.tag       = 'NIRS_dataHemo';
+NIRS_dataHemo.name      = 'Concentration';
+NIRS_dataHemo.labels    = { 'HbO and HbR','HbO', 'HbR',};
+NIRS_dataHemo.values    = {1, 2, 3};
+NIRS_dataHemo.val       = {1};
+NIRS_dataHemo.help      = {'Display HbO and HbR or wavelength first and second if concentration were not compute'};
+
+
 b_NIRSdata        = cfg_branch;
 b_NIRSdata.tag    = 'b_NIRSdata';
 b_NIRSdata.name   = 'NIRS epoch average data';
-b_NIRSdata.val    = {NIRSmat NIRS_datatype HMR_savenormfig};
+b_NIRSdata.val    = {NIRSmat NIRS_datatype HMR_savenormfig, NIRS_dataHemo};
 b_NIRSdata.help   = {''};
 
 b_SPMdata        = cfg_branch;
@@ -1953,7 +1962,7 @@ b_vColordata.name   = 'Load topographic map';
 b_vColordata.val    = {vColordata};
 b_vcolordata.help   = {''};
 
-typedata         = cfg_choice;
+typedata         =  cfg_choice;
 typedata.tag     = 'typedata';
 typedata.name    = 'Design';
 typedata.val     = {b_NIRSdata};
@@ -1970,6 +1979,18 @@ m_prjfile_mode.val      = {0};
 m_prjfile_mode.help     = {'The project file (.prj) used to create the topography can be paired which all file selected above, file1 use prj1, file2 use prj2...',...
     'You can also use the same prj for all the topography',...
     'In case of the selection Load topographic map is selected, the same prj skin and cortex have been used for all files'};
+
+%prjfile define above 
+m_projection_mode          = cfg_menu;
+m_projection_mode.tag      = 'm_projection_mode';
+m_projection_mode.name     = 'Projection';  
+m_projection_mode.labels   = {'Banana shape, radial projection', 'Inverse weighted distance'}; 
+m_projection_mode.values   = {0,1};
+m_projection_mode.val      = {0};
+m_projection_mode.help     = {'Topographic projection',...
+    'Banana shape, project color scale amplitude using the radial angle in spherical coordinate between source and detector.',...
+    'Inverse weighted distance use the intersection between source and detector and project color scale using inverse weighted distance.'};
+
 
 v_cmin          =  cfg_entry;
 v_cmin.tag      = 'v_cmin';
@@ -2069,14 +2090,14 @@ v_showcover.tag    = 'v_showcover';
 v_showcover.name   = 'Show coverage';
 v_showcover.labels = {'Yes','No'};
 v_showcover.values = {1,0};
-v_showcover.val    = {1};
+v_showcover.val    = {0};
 v_showcover.help   = {'Show uncovered region by the montage in grey'}';
 
 b_option         = cfg_branch;
 b_option.tag     = 'b_option';
 b_option.name    = 'Define display option';
 b_option.help    = {'Display option for HSJ helmet.'};
-b_option.val     = {prjfile m_prjfile_mode v_cmin,v_cmax,v_ctr,v_view,v_start,v_stop,v_step,v_outpath,v_outtimeprecisionleft,v_outtimeprecision,v_showcover,v_skin};
+b_option.val     = {prjfile m_prjfile_mode m_projection_mode, v_cmin,v_cmax,v_ctr,v_view,v_start,v_stop,v_step,v_outpath,v_outtimeprecisionleft,v_outtimeprecision,v_showcover,v_skin};
 
 % Executable Branch
 E_VIDEO      = cfg_exbranch;
@@ -3553,7 +3574,7 @@ M_datawritenirs.help   = {'These modules convert nir file in .nirs, last module 
 M_Utility        = cfg_choice; 
 M_Utility.name   = 'Utility NIRSmat';
 M_Utility.tag    = 'M_Utility';
-M_Utility.values = {E_NIRSmatdiradjust, E_NIRSmatcreatenewbranch  E_createseedlist E_qualityreport E_zone2channellist E_channellist2zone E_viewNIRS M_datawritenirs}; %
+M_Utility.values = {E_NIRSmatdiradjust, E_NIRSmatcreatenewbranch  E_createseedlist E_qualityreport E_zone2channellist E_channellist2zone E_VIDEO E_viewNIRS M_datawritenirs}; %
 M_Utility.help   = {'Utility on NIRSmat function.'};
 
 nirsHSJ        = cfg_choice;

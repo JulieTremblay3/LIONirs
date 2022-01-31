@@ -1148,10 +1148,9 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
             if idreg(iselected)==0
                 % Xmean(:) =1
                 Xm = XmRegressorgood;
-                label = Regressorlist{iReg};
-                [filepath,name,ext] = fileparts(Regressorlist{iReg});
-                label =  [name,ext];
-                
+                label = Regressorlist{iselected};
+                [filepath,name,ext] = fileparts(Regressorlist{iselected});
+                label =  [name,ext];                
             else
                % Xm = tmpGLM.AUX.data{idreg(iselected)}*beta(iselected,:);
                 Xm = tmpGLM.AUX.data{idreg(iselected)}; %compress multiply by beta later

@@ -16,10 +16,10 @@ end
 if numel(varargin) >=4
     PMI = varargin{4}; %BASIC PMI structure 
 end
-if ~isfield(label,'vcolortype')
-    label.vcolortype = 0; % L'image à ouvrir est déjà en format topographique
-end
-
+%test essenstial field if absent define them
+try;label.vcolortype;catch;label.vcolortype = 0;end
+try;label.projectiontype; catch; label.projectiontype = 0; end
+try;label.dataHemo;catch; label.dataHemo = 1; end
 %non de sortir 
 labeltime = label.labeltime;
 file = label.file;
@@ -60,32 +60,41 @@ if ~isdir([label.pathout])
       
       
       %Section ouvrir le video
-        if file~=0
-            try
-                if flag_viewangle
-                    mov = avifile([label.pathout,filesep,file,'.avi'],'fps',1);
-                end
-                nameavi =[file,'.avi'];
-                pathavi = [label.pathout,filesep];
-            catch
-                [nameavi,pathavi]=uiputfile([label.pathout,file,'.avi']);%si nom invalide selection manuel du nom
-                if flag_viewangle
-                    mov = avifile([pathavi,nameavi],'fps',1);
-                end
-            end
-        end
+      %FAIT POUR VIEILLE VERSION 2009 
+%         if file~=0
+%             try
+%                 if flag_viewangle
+%                     mov = avifile([label.pathout,filesep,file,'.avi'],'fps',1);
+%                 end
+%                 nameavi =[file,'.avi'];
+%                 pathavi = [label.pathout,filesep];
+%             catch
+%                 [nameavi,pathavi]=uiputfile([label.pathout,file,'.avi']);%si nom invalide selection manuel du nom
+%                 if flag_viewangle
+%                     mov = avifile([pathavi,nameavi],'fps',1);
+%                 end
+%             end
+%         end
+        nameavi =[file,'.avi'];
+        pathavi = [label.pathout,filesep];
     if label.vcolortype == 0 %Travail data original pas avec les fichiers déjà en topo
         if ~isdir([pathavi,'Topo',filesep])
             mkdir([pathavi,'Topo',filesep]);
         end
+        if label.dataHemo==1 | label.dataHemo==2
         if ~isdir([pathavi,'Topo',filesep,'HbO',filesep])
             mkdir([pathavi,'Topo',filesep,'HbO',filesep]);
         end
-        if ~isdir([pathavi,'Topo',filesep,'HbR',filesep])
-            mkdir([pathavi,'Topo'filesep,'HbR',filesep])
         end
+        if label.dataHemo==1 | label.dataHemo==3
+        if ~isdir([pathavi,'Topo',filesep,'HbR',filesep])
+            mkdir([pathavi,'Topo',filesep,'HbR',filesep])
+        end
+        end
+        if 0 %label.dataHemo==3
         if ~isdir([pathavi,'Topo',filesep,'HbT',filesep])
             mkdir([pathavi,'Topo',filesep,'HbT',filesep])
+        end
         end
     end
         
@@ -128,8 +137,9 @@ if ~isdir([label.pathout])
             set(hback ,'units','normalize','position',[ini_col,ini_row,0.8,haut*2]);
             set(hback,'xtick',[],'ytick',[],'ztick',[], 'xcolor',[1,1,1],'ycolor',[1,1,1],'zcolor',[1,1,1]);
             caxis(xlim)
+          
+            if 0
             colorbar
-            
             saveas(hfiguredisplay,[pathavi,'colorbar.tif'],'tif')
             imgall = imread([pathavi,'colorbar.tif'],'tif'); 
             X2d = sum(imgall,3);
@@ -141,7 +151,7 @@ if ~isdir([label.pathout])
             imwrite(colorbartif,[pathavi,'colorbar.tif'],'tif');
             clear colorbartif imgall
             clear idx idy 
-            
+            end
             
             %Orientation of the topo
             for i=0:numwindows-1
@@ -196,8 +206,13 @@ if ~isdir([label.pathout])
                     'Position',[0.01,0.45-.45/2,0.04 0.05],'FontSize',12,'tag','edittimingHbO','BackgroundColor',[1,1,1],'HorizontalAlignment','center');
                 end
                 %%%%%%%Début HbO%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                if  label.dataHemo==1|label.dataHemo==2
                 if label.vcolortype == 0;
-                    PrjStruct = display_MRIcolor(PrjStruct,PMI,d1(itime,:,1),skintype);
+                    if label.projectiontype==0
+                        PrjStruct = display_MRIcolor(PrjStruct,PMI,d1(itime,:,1),skintype);
+                    elseif label.projectiontype==1
+                    	PrjStruct = display_MRIcolor_InverseWeightedDistance(PrjStruct,PMI,d1(itime,:,1),skintype);
+                    end
                 end
                 if file~=0
                     oMRI = get_MRI_Data(PrjStruct);
@@ -276,11 +291,18 @@ if ~isdir([label.pathout])
                           end
                     end
                 end
-                
+            end
                 %%%%%%%%%%%%FIN HbO %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-                if label.vcolortype == 0
                 %Début HbT
-                    PrjStruct = display_MRIcolor(PrjStruct,PMI,d1(itime,:,3),skintype);
+                 if 0 %label.dataHemo==3
+                if label.vcolortype == 0
+                
+                    if label.projectiontype==0
+                        PrjStruct = display_MRIcolor(PrjStruct,PMI,d1(itime,:,1),skintype);
+                    elseif label.projectiontype==1
+                    	PrjStruct = display_MRIcolor_InverseWeightedDistance(PrjStruct,PMI,d1(itime,:,1),skintype);
+                    end
+                    
                     if file~=0
                         oMRI = get_MRI_Data(PrjStruct);
                         if skintype==0 %skin
@@ -332,11 +354,18 @@ if ~isdir([label.pathout])
                         set(hobject,'visible','on');   
                     end
                     end
-                end                   
+                end
+            end
                 %%%%%%%%%Fin HbT%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                
                 %Début HbR
+                if label.dataHemo==1 | label.dataHemo==3
                 if label.vcolortype == 0
-                    PrjStruct = display_MRIcolor(PrjStruct,PMI,d1(itime,:,2),skintype);
+                      if label.projectiontype==0
+                        PrjStruct = display_MRIcolor(PrjStruct,PMI,d1(itime,:,2),skintype);
+                      elseif label.projectiontype==1
+                    	PrjStruct = display_MRIcolor_InverseWeightedDistance(PrjStruct,PMI,d1(itime,:,2),skintype);
+                    end
+                    %PrjStruct = display_MRIcolor(PrjStruct,PMI,d1(itime,:,2),skintype);
                     if file~=0
                         oMRI = get_MRI_Data(PrjStruct);
                         if skintype==0 %skin
@@ -388,7 +417,8 @@ if ~isdir([label.pathout])
                         set(hobject,'visible','on');   
                     end
                     end
-                    end
+                end
+            end
                     %FIN HbR%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                   if flag_viewangle 
                     uiwait(hfiguredisplay,0.5)
@@ -396,31 +426,48 @@ if ~isdir([label.pathout])
                         %F = getframe(close);
                         figure(hfiguredisplay)
                        % F = getframe %(hfiguredisplay);
-                        F.cdata = screencapture(hfiguredisplay)
-                        F.colormap = [];                        
-                        mov = addframe(mov,F);
+                       %old version
+%                         F.cdata = screencapture(hfiguredisplay)
+%                         F.colormap = [];                        
+%                         mov = addframe(mov,F);
+                        %new version
                     end 
+                    v.frames(itime) = getframe(hfiguredisplay);
+                    v.times(itime) = itime/ 1; %30; % display at 1fps
+                    disp(['Frame: ', num2str( itime),' Time: ',labeltime{itime}]);
+                    v.width=size(v.frames(1).cdata,2);
+                    v.height=size(v.frames(1).cdata,1);
                     uiwait(gcf,speed)
                     delete(hHbO)
                     delete(hHbR)
                     delete(hTime) 
                   end                
             end
-          if label.vcolortype == 0; %sortie pour tout les modes sauf le .vcolor
-             [dir,fil,ext] = fileparts(TopoHbO.pp(1).p{1});
-             TOPO = TopoHbO;
-             save(fullfile(dir,[file,'HbOTOPO.mat']),'TOPO','-mat');
-             TOPOmat{1} = fullfile(dir,[file,'HbOTOPO.mat']);
-
-             [dir,fil,ext] = fileparts(TopoHbR.pp(1).p{1});
-             TOPO = TopoHbR;
-             save(fullfile(dir,[file,'HbRTOPO.mat']),'TOPO','-mat');
-             TOPOmat{2} = fullfile(dir,[file,'HbRTOPO.mat']);
-
-             [dir,fil,ext] = fileparts(TopoHbT.pp(1).p{1});
-             TOPO = TopoHbT;
-             save(fullfile(dir,[file,'HbTTOPO.mat']),'TOPO','-mat');
-             TOPOmat{3} = fullfile(dir,[file,'HbTTOPO.mat']);
+%             nameavi =[file,'.avi'];
+%         pathavi = [label.pathout,filesep];
+            nameavi = 'video.wmv';
+            disp(['Create video file: ', fullfile([pathavi,nameavi])])         
+            mmwrite([fullfile([pathavi,nameavi])],v);
+            
+            if label.vcolortype == 0; %sortie pour tout les modes sauf le .vcolor
+                if label.dataHemo==1|label.dataHemo==2
+                    [dir,fil,ext] = fileparts(TopoHbO.pp(1).p{1});
+                    TOPO = TopoHbO;
+                    save(fullfile(dir,[file,'HbOTOPO.mat']),'TOPO','-mat');
+                    TOPOmat{1} = fullfile(dir,[file,'HbOTOPO.mat']);
+                end
+              if label.dataHemo==1|label.dataHemo==3
+                [dir,fil,ext] = fileparts(TopoHbR.pp(1).p{1});
+                TOPO = TopoHbR;
+                save(fullfile(dir,[file,'HbRTOPO.mat']),'TOPO','-mat');
+                 TOPOmat{2} = fullfile(dir,[file,'HbRTOPO.mat']);
+              end
+              if 0 % label.dataHemo==3
+                [dir,fil,ext] = fileparts(TopoHbT.pp(1).p{1});
+                TOPO = TopoHbT;
+                save(fullfile(dir,[file,'HbTTOPO.mat']),'TOPO','-mat');
+                TOPOmat{3} = fullfile(dir,[file,'HbTTOPO.mat']);
+              end
           else
               TOPOmat = [];
           end
@@ -430,18 +477,19 @@ if ~isdir([label.pathout])
 %             disp(exception.message);
 %             close(mov)
 %         end
-        if flag_viewangle
-            if file~=0
-                mov = close(mov);
-            end 
-            close(hfiguredisplay);
-            try
-                [video, audio] = mmread([pathavi,nameavi]);
-                filename = [pathavi,nameavi];
-                mmwrite([filename(1:end-3),'wmv'],audio,video);
-            catch
-                disp('Video format was not convert in wmv')
-            end
-        end
+%         if flag_viewangle
+%             if file~=0
+%                 mov = close(mov);
+%             end 
+%             close(hfiguredisplay);
+%             try
+%                 [video, audio] = mmread([pathavi,nameavi]);
+%                 filename = [pathavi,nameavi];
+%                 mmwrite([filename(1:end-3),'wmv'],audio,video);
+%             catch
+%                 disp('Video format was not convert in wmv')
+%             end
+%         end
         %FIN FONCTION 
         warning on all
+end

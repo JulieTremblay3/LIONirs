@@ -416,6 +416,7 @@ if avtype == 1 %save data file for average over many files
 
     %Repport nb of trials
     hnbtrial = figure;
+    subplot(2,1,1)
     set(gca,'fontsize',14)
     hold on
     for ichannel = 1:numel(mediannbevents)/2
@@ -437,10 +438,20 @@ if avtype == 1 %save data file for average over many files
         filereport = fullfile(dir2,['Report_Nb_trial_median_per_channel_reject_threshold_',num2str(job.choiceave.badchannelratio)]);
 %    end 
     title(['Channel with nb Trial >= ', num2str(job.choiceave.badchannelratio*100), '% are keeped (green one are rejected)' ])
+    subplot(2,1,2)
+    try
+    imagesc(double(noise))
+    ylabel('Channel id')
+    xlabel('Time (sample)')
+    title('Noise')
+    catch
+    end
     saveas(hnbtrial,[filereport,'.jpg'],'jpg');  
     saveas(hnbtrial,[filereport,'.fig'],'fig'); 
     disp(['Save event report: ',filereport])
     close(hnbtrial)
+    
+    
     
 %     figure;plot(tval')
 %     figure;plot(av')

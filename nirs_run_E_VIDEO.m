@@ -7,6 +7,7 @@ if isfield(job.typedata,'b_HMRdatad1manual')
     job.typedata.b_HMRdata = job.typedata.b_HMRdatad1manual;
 end
 
+label.projectiontype = job.b_option.m_projection_mode;
 
 if isfield(job.typedata,'b_HMRdata')
     %try
@@ -168,7 +169,7 @@ if isfield(job.typedata,'b_HMRdata')
                     d1(itime,chok,3) = ndHbT(echantillon_time,:);
                     itime = itime + 1;
                 end
-            else flag_avgtime==1;  %average data time point
+            elseif flag_avgtime==1;  %average data time point
                 itime = 1;
                 clear d1;
                 d1 = zeros(numel(start:step_time:(start+postTime)),nbch,3);
@@ -266,6 +267,10 @@ if isfield(job.typedata,'b_NIRSdata') %NIRS.mat FILE !!!
                 return
             end        
         end
+        if isfield(job.typedata.b_NIRSdata,'NIRS_dataHemo')
+            label.dataHemo = job.typedata.b_NIRSdata.NIRS_dataHemo;
+        end
+        
         for ifile=1:numel(job.typedata.b_NIRSdata.NIRSmat)
             global currentsub;
             currentsub = 1;
@@ -281,7 +286,7 @@ if isfield(job.typedata,'b_NIRSdata') %NIRS.mat FILE !!!
             load(job.typedata.b_NIRSdata.NIRSmat{ifile});
             for imodule = numel(NIRS.Dt.fir.pp):-1:1
                 if strfind(NIRS.Dt.fir.pp(imodule).pre(1:15),'Epoch averaging')
-                    PMI{currentsub}.data(cf).MeasListAct = NIRS.Dt.fir.pp(imodule).chok;
+                    PMI{currentsub}.data(cf).MeasListAct = NIRS.Cf.H.C.ok; %NIRS.Dt.fir.pp(imodule).chok;
                     break
                 end
             end
@@ -322,9 +327,10 @@ if isfield(job.typedata,'b_NIRSdata') %NIRS.mat FILE !!!
                 xname =fullfile(pathstr,[name,'_tval',ext]);
             end
             
-            pretime = -abs(NIRS.Dt.fir.pp(imodule).job.choiceave.pretime);
+            pretime = -abs(str2num(NIRS.Dt.fir.pp(imodule).job.choiceave.pretime));
             PMI{currentsub}.data(cf).HRF.AvgC = fopen_NIR(xname,NIRS.Cf.H.C.N)';
-            PMI{currentsub}.data(cf).MeasListAct = NIRS.Dt.fir.pp(imodule).chok;
+              PMI{currentsub}.data(cf).MeasListAct = NIRS.Cf.H.C.ok;
+            %PMI{currentsub}.data(cf).MeasListAct = NIRS.Dt.fir.pp(imodule).chok;
             
             if job.typedata.b_NIRSdata.NIRS_datatype==1 || job.typedata.b_NIRSdata.NIRS_datatype==3
                 flag_avgtime = 0; %each time point
@@ -332,7 +338,7 @@ if isfield(job.typedata,'b_NIRSdata') %NIRS.mat FILE !!!
                 flag_avgtime = 1; %avg periode of time point
             end
             
-            PMI{currentsub}.data(cf).HRF.tHRF = (1:size(PMI{currentsub}.data(cf).HRF.AvgC,1))*1/NIRS.Cf.dev.fs+pretime;
+            PMI{currentsub}.data(cf).HRF.tHRF = (1:size(PMI{currentsub}.data(cf).HRF.AvgC,1))*1/NIRS.Cf.dev.fs+pretime(1);
             step_time = job.b_option.v_step;
             start = job.b_option.v_start;
             postTime= job.b_option.v_stop-job.b_option.v_start;
