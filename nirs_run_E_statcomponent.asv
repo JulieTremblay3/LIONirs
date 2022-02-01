@@ -29,7 +29,7 @@ end
             elseif job.c_statcomponent.b_TtestOneSample.m_TtestOneSample == 3 ;
                 info.tail = 'right';
             end      
-            [h,p,ci,stats] = ttest(AllC(ich,:),0,'tail',info.tail); %Use from Matlab Statistics and Machine Learning Toolbox™  
+            [h,p,ci,stats] = ttest(AllC(ich,:),0,'tail',info.tail); %Use from Matlab Statistics and Machine Learning Toolboxâ„¢  
             df(ich) = stats.df;
             tval(ich,1) = stats.tstat;
             pval(ich,1)= p;        
@@ -76,7 +76,7 @@ elseif isfield(job.c_statcomponent,'b_Ttestpaired')
         info.AllG1 = AllG1;
         info.AllG2 = AllG2;
     for ich = 1:size(AllG1,1) 
-       [h,p,ci,stats] = ttest(AllG1(ich,:),AllG2(ich,:), 'tail',info.tail); % from Matlab Statistics and Machine Learning Toolbox™
+       [h,p,ci,stats] = ttest(AllG1(ich,:),AllG2(ich,:), 'tail',info.tail); % from Matlab Statistics and Machine Learning Toolboxâ„¢
         tval(ich,1)   = stats.tstat;
         df            = stats.df;
         pval(ich,1)   = p;      
@@ -172,7 +172,6 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
             [num,txt,raw] = xlsread(job.c_statcomponent.c_ANOVAN.b_ANOVAN.f_anovan{1});
          catch
             [num,txt,raw] = readtxtfile_asxlsread(job.c_statcomponent.c_ANOVAN.b_ANOVAN.f_anovan{1});
-         end
 
      elseif  strcmp(ext,'.txt')
           [num,txt,raw] = readtxtfile_asxlsread(job.c_statcomponent.c_ANOVAN.b_ANOVAN.f_anovan{1});
@@ -295,11 +294,7 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
       
      [filepath,name,ext] = fileparts(job.c_statcomponent.c_ANOVAN.b_ANOVANzone.f_anovan{1});
      if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
-         try
          [num,txt,raw] = xlsread(job.c_statcomponent.c_ANOVAN.b_ANOVANzone.f_anovan{1});
-         catch
-            [num,txt,raw] = readtxtfile_asxlsread(job.c_statcomponent.c_ANOVAN.b_ANOVANzone.f_anovan{1});
-         end
      elseif  strcmp(ext,'.txt')
          [num,txt,raw] = readtxtfile_asxlsread(job.c_statcomponent.c_ANOVAN.b_ANOVANzone.f_anovan{1});
      end

@@ -60,24 +60,24 @@ for ch = 1:size(ml,1)/2 %Passage 1 coordonné
                 x_srs = vHoles(pSrs).Coord.x;%-vHoles(pSrs).Normal.x*vHoles(pSrs).SkinDepth;
                 y_srs = vHoles(pSrs).Coord.y;%-vHoles(pSrs).Normal.y*vHoles(pSrs).SkinDepth;
                 z_srs = vHoles(pSrs).Coord.z;%-vHoles(pSrs).Normal.z*vHoles(pSrs).SkinDepth;
-                x_det = vHoles(pDet).Coord.x;%-vHoles(pDet).Normal.x*vHoles(pDet).SkinDepth;
-                y_det = vHoles(pDet).Coord.y;%-vHoles(pDet).Normal.y*vHoles(pDet).SkinDepth;
-                z_det = vHoles(pDet).Coord.z;%-vHoles(pDet).Normal.z*vHoles(pDet).SkinDepth;
+                x_det = vHoles(pDet(1)).Coord.x;%-vHoles(pDet).Normal.x*vHoles(pDet).SkinDepth;
+                y_det = vHoles(pDet(1)).Coord.y;%-vHoles(pDet).Normal.y*vHoles(pDet).SkinDepth;
+                z_det = vHoles(pDet(1)).Coord.z;%-vHoles(pDet).Normal.z*vHoles(pDet).SkinDepth;
             elseif type == 1 
             %transfert on the cortex
                 x_srs = vHoles(pSrs).Coord.x;%-vHoles(pSrs).Normal.x*vHoles(pSrs).CortexDepth;
                 y_srs = vHoles(pSrs).Coord.y;%-vHoles(pSrs).Normal.y*vHoles(pSrs).CortexDepth;
                 z_srs = vHoles(pSrs).Coord.z;%-vHoles(pSrs).Normal.z*vHoles(pSrs).CortexDepth;
-                x_det = vHoles(pDet).Coord.x;%-vHoles(pDet).Normal.x*vHoles(pDet).CortexDepth;
-                y_det = vHoles(pDet).Coord.y;%-vHoles(pDet).Normal.y*vHoles(pDet).CortexDepth;
-                z_det = vHoles(pDet).Coord.z;%-vHoles(pDet).Normal.z*vHoles(pDet).CortexDepth;   
+                x_det = vHoles(pDet(1)).Coord.x;%-vHoles(pDet).Normal.x*vHoles(pDet).CortexDepth;
+                y_det = vHoles(pDet(1)).Coord.y;%-vHoles(pDet).Normal.y*vHoles(pDet).CortexDepth;
+                z_det = vHoles(pDet(1)).Coord.z;%-vHoles(pDet).Normal.z*vHoles(pDet).CortexDepth;   
             else
                 x_srs = vHoles(pSrs).Coord.x;%-vHoles(pSrs).Normal.x*vHoles(pSrs).SkinDepth;
                 y_srs = vHoles(pSrs).Coord.y;%-vHoles(pSrs).Normal.y*vHoles(pSrs).SkinDepth;
                 z_srs = vHoles(pSrs).Coord.z;%-vHoles(pSrs).Normal.z*vHoles(pSrs).SkinDepth;
-                x_det = vHoles(pDet).Coord.x;%-vHoles(pDet).Normal.x*vHoles(pDet).SkinDepth;
-                y_det = vHoles(pDet).Coord.y;%-vHoles(pDet).Normal.y*vHoles(pDet).SkinDepth;
-                z_det = vHoles(pDet).Coord.z;%-vHoles(pDet).Normal.z*vHoles(pDet).SkinDepth;
+                x_det = vHoles(pDet(1)).Coord.x;%-vHoles(pDet).Normal.x*vHoles(pDet).SkinDepth;
+                y_det = vHoles(pDet(1)).Coord.y;%-vHoles(pDet).Normal.y*vHoles(pDet).SkinDepth;
+                z_det = vHoles(pDet(1)).Coord.z;%-vHoles(pDet).Normal.z*vHoles(pDet).SkinDepth;
             end
               x_c = x_srs-(x_srs-x_det)/2;
               y_c = y_srs-(y_srs-y_det)/2;

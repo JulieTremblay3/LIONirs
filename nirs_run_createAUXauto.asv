@@ -113,8 +113,8 @@ A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0'};
 VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-5),...
     num2cell(onsetall+job.c_createAUXauto.b_HRFtriggeronset.e_HRFduration+5), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1)  ];
 try
-    xlswrite(filenamexls,[A;VAL])
-    disp(['Create default xls config to GLM ', label, ' extract : ', filenamexls ]);
+xlswrite(filenamexls,[A;VAL])
+disp(['Create default xls config to GLM ', label, ' extract : ', filenamexls ]);
 catch   
     writetxtfile(filenamexls,[A;VAL]);
     disp(['Create default xls config to GLM ', label, ' extract : ', filenamexls ]);

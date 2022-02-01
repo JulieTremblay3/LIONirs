@@ -547,21 +547,35 @@ if avtype == 1 %save data file for average over many files
     if filenb > 1
         for jfile = 1:filenb
             [dir2,~,~] = fileparts(job.NIRSmat{jfile,1});
-            path = fullfile(dir2,['Report_Files_Used_for_Averaging_File',num2str(jfile)]);
-            if ismac
-                writetxtfile_asxlswrite(path, report)
-            else
-                xlswrite(path, report);
-            end
+%            filenamexls = fullfile(dir2,['Report_Files_Used_for_Averaging_File',num2str(jfile)]);
+%             if ismac
+%                 writetxtfile_asxlswrite(filenamexls, report)
+%                 disp(['File report:',filenamexls ])
+%             else
+%                 try
+%                     xlswrite(filenamexls, report);
+%                      disp(['File report:',filenamexls ])
+%                 catch
+%                     writetxtfile(filenamexls,report);
+%                      disp(['File report:',filenamexls ])
+%                 end
+%             end
         end
     else
-        path = fullfile(dir2,'Report_Blocks_Used_for_Averaging');
-        if ismac
-            writetxtfile_asxlswrite(path, report)
-        else
-            xlswrite(path, report);
-        end
-        xlswrite(path, report);
+%         filenamexls= fullfile(dir2,'Report_Blocks_Used_for_Averaging');
+%         if ismac
+%             writetxtfile_asxlswrite(filenamexls, report)
+%              disp(['File report:',filenamexls ])
+%         else
+%             try
+%                 xlswrite(filenamexls, report);
+%                  disp(['File report:',filenamexls ])
+%             catch
+%                 writetxtfile(filenamexls,report);
+%                  disp(['File report:',filenamexls ])
+%             end
+%         end
+      
     end
     A = [];
 end

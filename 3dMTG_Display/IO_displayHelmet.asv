@@ -2,9 +2,9 @@ function IO_DisplayHelmet(PrjStruct,PMI,DispParameter)
 %**************************************************************************
 % function displayHelmet(helmet)
 % Fonction permettant gerant l'affichage de tous les elements du casque
-% Entrée : 
+% EntrÃ©e : 
 %          Prjstrut      structure de donnee IOmtg
-%          PMI structure structure de donnée d'homer 
+%          PMI structure structure de donnÃ©e d'homer 
 %          DispParameter parametre d'affichage     
 %               DispParameter.axes1 = handles.axes_projection;
 %               DispParameter.viewhelmet = 1;
@@ -99,7 +99,7 @@ function IO_DisplayHelmet(PrjStruct,PMI,DispParameter)
         CameraPosition = get( DispParameter.axes1, 'CameraPosition' );
         display_holescortex(DispHelm, CameraPosition,DispParameter);
     end
-    %Affichage des canaux sélectionnées
+    %Affichage des canaux sÃ©lectionnÃ©es
     if  DispParameter.channel
         displaychannel(DispHelm,PMI,DispParameter);
     end
@@ -111,7 +111,7 @@ function IO_DisplayHelmet(PrjStruct,PMI,DispParameter)
 %     end
 
     
-    %Affichage des canaux sélectionnées
+    %Affichage des canaux sÃ©lectionnÃ©es
     if 0%DispParameter.viewcortexintersection & DispParameter.reset
         displaychannelcortex(DispHelm,PMI,DispParameter);
     end
@@ -238,7 +238,7 @@ DispParameter.viewd1chcolor = 1;
                     end
                 end
              end
-            %Affichage des détecteurs     
+            %Affichage des dÃ©tecteurs     
             %if  p == sMtg.v_pDet(ind_d);
             if find(sMtg.v_pDet==p)  
                 if ind_d < length(sMtg.v_pDet)
@@ -394,7 +394,7 @@ Mtg_Selected = [sMtg.v_pDet, sMtg.v_pSrc];
 %                                                            strFiber, 'FontSize',8, 'Color','black')%,   ...'VerticalAlignment', 'top');
 %                     end
 %                  end
-%                 %Affichage des détecteurs     
+%                 %Affichage des dÃ©tecteurs     
 %                 %if  p == sMtg.v_pDet(ind_d);
 %                 if find(sMtg.v_pDet==p)  
 %                     if ind_d < length(sMtg.v_pDet)
@@ -529,6 +529,7 @@ function displaychannel(DispHelm,PMI,DispParameter)
         end
          
          p_det = find(sMtg.v_HolesMtg == Det_n);
+          p_det()
          if ~isempty(p_det)
             detx = vHoles(p_det(1)).Coord.x;
             dety = vHoles(p_det(1)).Coord.y;

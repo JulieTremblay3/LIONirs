@@ -337,9 +337,17 @@ pourcentagetr = job.i_minch_cardiac/100;
     if ismac
         writetxtfile_asxlsfile(fullfile(filepath,['CardiacCHCOH.xls']),xlsall);
     else
+        try
         xlswrite(fullfile(filepath,['CardiacCHCOH.xls']),xlsall);
+        catch
+             writetxtfile_asxlsfile(fullfile(filepath,['CardiacCHCOH.xls']),xlsall);
+        end
         if  SNRfft
+            try
             xlswrite(fullfile(filepath,['CardiacCHSNR.xls']),xlsallSNR);
+            catch
+            writetxtfile_asxlsfile(fullfile(filepath,['CardiacCHSNR.xls']),xlsallSNR);
+            end
         end
     end
     disp(['Save Cardiac report COH figure: ', fullfile(filepath,[nametmp,'CardiacCHCOH',num2str(f),'.jpg'])]);

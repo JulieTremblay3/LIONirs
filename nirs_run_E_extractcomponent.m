@@ -854,9 +854,15 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
  
     [~,~,ext] =fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
     if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
-        [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
-        [dirxls,filexls,extxls] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
-        id.Regressor = [];
+        try
+            [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
+            [dirxls,filexls,extxls] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
+            id.Regressor = [];
+        catch
+            [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
+            [dirxls,filexls,extxls] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
+            id.Regressor = []; 
+        end
         
     elseif strcmp(ext,'.txt')
         [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
@@ -1220,14 +1226,23 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
         namefilter=[labelid,'_',Regressorlist{1}]; 
         disp(['Suggested filter name ',  namefilter,' to export'])
         VAL = {NIRSDtp{ievent},'GLM', namefilter, [NIRSDtp{ievent}, 'channellist.txt'],namefilter};
+        try
         xlswrite(filenamexls,[A;VAL]);
         disp(['Create xls example file: ',filenamexls,' to help you to configure the Export list function to export component'])
+        catch
+        writetxtfile(filenamexls,[A;VAL]);
+        disp(['Create xls example file: ',filenamexls,' to help you to configure the Export list function to export component'])
+        end
     catch
     end
 elseif isfield(job.c_extractcomponent,'b_extractcomponent_PARAFAC')
     [~,~,ext] =fileparts(job.c_extractcomponent.b_extractcomponent_PARAFAC.f_component_PARAFAClist{1});
     if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
+        try
         [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_PARAFAC.f_component_PARAFAClist{1});
+        catch
+        [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_PARAFAC.f_component_PARAFAClist{1});
+        end 
     elseif strcmp(ext,'.txt')
         [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_PARAFAC.f_component_PARAFAClist{1});
     end
@@ -1406,7 +1421,12 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_AVG')
     [~,~,ext] =fileparts(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
     if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
         [pathstr, name, ext]= fileparts(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
+         try
         [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
+        catch
+        [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
+        end 
+
     elseif strcmp(ext,'.txt')
         [pathstr, name, ext]= fileparts(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
         [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});

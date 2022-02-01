@@ -18,19 +18,19 @@ printreportthreshold = job.b_meandiff.printreportthreshold;
 corr_thr = job.b_corr.corr_thr;
 option_find_correlation = job.b_corr.m_corr;
 
-%Test 3 durée minimal de signal continue sans artefact 
+%Test 3 durÃ©e minimal de signal continue sans artefact 
 m_min_subinterval  = job.b_min_subinterval.m_min_subinterval;
 min_subinterval =  job.b_min_subinterval.min_subinterval;
 too_small_step_dur  =2; 
 
-%Test 4 nombre de canaux minimaux à avoir un artefact en même temps
+%Test 4 nombre de canaux minimaux Ã  avoir un artefact en mÃªme temps
 minpourcentage = job.b_minpourcentagebad.minpourcentagebad;
 option_minpourcentage = job.b_minpourcentagebad.m_minpourcentagebad;
 %check 
 try
     zscore(rand(10));
 catch
-    disp('Uncomplete Artifact Detection, Please install the Matlab Statistics and Machine Learning Toolbox™')
+    disp('Uncomplete Artifact Detection, Please install the Matlab Statistics and Machine Learning Toolboxâ„¢')
     out.NIRSmat = job.NIRSmat;  
     return
 end
@@ -163,7 +163,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                                 mean_diff = zsc;
                                 ind = find(abs(zsc) >thr_ind); 
                             elseif  job.b_meandiff.m_thresholdstepzscore ==2 %old version using median
-                                 %Etape 2 Definition du threshold en fonction des données                        
+                                 %Etape 2 Definition du threshold en fonction des donnÃ©es                        
                                     zsc = zscore(abs(mean_diff));
                                     indok = find(abs(zsc)<3);
                                     valdata = median(abs(mean_diff(indok)));
@@ -468,7 +468,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 
                   catch
                         disp('Error to use correlation between channels.');
-                        disp('Please install the Matlab Statistics and Machine Learning Toolbox™ to achieved correlation between channel')
+                        disp('Please install the Matlab Statistics and Machine Learning Toolboxâ„¢ to achieved correlation between channel')
                         option_find_correlation = 0;
                    end
                  end

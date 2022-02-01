@@ -8,7 +8,11 @@ function out = nirs_run_E_Concatenate_nirsmat(job)
 prefix = 'All'; 
 [~,~,ext] =fileparts(job.f_nirsmatinfo{1});
 if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
-    [data, text, rawData] = xlsread(job.f_nirsmatinfo{1});
+    try
+        [data, text, rawData] = xlsread(job.f_nirsmatinfo{1});
+    catch
+         [data, text, rawData] = readtxtfile_asxlsread(job.f_nirsmatinfo{1});
+    end
 elseif strcmp(ext,'.txt')
     [data, text, rawData] = readtxtfile_asxlsread(job.f_nirsmatinfo{1});
 end

@@ -93,9 +93,13 @@ folderout = job.f_qualityreport{1};
 if ismac
     writetxtfile_asxlswrite(fullfile(folderout,'QualityReport.txt'), xlsout);
     disp(['File created: ', fullfile(folderout,'QualityReport.txt')]);
-
 else
-    xlswrite(fullfile(folderout,'QualityReport.xlsx'),xlsout);
-    disp(['File created: ', fullfile(folderout,'QualityReport.xlsx')]);
+    try
+        xlswrite(fullfile(folderout,'QualityReport.xlsx'),xlsout);
+        disp(['File created: ', fullfile(folderout,'QualityReport.xlsx')]);
+    catch
+        writetxtfile_asxlswrite(fullfile(folderout,'QualityReport.txt'), xlsout);
+        disp(['File created: ', fullfile(folderout,'QualityReport.txt')]);
+    end
 end
 out.NIRSmat = job.NIRSmat;

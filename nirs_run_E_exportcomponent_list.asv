@@ -140,7 +140,7 @@ for filenb = 1:size(NIRSDtp,1)
                         clear A        
                         ncomp = ncomp +1;
                     elseif strcmp(upper(PARCOMP(icomp).type),'AVG')
-                        listgood = PARCOMP(icomp).listgood; %check canaux pour séparer.... 
+                        listgood = PARCOMP(icomp).listgood; %check canaux pour sÃ©parer.... 
                         listgood = PARCOMP(icomp).listgood;
                         ChannelListfile = fullfile(pathoutlist,ListDtp{filenb});                     
                         [listHBOch, listHBRch, listnameHbO, listnameHbR, zonelist] = findchinChannelList(NIRS, ChannelListfile,listgood);
@@ -231,11 +231,8 @@ if 0
         if ismac
             writetxtfile_asxlsfile(fullfile(pathoutlist,['Component Tval' type,label,'.txt']),tmp);
         else
-            try
-                xlswrite(fullfile(pathoutlist,['Component Tval' type,label,'.xls']),tmp);
-            catch
-                writetxtfile_asxlsfile(fullfile(pathoutlist,['Component Tval' type,label,'.txt']),tmp);
-            end
+       
+            xlswrite(fullfile(pathoutlist,['Component Tval' type,label,'.xls']),tmp);
         end 
     catch
     end
@@ -245,12 +242,7 @@ if 0
        if ismac
            writetxtfile_asxlsfile(fullfile(pathoutlist,['Component R2' type,label,'.txt']),tmp);
        else
-            try
-               xlswrite(fullfile(pathoutlist,['Component R2' type,label,'.xls']),tmp);
-            catch
-               writetxtfile_asxlsfile(fullfile(pathoutlist,['Component Tval' type,label,'.txt']),tmp);
-
-            end
+           xlswrite(fullfile(pathoutlist,['Component R2' type,label,'.xls']),tmp);
        end
     catch
     end

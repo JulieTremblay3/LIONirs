@@ -6,7 +6,11 @@ function out = nirs_run_E_exportcomponent_zone(job)
 figureflag = 0;
 [~,~,ext] =fileparts(job.f_component_zone{1});
 if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
-    [data, text, rawData] = xlsread(job.f_component_zone{1});
+    try
+        [data, text, rawData] = xlsread(job.f_component_zone{1});
+    catch
+        [data, text, rawData] = readtxtfile_asxlsread(job.f_component_zone{1});
+    end
 elseif strcmp(ext,'.txt')
     [data, text, rawData] = readtxtfile_asxlsread(job.f_component_zone{1});
 end
@@ -156,9 +160,14 @@ end
   
     rawxls = [labelall',  [zonelabel';   num2cell( allbHbO)']]; 
     try
-    xlswrite(fullfile(pathoutlist, ['zone',namelist, ext]),rawxls)
+        xlswrite(fullfile(pathoutlist, ['zone',namelist, ext]),rawxls)
     catch
       [file,pathout] =uiputfile( fullfile(pathoutlist, ['zone',namelist, ext]))
-       xlswrite(fullfile(pathout,file),rawxls)
+      try
+        xlswrite(fullfile(pathout,file),rawxls)
+      catch
+        writetxtfile(fullfile(pathout,file),rawxls);
+        disp(['Result .txt file saved: ', fullfile(pathout,file)]);
+      end
     end
     out.NIRSmat = {fullfile(NIRSDtp{1},'NIRS.mat')};

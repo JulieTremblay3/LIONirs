@@ -4,12 +4,7 @@ xlslistfile = job.f_matrix{1};
 [~,~,ext] =fileparts([xlslistfile]);
 try
 if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
-    try
-        [raw, txt, info]=xlsread([xlslistfile]);
-    catch
-        [num, txt, info] = readtxtfile_asxlsread([xlslistfile])
-
-    end
+    [raw, txt, info]=xlsread([xlslistfile]);
 elseif strcmp(ext,'.txt')
     [num, txt, info] = readtxtfile_asxlsread([xlslistfile])
 end
@@ -655,7 +650,7 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
         idcov2substract = 0;
         for id=1:numel(covariableall)
             if strcmp(covariableall{id},job.c_statmatrix.b_GLM_Mat.b_substractidCovariable_Mat )
-                idcov2substract = id; %indice de la covariable a soustraire, dans l'ordre d'entrée
+                idcov2substract = id; %indice de la covariable a soustraire, dans l'ordre d'entrÃ©e
             end
         end
         if idcov2substract
@@ -717,11 +712,10 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
     else
         [filepath,name,ext] = fileparts(xlslistfile);
         try
-            xlswrite(fullfile(dir1,['GLM.xlsx']),infonew);
-            disp(['Result .xlsx file saved ' fullfile(dir1,['GLM.xlsx'])])
+        xlswrite(fullfile(dir1,['GLM.xlsx']),infonew);
+        disp(['Result .xlsx file saved ' fullfile(dir1,['GLM.xlsx'])])
         catch
-            writetxtfile(fullfile(dir1,['GLM.txt']),infonew);
-            disp(['Result .txt file saved: ' fullfile(dir1,['GLM.txt'])])
+            
         end
     end
     
