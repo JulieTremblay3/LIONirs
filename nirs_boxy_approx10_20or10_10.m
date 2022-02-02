@@ -2,7 +2,7 @@ function SD = nirs_boxy_approx10_20or10_10(SD,use10_10system)
 %Approximate channels by 10-20 electrode system
 
 %this function can be simplified as much of the info is in SD
-%test
+%test 1212
 %v_pSrc = mtg.v_pSrc; %alias - positions sur montage
 %v_pDet = mtg.v_pDet;
 %v_pEle = mtg.v_pEle; %Electrodes
