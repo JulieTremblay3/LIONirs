@@ -97,7 +97,7 @@ function out = nirs_run_E_exportcomponent(job)
     
     all(:,idkeep)
     if ismac
-        writetxt_asxlswrite(fullfile(pathout,['Component' type,label,'.xls']),tmp);
+        writetxtfile_asxlswrite(fullfile(pathout,['Component' type,label,'.xls']),tmp);
         disp(['Create: ', fullfile(pathout,['Component' type,label,'.xls']) ]);
     else
         try
