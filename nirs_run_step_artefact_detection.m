@@ -155,6 +155,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                                 zsc = zscore(mean_diff);
                                 mean_diff = zsc;
                                 ind = find(abs(zsc) >thr_ind);
+                                  threshold = thr_ind;
                             elseif job.b_meandiff.m_thresholdstepzscore ==0 %use valid time point
                                 nandiff = ones(size(mean_diff));
                                 nandiff(find(noisestep(:,Idx)))=nan;
@@ -162,6 +163,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                                 zsc = (mean_diff - nanmean(mean_diffnan))/nanstd(mean_diffnan);    
                                 mean_diff = zsc;
                                 ind = find(abs(zsc) >thr_ind); 
+                                  threshold = thr_ind;
                             elseif  job.b_meandiff.m_thresholdstepzscore ==2 %old version using median
                                  %Etape 2 Definition du threshold en fonction des données                        
                                     zsc = zscore(abs(mean_diff));
@@ -177,7 +179,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
 
                             end
                            
-                            threshold = thr_ind;
+                          
                             %ajout
 
                             %Etape 3 Garder les intervals de plus de

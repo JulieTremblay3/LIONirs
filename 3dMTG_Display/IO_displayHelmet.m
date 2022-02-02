@@ -509,12 +509,16 @@ function displaychannel(DispHelm,PMI,DispParameter)
     colorjet = colormap(jet(101));
 
     
-  for ind = 1:length(PMI{currentsub}.plotLst);  
+  for ind = 1:(numel(PMI{currentsub}.plot)/2);  
       if ~size(PMI{currentsub}.plot,2)
           msgbox('Size wrong')
       end
+      try
     srs = PMI{currentsub}.plot(ind,1);
     det = PMI{currentsub}.plot(ind,2);
+      catch
+          1
+      end
     if (srs ~= 0 && det ~= 0 )     
         Srs_n = SDpairs2Srs_n(srs,1); 
         Det_n = SDpairs2Srs_n(det,2);

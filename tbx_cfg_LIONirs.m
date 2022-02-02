@@ -2155,7 +2155,7 @@ m_extractcomponentfigure.tag    = 'm_extractcomponentfigure';
 m_extractcomponentfigure.name   = 'Figure ';
 m_extractcomponentfigure.labels = {'Yes', 'No'};
 m_extractcomponentfigure.values = {1,0};
-m_extractcomponentfigure.val    = {1}; 
+m_extractcomponentfigure.val    = {0}; 
 m_extractcomponentfigure.help   = {'Choose whether or not you want to display the output figure.'};
 
 

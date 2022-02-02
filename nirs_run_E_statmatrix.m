@@ -7,15 +7,15 @@ if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
     try
         [raw, txt, info]=xlsread([xlslistfile]);
     catch
-        [num, txt, info] = readtxtfile_asxlsread([xlslistfile])
+        [num, txt, info] = readtxtfile_asxlsread([xlslistfile]);
 
     end
 elseif strcmp(ext,'.txt')
-    [num, txt, info] = readtxtfile_asxlsread([xlslistfile])
+    [num, txt, info] = readtxtfile_asxlsread([xlslistfile]);
 end
 catch
-    disp(['Error could not read file: ',xlslistfile])
-    disp(['Verify the file location or if the file is already open'])
+    disp(['Error could not read file: ',xlslistfile]);
+    disp(['Verify the file location or if the file is already open']);
     return
 end
     %Load the matrices same as any
@@ -164,19 +164,19 @@ if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
             try
                 % Compute the correct p-value for the test, and confidence intervals
                 % if requested.
-                if job.c_statmatrix.b_TtestOneSamplematrix.m_TtestOneSample_matrix == 1 % two-tailed test
+                if job.c_statmatrix.b_TtestOneSamplematrix.m_TtestOneSample_matrix == 1; % two-tailed test
                     pval(i,j) = 2 * tcdf(-abs(-tval(i,j)), dfall(i,j));
                     %     if nargout > 2
                     %         crit = tinv((1 - alpha / 2), df) .* ser;
                     %         ci = cat(dim, xmean - crit, xmean + crit);
                     %     end
-                elseif job.c_statmatrix.b_TtestOneSamplematrix.m_TtestOneSample_matrix == 3 % right one-tailed test
+                elseif job.c_statmatrix.b_TtestOneSamplematrix.m_TtestOneSample_matrix == 3; % right one-tailed test
                     pval(i,j) = tcdf(-tval(i,j), dfall(i,j));
                     %     if nargout > 2
                     %         crit = tinv(1 - alpha, df) .* ser;
                     %         ci = cat(dim, xmean - crit, Inf(size(p)));
                     %     end
-                elseif job.c_statmatrix.b_TtestOneSamplematrix.m_TtestOneSample_matrix == 2 % left one-tailed test
+                elseif job.c_statmatrix.b_TtestOneSamplematrix.m_TtestOneSample_matrix == 2; % left one-tailed test
                     pval(i,j) = tcdf(tval(i,j), dfall(i,j));
                     %     if nargout > 2
                     %         crit = tinv(1 - alpha, df) .* ser;
@@ -191,7 +191,7 @@ if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     dir1 = job.e_statmatrixPath{1};
     
     if ~isdir(dir1)
-        mkdir(dir1)
+        mkdir(dir1);
     end
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
     
@@ -254,7 +254,7 @@ if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
       
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
-    copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid))
+    copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
     %  dir1 = job.e_statmatrixPath{1};
     try
     if ismac
@@ -264,14 +264,14 @@ if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     else
         try
             xlswrite(fullfile(dir1,[name,labelnode,'SimpleTtest.xlsx']),infonew);
-            disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,'SimpleTtest.xlsx'])])
+            disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,'SimpleTtest.xlsx'])]);
         catch
             writetxtfile(fullfile(dir1,[name,labelnode,'SimpleTtest.txt']),infonew);
             disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'SimpleTtest.txt'])]);
         end
     end
     catch
-        disp(['Error could not save .xlsx file: ' fullfile(dir1,[name,labelnode,'SimpleTtest.xlsx'])])
+        disp(['Error could not save .xlsx file: ' fullfile(dir1,[name,labelnode,'SimpleTtest.xlsx'])]);
     end
 elseif isfield(job.c_statmatrix,'b_PermutationTest')
     ESTAD = 4;
@@ -359,7 +359,7 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
     
     dir1 = job.e_statmatrixPath{1};
     if ~isdir(dir1)
-        mkdir(dir1)
+        mkdir(dir1);
     end
     
     
@@ -454,48 +454,48 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
         % Code to run on Mac platform problem with xlswrite
         [filepath,name,ext] = fileparts(xlslistfile);
         writetxtfile(fullfile(dir1,[name,'_',labelnode,num2str(NPERM),'PermutationTtest.txt']),infonew);
-        disp(['Result .txt file saved: ' fullfile(dir1,[name,'_',labelnode,num2str(NPERM),'PermutationTtest.txt'])])
+        disp(['Result .txt file saved: ' fullfile(dir1,[name,'_',labelnode,num2str(NPERM),'PermutationTtest.txt'])]);
         
     else
         [filepath,name,ext] = fileparts(xlslistfile);
         try
         xlswrite(fullfile(dir1,[name,'_',labelnode,num2str(NPERM),'PermutationTtest.xlsx']),infonew);
-        disp(['Result .xlsx file saved ' fullfile(dir1,[name,'_',labelnode,num2str(NPERM),'PermutationTtest.xlsx'])])
+        disp(['Result .xlsx file saved ' fullfile(dir1,[name,'_',labelnode,num2str(NPERM),'PermutationTtest.xlsx'])]);
         catch
             writetxtfile(fullfile(dir1,[name,'_',labelnode,num2str(NPERM),'PermutationTtest.txt']),infonew);
-            disp(['Result .xlsx file saved ' fullfile(dir1,[name,'_',labelnode,num2str(NPERM),'PermutationTtest.xlsx'])])
+            disp(['Result .xlsx file saved ' fullfile(dir1,[name,'_',labelnode,num2str(NPERM),'PermutationTtest.xlsx'])]);
         end        
     end
     
 elseif isfield(job.c_statmatrix,'b_exportNBSformat')%
     dir1 = job.e_statmatrixPath{1};
     if ~isdir(dir1)
-        mkdir(dir1)
+        mkdir(dir1);
     end
     
-    Mat = permute(MATall,[3,2,1])
-    disp(['Save file to NBS: ', fullfile(dir1,'DATA.mat')])
-    save(fullfile(dir1,'DATA.mat'),'Mat')
-    design= double([ groupeall==1,groupeall==2])
-    save(fullfile(dir1,'design.mat'),'design')
-    contrast= [ 1,-1]
-    save(fullfile(dir1,'G1higherG2contrast.mat'),'contrast','-mat')
+    Mat = permute(MATall,[3,2,1]);
+    disp(['Save file to NBS: ', fullfile(dir1,'DATA.mat')]);
+    save(fullfile(dir1,'DATA.mat'),'Mat');
+    design= double([ groupeall==1,groupeall==2]);
+    save(fullfile(dir1,'design.mat'),'design');
+    contrast= [ 1,-1];
+    save(fullfile(dir1,'G1higherG2contrast.mat'),'contrast','-mat');
     
-    listelectrode = DATA{1}.ZoneList
-    fid = fopen(fullfile(dir1,'nodeLabels.txt'),'w')
+    listelectrode = DATA{1}.ZoneList;
+    fid = fopen(fullfile(dir1,'nodeLabels.txt'),'w');
     for i=1:numel(listelectrode)
-        fprintf(fid,'%s',listelectrode{i})
+        fprintf(fid,'%s',listelectrode{i});
         if i<numel(listelectrode)
-            fprintf(fid,'\r')
+            fprintf(fid,'\r');
         end
     end
-    fclose(fid)
+    fclose(fid);
     %OUTOUT POUR NBSToolbox not realisitic position... to be built if needed
-    fid = fopen(fullfile(dir1,'COG.txt'),'w')
+    fid = fopen(fullfile(dir1,'COG.txt'),'w');
     for i=1:numel(listelectrode)
-        fprintf(fid,'%2.3f %2.3f %2.3f\r',0,0,0 )
+        fprintf(fid,'%2.3f %2.3f %2.3f\r',0,0,0 );
     end
-    fclose(fid)
+    fclose(fid);
 elseif isfield(job.c_statmatrix,'b_PearsonCorr_Mat')
     dir1 = job.e_statmatrixPath{1};
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
@@ -576,10 +576,10 @@ elseif isfield(job.c_statmatrix,'b_PearsonCorr_Mat')
         [filepath,name,ext] = fileparts(xlslistfile);
         try
         xlswrite(fullfile(dir1,['PearsonCorrelation.xlsx']),infonew);
-        disp(['Result .xlsx file saved ' fullfile(dir1,['PearsonCorrelationPermutationTtest.xlsx'])])
+        disp(['Result .xlsx file saved ' fullfile(dir1,['PearsonCorrelationPermutationTtest.xlsx'])]);
         catch        
             writetxtfile(fullfile(dir1,['PearsonCorrelation.txt']),infonew);
-             disp(['Result .xlsx file saved ' fullfile(dir1,['PearsonCorrelationPermutationTtest.xlsx'])])
+             disp(['Result .xlsx file saved ' fullfile(dir1,['PearsonCorrelationPermutationTtest.xlsx'])]);
         end
     end
 elseif isfield(job.c_statmatrix,'b_GLM_Mat')
@@ -601,7 +601,7 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
         ycol = 0;
         for icol=1:size(info,2)
             if ~isnan(info{1,icol})
-                if strcmp(strtrim(upper(deblank(info{1,icol}))), strtrim(upper(Pearsony)))
+                if strcmp(strtrim(upper(deblank(info{1,icol}))), strtrim(upper(Pearsony)));
                     ycol = icol;
                 end
             end
@@ -637,14 +637,14 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
                 [b,bint,r,rint,stats] = regress(y,X);
                 try
                     for icov = 1:numel(covariableall)
-                        eval(['bCOV',num2str(icov),'(',num2str(i),',',num2str(j),')=',num2str(b(icov)),';'])
+                        eval(['bCOV',num2str(icov),'(',num2str(i),',',num2str(j),')=',num2str(b(icov)),';']);
                     end
                 catch
-                    1
+                    1;
                 end
                 if stats(3)<0.05
                     for icov = 1:numel(covariableall)
-                        eval(['bCOV',num2str(icov),'sig(',num2str(i),',',num2str(j),')=',num2str(b(icov)),';'])
+                        eval(['bCOV',num2str(icov),'sig(',num2str(i),',',num2str(j),')=',num2str(b(icov)),';']);
                     end
                 end
                 
@@ -653,24 +653,24 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
     end
     if 1 %save residual covariable substracted
         idcov2substract = 0;
-        for id=1:numel(covariableall)
-            if strcmp(covariableall{id},job.c_statmatrix.b_GLM_Mat.b_substractidCovariable_Mat )
+        for id=1:numel(covariableall);
+            if strcmp(covariableall{id},job.c_statmatrix.b_GLM_Mat.b_substractidCovariable_Mat );
                 idcov2substract = id; %indice de la covariable a soustraire, dans l'ordre d'entrée
             end
         end
-        if idcov2substract
+        if idcov2substract;
             residual = nan(size(MATall));
             residualsig = nan(size(MATall));
             
-            for i=1:size(MATall,2)
-                for j=1:size(MATall,2)
+            for i=1:size(MATall,2);
+                for j=1:size(MATall,2);
                     iduse = find(sum(~isnan(score),2)==size(score,2)& ~isnan(MATall(:,i,j)));
                     X = score(iduse,:);
                     if i==8 & j==5
-                    figure
-                    hold on
-                    plot(X(:,idcov2substract),eval(['bCOV',num2str(1),'(i,j)'])*X(:,1)+eval(['bCOV',num2str(2),'(i,j)'])*X(:,2) ,'x')
-                    plot(X(:,idcov2substract), MATall(iduse,i,j),'xr')
+                    figure;
+                    hold on;
+                    plot(X(:,idcov2substract),eval(['bCOV',num2str(1),'(i,j)'])*X(:,1)+eval(['bCOV',num2str(2),'(i,j)'])*X(:,2) ,'x');
+                    plot(X(:,idcov2substract), MATall(iduse,i,j),'xr');
                     end
                     residual(iduse,i,j) = MATall(iduse,i,j) - eval(['bCOV',num2str(idcov2substract),'(i,j)'])*X(:,idcov2substract);
                     residualsig(iduse,i,j) = MATall(iduse,i,j) - eval(['bCOV',num2str(idcov2substract),'sig(i,j)'])*X(:,idcov2substract);
@@ -685,9 +685,9 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
                 meancorr = squeeze(residualsig(isubject-1,:,:));
                 save(fullfile(info{isubject,1},['ressig' info{isubject,2},'.mat']),'ZoneList','matcorr','meancorr');
             end
-            disp(['Save residual by subtracting: ',fullfile(info{isubject,1}),' ' ,covariableall{idcov2substract}])
+            disp(['Save residual by subtracting: ',fullfile(info{isubject,1}),' ' ,covariableall{idcov2substract}]);
         else
-        disp(['No subtracting residual '])
+        disp(['No subtracting residual ']);
         end
   
     end
@@ -695,14 +695,14 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
     %WRITE IN A NEW FILE
     for icov = 1:numel(covariableall)
         file = [name,'_',covariableall{icov},'.mat'];
-        eval(['matcorr =','bCOV',num2str(icov),';'])
-        eval(['meancorr =','bCOV',num2str(icov),';'])
+        eval(['matcorr =','bCOV',num2str(icov),';']);
+        eval(['meancorr =','bCOV',num2str(icov),';']);
         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         new = [{dir1},{file}, {ZONEid},{1} ];
         infonew = [infonew;new];
         file = [name,'_',covariableall{icov},'p05.mat'];
-        eval(['matcorr =','bCOV',num2str(icov),'sig;'])
-        eval(['meancorr =','bCOV',num2str(icov),'sig;'])
+        eval(['matcorr =','bCOV',num2str(icov),'sig;']);
+        eval(['meancorr =','bCOV',num2str(icov),'sig;']);
         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         new = [{dir1},{file}, {ZONEid},{1} ];
         infonew = [infonew;new];
@@ -713,15 +713,15 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
         % Code to run on Mac platform problem with xlswrite
         [filepath,name,ext] = fileparts(xlslistfile);
         writetxtfile(fullfile(dir1,['GLM.txt']),infonew);
-        disp(['Result .txt file saved: ' fullfile(dir1,['GLM.txt'])])
+        disp(['Result .txt file saved: ' fullfile(dir1,['GLM.txt'])]);
     else
         [filepath,name,ext] = fileparts(xlslistfile);
         try
             xlswrite(fullfile(dir1,['GLM.xlsx']),infonew);
-            disp(['Result .xlsx file saved ' fullfile(dir1,['GLM.xlsx'])])
+            disp(['Result .xlsx file saved ' fullfile(dir1,['GLM.xlsx'])]);
         catch
             writetxtfile(fullfile(dir1,['GLM.txt']),infonew);
-            disp(['Result .txt file saved: ' fullfile(dir1,['GLM.txt'])])
+            disp(['Result .txt file saved: ' fullfile(dir1,['GLM.txt'])]);
         end
     end
     

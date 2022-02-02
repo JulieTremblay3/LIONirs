@@ -359,9 +359,10 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
     try
         xlswrite(fullfile(dir1,'ROI.xls'),tmp)
     catch
-       writetxtfile_asxlsfile(fullfile(dir1,'ROI.xls'),tmp);
+        writetxtfile_asxlswrite(fullfile(dir1,'ROI.xls'),tmp);
     end
-end
+    end
+ end
 if job.m_statcomponent_saveoption==0
     save(fullfile(dir1,['info.mat']),'info')
 end

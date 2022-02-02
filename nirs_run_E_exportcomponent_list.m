@@ -213,7 +213,7 @@ if 0
     tmp = [alllabel;num2cell(allsubject)];
     if ismac
         try
-            writetxtfile_asxlsfile(fullfile(pathoutlist,['Component' type,label,'.txt']),tmp);
+            writetxtfile_asxlswrite(fullfile(pathoutlist,['Component' type,label,'.txt']),tmp);
         catch
             disp(['Error ','File ', fullfile(pathoutlist,['Component' type,label,'.txt']),' could not be written' ])
             msgbox(['File ', fullfile(pathoutlist,['Component' type,label,'.txt']),' could not be written'])
@@ -222,6 +222,7 @@ if 0
         try
             xlswrite(fullfile(pathoutlist,['Component' type,label,'.xls']),tmp);
         catch
+            writetxtfile_asxlswrite(fullfile(pathoutlist,['Component' type,label,'.xls']),tmp);
             msgbox(['File ', fullfile(pathoutlist,['Component' type,label,'.xls']),' could not be written'])
         end
     end
@@ -229,12 +230,12 @@ if 0
     try
         tmp = num2cell(Tglmall);
         if ismac
-            writetxtfile_asxlsfile(fullfile(pathoutlist,['Component Tval' type,label,'.txt']),tmp);
+             writetxtfile_asxlswrite(fullfile(pathoutlist,['Component Tval' type,label,'.txt']),tmp);
         else
             try
                 xlswrite(fullfile(pathoutlist,['Component Tval' type,label,'.xls']),tmp);
             catch
-                writetxtfile_asxlsfile(fullfile(pathoutlist,['Component Tval' type,label,'.txt']),tmp);
+                 writetxtfile_asxlswrite(fullfile(pathoutlist,['Component Tval' type,label,'.txt']),tmp);
             end
         end 
     catch
@@ -243,12 +244,12 @@ if 0
        tmp = [chlist{1}, chlist{2},num2cell(Rall)];
        tmp = [labelall;tmp ];
        if ismac
-           writetxtfile_asxlsfile(fullfile(pathoutlist,['Component R2' type,label,'.txt']),tmp);
+            writetxtfile_asxlswrite(fullfile(pathoutlist,['Component R2' type,label,'.txt']),tmp);
        else
             try
                xlswrite(fullfile(pathoutlist,['Component R2' type,label,'.xls']),tmp);
             catch
-               writetxtfile_asxlsfile(fullfile(pathoutlist,['Component Tval' type,label,'.txt']),tmp);
+                writetxtfile_asxlswrite(fullfile(pathoutlist,['Component R2' type,label,'.xls']),tmp);
 
             end
        end
