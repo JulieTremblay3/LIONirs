@@ -257,9 +257,7 @@ for filenb = 1:size(job.NIRSmat,1)
 %                         end
                         if job.m_SegmentTrig==1 % use first trig
                             temp = idstimAUX{iaux};
-                            indstim_AUX{iaux}= AUX(iaux).ind_dur_ch(temp(1),1);
-                            disp(['Use only first trig ', num2str(numel( indstim_AUX{iaux})), ' AUX trigger ', sprintf('S%3.0f, ',trigger) ,...
-                            sprintf('\n'),'Time: ', sprintf('%.2f, ',AUX.infoBV.SamplingInterval/1000000*indstim_AUX{iaux}),'seconds to sync', sprintf('\n'),'Sample: ',sprintf('%d, ',indstim_AUX{iaux}) ]);
+                            indstim_AUX{iaux}= AUX(iaux).ind_dur_ch(temp(3),1);
                         else 
                             indstim_AUX{iaux} = AUX(iaux).ind_dur_ch(idstimAUX{iaux},1);
                             disp('Error unequal AUX trigger identification review vmrk')

@@ -80,7 +80,7 @@ for filenb = 1:size(NIRSDtp,1)
         scomp = ncomp;   
         disp(['Look for  ', upper(label)])
         for icomp = 1:numel(PARCOMP)
-            if ~isempty(findstr(upper(PARCOMP(icomp).label),upper(label)))
+            if ~isempty(findstr(strtrim(upper(PARCOMP(icomp).label)),strtrim(upper(label))))
                 if strcmp(PARCOMP(icomp).type,type)            
                     if strcmp(upper(PARCOMP(icomp).type),'PARAFAC')
                         listgood=[PARCOMP(icomp).listgood;PARCOMP(icomp).listgood+NC/2];

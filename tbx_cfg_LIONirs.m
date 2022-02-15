@@ -898,6 +898,7 @@ m_NormType.val      = {0};
 m_NormType.help     = {'Choose one of the two definitions of Io'}';
 
 
+
 b_choicenormstim         = cfg_branch;
 b_choicenormstim.tag     = 'b_choicenormstim';
 b_choicenormstim.name    = 'Normalization around trigger';
@@ -929,12 +930,20 @@ vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
 end
 
 
+m_SegmentTrig          = cfg_menu;
+m_SegmentTrig.tag      = 'm_SegmentTrig';
+m_SegmentTrig.name     = 'Option trig';
+m_SegmentTrig.labels   = {'Use all','Only first'};
+m_SegmentTrig.values   = {0,1};
+m_SegmentTrig.val      = {0};
+m_SegmentTrig.help     = {'By defaults, use all trig to segment. However, in some cases use only first trig to segment the whole bloc of the data'};
+
 
 % Executable Branch
 E_segment      = cfg_exbranch;
 E_segment.name = 'Segment';
 E_segment.tag  = 'segment';
-E_segment.val  = {NIRSmat DelPreviousData trigger pretime posttime};
+E_segment.val  = {NIRSmat DelPreviousData trigger pretime posttime m_SegmentTrig };
 E_segment.prog = @nirs_run_segment;
 E_segment.vout = @nirs_cfg_vout_segment;
 E_segment.help = {'This module segments data around triggers (defining pretime and post time). This step is essential to synchronize multimodal data such as EEG, auxiliary (AUX)  or video. '};

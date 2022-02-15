@@ -104,7 +104,7 @@ function out = nirs_run_E_exportcomponent(job)
             xlswrite(fullfile(pathout,['Component' type,label,'.xls']),tmp);
             disp(['Create: ', fullfile(pathout,['Component' type,label,'.xls']) ]);
         catch
-             writetxtfile(fullfile(pathout,['Component' type,label,'.xls'],tmp);
+             writetxtfile(fullfile(pathout,['Component' type,label,'.xls']),tmp);
              disp(['Create: ', fullfile(pathout,['Component' type,label,'.xls']) ]);
         end
     end
