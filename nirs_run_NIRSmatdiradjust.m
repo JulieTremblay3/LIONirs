@@ -21,14 +21,15 @@ for imodule = numel(NIRS.Dt.fir.pp):-1:1
          dirrootnew = [fliplr(remnew),fliplr(toknew)];
         ok=0; %getout ! 
      else
-         [toknew,remnew]=strtok(remnew,{'\','/'});
-     end
+         %[toknew,remnew]=strtok(remnew,{'\','/'});
+         dirrootnew = [fliplr(remnew),fliplr(toknew)];
+     end 
      if isempty(toknew)
          ok=0; 
          disp([fliplr(tok1) ,' root folder do not exist'])
      end
          
-    end
+    end 
      NIRS.Dt.fir.pp(imodule).p{ifile} = fullfile( dirrootnew , [file1,ext1]); 
     end               
 end

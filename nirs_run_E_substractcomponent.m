@@ -308,10 +308,16 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 A = reshape(X,numel(X),1)*reshape( Mb1,1,numel(Mb1)) +ones(numel(X),1)*reshape( Mb2,1,numel(Mb2));
                 spar = intensnorm - A;
                 Xm = A-1;              
-                if indstart == 1 
+                if indstart == 1 & (indstop+1)< size(d,1)
                     d(PARCOMP(icomp).indt(1):PARCOMP(icomp).indt(end) ,listgood2wv) = spar + ones(numel(PARCOMP(icomp).indt),1)*d(indstart,listgood2wv) ;
                     d(indstop+1:end,listgood2wv) =  d(indstop+1:end,listgood2wv)-...
                         ones(size(d(indstop+1:end,1)))* (d(indstop+1,listgood2wv) - d(indstart,listgood2wv) ); %offset adjustement
+                    dureetime = (PARCOMP(icomp).indt(end)-PARCOMP(icomp).indt(1))*1/fs;
+                    fprintf(' %3.1f%s\r',dureetime,['s done and offset adjustement']); 
+                elseif indstart == 1 & indstop== size(d,1)
+                     d(PARCOMP(icomp).indt(1):PARCOMP(icomp).indt(end) ,listgood2wv) = spar + ones(numel(PARCOMP(icomp).indt),1)*d(indstart,listgood2wv) ;
+                    d(indstop+1:end,listgood2wv) =  d(indstop+1:end,listgood2wv)-...
+                        ones(size(d(indstop:end,1)))* (d(indstop,listgood2wv) - d(indstart,listgood2wv) ); %offset adjustement
                     dureetime = (PARCOMP(icomp).indt(end)-PARCOMP(icomp).indt(1))*1/fs;
                     fprintf(' %3.1f%s\r',dureetime,['s done and offset adjustement']); 
                 elseif (indstop+1)>= size(d,1)
@@ -342,9 +348,11 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                     PARCORR.listgood = listgood2wv;
                     PARCORR.indt = indstart:indstop;%indice de temps.
                     PARCORR.Xm = Xm; 
-                    if indstart == 1
+                    if indstart == 1 & (indstop+1)< size(d,1)
                         PARCORR.Offset =  (d(indstop+1,:) - d(indstart,:) );
                         fprintf('%s\r',[' Offset Corrected ']); 
+                    elseif  indstart == 1 & indstop== size(d,1)
+                        PARCORR.Offset  =  (d(indstop,:) - d(indstart,:) );
                     elseif (indstop+1)>size(d,1)
                         PARCORR.Offset =  (d(end,:) - d(indstart-1,:) );
                     else
@@ -363,8 +371,10 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                     PARCORR(1+id).listgood =  listgood2wv;
                     PARCORR(1+id).indt = indstart:indstop;
                     PARCORR(1+id).Xm = Xm; %indice de temps.
-                    if indstart == 1
+                    if indstart == 1 & (indstop+1)< size(d,1)
                         PARCORR(1+id).Offset =  (d(indstop+1,:) - d(indstart,:) );
+                    elseif indstart == 1 & indstop== size(d,1)
+                        PARCORR(1+id).Offset =  (d(indstop,:) - d(indstart,:) );
                     elseif (indstop+1)>size(d,1)
                         PARCORR(1+id).Offset =  (d(end,:) - d(indstart-1,:) );
                     else

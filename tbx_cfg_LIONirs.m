@@ -2221,7 +2221,8 @@ b_extractcomponent_phys.tag  = 'b_extractcomponent_phys';
 b_extractcomponent_phys.name = 'Identify physiology regression';
 b_extractcomponent_phys.val  = {NIRSmat,  f_extractcomponent_physzone ,m_extractcomponent_physzone};
 b_extractcomponent_phys.help = {'Apply subtraction of the short distance physiology as describe in Saager and Berger 2008, https://doi.org/10.1117/1.2940587.',...
-                                    'One signal was scaled to fit the other in a least-squares LS sense the scale estimation is saved as (SHORTGLM) component and must be subtracted.'};
+                                    'One signal was scaled to fit the other in a least-squares LS sense the scale estimation is saved as (SHORTGLM) component and must be subtracted.',...
+                                    'When artefact period (yellow) are marked, the regression will be apply piecewise for each segment of data conserved.'};
 
 f_extractcomponent_glmlist         = cfg_files;
 f_extractcomponent_glmlist.name    = 'List GLM to identify (xls)'; 

@@ -48,6 +48,10 @@ for izone = 1:numel(DATA{id}.zone.plotLst)
                  strDet = SDDet2strboxy(ML(ich,2));
                  strSrs = SDPairs2strboxy(ML(ich,1));
                  idch = strmatch([strDet, ' ',strSrs ],List,'exact');    
+            case 'EEG'                          
+                 strDet = SDDet2strEEG(ML(ich,2));
+                 strSrs = SDPairs2strEEG(ML(ich,1));
+                 idch = strmatch([strDet, ' ',strSrs ],List,'exact');    
             otherwise
                 strDet = SDDet2strboxy_ISS(ML(ich,2));
                 strSrs = SDPairs2strboxy_ISS(ML(ich,1));

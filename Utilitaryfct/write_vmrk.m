@@ -1,9 +1,10 @@
 function write_vmrk(varargin)
-% Write events in the vmrk binary file.
+% Write events in the vmrk ascii file.
 % Inputs : filepath, type of artefact, description of artefact and a N x 3
 % matrix of the data points (indices), duration and channels for each of
 % the N markers.
 % ex.: write_vmrk(filepath,type,description,ind_dur_ch);
+% append in the current file
 
 file = varargin{1};
 type = varargin{2};

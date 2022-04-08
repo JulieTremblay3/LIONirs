@@ -22,7 +22,12 @@ end
 groupeall = [];
 for isubject=2:size(info,1)
     id = isubject-1;
-    MAT = load(fullfile(info{isubject,1},[ info{isubject,2},'.mat']));
+    tmp = info{isubject,2};
+    if strcmp(tmp(end-2:end),'mat')
+         MAT = load(fullfile(info{isubject,1},[ info{isubject,2}]));
+    else
+        MAT = load(fullfile(info{isubject,1},[ info{isubject,2},'.mat']));
+    end
     DATA{id}.ZoneList = MAT.ZoneList;
     if isfield(MAT, 'meancorr')
         matcorr = MAT.meancorr;
@@ -254,6 +259,7 @@ if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
       
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
+    if strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
     copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
     %  dir1 = job.e_statmatrixPath{1};
     try
@@ -484,7 +490,7 @@ elseif isfield(job.c_statmatrix,'b_exportNBSformat')%
     listelectrode = DATA{1}.ZoneList;
     fid = fopen(fullfile(dir1,'nodeLabels.txt'),'w');
     for i=1:numel(listelectrode)
-        fprintf(fid,'%s',listelectrode{i})
+        fprintf(fid,'%s',listelectrode{i});
         if i<numel(listelectrode)
             fprintf(fid,'\r');
         end
@@ -655,7 +661,7 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
         idcov2substract = 0;
         for id=1:numel(covariableall);
             if strcmp(covariableall{id},job.c_statmatrix.b_GLM_Mat.b_substractidCovariable_Mat );
-                idcov2substract = id; %indice de la covariable a soustraire, dans l'ordre d'entrÃ©e
+                idcov2substract = id; %indice de la covariable a soustraire, dans l'ordre d'entrée
             end
         end
         if idcov2substract;
@@ -667,10 +673,10 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
                     iduse = find(sum(~isnan(score),2)==size(score,2)& ~isnan(MATall(:,i,j)));
                     X = score(iduse,:);
                     if i==8 & j==5
-                    figure
-                    hold on
-                    plot(X(:,idcov2substract),eval(['bCOV',num2str(1),'(i,j)'])*X(:,1)+eval(['bCOV',num2str(2),'(i,j)'])*X(:,2) ,'x')
-                    plot(X(:,idcov2substract), MATall(iduse,i,j),'xr')
+                    figure;
+                    hold on;
+                    plot(X(:,idcov2substract),eval(['bCOV',num2str(1),'(i,j)'])*X(:,1)+eval(['bCOV',num2str(2),'(i,j)'])*X(:,2) ,'x');
+                    plot(X(:,idcov2substract), MATall(iduse,i,j),'xr');
                     end
                     residual(iduse,i,j) = MATall(iduse,i,j) - eval(['bCOV',num2str(idcov2substract),'(i,j)'])*X(:,idcov2substract);
                     residualsig(iduse,i,j) = MATall(iduse,i,j) - eval(['bCOV',num2str(idcov2substract),'sig(i,j)'])*X(:,idcov2substract);
@@ -685,9 +691,9 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
                 meancorr = squeeze(residualsig(isubject-1,:,:));
                 save(fullfile(info{isubject,1},['ressig' info{isubject,2},'.mat']),'ZoneList','matcorr','meancorr');
             end
-            disp(['Save residual by subtracting: ',fullfile(info{isubject,1}),' ' ,covariableall{idcov2substract}])
+            disp(['Save residual by subtracting: ',fullfile(info{isubject,1}),' ' ,covariableall{idcov2substract}]);
         else
-        disp(['No subtracting residual '])
+        disp(['No subtracting residual ']);
         end
   
     end
@@ -695,14 +701,14 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
     %WRITE IN A NEW FILE
     for icov = 1:numel(covariableall)
         file = [name,'_',covariableall{icov},'.mat'];
-        eval(['matcorr =','bCOV',num2str(icov),';'])
-        eval(['meancorr =','bCOV',num2str(icov),';'])
+        eval(['matcorr =','bCOV',num2str(icov),';']);
+        eval(['meancorr =','bCOV',num2str(icov),';']);
         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         new = [{dir1},{file}, {ZONEid},{1} ];
         infonew = [infonew;new];
         file = [name,'_',covariableall{icov},'p05.mat'];
-        eval(['matcorr =','bCOV',num2str(icov),'sig;'])
-        eval(['meancorr =','bCOV',num2str(icov),'sig;'])
+        eval(['matcorr =','bCOV',num2str(icov),'sig;']);
+        eval(['meancorr =','bCOV',num2str(icov),'sig;']);
         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         new = [{dir1},{file}, {ZONEid},{1} ];
         infonew = [infonew;new];
@@ -713,15 +719,15 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
         % Code to run on Mac platform problem with xlswrite
         [filepath,name,ext] = fileparts(xlslistfile);
         writetxtfile(fullfile(dir1,['GLM.txt']),infonew);
-        disp(['Result .txt file saved: ' fullfile(dir1,['GLM.txt'])])
+        disp(['Result .txt file saved: ' fullfile(dir1,['GLM.txt'])]);
     else
         [filepath,name,ext] = fileparts(xlslistfile);
         try
             xlswrite(fullfile(dir1,['GLM.xlsx']),infonew);
-            disp(['Result .xlsx file saved ' fullfile(dir1,['GLM.xlsx'])])
+            disp(['Result .xlsx file saved ' fullfile(dir1,['GLM.xlsx'])]);
         catch
             writetxtfile(fullfile(dir1,['GLM.txt']),infonew);
-            disp(['Result .txt file saved: ' fullfile(dir1,['GLM.txt'])])
+            disp(['Result .txt file saved: ' fullfile(dir1,['GLM.txt'])]);
         end
     end
     

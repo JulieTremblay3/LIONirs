@@ -22,7 +22,12 @@ end
 groupeall = [];
 for isubject=2:size(info,1)
     id = isubject-1;
-    MAT = load(fullfile(info{isubject,1},[ info{isubject,2},'.mat']));
+    tmp = info{isubject,2};
+    if strcmp(tmp(end-2:end),'mat')
+         MAT = load(fullfile(info{isubject,1},[ info{isubject,2}]));
+    else
+        MAT = load(fullfile(info{isubject,1},[ info{isubject,2},'.mat']));
+    end
     DATA{id}.ZoneList = MAT.ZoneList;
     if isfield(MAT, 'meancorr')
         matcorr = MAT.meancorr;
@@ -254,7 +259,9 @@ if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
       
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
-    copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
+    if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
+        copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
+    end
     %  dir1 = job.e_statmatrixPath{1};
     try
     if ismac
@@ -448,8 +455,9 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
     disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
-    
+    if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
     copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid))
+    end
     if ismac
         % Code to run on Mac platform problem with xlswrite
         [filepath,name,ext] = fileparts(xlslistfile);

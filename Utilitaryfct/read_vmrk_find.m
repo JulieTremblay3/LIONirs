@@ -34,9 +34,10 @@ try
                 for b = 1:size(type,1) %Loop over all specified types
                     mrk_ind = [mrk_ind, strfind(fline,char(type{b}))]; %In the case of a cell array type
                 end
-                
+                [token,remain]  = strtok(type{b},','); %check if coma in the label, take token to start identification after first comma              
+
                 if ~isempty(mrk_ind)
-                    i = mrk_ind+length(type{b})+1; % 1 indice after first comma
+                    i = mrk_ind+length(token)+1; % 1 indice after first comma
                     while ~strcmp(fline(i),',') %To skip desc
                         i = i+1;
                     end
