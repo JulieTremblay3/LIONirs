@@ -21,7 +21,7 @@ for imodule = numel(NIRS.Dt.fir.pp):-1:1
          dirrootnew = [fliplr(remnew),fliplr(toknew)];
         ok=0; %getout ! 
      else
-         %[toknew,remnew]=strtok(remnew,{'\','/'});
+         [toknew,remnew]=strtok(remnew,{'\','/'});
          dirrootnew = [fliplr(remnew),fliplr(toknew)];
      end 
      if isempty(toknew)
@@ -31,9 +31,9 @@ for imodule = numel(NIRS.Dt.fir.pp):-1:1
          
     end 
      NIRS.Dt.fir.pp(imodule).p{ifile} = fullfile( dirrootnew , [file1,ext1]); 
-    end               
-end
-disp(['Folder adjustment location: ', dirrootnew]);
+    end                
+end 
+disp(['Folder adjustment location: ', dirrootnew]); 
 if isfield(job.c_MultimodalPath,'b_MultimodalPath_yes')    
     dirrootnew = job.c_MultimodalPath.b_MultimodalPath_yes.e_MultimodalPath{1};
 

@@ -138,16 +138,18 @@ for isubject=2:size(info,1)
     id = isubject-1;
      try
         MAT = load(fullfile(info{isubject,1}, [info{isubject,2}]));
+        if isfield(MAT,'ZoneList')
+             DATA{id}.ZoneList = MAT.ZoneList;
+             DATA{id}.MAT = MAT.meancorr;
+        end
     catch
         disp(['ERROR loading' ,fullfile(info{isubject,1}, info{isubject,2})]);
      end
-    if isfield( MAT,'ZoneList')
-         DATA{id}.ZoneList = MAT.ZoneList;
-    end
+ 
 
 %     idbad =find(isnan(MAT.meancorr))
 %     MAT.meancorr(idbad)=0;
-    DATA{id}.MAT = MAT.meancorr;
+ 
     
 %     idbad =find(isnan(MAT.meancorrPearsonFisher))
 %     MAT.meancorrPearsonFisher(idbad)=0;

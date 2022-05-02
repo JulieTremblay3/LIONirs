@@ -7,8 +7,6 @@ if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
     try
         [raw, txt, info]=xlsread([xlslistfile]);
     catch
-        [num, txt, info] = readtxtfile_asxlsread([xlslistfile]);
-
     end
 elseif strcmp(ext,'.txt')
     [num, txt, info] = readtxtfile_asxlsread([xlslistfile]);

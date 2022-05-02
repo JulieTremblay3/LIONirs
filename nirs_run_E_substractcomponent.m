@@ -4,7 +4,7 @@ function out = nirs_run_E_substractcomponent(job)
 % file.
 
 %filename prefix
-prefix = 's'; %for "substrac"
+prefix = 's'; %for "substract"
 DelPreviousData  = 0; %job.DelPreviousData;
 figureon = 0;
 % if isfield(job.NewDirCopyNIRSTRUE,'CreateNIRSCopy')
