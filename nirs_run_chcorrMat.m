@@ -307,25 +307,27 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
          end
          fprintf('\r')        
             end
-                
-         %zscore outlier on matcorr matcorrHbR trial distribution ensure no outlier due to forget artifact.            
-         meantrial =  nanmean(matcorr(:,:,:),3);
-         stdtrial =  nanstd(matcorr(:,:,:),0,3);
-         ztrial = (matcorr- repmat( meantrial,1,1,size(matcorr,3)))./repmat( stdtrial,1,1,size(matcorr,3));
-          idoutlier =  find(abs(ztrial)>job.I_chcorrlist_type.b_Pearson.c_Pearson.b_PearsonBootstrap.i_OutlierControl_crossspectrum);
-         % zscore across trial to detect outlier trial and set them to nan. 
-         if ~isempty(idoutlier)
-            matcorr(idoutlier)=nan;
-         end
-         meantrial =  nanmean(matcorrHbR(:,:,:),3);
-         stdtrial =  nanstd(matcorrHbR(:,:,:),0,3);
-         ztrial = (matcorrHbR- repmat( meantrial,1,1,size(matcorrHbR,3)))./repmat( stdtrial,1,1,size(matcorrHbR,3));
-         idoutlier =  find(abs(ztrial)>job.I_chcorrlist_type.b_Pearson.c_Pearson.b_PearsonBootstrap.i_OutlierControl_crossspectrum);
-         % zscore across trial to detect outlier trial and set them to nan. 
-         if ~isempty(idoutlier)
-            matcorrHbR(idoutlier)=nan;
-         end
-         
+          if isfield(job.I_chcorrlist_type.b_Pearson.c_Pearson,'m_Pearson')
+             totaltrialgood = size(matcorrHbR,3);
+          else
+             %zscore outlier on matcorr matcorrHbR trial distribution ensure no outlier due to forget artifact.            
+             meantrial =  nanmean(matcorr(:,:,:),3);
+             stdtrial =  nanstd(matcorr(:,:,:),0,3);
+             ztrial = (matcorr- repmat( meantrial,1,1,size(matcorr,3)))./repmat( stdtrial,1,1,size(matcorr,3));
+              idoutlier =  find(abs(ztrial)>job.I_chcorrlist_type.b_Pearson.c_Pearson.b_PearsonBootstrap.i_OutlierControl_crossspectrum);
+             % zscore across trial to detect outlier trial and set them to nan. 
+             if ~isempty(idoutlier)
+                matcorr(idoutlier)=nan;
+             end
+             meantrial =  nanmean(matcorrHbR(:,:,:),3);
+             stdtrial =  nanstd(matcorrHbR(:,:,:),0,3);
+             ztrial = (matcorrHbR- repmat( meantrial,1,1,size(matcorrHbR,3)))./repmat( stdtrial,1,1,size(matcorrHbR,3));
+             idoutlier =  find(abs(ztrial)>job.I_chcorrlist_type.b_Pearson.c_Pearson.b_PearsonBootstrap.i_OutlierControl_crossspectrum);
+             % zscore across trial to detect outlier trial and set them to nan. 
+             if ~isempty(idoutlier)
+                matcorrHbR(idoutlier)=nan;
+             end
+          end
          
         elseif isfield(job.I_chcorrlist_type,'b_Hilbert') %hilbert joint probability distribution
             if isfield(job.I_chcorrlist_type.b_Hilbert.c_Hilbert,'m_Hilbert') %by segment       
@@ -364,7 +366,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                         end
                     end
                 end
-       
+                 totaltrialgood = size(matcorr);
                 
             elseif isfield(job.I_chcorrlist_type.b_Hilbert.c_Hilbert,'b_HilbertBootstrap')  %circular bootstrap
                 fs = NIRS.Cf.dev.fs;                         % Sample frequency (Hz)
@@ -1271,25 +1273,25 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
             meancorrHbR =  1/2*(log((1+nanmean(meancorrHbR,3))./(1-nanmean(meancorrHbR,3))));
         end
         
-        save(fullfile(pathout,[filloutput,'_HBO','_Pearson','.mat']),'ZoneList','matcorr','meancorr');
+        save(fullfile(pathout,[filloutput,'_HBO','_Pearson','.mat']),'ZoneList','matcorr','meancorr', 'totaltrialgood'  )
         disp(['Save Pearson matrix: ',  fullfile(pathout,[filloutput,'_HBO','_Pearson','.mat'])])
         matcorr = matcorrHbR; meancorr = meancorrHbR;
-        save(fullfile(pathout,[filloutput,'_HBR','_Pearson','.mat']),'ZoneList','matcorr','meancorr');
+        save(fullfile(pathout,[filloutput,'_HBR','_Pearson','.mat']),'ZoneList','matcorr','meancorr', 'totaltrialgood'  )
         disp(['Save Pearson matrix: ',  fullfile(pathout,[filloutput,'_HBR','_Pearson','.mat'])])
     elseif isfield(job.I_chcorrlist_type,'b_Hilbert')
-        save(fullfile(pathout,[filloutput,'_HBO','_Hilbert','.mat']),'ZoneList','matcorr','meancorr');
+        save(fullfile(pathout,[filloutput,'_HBO','_Hilbert','.mat']),'ZoneList','matcorr','meancorr', 'totaltrialgood'  )
         disp(['Save Hilbert matrix: ',  fullfile(pathout,[filloutput,'_HBO','_Hilbert','.mat'])])
         matcorr = matcorrHbR; meancorr = meancorrHbR;
-        save(fullfile(pathout,[filloutput,'_HBR','_Hilbert','.mat']),'ZoneList','matcorr','meancorr');
+        save(fullfile(pathout,[filloutput,'_HBR','_Hilbert','.mat']),'ZoneList','matcorr','meancorr', 'totaltrialgood'  )
         disp(['Save Hilbert matrix: ',  fullfile(pathout,[filloutput,'_HBR','_Hilbert','.mat'])])
     elseif isfield(job.I_chcorrlist_type,'b_Granger')
-        save(fullfile(pathout,[filloutput,'_HBO','_MVARGranger','.mat']),'ZoneList','matcorr','meancorr');
+        save(fullfile(pathout,[filloutput,'_HBO','_MVARGranger','.mat']),'ZoneList','matcorr','meancorr', 'totaltrialgood'  )
         matcorr = matcorrHbR; meancorr = meancorrHbR;
-        save(fullfile(pathout,[filloutput,'_HBR','_MVARGranger','.mat']),'ZoneList','matcorr','meancorr');
+        save(fullfile(pathout,[filloutput,'_HBR','_MVARGranger','.mat']),'ZoneList','matcorr','meancorr', 'totaltrialgood'  )
     elseif isfield(job.I_chcorrlist_type, 'b_Phase')
-        save(fullfile(pathout,[filloutput,'_HBO','_PH_ISS','.mat']),'ZoneList','matcorr','meancorr');
+        save(fullfile(pathout,[filloutput,'_HBO','_PH_ISS','.mat']),'ZoneList','matcorr','meancorr', 'totaltrialgood'  )
         matcorr = matcorrHbR; meancorr = meancorrHbR;
-        save(fullfile(pathout,[filloutput,'_HBR','_PH_ISS','.mat']),'ZoneList','matcorr','meancorr');
+        save(fullfile(pathout,[filloutput,'_HBR','_PH_ISS','.mat']),'ZoneList','matcorr','meancorr', 'totaltrialgood'  )
     elseif  isfield(job.I_chcorrlist_type, 'b_crossspectrum')
         
         %         matcorrfft = matcorr;
