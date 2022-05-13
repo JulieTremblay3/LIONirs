@@ -3445,6 +3445,13 @@ b_PermutationTest.name   = 'Unpaired permutation t-test' ;
 b_PermutationTest.val    = {e_npermutation, e_TtestOneSampleGR, e_TtestOneSampleGR2};
 b_PermutationTest.help   = {'Compared 2 groups using permutation '};
 
+b_PairedTtest = cfg_branch;
+b_PairedTtest.tag    = 'b_PairedTtest';
+b_PairedTtest.name   = 'Paired t-test' ;
+b_PairedTtest.val    = {m_TtestOneSample_matrix};
+b_PairedTtest.help   = {'Compared repeated measure identify subject in the xls and keep paired sujbject list one after the other'};
+
+
 b_exportNBSformat        = cfg_branch;
 b_exportNBSformat.tag    = 'b_exportNBSformat';
 b_exportNBSformat.name   = 'Export NBS format' ;
@@ -3486,7 +3493,7 @@ b_GLM_Mat.help   = {'Apply the general linear model, specify covariable as regre
 c_statmatrix         = cfg_choice;
 c_statmatrix.tag     = 'c_statmatrix';
 c_statmatrix.name    = 'Choose the statistical test';
-c_statmatrix.values  = {b_TtestOneSamplematrix,b_PermutationTest,b_PearsonCorr_Mat, b_GLM_Mat, b_exportNBSformat};
+c_statmatrix.values  = {b_TtestOneSamplematrix,b_PermutationTest,b_PearsonCorr_Mat, b_GLM_Mat, b_exportNBSformat b_PairedTtest};
 c_statmatrix.val     = {b_TtestOneSamplematrix}; %Default option
 c_statmatrix.help    = {'Select one of the statistical tests.'};
 

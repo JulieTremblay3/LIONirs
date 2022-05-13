@@ -1044,7 +1044,7 @@ for ilistzone = 1:numel(listok)
         for izone = 1:numel(DATA{isubject}.zone.plotLst)
            idlabelall = [idlabelall, {DATA{isubject}.zone.label{izone}}];
         end
-        x = strmatch(listok{ilistzone},idlabelall ,  'exact')   ;     
+        x = strmatch(listok{ilistzone},idlabelall ,  'exact')        
         xlssheet{1,icol} = [listok{ilistzone}, ' Clustering coefficient'];
          
          if ~isempty(x)

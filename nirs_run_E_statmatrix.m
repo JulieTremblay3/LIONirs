@@ -730,7 +730,135 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
             disp(['Result .txt file saved: ' fullfile(dir1,['GLM.txt'])]);
         end
     end
+elseif isfield(job.c_statmatrix,'b_PairedTtest')
+    AllC = [];
+    id =1;
+    %Use a specific groupe
+    idG1 = find(  groupeall==1);
+     idG2 = find(  groupeall==2);
+    MATallG1 = MATall( idG1,:,:);
+    MATallG2 = MATall( idG2,:,:);
+    matdiff = MATallG1 -  MATallG2;
+    meanall = squeeze(nanmean(  matdiff,1));
+    refval  = 0.1;
+    tval = squeeze((nanmean( matdiff(:,:,:),1)-refval)./(nanstd( matdiff(:,:,:),1)./sqrt(sum(~isnan( matdiff(:,:,:)),1))  ));
+    dfall = squeeze(sum(~isnan( matdiff(:,:,:)),1))-1;
+    for i=1:size(tval,1)
+        for j=1:size(tval,2)
+            try
+                % Compute the correct p-value for the test, and confidence intervals
+                % if requested.
+                if job.c_statmatrix.b_PairedTtest.m_TtestOneSample_matrix == 1; % two-tailed test
+                    pval(i,j) = 2 * tcdf(-abs(-tval(i,j)), dfall(i,j));
+                    %     if nargout > 2
+                    %         crit = tinv((1 - alpha / 2), df) .* ser;
+                    %         ci = cat(dim, xmean - crit, xmean + crit);
+                    %     end
+                elseif job.c_statmatrix.b_PairedTtest.m_TtestOneSample_matrix == 3; % right one-tailed test
+                    pval(i,j) = tcdf(-tval(i,j), dfall(i,j));
+                    %     if nargout > 2
+                    %         crit = tinv(1 - alpha, df) .* ser;
+                    %         ci = cat(dim, xmean - crit, Inf(size(p)));
+                    %     end
+                elseif job.c_statmatrixb_PairedTtest.m_TtestOneSample_matrix == 2; % left one-tailed test
+                    pval(i,j) = tcdf(tval(i,j), dfall(i,j));
+                    %     if nargout > 2
+                    %         crit = tinv(1 - alpha, df) .* ser;
+                    %         ci = cat(dim, -Inf(size(p)), xmean + crit);
+                    %     end
+                end
+            catch
+                pval(i,j) = nan;
+            end
+        end
+    end
+    dir1 = job.e_statmatrixPath{1};
     
+    if ~isdir(dir1)
+        mkdir(dir1);
+    end
+    infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
+    
+    
+    matcorr =  meanall;
+    meancorr = meanall;
+    totaltrialgood = mean(dfall(:));
+    file = [name,labelnode,'PAIREDTtest mean','.mat'];
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    disp(['Save: ', fullfile(dir1,[file])]);
+    new = [{dir1},{file}, {ZONEid},{1} ];
+    infonew = [infonew;new];
+    
+    
+    % ZoneList = MAT.ZoneList;
+    matcorr =  tval;
+    meancorr = tval;
+    totaltrialgood = mean(dfall(:));
+    file = [name,labelnode,'PAIREDTtest tval','.mat'];
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    disp(['Save: ', fullfile(dir1,[file])]);
+    new = [{dir1},{file}, {ZONEid},{1} ];
+    infonew = [infonew;new];
+    
+    file = [name,labelnode,'PAIREDTtest tvalp05','.mat'];
+    matcorr = tval.*double(pval<0.05);
+    meancorr = tval.*double(pval<0.05);
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    disp(['Save: ', fullfile(dir1,[file])]);
+    new = [{dir1},{file}, {ZONEid},{1} ];
+    infonew = [infonew;new];
+    [FDR,Q] = mafdr(pval(:));
+    Q = reshape(Q,size(pval));
+    infonew = [infonew;new];
+    
+    file = [name,labelnode,'PAIREDTtest meanp05','.mat'];
+    matcorr = meanall.*double(pval<0.05);
+    meancorr = meanall.*double(pval<0.05);
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    disp(['Save: ', fullfile(dir1,[file])]);
+    new = [{dir1},{file}, {ZONEid},{1} ];
+    infonew = [infonew;new];
+    
+    file = [name,labelnode,'PAIREDTtest tvalFDR05','.mat'];
+    matcorr = tval.*double(Q<0.05);
+    meancorr = tval.*double(Q<0.05);
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    disp(['Save: ', fullfile(dir1,[file])]);
+    new = [{dir1},{file}, {ZONEid},{1} ];
+    infonew = [infonew;new];
+    
+    
+    [FDR,Q] = mafdr(pval(:));
+    Q = reshape(Q,size(pval));
+    file = [name,'PAIREDTtest tvalFDR01','.mat'];
+    matcorr = tval.*double(Q<0.01);
+    meancorr = tval.*double(Q<0.01);
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    disp(['Save: ', fullfile(dir1,[file])]);
+      
+    new = [{dir1},{file}, {ZONEid},{1} ];
+    infonew = [infonew;new];
+    if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
+        copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
+    end
+    %  dir1 = job.e_statmatrixPath{1};
+    try
+    if ismac
+        % Code to run on Mac platform problem with xlswrite
+        writetxtfile(fullfile(dir1,[name,labelnode,'PAIREDTtest.txt']),infonew);
+        disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'PAIREDTtest.txt'])]);
+    else
+        try
+            xlswrite(fullfile(dir1,[name,labelnode,'PAIREDTtest.xlsx']),infonew);
+            disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,'PAIREDTtest.xlsx'])]);
+        catch
+            writetxtfile(fullfile(dir1,[name,labelnode,'PAIREDTtest.txt']),infonew);
+            disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'PAIREDTtest.txt'])]);
+        end
+    end
+    catch
+        disp(['Error could not save .xlsx file: ' fullfile(dir1,[name,labelnode,'PAIREDTtest.xlsx'])]);
+    end    
 end
 out='Stat tests';
 
