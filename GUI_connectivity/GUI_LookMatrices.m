@@ -861,13 +861,15 @@ ML = DATA{id}.zone.ml;
          end
     end
     end
-
+    idtoplot = get(handles.popup_listsujet,'value');
     %Global Efficiency
-    MatCTL =  DATA{7}.MAT(idlist,idlist);
-    MatCHD =  DATA{8}.MAT(idlist,idlist);
-    labelCTL = [DATA{7}.name,' CTL'];
-    labelCHD = [DATA{8}.name,' CHD'];
-    
+    MatCTL =  DATA{idtoplot}.MAT(idlist,idlist);
+    %MatCHD =  DATA{idtoplot}.MAT(idlist,idlist);
+    labelCTL = [DATA{idtoplot}.name,' CTL'];
+    %labelCHD = [DATA{idtoplot}.name,' CHD'];
+    %remove nan here
+    goodrow = find(~(sum(isnan(MatCTL))==size(MatCTL,1)));
+    MatCTL = MatCTL(goodrow,goodrow);
    topthr = str2num(get(handles.edit_cmax,'string'));
     tr = 0.01:0.01:topthr;
     id = 1;
@@ -893,8 +895,8 @@ ML = DATA{id}.zone.ml;
                 Mat = threshold_absolute( MatCTL, itr);    
               
                    GE_CTL(id)=mean(efficiency_bin(Mat,1));
-                   Mat = threshold_absolute(   MatCHD, itr);
-                   GE_CHD(id)=mean(efficiency_bin(Mat,1));
+         %          Mat = threshold_absolute(   MatCHD, itr);
+         %          GE_CHD(id)=mean(efficiency_bin(Mat,1));
 %                    Mat = threshold_absolute( MatCTL, itr);           
 %                    GE_CTL(id)=efficiency_bin(Mat,0);
 %                    Mat = threshold_absolute(   MatCHD, itr);
@@ -904,46 +906,46 @@ ML = DATA{id}.zone.ml;
             case 'Clustering coefficient'
                    Mat = threshold_absolute( MatCTL, itr);           
                    GE_CTL(id)=mean(clustering_coef_bu(Mat));
-                   Mat = threshold_absolute(   MatCHD, itr);
-                   GE_CHD(id)=mean(clustering_coef_bu(Mat));
+          %         Mat = threshold_absolute(   MatCHD, itr);
+           %        GE_CHD(id)=mean(clustering_coef_bu(Mat));
                    id = id +1;
             case 'Characteristic path length'
                    Mat = threshold_absolute( MatCTL, itr);           
                    GE_CTL(id)= charpath(distance_bin(Mat));
-                   Mat = threshold_absolute(   MatCHD, itr);
-                   GE_CHD(id)  = charpath(distance_bin(Mat));
+            %       Mat = threshold_absolute(   MatCHD, itr);
+            %       GE_CHD(id)  = charpath(distance_bin(Mat));
                    id = id +1;      
             case 'Local Efficiency'
                    Mat = threshold_absolute( MatCTL, itr);           
                    GE_CTL(:,id)=efficiency_bin(Mat,1);
-                   Mat = threshold_absolute(   MatCHD, itr);
-                   GE_CHD(:,id)=efficiency_bin(Mat,1);
+             %      Mat = threshold_absolute(   MatCHD, itr);
+             %      GE_CHD(:,id)=efficiency_bin(Mat,1);
                    id = id +1;
         end 
 
     end
     figure;hold on
     plot( tr,GE_CTL,'displayname',labelCTL,'linewidth',4,'color','b')
-    plot( tr,GE_CHD,'displayname', labelCHD ,'linewidth',4,'color','r')
+ %   plot( tr,GE_CHD,'displayname', labelCHD ,'linewidth',4,'color','r')
     xlabel('Threshold','fontsize',20);
     ylabel(metric,'fontsize',20);
     set(gca,'fontsize',20); 
     xlim([0,max(tr)]);
-    if isnan(max([GE_CTL,GE_CHD]))
+    if isnan(max([GE_CTL]))
         maxy = 1;
     else
-        maxy = (max([GE_CTL,GE_CHD]));
+        maxy = (max([GE_CTL]));
     end
     ylim([0, maxy]);
-    clear GE_CHD;clear GE_CTL;
+    clear GE_CTL;
     if strcmp(metric,'Local Efficiency')
     figure;hold on
-    plot( tr,GE_CTL-GE_CHD,'displayname',['CTL-CHD'],'linewidth',1,'color','b')
+    plot( tr,GE_CTL,'displayname',['CTL'],'linewidth',1,'color','b')
      xlabel('Threshold','fontsize',20);
     ylabel(metric,'fontsize',20);
     set(gca,'fontsize',20); 
     xlim([0,max(tr)]);
-    ylim([min([GE_CTL(:);GE_CHD(:)]),max([GE_CTL(:);GE_CHD(:)])]);
+    ylim([min([GE_CTL(:)]),max([GE_CTL(:)])]);
     clear GE_CHD;clear GE_CTL;
     end
 %     plot( tr,GE_CHD,'displayname', labelCHD ,'linewidth',4,'color','r')
@@ -955,8 +957,10 @@ end
 for isubject = 1:numel(DATA)
         Mat =  DATA{isubject}.MAT;
 	    Mat = threshold_absolute(Mat, thr);
-        id = find(isnan(Mat));
-        if ~isempty(id);Mat(id)=0;end;
+        goodrow = find(~(sum(isnan(Mat))==size(Mat,1)));
+        Mat = Mat(goodrow,goodrow);
+%         id = find(isnan(Mat));
+%         if ~isempty(id);Mat(id)=0;end;
 	    DATA{isubject}.measure.GlobalEfficiency  = efficiency_bin(Mat,0);            
         DATA{isubject}.measure.ClusteringCoef = mean(clustering_coef_bu(Mat));        
         DATA{isubject}.measure.node.LocalEfficiency = efficiency_bin(Mat,1); 
@@ -1044,7 +1048,7 @@ for ilistzone = 1:numel(listok)
         for izone = 1:numel(DATA{isubject}.zone.plotLst)
            idlabelall = [idlabelall, {DATA{isubject}.zone.label{izone}}];
         end
-        x = strmatch(listok{ilistzone},idlabelall ,  'exact')   ;     
+        x = strmatch(listok{ilistzone},idlabelall ,  'exact');     
         xlssheet{1,icol} = [listok{ilistzone}, ' Clustering coefficient'];
          
          if ~isempty(x)
@@ -1060,7 +1064,7 @@ for ilistzone = 1:numel(listok)
         for izone = 1:numel(DATA{isubject}.zone.plotLst)
            idlabelall = [idlabelall, {DATA{isubject}.zone.label{izone}}];
         end
-        x = strmatch(listok{ilistzone},idlabelall ,  'exact')        
+        x = strmatch(listok{ilistzone},idlabelall ,  'exact');        
         xlssheet{1,icol} = [listok{ilistzone}, ' Mean'];
          
          if ~isempty(x)
