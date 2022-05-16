@@ -955,17 +955,20 @@ ML = DATA{id}.zone.ml;
 end
 
 for isubject = 1:numel(DATA)
-        Mat =  DATA{isubject}.MAT;
+        if size(DATA{isubject}.MAT,1) == size(DATA{1}.MAT,1)
+        Mat =  DATA{isubject}.MAT(idlist,idlist);
 	    Mat = threshold_absolute(Mat, thr);
-        goodrow = find(~(sum(isnan(Mat))==size(Mat,1)));
+        goodrow = find(~(sum(isnan(Mat))>=size(Mat,1)-1));
         Mat = Mat(goodrow,goodrow);
 %         id = find(isnan(Mat));
 %         if ~isempty(id);Mat(id)=0;end;
 	    DATA{isubject}.measure.GlobalEfficiency  = efficiency_bin(Mat,0);            
-        DATA{isubject}.measure.ClusteringCoef = mean(clustering_coef_bu(Mat));        
+        DATA{isubject}.measure.ClusteringCoef = nanmean(clustering_coef_bu(Mat));        
         DATA{isubject}.measure.node.LocalEfficiency = efficiency_bin(Mat,1); 
         DATA{isubject}.measure.node.Degree = degrees_und(Mat);     
-        DATA{isubject}.measure.Mean = median(Mat(:));    
+        DATA{isubject}.measure.Mean = mean(Mat(:));    
+        DATA{isubject}.measure.charpath = charpath(distance_bin(Mat));
+        end
 end
 histogramme_name = get(handles.popupmenu_viewhistogramme,'string');
 if ~iscell(histogramme_name)
@@ -988,7 +991,7 @@ for isubject = 1:numel(DATA)
         
         DATA{isubject}.zone.GlobalEfficiency(izone)  = efficiency_bin(submat,0);
         DATA{isubject}.zone.ClusteringCoef(izone) = mean(clustering_coef_bu(submat));
-        DATA{isubject}.zone.Mean(izone)= median(submat(:));
+        DATA{isubject}.zone.Mean(izone)= mean(submat(:));
     end
 end
   catch
@@ -1013,8 +1016,10 @@ for isubject = 1:numel(DATA)
 end
 xlssheet{1,1} = 'Subject';
 xlssheet{1,2} = 'Groupe';
-xlssheet{1,3} = 'Global Connectivity';
-xlssheet{1,4} = 'Clustering coefficient';
+xlssheet{1,3} = 'GlobalEfficiency';
+xlssheet{1,4} = 'Clustering coefficient ';
+% xlssheet{1,5} = 'Mean clustering_coef';
+% xlssheet{1,6} = 'Characteristic path length';
 
 icol = 1
 for isubject=1:nbsubject
@@ -1022,10 +1027,12 @@ for isubject=1:nbsubject
     xlssheet{isubject+1,2} = DATA{isubject}.GR;
     xlssheet{isubject+1,3} = DATA{isubject}.measure.GlobalEfficiency;
     xlssheet{isubject+1,4} = DATA{isubject}.measure.ClusteringCoef;
-    xlssheet{isubject+1,5} = DATA{isubject}.measure.Mean;
+%     xlssheet{isubject+1,5} = DATA{isubject}.measure.Mean;
+%     xlssheet{isubject+1,6} = DATA{isubject}.measure.charpath;
+    
 end   
     listok = get(handles.listbox_selectedzone,'string');
-    icol = 5;
+    icol = 7;
 for ilistzone = 1:numel(listok)
     for isubject=1:nbsubject ;      
         idlabelall = [];
@@ -1058,23 +1065,29 @@ for ilistzone = 1:numel(listok)
     icol = icol + 1;
 end
 
-for ilistzone = 1:numel(listok)
-    for isubject=1:nbsubject       
-        idlabelall = [];
-        for izone = 1:numel(DATA{isubject}.zone.plotLst)
-           idlabelall = [idlabelall, {DATA{isubject}.zone.label{izone}}];
-        end
-        x = strmatch(listok{ilistzone},idlabelall ,  'exact');        
-        xlssheet{1,icol} = [listok{ilistzone}, ' Mean'];
-         
-         if ~isempty(x)
-             xlssheet{isubject+1,icol} = DATA{isubject}.zone.Mean(x);
-         end
-    end
-    icol = icol + 1;
-end
-
-xlswrite(fullfile(path,file), xlssheet);
+% for ilistzone = 1:numel(listok)
+%     for isubject=1:nbsubject       
+%         idlabelall = [];
+%         for izone = 1:numel(DATA{isubject}.zone.plotLst)
+%            idlabelall = [idlabelall, {DATA{isubject}.zone.label{izone}}];
+%         end
+%         x = strmatch(listok{ilistzone},idlabelall ,  'exact');        
+%         xlssheet{1,icol} = [listok{ilistzone}, ' Mean Clustering coefficient'];
+%          
+%          if ~isempty(x)
+%              xlssheet{isubject+1,icol} = DATA{isubject}.zone.Mean(x);
+%          end
+%     end
+%     icol = icol + 1;
+% end
+ if ismac
+     
+    writetxtfile_asxlswrite(fullfile(path,[file(1:end-3),'txt']), xlssheet);
+    disp(['Create: ', fullfile(path,[file(1:end-3),'txt'])]);
+ else
+    xlswrite(fullfile(path,file), xlssheet);
+    disp(['Create: ', fullfile(path,file)]);
+ end
 
 %msgbox('DONE')
 
