@@ -23,10 +23,10 @@ for isubject=2:size(info,1)
     tmp = info{isubject,2};
     if strcmp(tmp(end-2:end),'mat')
          MAT = load(fullfile(info{isubject,1},[ info{isubject,2}]));
-         disp(['Load ',fullfile(info{isubject,1},info{isubject,2})])
+           disp(['Load ',fullfile(info{isubject,1},info{isubject,2})])
     else
         MAT = load(fullfile(info{isubject,1},[ info{isubject,2},'.mat']));
-        disp(['Load ',fullfile(info{isubject,1},[ info{isubject,2},'.mat'])])
+            disp(['Load ',fullfile(info{isubject,1},[ info{isubject,2},'.mat'])])
     end
 
     DATA{id}.ZoneList = MAT.ZoneList;

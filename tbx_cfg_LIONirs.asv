@@ -3490,12 +3490,21 @@ b_GLM_Mat.val    = {b_Covariable_Mat b_substractidCovariable_Mat};
 b_GLM_Mat.help   = {'Apply the general linear model, specify covariable as regressor y=b1*x1+b2*x2+...+c, do not forget to include a covariable for the constant.'};
 
 
+e_zscorelist         = cfg_entry; %path
+e_zscorelist.name    = 'Zscore apply these groups id';
+e_zscorelist.tag     = 'e_zscorelist';       
+e_zscorelist.strtype = 'r';
+e_zscorelist.num     = [1 Inf];     
+e_zscorelist.val     = {2,3,4,5,6,7}; 
+e_zscorelist.help    = {['Enter the group which one you which to save the zscore']}; 
+
+
 
 b_zscore_Mat        = cfg_branch;
-b_zscore_Mat.tag    = 'b_zscore_Mat';
-b_zscore_Mat.name   = 'Zscore' ;
+b_zscore_Mat.tag    = 'b_GLM_Mat';
+b_zscore_Mat.name   = 'GLM' ;
 b_zscore_Mat.val    = {e_TtestOneSampleGR e_TtestOneSampleGR2};
-b_zscore_Mat.help   = {'Find the normal distribution group 1 and compute zscore matrice for each individual belonging to group 2o a groupe 1'};
+b_zscore_Mat.help   = {'Find the normal distribution groupe 1 and compute zscore map for each individual belonging to groupe 2 according to a groupe 1 and apply the zscore transformation each subject observation'};
 
 
 
