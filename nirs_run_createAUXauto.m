@@ -185,7 +185,7 @@ for ifile =1:numel(rDtp)
         NIRS.Dt.AUX(idAUX).label = label;
         onsetall = [onsetall;onset];
         fileall = [fileall; repmat(ifile,numel(onset),1)];
-        e_HRFduration = num(:,2)
+        e_HRFduration = num(:,2);
     end
 end
 %create defaults xls to help building extract configuration.
