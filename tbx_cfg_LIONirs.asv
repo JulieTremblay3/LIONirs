@@ -2949,6 +2949,24 @@ b_HRFtriggeronset.name   = 'HRF trigger onset';
 b_HRFtriggeronset.val    = {e_HRFtrigger, e_HRFduration e_HRFlabel e_TimetoPeak1, e_FWHM1,e_TimetoPeak2,e_FWHM2,e_DIP,e_AUXdir };
 b_HRFtriggeronset.help   = {'Model HRF response using trigger onset and the user defines fix duration.'};
 
+
+e_HRFxlsfiles         = cfg_files;  
+e_HRFxlsfiles.name    = 'e_HRFxlsfiles'; % The displayed name
+e_HRFxlsfiles.tag     = 'XLS onset files';          
+e_HRFxlsfiles.num     = [0 Inf];     % Number of inputs required 
+e_HRFxlsfiles.val{1}  = {''};
+e_HRFxlsfiles.help    = {'Open excell or txt table file with HRF onset information. This file must contain 3 columns, first column = onset, second column = duration and third column=weight'}; % help text displayed
+
+
+b_HRFxlsonset        = cfg_branch;
+b_HRFxlsonset.tag    = 'b_HRFxlsonset';
+b_HRFxlsonset.name   = 'HRF xls onset';
+b_HRFxlsonset.val    = {e_HRFxlsfiles  e_HRFlabel e_TimetoPeak1, e_FWHM1,e_TimetoPeak2,e_FWHM2,e_DIP,e_AUXdir };
+b_HRFxlsonset.help   = {'Model HRF response using xls onset write the xls using 3 columns first the onset second the duration and third the '};
+
+
+
+
 c_createAUXauto         = cfg_choice;
 c_createAUXauto.tag     = 'c_createAUXauto';
 c_createAUXauto.name    = 'Choose AUX to generate';
@@ -3400,7 +3418,7 @@ m_TtestOneSample_matrix.help   = {'Use one-tailed or two-tailed t-test.'};
 
 f_matrix         = cfg_files;
 f_matrix.name    = 'Enter list connectivity matrix'; 
-f_matrix.tag     = 'f_matrix';       %file names
+f_matrix.tag     = 'f_matrix';       %file namesH
 f_matrix.filter  = {'xlsx','xls','txt'};
 f_matrix.ufilter = '.*';    
 f_matrix.num     = [1 Inf];     % Number of inputs required 
@@ -3490,21 +3508,12 @@ b_GLM_Mat.val    = {b_Covariable_Mat b_substractidCovariable_Mat};
 b_GLM_Mat.help   = {'Apply the general linear model, specify covariable as regressor y=b1*x1+b2*x2+...+c, do not forget to include a covariable for the constant.'};
 
 
-e_zscorelist         = cfg_entry; %path
-e_zscorelist.name    = 'Zscore apply these groups id';
-e_zscorelist.tag     = 'e_zscorelist';       
-e_zscorelist.strtype = 'r';
-e_zscorelist.num     = [1 Inf];     
-e_zscorelist.val     = {2,3,4,5,6,7}; 
-e_zscorelist.help    = {['Enter the group which one you which to save the zscore']}; 
-
-
 
 b_zscore_Mat        = cfg_branch;
-b_zscore_Mat.tag    = 'b_GLM_Mat';
-b_zscore_Mat.name   = 'GLM' ;
+b_zscore_Mat.tag    = 'b_zscore_Mat';
+b_zscore_Mat.name   = 'Zscore' ;
 b_zscore_Mat.val    = {e_TtestOneSampleGR e_TtestOneSampleGR2};
-b_zscore_Mat.help   = {'Find the normal distribution groupe 1 and compute zscore map for each individual belonging to groupe 2 according to a groupe 1 and apply the zscore transformation each subject observation'};
+b_zscore_Mat.help   = {'Find the normal distribution group 1 and compute zscore matrice for each individual belonging to group 2o a groupe 1'};
 
 
 

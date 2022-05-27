@@ -2949,10 +2949,28 @@ b_HRFtriggeronset.name   = 'HRF trigger onset';
 b_HRFtriggeronset.val    = {e_HRFtrigger, e_HRFduration e_HRFlabel e_TimetoPeak1, e_FWHM1,e_TimetoPeak2,e_FWHM2,e_DIP,e_AUXdir };
 b_HRFtriggeronset.help   = {'Model HRF response using trigger onset and the user defines fix duration.'};
 
+
+e_HRFxlsfiles         = cfg_files;  
+e_HRFxlsfiles.name    = 'XLS onset files'; % The displayed name
+e_HRFxlsfiles.tag     = 'e_HRFxlsfiles';          
+e_HRFxlsfiles.num     = [0 Inf];     % Number of inputs required 
+e_HRFxlsfiles.val{1}  = {''};
+e_HRFxlsfiles.help    = {'Open excel or text file with HRF table onset information. This file must contain 3 columns, first column = onset, second column = duration and third column=weight'}; % help text displayed
+
+
+b_HRFxlsonset        = cfg_branch;
+b_HRFxlsonset.tag    = 'b_HRFxlsonset';
+b_HRFxlsonset.name   = 'HRF xls onset';
+b_HRFxlsonset.val    = {e_HRFxlsfiles  e_HRFlabel e_TimetoPeak1, e_FWHM1,e_TimetoPeak2,e_FWHM2,e_DIP,e_AUXdir };
+b_HRFxlsonset.help   = {'Model HRF response using onset write the table (.xlsx or .txt file) using 3 columns first the onset time in seconds, second the duration in seconds and third the weight 1 or other'};
+
+
+
+
 c_createAUXauto         = cfg_choice;
 c_createAUXauto.tag     = 'c_createAUXauto';
 c_createAUXauto.name    = 'Choose AUX to generate';
-c_createAUXauto.values  = {b_HRFtriggeronset};
+c_createAUXauto.values  = {b_HRFtriggeronset b_HRFxlsonset};
 c_createAUXauto.val     = {b_HRFtriggeronset}; %Default option
 c_createAUXauto.help    = {''};
 
@@ -3400,7 +3418,7 @@ m_TtestOneSample_matrix.help   = {'Use one-tailed or two-tailed t-test.'};
 
 f_matrix         = cfg_files;
 f_matrix.name    = 'Enter list connectivity matrix'; 
-f_matrix.tag     = 'f_matrix';       %file names
+f_matrix.tag     = 'f_matrix';       %file namesH
 f_matrix.filter  = {'xlsx','xls','txt'};
 f_matrix.ufilter = '.*';    
 f_matrix.num     = [1 Inf];     % Number of inputs required 

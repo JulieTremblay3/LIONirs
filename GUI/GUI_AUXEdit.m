@@ -180,10 +180,7 @@ if strcmp(listoption{idval},'Create HRF using onset duration xls file')
     elseif strcmp(ext,'.txt')   
         [num, txt, raw] = readtxtfile_asxlsread(fileevent);
     end
-    [EEG.data,EEG.infoBV,EEG.marker,EEG.ind_dur_ch]= fopen_EEG(filedata);
-    idtrigger = find(strcmp('trigger',EEG.marker(:,1))& EEG.ind_dur_ch(:,1)>0);
-    EEG.marker = EEG.marker(idtrigger,:);
-    EEG.ind_dur_ch = EEG.ind_dur_ch(idtrigger,:);
+  
     %HRF convolution
     onset =num(:,1);
     dur = num(:,2);

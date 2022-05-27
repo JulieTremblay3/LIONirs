@@ -31,79 +31,162 @@ for ifile =1:numel(rDtp)
     idtrigger = find(strcmp('trigger',EEG.marker(:,1))& EEG.ind_dur_ch(:,1)>0);
     EEG.marker = EEG.marker(idtrigger,:);
     EEG.ind_dur_ch = EEG.ind_dur_ch(idtrigger,:);
-    trigtofind = job.c_createAUXauto.b_HRFtriggeronset.e_HRFtrigger;
-    aux5 = NIRS.Dt.fir.aux5{ifile};
-    onset = []; %initialise in case no trig available
-    dur = [];
-    weight = [];
-    for itrig = 1:numel(trigtofind) %multiple trig support
-        id=  find(sum(aux5(:,1)==trigtofind(itrig),2));
-        if ~isempty(id)
-            onset =[onset;aux5(id,2).*1./fs];
-            dur = [dur;repmat(job.c_createAUXauto.b_HRFtriggeronset.e_HRFduration,numel(onset),1)] ;
-            weight =[weight;repmat(1,numel(onset),1)] ;
+    if isfield(job.c_createAUXauto,'b_HRFtriggeronset') % use trigger as HRF onset
+        trigtofind = job.c_createAUXauto.b_HRFtriggeronset.e_HRFtrigger;
+        aux5 = NIRS.Dt.fir.aux5{ifile};
+        onset = []; %initialise in case no trig available
+        dur = [];
+        weight = [];
+        for itrig = 1:numel(trigtofind) %multiple trig support
+            id=  find(sum(aux5(:,1)==trigtofind(itrig),2));
+            if ~isempty(id)
+                onset =[onset;aux5(id,2).*1./fs];
+                dur = [dur;repmat(job.c_createAUXauto.b_HRFtriggeronset.e_HRFduration,numel(onset),1)] ;
+                weight =[weight;repmat(1,numel(onset),1)] ;
+            end
         end
-    end
+        eventV =zeros(size(EEG.data,1),1);
+        fs = 1/(EEG.infoBV.SamplingInterval/1e6);
+        t = 1/fs:1/fs:1/fs*size(EEG.data,1);
+        idevent = [];
+        for ievent = 1:numel(onset)
+            idon = find(t>onset(ievent) & t<(onset(ievent)+dur(ievent)));
+            eventV(idon ) = weight(ievent,1);
+        end
+        
+        if ~isempty(dur)
+            frametimes = 1/fs:1/fs:(dur(1)+30);
+            param1=job.c_createAUXauto.b_HRFtriggeronset.e_TimetoPeak1;
+            param2=job.c_createAUXauto.b_HRFtriggeronset.e_FWHM1;
+            param3=job.c_createAUXauto.b_HRFtriggeronset.e_TimetoPeak2;
+            param4=job.c_createAUXauto.b_HRFtriggeronset.e_FWHM2;
+            param5=job.c_createAUXauto.b_HRFtriggeronset.e_DIP;
+            %  [5.4 5.2 10.8 7.35 0.35]
+            H = fmridesign(frametimes,0,[1 0],[],[param1 param2 param3 param4 param5 0]); %Default
+            Sc1 = conv2(H.X(:,1,1), eventV);
+            Scntmp = Sc1(1:end-numel(H.X(:,1,1))+1);
+            Scntmp = Scntmp/max(Scntmp);
+            %      Regressor.xdata = t';
+            %      Regressor.ydata = Scn;
+            %      Onset.xdata = [onset,onset];
+            %      Onset.ydata = [min(Scn),max(Scn) ];
+            if numel(Scntmp)>=Ns
+                Scn = Scntmp(1:Ns);
+            else
+                Scn= zeros(Ns,1);
+                Scn(1:numel(Scntmp)) = Scntmp;
+            end
+        else
+            Scn = zeros(Ns,1);
+        end
+        
+        %figure;plot(eventV)
+        filename = 'AUX';
+        HRFcurve.data = Scn;
+        HRFcurve.ind_dur_ch=EEG.ind_dur_ch;
+        HRFcurve.marker=EEG.marker;
+        HRFcurve.infoBV = EEG.infoBV;
+        label = job.c_createAUXauto.b_HRFtriggeronset.e_HRFlabel;
+        HRFcurve.infoBV.DataType = 'TIMEDOMAIN';
+        HRFcurve.infoBV.dataformat = 'BINARY';
+        HRFcurve.infoBV.DataOrientation='VECTORIZED';
+        HRFcurve.infoBV.NumberOfChannels = '1';
+        HRFcurve.infoBV.name_ele = {deblank(label)};
+        HRFcurve.infoBV.coor_r = 1;
+        HRFcurve.infoBV.coor_theta  = 90;
+        HRFcurve.infoBV.coor_phi = 45;
+        HRFcurve.infoBV.DataPoints = numel(Scn);
+        [pathstr, name, ext] = fileparts(filedata);
+        fileoutHRFcurve = fullfile(job.c_createAUXauto.b_HRFtriggeronset.e_AUXdir{1}, [label,name,'.dat']);
+        disp(['File HRF AUX create: ', fileoutHRFcurve]);
+        fwrite_EEG(fileoutHRFcurve,HRFcurve,1,HRFcurve.infoBV.DataPoints );
+        NIRS.Dt.AUX(idAUX).pp(1,numel(NIRS.Dt.AUX(1).pp)).p{ifile,1}=fileoutHRFcurve;
+        NIRS.Dt.AUX(idAUX).pp(1,numel(NIRS.Dt.AUX(1).pp)).sync_timesec{ifile,1}=0;
+        NIRS.Dt.AUX(idAUX).label = label;
+        onsetall = [onsetall;onset];
+        fileall = [fileall; repmat(ifile,numel(onset),1)];
+           e_HRFduration =   dur;
+    elseif isfield(job.c_createAUXauto, 'b_HRFxlsonset') %use xls file to define trig onset
+        fileevent = job.c_createAUXauto.b_HRFxlsonset.e_HRFxlsfiles{1} ;
+        aux5 = NIRS.Dt.fir.aux5{ifile};        
+        [~,~,ext] =fileparts(fileevent);
+        if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
+            [num, txt, raw] = xlsread(fileevent);
+        elseif strcmp(ext,'.txt')   
+            [num, txt, raw] = readtxtfile_asxlsread(fileevent);
+        end
+  
+    %HRF convolution
+    onset =num(:,1);
+    dur = num(:,2);
+    weight = num(:,3);
     eventV =zeros(size(EEG.data,1),1);
     fs = 1/(EEG.infoBV.SamplingInterval/1e6);
     t = 1/fs:1/fs:1/fs*size(EEG.data,1);
     idevent = [];
     for ievent = 1:numel(onset)
-        idon = find(t>onset(ievent) & t<(onset(ievent)+dur(ievent)));
-        eventV(idon ) = weight(ievent,1);
+        idon = find(t>onset(ievent) & t<(onset(ievent)+dur(ievent)));      
+        eventV(idon) = weight(ievent,1);
     end
     
-    if ~isempty(dur)
-        frametimes = 1/fs:1/fs:dur(1);
-        param1=job.c_createAUXauto.b_HRFtriggeronset.e_TimetoPeak1;
-        param2=job.c_createAUXauto.b_HRFtriggeronset.e_FWHM1;
-        param3=job.c_createAUXauto.b_HRFtriggeronset.e_TimetoPeak2;
-        param4=job.c_createAUXauto.b_HRFtriggeronset.e_FWHM2;
-        param5=job.c_createAUXauto.b_HRFtriggeronset.e_DIP;
-        %  [5.4 5.2 10.8 7.35 0.35]
+        if ~isempty(dur)
+            frametimes = 1/fs:1/fs:(dur(1)+30);
+            param1=job.c_createAUXauto.b_HRFxlsonset.e_TimetoPeak1;
+            param2=job.c_createAUXauto.b_HRFxlsonset.e_FWHM1;
+            param3=job.c_createAUXauto.b_HRFxlsonset.e_TimetoPeak2;
+            param4=job.c_createAUXauto.b_HRFxlsonset.e_FWHM2;
+            param5=job.c_createAUXauto.b_HRFxlsonset.e_DIP;
+            %  [5.4 5.2 10.8 7.35 0.35]
+            H = fmridesign(frametimes,0,[1 0],[],[param1 param2 param3 param4 param5 0]); %Default
+            Sc1 = conv2(H.X(:,1,1), eventV);
+            Scntmp = Sc1(1:end-numel(H.X(:,1,1))+1);
+            Scntmp = Scntmp/max(Scntmp);
+            %      Regressor.xdata = t';
+            %      Regressor.ydata = Scn;
+            %      Onset.xdata = [onset,onset];
+            %      Onset.ydata = [min(Scn),max(Scn) ];
+            if numel(Scntmp)>=Ns
+                Scn = Scntmp(1:Ns);
+            else
+                Scn= zeros(Ns,1);
+                Scn(1:numel(Scntmp)) = Scntmp;
+            end
+        else
+            Scn = zeros(Ns,1);
+        end
+
         H = fmridesign(frametimes,0,[1 0],[],[param1 param2 param3 param4 param5 0]); %Default
         Sc1 = conv2(H.X(:,1,1), eventV);
-        Scntmp = Sc1(1:end-numel(H.X(:,1,1))+1);
-        Scntmp = Scntmp/max(Scntmp);
-        %      Regressor.xdata = t';
-        %      Regressor.ydata = Scn;
-        %      Onset.xdata = [onset,onset];
-        %      Onset.ydata = [min(Scn),max(Scn) ];
-        if numel(Scntmp)>=Ns
-            Scn = Scntmp(1:Ns);
-        else
-            Scn= zeros(Ns,1);
-            Scn(1:numel(Scntmp)) = Scntmp;
-        end
-    else
-        Scn = zeros(Ns,1);
+        Scn = Sc1(1:end-numel(H.X(:,1,1))+1);
+
+        Scn = Scn/max(Scn);
+         %figure;plot(eventV)
+        filename = 'AUX';
+        HRFcurve.data = Scn;
+        HRFcurve.ind_dur_ch=EEG.ind_dur_ch;
+        HRFcurve.marker=EEG.marker;
+        HRFcurve.infoBV = EEG.infoBV;
+        label = job.c_createAUXauto.b_HRFxlsonset.e_HRFlabel;
+        HRFcurve.infoBV.DataType = 'TIMEDOMAIN';
+        HRFcurve.infoBV.dataformat = 'BINARY';
+        HRFcurve.infoBV.DataOrientation='VECTORIZED';
+        HRFcurve.infoBV.NumberOfChannels = '1';
+        HRFcurve.infoBV.name_ele = {deblank(label)};
+        HRFcurve.infoBV.coor_r = 1;
+        HRFcurve.infoBV.coor_theta  = 90;
+        HRFcurve.infoBV.coor_phi = 45;
+        HRFcurve.infoBV.DataPoints = numel(Scn);
+        [pathstr, name, ext] = fileparts(filedata);
+        fileoutHRFcurve = fullfile(job.c_createAUXauto.b_HRFxlsonset.e_AUXdir{1}, [label,name,'.dat']);
+        disp(['File HRF AUX create: ', fileoutHRFcurve]);
+        fwrite_EEG(fileoutHRFcurve,HRFcurve,1,HRFcurve.infoBV.DataPoints );
+        NIRS.Dt.AUX(idAUX).pp(1,numel(NIRS.Dt.AUX(1).pp)).p{ifile,1}=fileoutHRFcurve;
+        NIRS.Dt.AUX(idAUX).pp(1,numel(NIRS.Dt.AUX(1).pp)).sync_timesec{ifile,1}=0;
+        NIRS.Dt.AUX(idAUX).label = label;
+        onsetall = [onsetall;onset];
+        fileall = [fileall; repmat(ifile,numel(onset),1)];
+        e_HRFduration = num(:,2);
     end
-    
-    %figure;plot(eventV)
-    filename = 'AUX';
-    HRFcurve.data = Scn;
-    HRFcurve.ind_dur_ch=EEG.ind_dur_ch;
-    HRFcurve.marker=EEG.marker;
-    HRFcurve.infoBV = EEG.infoBV;
-    label = job.c_createAUXauto.b_HRFtriggeronset.e_HRFlabel;
-    HRFcurve.infoBV.DataType = 'TIMEDOMAIN';
-    HRFcurve.infoBV.dataformat = 'BINARY';
-    HRFcurve.infoBV.DataOrientation='VECTORIZED';
-    HRFcurve.infoBV.NumberOfChannels = '1';
-    HRFcurve.infoBV.name_ele = {deblank(label)};
-    HRFcurve.infoBV.coor_r = 1;
-    HRFcurve.infoBV.coor_theta  = 90;
-    HRFcurve.infoBV.coor_phi = 45;
-    HRFcurve.infoBV.DataPoints = numel(Scn);
-    [pathstr, name, ext] = fileparts(filedata);
-    fileoutHRFcurve = fullfile(job.c_createAUXauto.b_HRFtriggeronset.e_AUXdir{1}, [label,name,'.dat']);
-    disp(['File HRF AUX create: ', fileoutHRFcurve]);
-    fwrite_EEG(fileoutHRFcurve,HRFcurve,1,HRFcurve.infoBV.DataPoints );
-    NIRS.Dt.AUX(idAUX).pp(1,numel(NIRS.Dt.AUX(1).pp)).p{ifile,1}=fileoutHRFcurve;
-    NIRS.Dt.AUX(idAUX).pp(1,numel(NIRS.Dt.AUX(1).pp)).sync_timesec{ifile,1}=0;
-    NIRS.Dt.AUX(idAUX).label = label;
-    onsetall = [onsetall;onset];
-    fileall = [fileall; repmat(ifile,numel(onset),1)];
 end
 %create defaults xls to help building extract configuration.
 
@@ -111,11 +194,11 @@ end
 filenamexls = fullfile(filepath,'ExtractHRF.xlsx');
 A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0'};
 VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-5),...
-    num2cell(onsetall+job.c_createAUXauto.b_HRFtriggeronset.e_HRFduration+5), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1)  ];
+num2cell(onsetall+e_HRFduration+5), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1)  ];
 try
-xlswrite(filenamexls,[A;VAL])
-disp(['Create default xls config to GLM ', label, ' extract : ', filenamexls ]);
-catch   
+    xlswrite(filenamexls,[A;VAL])
+    disp(['Create default xls config to GLM ', label, ' extract : ', filenamexls ]);
+catch
     writetxtfile(filenamexls,[A;VAL]);
     disp(['Create default xls config to GLM ', label, ' extract : ', filenamexls ]);
 end
