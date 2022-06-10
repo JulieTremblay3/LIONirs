@@ -3410,7 +3410,7 @@ m_nodeunit.help      = {'Apply the statistics on each node. Define nodes as each
 
 m_TtestOneSample_matrix        = cfg_menu;
 m_TtestOneSample_matrix.tag    = 'm_TtestOneSample_matrix';
-m_TtestOneSample_matrix.name   = 'Use ';
+m_TtestOneSample_matrix.name   = 'Tailed ';
 m_TtestOneSample_matrix.labels = {'2-tailed','1-tailed left (neg)' ,'1-tailed right (pos)' };
 m_TtestOneSample_matrix.values = {1,2,3};
 m_TtestOneSample_matrix.val    = {1}; 
@@ -3463,11 +3463,11 @@ b_PermutationTest.name   = 'Unpaired permutation t-test' ;
 b_PermutationTest.val    = {e_npermutation, e_TtestOneSampleGR, e_TtestOneSampleGR2};
 b_PermutationTest.help   = {'Compared 2 groups using permutation '};
 
-b_PairedTtest = cfg_branch;
+b_PairedTtest        = cfg_branch;
 b_PairedTtest.tag    = 'b_PairedTtest';
 b_PairedTtest.name   = 'Paired t-test' ;
-b_PairedTtest.val    = {m_TtestOneSample_matrix};
-b_PairedTtest.help   = {'Compared repeated measure identify subject in the xls and keep paired sujbject list one after the other. The subtraction of each subject will be saved in the results folder.'};
+b_PairedTtest.val    = {m_TtestOneSample_matrix, e_TtestOneSampleGR, e_TtestOneSampleGR2};
+b_PairedTtest.help   = {'Compute Paired Ttest using repeated measures identify subject in the xls.  The subject list must be placed in order. The first subject in group 1 will be paired with the first subject in group 2 in the subject list.  The subtraction of each subject will be saved in the results folder.'};
 
 
 b_exportNBSformat        = cfg_branch;
@@ -3508,19 +3508,42 @@ b_GLM_Mat.val    = {b_Covariable_Mat b_substractidCovariable_Mat};
 b_GLM_Mat.help   = {'Apply the general linear model, specify covariable as regressor y=b1*x1+b2*x2+...+c, do not forget to include a covariable for the constant.'};
 
 
+e_GRzscore         = cfg_entry; %path
+e_GRzscore.name    = 'Subject to apply zscore (group)';
+e_GRzscore.tag     = 'e_GRzscore';       
+e_GRzscore.strtype = 'r';
+e_GRzscore.num     = [1 Inf];     
+e_GRzscore.val     = {2}; 
+e_GRzscore.help    = {['Enter the group identification to compute the zscore for each subject according to the group distribution ']};
 
 b_zscore_Mat        = cfg_branch;
 b_zscore_Mat.tag    = 'b_zscore_Mat';
 b_zscore_Mat.name   = 'Zscore' ;
-b_zscore_Mat.val    = {e_TtestOneSampleGR e_TtestOneSampleGR2};
+b_zscore_Mat.val    = {e_TtestOneSampleGR e_GRzscore};
 b_zscore_Mat.help   = {'Find the normal distribution group 1 and compute zscore matrice for each individual belonging to group 2o a groupe 1'};
 
+
+
+e_Anova1GR         = cfg_entry; %path
+e_Anova1GR.name    = 'Group identification';
+e_Anova1GR.tag     = 'e_Anova1GR';       
+e_Anova1GR.strtype = 's';
+e_Anova1GR.num     = [1 Inf];     
+e_Anova1GR.val     = {'1, 2, 3'}; 
+e_Anova1GR.help    = {['Enter the group to include in the ANOVA (refer to group value in the xls file).']};
+
+
+b_anova1_Mat        = cfg_branch;
+b_anova1_Mat.tag    = 'b_anova1_Mat';
+b_anova1_Mat.name   = 'Anova one way' ;
+b_anova1_Mat.val    = {e_Anova1GR};
+b_anova1_Mat.help   = {'Find One-way analysis of variance anova1 list the group to evaluate in the anova fdr correction'};
 
 
 c_statmatrix         = cfg_choice;
 c_statmatrix.tag     = 'c_statmatrix';
 c_statmatrix.name    = 'Choose the statistical test';
-c_statmatrix.values  = {b_TtestOneSamplematrix,b_PermutationTest,b_PearsonCorr_Mat, b_GLM_Mat, b_exportNBSformat b_PairedTtest,b_zscore_Mat};
+c_statmatrix.values  = {b_TtestOneSamplematrix,b_PermutationTest,b_PearsonCorr_Mat, b_GLM_Mat, b_exportNBSformat b_PairedTtest,b_zscore_Mat,b_anova1_Mat};
 c_statmatrix.val     = {b_TtestOneSamplematrix}; %Default option
 c_statmatrix.help    = {'Select one of the statistical tests.'};
 

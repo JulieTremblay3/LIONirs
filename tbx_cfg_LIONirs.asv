@@ -2951,18 +2951,18 @@ b_HRFtriggeronset.help   = {'Model HRF response using trigger onset and the user
 
 
 e_HRFxlsfiles         = cfg_files;  
-e_HRFxlsfiles.name    = 'e_HRFxlsfiles'; % The displayed name
-e_HRFxlsfiles.tag     = 'XLS onset files';          
+e_HRFxlsfiles.name    = 'XLS onset files'; % The displayed name
+e_HRFxlsfiles.tag     = 'e_HRFxlsfiles';          
 e_HRFxlsfiles.num     = [0 Inf];     % Number of inputs required 
 e_HRFxlsfiles.val{1}  = {''};
-e_HRFxlsfiles.help    = {'Open excell or txt table file with HRF onset information. This file must contain 3 columns, first column = onset, second column = duration and third column=weight'}; % help text displayed
+e_HRFxlsfiles.help    = {'Open excel or text file with HRF table onset information. This file must contain 3 columns, first column = onset, second column = duration and third column=weight'}; % help text displayed
 
 
 b_HRFxlsonset        = cfg_branch;
 b_HRFxlsonset.tag    = 'b_HRFxlsonset';
 b_HRFxlsonset.name   = 'HRF xls onset';
 b_HRFxlsonset.val    = {e_HRFxlsfiles  e_HRFlabel e_TimetoPeak1, e_FWHM1,e_TimetoPeak2,e_FWHM2,e_DIP,e_AUXdir };
-b_HRFxlsonset.help   = {'Model HRF response using xls onset write the xls using 3 columns first the onset second the duration and third the '};
+b_HRFxlsonset.help   = {'Model HRF response using onset write the table (.xlsx or .txt file) using 3 columns first the onset time in seconds, second the duration in seconds and third the weight 1 or other'};
 
 
 
@@ -2970,7 +2970,7 @@ b_HRFxlsonset.help   = {'Model HRF response using xls onset write the xls using 
 c_createAUXauto         = cfg_choice;
 c_createAUXauto.tag     = 'c_createAUXauto';
 c_createAUXauto.name    = 'Choose AUX to generate';
-c_createAUXauto.values  = {b_HRFtriggeronset};
+c_createAUXauto.values  = {b_HRFtriggeronset b_HRFxlsonset};
 c_createAUXauto.val     = {b_HRFtriggeronset}; %Default option
 c_createAUXauto.help    = {''};
 
@@ -3410,7 +3410,7 @@ m_nodeunit.help      = {'Apply the statistics on each node. Define nodes as each
 
 m_TtestOneSample_matrix        = cfg_menu;
 m_TtestOneSample_matrix.tag    = 'm_TtestOneSample_matrix';
-m_TtestOneSample_matrix.name   = 'Use ';
+m_TtestOneSample_matrix.name   = 'Tailed ';
 m_TtestOneSample_matrix.labels = {'2-tailed','1-tailed left (neg)' ,'1-tailed right (pos)' };
 m_TtestOneSample_matrix.values = {1,2,3};
 m_TtestOneSample_matrix.val    = {1}; 
@@ -3463,11 +3463,11 @@ b_PermutationTest.name   = 'Unpaired permutation t-test' ;
 b_PermutationTest.val    = {e_npermutation, e_TtestOneSampleGR, e_TtestOneSampleGR2};
 b_PermutationTest.help   = {'Compared 2 groups using permutation '};
 
-b_PairedTtest = cfg_branch;
+b_PairedTtest        = cfg_branch;
 b_PairedTtest.tag    = 'b_PairedTtest';
 b_PairedTtest.name   = 'Paired t-test' ;
-b_PairedTtest.val    = {m_TtestOneSample_matrix};
-b_PairedTtest.help   = {'Compared repeated measure identify subject in the xls and keep paired sujbject list one after the other. The subtraction of each subject will be saved in the results folder.'};
+b_PairedTtest.val    = {m_TtestOneSample_matrix, e_TtestOneSampleGR, e_TtestOneSampleGR2};
+b_PairedTtest.help   = {'Compute Paired Ttest using repeated measures identify subject in the xls.  The subject list must be placed in order. The first subject in group 1 will be paired with the first subject in group 2 in the subject list.  The subtraction of each subject will be saved in the results folder.'};
 
 
 b_exportNBSformat        = cfg_branch;
@@ -3508,6 +3508,13 @@ b_GLM_Mat.val    = {b_Covariable_Mat b_substractidCovariable_Mat};
 b_GLM_Mat.help   = {'Apply the general linear model, specify covariable as regressor y=b1*x1+b2*x2+...+c, do not forget to include a covariable for the constant.'};
 
 
+e_GRzscore         = cfg_entry; %path
+e_GRzscore.name    = 'Group to apply zscore';
+e_GRzscore.tag     = 'e_GRzscore';       
+e_GRzscore.strtype = 's';
+e_Anova1GR.num     = [1 Inf];     
+e_GRzscore.val     = {'1, 2, 3'}; 
+e_Anova1GR.help    = {['Enter the group to include in the ANOVA (refer to group value in the xls file).']};
 
 b_zscore_Mat        = cfg_branch;
 b_zscore_Mat.tag    = 'b_zscore_Mat';
@@ -3517,10 +3524,26 @@ b_zscore_Mat.help   = {'Find the normal distribution group 1 and compute zscore 
 
 
 
+e_Anova1GR         = cfg_entry; %path
+e_Anova1GR.name    = 'Group identification';
+e_Anova1GR.tag     = 'e_Anova1GR';       
+e_Anova1GR.strtype = 's';
+e_Anova1GR.num     = [1 Inf];     
+e_Anova1GR.val     = {'1, 2, 3'}; 
+e_Anova1GR.help    = {['Enter the group to include in the ANOVA (refer to group value in the xls file).']};
+
+
+b_anova1_Mat        = cfg_branch;
+b_anova1_Mat.tag    = 'b_anova1_Mat';
+b_anova1_Mat.name   = 'Anova one way' ;
+b_anova1_Mat.val    = {e_Anova1GR};
+b_anova1_Mat.help   = {'Find One-way analysis of variance anova1 list the group to evaluate in the anova fdr correction'};
+
+
 c_statmatrix         = cfg_choice;
 c_statmatrix.tag     = 'c_statmatrix';
 c_statmatrix.name    = 'Choose the statistical test';
-c_statmatrix.values  = {b_TtestOneSamplematrix,b_PermutationTest,b_PearsonCorr_Mat, b_GLM_Mat, b_exportNBSformat b_PairedTtest,b_zscore_Mat};
+c_statmatrix.values  = {b_TtestOneSamplematrix,b_PermutationTest,b_PearsonCorr_Mat, b_GLM_Mat, b_exportNBSformat b_PairedTtest,b_zscore_Mat,b_anova1_Mat};
 c_statmatrix.val     = {b_TtestOneSamplematrix}; %Default option
 c_statmatrix.help    = {'Select one of the statistical tests.'};
 

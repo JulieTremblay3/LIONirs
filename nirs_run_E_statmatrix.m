@@ -25,8 +25,15 @@ for isubject=2:size(info,1)
          MAT = load(fullfile(info{isubject,1},[ info{isubject,2}]));
          disp(['Load ',fullfile(info{isubject,1},info{isubject,2})])
     else
-        MAT = load(fullfile(info{isubject,1},[ info{isubject,2},'.mat']));
-        disp(['Load ',fullfile(info{isubject,1},[ info{isubject,2},'.mat'])])
+        try
+            MAT = load(fullfile(info{isubject,1},[ info{isubject,2},'.mat']));
+            disp(['Load ',fullfile(info{isubject,1},[ info{isubject,2},'.mat'])]);
+        catch
+            disp(['Error Load ',fullfile(info{isubject,1},[ info{isubject,2},'.mat'])]);
+            MAT.meancorr = nan(size(DATA{1,1}.MAT));
+            MAT.matcorr =  MAT.meancorr;
+            MAT.ZoneList = DATA{1,1}.ZoneList;
+        end
     end
 
     DATA{id}.ZoneList = MAT.ZoneList;
@@ -636,16 +643,17 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
         eval(['bCOV',num2str(icov),' = zeros(size(MATall,2),size(MATall,2));']);
         eval(['bCOV',num2str(icov),'sig = zeros(size(MATall,2),size(MATall,2));']);
     end
-    
+     mat_n_used = zeros(size(MATall,2));
     for i=1:size(MATall,2)
         for j=1:size(MATall,2)
             iduse = find(sum(~isnan(score),2)==size(score,2)& ~isnan(MATall(:,i,j)));
+            mat_n_used(i,j) = numel(iduse); 
             X = score(iduse,:);
             y = MATall(iduse,i,j);
              if ~isempty(iduse)
                 %R2 statistic, the F-statistic and its p-value, and an estimate of the error variance.
-                [b,bint,r,rint,stats] = regress(y,X);
-                try
+                [b,bint,r,rint,stats] = regress(y,X); 
+                try 
                     for icov = 1:numel(covariableall)
                         eval(['bCOV',num2str(icov),'(',num2str(i),',',num2str(j),')=',num2str(b(icov)),';']);
                     end
@@ -676,12 +684,12 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
                 for j=1:size(MATall,2);
                     iduse = find(sum(~isnan(score),2)==size(score,2)& ~isnan(MATall(:,i,j)));
                     X = score(iduse,:);
-                    if i==8 & j==5
-                    figure;
-                    hold on;
-                    plot(X(:,idcov2substract),eval(['bCOV',num2str(1),'(i,j)'])*X(:,1)+eval(['bCOV',num2str(2),'(i,j)'])*X(:,2) ,'x');
-                    plot(X(:,idcov2substract), MATall(iduse,i,j),'xr');
-                    end
+%                     if i==8 & j==5
+%                     figure;
+%                     hold on;
+%                     plot(X(:,idcov2substract),eval(['bCOV',num2str(1),'(i,j)'])*X(:,1)+eval(['bCOV',num2str(2),'(i,j)'])*X(:,2) ,'x');
+%                     plot(X(:,idcov2substract), MATall(iduse,i,j),'xr');
+%                     end
                     residual(iduse,i,j) = MATall(iduse,i,j) - eval(['bCOV',num2str(idcov2substract),'(i,j)'])*X(:,idcov2substract);
                     residualsig(iduse,i,j) = MATall(iduse,i,j) - eval(['bCOV',num2str(idcov2substract),'sig(i,j)'])*X(:,idcov2substract);
 
@@ -695,6 +703,8 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
                 meancorr = squeeze(residualsig(isubject-1,:,:));
                 save(fullfile(info{isubject,1},['ressig' info{isubject,2},'.mat']),'ZoneList','matcorr','meancorr');
             end
+
+            
             disp(['Save residual by subtracting: ',fullfile(info{isubject,1}),' ' ,covariableall{idcov2substract}]);
         else
         disp(['No subtracting residual ']);
@@ -718,6 +728,13 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
         infonew = [infonew;new];
     end
     
+        file = [name,'_','n','.mat'];
+        matcorr = mat_n_used;
+        meancorr = mat_n_used;
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        new = [{dir1},{file}, {ZONEid},{1} ];
+        infonew = [infonew;new];
+    
     copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
     if ismac
         % Code to run on Mac platform problem with xlswrite
@@ -739,16 +756,17 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest')
     id =1;
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
     %Use a specific groupe
-    idG1 = find(  groupeall==1);
-    idG2 = find(  groupeall==2);
+
+    idG1 = find(  groupeall==job.c_statmatrix.b_PairedTtest.e_TtestOneSampleGR);
+    idG2 = find(  groupeall==job.c_statmatrix.b_PairedTtest.e_TtestOneSampleGR2);
     MATallG1 = MATall( idG1,:,:);
     MATallG2 = MATall( idG2,:,:);
     matdiff = MATallG1 -  MATallG2;
     %savein result folder
     totaltrialgood =1; 
     dir1 = job.e_statmatrixPath{1};
-    for ifile=1:size(MATallG1)
-         file = [name,'subject',sprintf('%03.0f',(ifile)),'.mat'];
+    for ifile=1:size(matdiff,1)
+         file = ['Paired',sprintf('%03.0f',(ifile)),' ',    list_subject{idG1(ifile) } '-', list_subject{idG2(ifile)}  ,'.mat'];
          matcorr = squeeze(MATallG1(ifile,:,:) -  MATallG2(ifile,:,:));
          meancorr =  matcorr;
          save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
@@ -882,8 +900,8 @@ elseif isfield(job.c_statmatrix,'b_zscore_Mat')
     id =1;
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
     %Use a specific groupe 
-    idG1 = find(  groupeall==1);
-    idG2 = find(  groupeall==2);
+    idG1 = find(  groupeall==job.c_statmatrix.b_zscore_Mat.e_TtestOneSampleGR);
+    idG2 = find(  groupeall==job.c_statmatrix.b_zscore_Mat.e_GRzscore);
     MATallG1 = MATall( idG1,:,:);
     MATallG2 = MATall( idG2,:,:);
     meanG1 = squeeze(nanmean(  MATallG1 ,1));
@@ -893,7 +911,7 @@ elseif isfield(job.c_statmatrix,'b_zscore_Mat')
     dir1 = job.e_statmatrixPath{1} ;
    
     for ifile=1:size(MATallG2)
-         file = [name,'Zscore_subject',sprintf('%03.0f',(ifile)),'.mat'];
+         file = [name,'Zscore_',sprintf('%03.0f',(ifile)),list_subject{idG2(ifile)}  ,'.mat'];
          matcorr = (squeeze(MATallG2(ifile,:,:))- meanG1)./ stdG1;
          meancorr =  matcorr;
          save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
@@ -909,19 +927,83 @@ elseif isfield(job.c_statmatrix,'b_zscore_Mat')
     if ismac
         % Code to run on Mac platform problem with xlswrite
         writetxtfile(fullfile(dir1,[name,labelnode,'zscore.txt']),infonew);
-        disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'PAIREDTtest.txt'])]);
+        disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'zscore.txt'])]);
     else
         try
-            xlswrite(fullfile(dir1,[name,labelnode,'PAIREDTtest.xlsx']),infonew);
-            disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,'PAIREDTtest.xlsx'])]);
+            xlswrite(fullfile(dir1,[name,labelnode,'zscore.xlsx']),infonew);
+            disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,'zscore.xlsx'])]);
         catch
-            writetxtfile(fullfile(dir1,[name,labelnode,'PAIREDTtest.txt']),infonew);
-            disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'PAIREDTtest.txt'])]);
+            writetxtfile(fullfile(dir1,[name,labelnode,'zscore.txt']),infonew);
+            disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'zscore.txt'])]);
         end
     end
     catch
-        disp(['Error could not save .xlsx file: ' fullfile(dir1,[name,labelnode,'PAIREDTtest.xlsx'])]);
+        disp(['Error could not save .xlsx file: ' fullfile(dir1,[name,labelnode,'zscore.xlsx'])]);
     end
+elseif isfield(job.c_statmatrix,'b_anova1_Mat')
+    AllC = [];
+    id =1;
+    
+    totaltrialgood =1; 
+    dir1 = job.e_statmatrixPath{1} ;
+    infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];    
+    GROUPELIST = str2num(job.c_statmatrix.b_anova1_Mat.e_Anova1GR);
+    %Use a specific groupe     
+    iduse = find(  sum(groupeall==GROUPELIST,2));
+    for i= 1:size(MATall,2)
+        for j = 1:size(MATall,3)          
+            isgood = find(~isnan(MATall( iduse,i,j)));
+            [p,tbl,stats] = anova1((MATall( iduse(isgood),i,j)), groupeall(iduse(isgood)),'off');
+            pavova(i,j) = p;
+            navova(i,j) = numel(iduse(isgood));
+        end
+    end
+
+    for igr = 1:numel(GROUPELIST)
+        iduse = find(  sum(groupeall==GROUPELIST(igr),2));
+        file = [name,labelnode,'meanGR',num2str(igr),'.mat'];
+        meanG1 = squeeze(nanmean(MATall(iduse,:,:) ,1));
+        matcorr = meanG1;
+        meancorr = meanG1;
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        disp(['Save: ', fullfile(dir1,[file])]);
+        new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
+        infonew = [infonew;new];
+    end
+    
+    file = [name,labelnode,'pval_0.05 ','.mat'];
+    matcorr = double(pavova<0.05);
+    meancorr = double(pavova<0.05);
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    disp(['Save: ', fullfile(dir1,[file])]);
+    new = [{dir1},{file}, {ZONEid},{0} ];
+    infonew = [infonew;new];
+    
+    file = [name,labelnode,'n valid measure ','.mat'];
+    matcorr = double(navova);
+    meancorr = double(navova);
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    disp(['Save: ', fullfile(dir1,[file])]);
+    new = [{dir1},{file}, {ZONEid},{0} ];
+     infonew = [infonew;new];
+     if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
+    copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid))
+    end
+    if ismac
+        % Code to run on Mac platform problem with xlswrite
+        writetxtfile(fullfile(dir1,[name,labelnode,'Anova.txt']),infonew);
+        disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'Anova.txt'])]);
+    else
+        try
+            xlswrite(fullfile(dir1,[name,labelnode,'Anova.xlsx']),infonew);
+            disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,'Anova.xlsx'])]);
+        catch
+            writetxtfile(fullfile(dir1,[name,labelnode,'Anova.txt']),infonew);
+            disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'Anova.txt'])]);
+        end
+    end
+    
+    
 end
 out='Stat tests';
 

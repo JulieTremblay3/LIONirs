@@ -138,12 +138,15 @@ for isubject=2:size(info,1)
     id = isubject-1;
      try
         MAT = load(fullfile(info{isubject,1}, [info{isubject,2}]));
+        disp(['Load ' ,fullfile(info{isubject,1}, info{isubject,2})]);
         if isfield(MAT,'ZoneList')
              DATA{id}.ZoneList = MAT.ZoneList;
              DATA{id}.MAT = MAT.meancorr;
-        end
+        end  
     catch
         disp(['ERROR loading' ,fullfile(info{isubject,1}, info{isubject,2})]);
+        DATA{id}.MAT = nan(size(DATA{1,1}.MAT));
+        DATA{id}.ZoneList  = DATA{1,1}.ZoneList;
      end
  
 
@@ -182,14 +185,14 @@ for isubject=2:size(info,1)
   try
         load(fullfile(info{isubject,1}, info{isubject,3}),'-mat');
     catch
-        disp(['ERROR loading' ,fullfile(info{isubject,1}, info{isubject,3})]);
+        disp(['ERROR ' ,fullfile(info{isubject,1}, info{isubject,3})]);
   end
   name = MAT.ZoneList{1};
   if strcmp(name(1:2),'D0')
       DATA{id}.System = 'NIRx';
   else
       DATA{id}.System = 'ISS Imagent';
-%       DATA{id}.System = 'ISS' ;           
+%       DATA{id}.System = 'ISS' ;           -+*
   end
   names = fieldnames(zone);
   for iname = 1:numel(names)
@@ -208,8 +211,11 @@ for igroupe = 1:max(groupeall)
    MATAVGALL = zeros(numel(idlabelall),numel(idlabelall),numel(idsubject));
    for isubject = 1:numel(idsubject)
        ML = DATA{idsubject(isubject)}.zone.ml;
-         
+        try 
        List = strvcat(DATA{idsubject(isubject)}.ZoneList);
+        catch
+            1
+        end
        MATAVG = zeros(numel(idlabelall));
        MAT = DATA{idsubject(isubject)}.MAT;
        idlist = [];
