@@ -3509,17 +3509,17 @@ b_GLM_Mat.help   = {'Apply the general linear model, specify covariable as regre
 
 
 e_GRzscore         = cfg_entry; %path
-e_GRzscore.name    = 'Group to apply zscore';
+e_GRzscore.name    = 'Subject to apply zscore (group)';
 e_GRzscore.tag     = 'e_GRzscore';       
-e_GRzscore.strtype = 's';
-e_Anova1GR.num     = [1 Inf];     
-e_GRzscore.val     = {'1, 2, 3'}; 
-e_Anova1GR.help    = {['Enter the group to include in the ANOVA (refer to group value in the xls file).']};
+e_GRzscore.strtype = 'r';
+e_GRzscore.num     = [1 Inf];     
+e_GRzscore.val     = {2}; 
+e_GRzscore.help    = {['Enter the group identification to compute the zscore for each subject according to the group distribution ']};
 
 b_zscore_Mat        = cfg_branch;
 b_zscore_Mat.tag    = 'b_zscore_Mat';
 b_zscore_Mat.name   = 'Zscore' ;
-b_zscore_Mat.val    = {e_TtestOneSampleGR e_TtestOneSampleGR2};
+b_zscore_Mat.val    = {e_TtestOneSampleGR e_GRzscore};
 b_zscore_Mat.help   = {'Find the normal distribution group 1 and compute zscore matrice for each individual belonging to group 2o a groupe 1'};
 
 
@@ -3538,6 +3538,13 @@ b_anova1_Mat.tag    = 'b_anova1_Mat';
 b_anova1_Mat.name   = 'Anova one way' ;
 b_anova1_Mat.val    = {e_Anova1GR};
 b_anova1_Mat.help   = {'Find One-way analysis of variance anova1 list the group to evaluate in the anova fdr correction'};
+
+
+b_anovarep_Mat        = cfg_branch;
+b_anovarep_Mat.tag    = 'b_anovarep_Mat';
+b_anovarep_Mat.name   = 'Anova repeted measure' ;
+b_anovarep_Mat.val    = {e_Anova1GR};
+b_anovarep_Mat.help   = {'Apply Anova repeted measure.'};
 
 
 c_statmatrix         = cfg_choice;
