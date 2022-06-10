@@ -3552,7 +3552,7 @@ c_statmatrix.tag     = 'c_statmatrix';
 c_statmatrix.name    = 'Choose the statistical test';
 c_statmatrix.values  = {b_TtestOneSamplematrix,b_PermutationTest,b_PearsonCorr_Mat, b_GLM_Mat, b_exportNBSformat b_PairedTtest,b_zscore_Mat,b_anova1_Mat,b_anovarep_Mat};
 c_statmatrix.val     = {b_TtestOneSamplematrix}; %Default option
-c_statmatrix.help    = {'Select one of the statistical tests.'};
+c_statmatrix.help    = {'Select one of the statistical tests. NO FINISH'};
 
 % Folder selector.
 e_statmatrixPath          = cfg_files; %path
