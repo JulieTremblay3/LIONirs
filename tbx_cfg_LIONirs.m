@@ -3544,7 +3544,7 @@ b_anovarep_Mat        = cfg_branch;
 b_anovarep_Mat.tag    = 'b_anovarep_Mat';
 b_anovarep_Mat.name   = 'Anova repeted measure' ;
 b_anovarep_Mat.val    = {e_Anova1GR};
-b_anovarep_Mat.help   = {'Apply Anova repeted measure.'};
+b_anovarep_Mat.help   = {'Apply Anova repeted measure.To be finish'};
 
 
 c_statmatrix         = cfg_choice;
