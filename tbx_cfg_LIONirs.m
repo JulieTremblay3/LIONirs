@@ -3554,7 +3554,7 @@ c_statmatrix.values  = {b_TtestOneSamplematrix,b_PermutationTest,b_PearsonCorr_M
 c_statmatrix.val     = {b_TtestOneSamplematrix}; %Default option
 c_statmatrix.help    = {'Select one of the statistical tests. TEST'};
 
-% Folder selector.
+% Folder selector
 e_statmatrixPath          = cfg_files; %path
 e_statmatrixPath.name     = 'Result folder';
 e_statmatrixPath.tag      = 'e_statmatrixPath';

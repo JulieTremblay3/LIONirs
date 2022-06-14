@@ -102,12 +102,13 @@ sum(isnan(d1));
 
 weightN = weight./(ones(size(weight,1),1)*max(weight));
 idremove = find(max(weight)==0);
-idgood = find(0~=d1);
+d1(find(d1==0),1)=nan
+idremove = 
 weightN(:,idremove)=0; %set weight =0 if channel rejected
 if size(d1,1)==1
     Vcolor = weightN*(d1');
 elseif size(d1,2)==1
-    Vcolor = weightN(:,idgood)*(d1(idgood));
+    Vcolor = weightN*(d1);
 end
 %Vcolor = weight(:,:);
 
