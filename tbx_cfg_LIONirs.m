@@ -3394,8 +3394,8 @@ E_GUI_lookmatrices.help = {'Open a GUI to visualized fNIRS connectivity matrix.'
 m_fishertransform           = cfg_menu;
 m_fishertransform.tag       = 'm_fishertransform';
 m_fishertransform.name      = 'Fisher transform';
-m_fishertransform.labels    = {'Yes', 'No'};
-m_fishertransform.values    = {1,2};
+m_fishertransform.labels    = {'Yes', 'No','Yes & valeur absolu'};
+m_fishertransform.values    = {1,2,3};
 m_fishertransform.val       = {1};
 m_fishertransform.help      = {'Use the fisher transform 1/2 ln((1+p)/(1-p)), when the transformation is applied to the sample correlation coefficient, the sampling distribution of the resulting variable is approximately normal, with a variance that is stable over different values of the underlying true correlation.'};
 
@@ -3483,7 +3483,7 @@ b_Covariable_Mat.tag     = 'b_Covariable_Mat';
 b_Covariable_Mat.strtype = 's';
 b_Covariable_Mat.num     = [0 inf];
 b_Covariable_Mat.val     = {'Name column'};
-b_Covariable_Mat.help    = {'Use the exact column title to reconize which covariable to correlate with the connectivity scores. Separate by a comma when they are many covariables to explore.'};
+b_Covariable_Mat.help    = {'Example: Constant, Age. Use the exact column title to reconize which covariable to correlate with the connectivity scores. Separate by a comma when they are many covariables to explore. Add a constant in your model. '};
 
 
 b_PearsonCorr_Mat        = cfg_branch;
@@ -3505,7 +3505,7 @@ b_GLM_Mat        = cfg_branch;
 b_GLM_Mat.tag    = 'b_GLM_Mat';
 b_GLM_Mat.name   = 'GLM' ;
 b_GLM_Mat.val    = {b_Covariable_Mat b_substractidCovariable_Mat};
-b_GLM_Mat.help   = {'Apply the general linear model, specify covariable as regressor y=b1*x1+b2*x2+...+c, do not forget to include a covariable for the constant.'};
+b_GLM_Mat.help   = {'Apply the general linear model, Specify covariable as regressor y=b1*x1+b2*x2+...+c, do not forget to include a covariable for the constant. Use the function regress.m in matlab'};
 
 
 e_GRzscore         = cfg_entry; %path
@@ -3539,6 +3539,20 @@ b_anova1_Mat.name   = 'Anova one way' ;
 b_anova1_Mat.val    = {e_Anova1GR};
 b_anova1_Mat.help   = {'Find One-way analysis of variance anova1 list the group to evaluate in the anova fdr correction'};
 
+b_ANCOVA_Covariable         =  cfg_entry;
+b_ANCOVA_Covariable.name    = 'Covariable';
+b_ANCOVA_Covariable.tag     = 'b_Covariable_Mat';       
+b_ANCOVA_Covariable.strtype = 's';
+b_ANCOVA_Covariable.num     = [0 inf];
+b_ANCOVA_Covariable.val     = {'Name column'};
+b_ANCOVA_Covariable.help    = {'Use the exact column title to reconize which covariable.'};
+
+b_ANCOVA_Mat        = cfg_branch;
+b_ANCOVA_Mat.tag    = 'b_ANCOVA_Mat';
+b_ANCOVA_Mat.name   = 'ANCOVA' ;
+b_ANCOVA_Mat.val    = {e_Anova1GR,b_ANCOVA_Covariable};
+b_ANCOVA_Mat.help   = {'ANCOVA (Analysis of covariance) use the matlab function aoctool' };
+
 
 b_anovarep_Mat        = cfg_branch;
 b_anovarep_Mat.tag    = 'b_anovarep_Mat';
@@ -3550,7 +3564,7 @@ b_anovarep_Mat.help   = {'Apply Anova repeted measure.To be finish'};
 c_statmatrix         = cfg_choice;
 c_statmatrix.tag     = 'c_statmatrix';
 c_statmatrix.name    = 'Choose the statistical test';
-c_statmatrix.values  = {b_TtestOneSamplematrix,b_PermutationTest,b_PearsonCorr_Mat, b_GLM_Mat, b_exportNBSformat b_PairedTtest,b_zscore_Mat,b_anova1_Mat,b_anovarep_Mat};
+c_statmatrix.values  = {b_TtestOneSamplematrix,b_PermutationTest,b_PearsonCorr_Mat, b_GLM_Mat, b_exportNBSformat b_PairedTtest,b_zscore_Mat,b_anova1_Mat,b_ANCOVA_Mat,b_anovarep_Mat};
 c_statmatrix.val     = {b_TtestOneSamplematrix}; %Default option
 c_statmatrix.help    = {'Select one of the statistical tests. TEST'};
 
@@ -3566,7 +3580,7 @@ e_statmatrixPath.help     = {'Result of the statistics will be saved in this fol
 E_statmatrix    = cfg_exbranch;
 E_statmatrix.name = 'Stats Matrices';
 E_statmatrix.tag  = 'E_statmatrix';
-E_statmatrix.val  = {f_matrix,m_fishertransform,m_nodeunit,c_statmatrix, e_statmatrixPath};
+E_statmatrix.val  = {f_matrix,m_fishertransform,e_statcomponent_alpha,m_nodeunit,c_statmatrix, e_statmatrixPath};
 E_statmatrix.prog = @nirs_run_E_statmatrix;
 E_statmatrix.vout = @nirs_cfg_vout_E_statmatrix;
 E_statmatrix.help = {'Apply basic statistics on exported connectivity matrices.'};

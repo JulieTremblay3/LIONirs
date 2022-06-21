@@ -628,11 +628,8 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
         if ycol
             id= 1;
             for i=2:size(info,1)
-                if isnumeric(info{i,ycol })
-                    score(id,icov) = info{i,ycol };
-                else
-                  score(id,icov) = nan;
-                end
+                isn
+                score(id,icov) = info{i,ycol };
                 id = id+1;
             end
             
@@ -752,13 +749,13 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
         infonew = [infonew;new];
         disp( ['Save Fstat: ', fullfile(info{isubject,1},file)])
         
-        file = ['1-pval_cov=',covariablestring];
-        matcorr =1-pval;
+        file = ['pval_cov=',covariablestring];
+        matcorr =pval;
         meancorr =matcorr;
         save(fullfile(dir1,file),'ZoneList','matcorr','meancorr');
         new = [{dir1},{file},{ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
         infonew = [infonew;new];
-        disp( ['Save 1-pval: ', fullfile(info{isubject,1},file)])
+        disp( ['Save pval: ', fullfile(info{isubject,1},file)])
         
         file = ['RMSerr_cov=',covariablestring];
         matcorr =RMSerr;

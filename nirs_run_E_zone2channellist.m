@@ -3,6 +3,7 @@ for f=1:numel(job.zonemat)
     load(job.zonemat{f},'-mat');
     [filepath,name,ext] = fileparts(job.zonemat{f});
     fid = fopen(fullfile(filepath,[name,'.txt']),'w');
+    disp(['Create file:',fullfile(filepath,[name,'.txt'])])
     for izone = 1:numel(zone.label)
         fprintf(fid,'Label: %s\n',zone.label{izone});
         fprintf(fid,'RGBcolor: %s\n',num2str(zone.color(izone,:)));

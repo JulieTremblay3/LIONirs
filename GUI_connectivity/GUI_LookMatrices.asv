@@ -2145,14 +2145,9 @@ MAT = DATA{id}.MAT;
 figure
 xbins= 100
 subplot(2,1,1)
-hist(MAT(:),xbins)
+hist(MAT(:),xbins )
   [ftshist,binpos] =hist(MAT(:),xbins );
-title(['Distribution ', namesubject{id}])
-xlabel(['x '])
-
+title(['Distribution', namesubject{id}])
 tmp = cumsum(ftshist)
 subplot(2,1,2)
-plot(binpos,tmp./max(tmp)*100)
-ylabel('P(X<x) (%)')
-xlabel(['x '])
-title('Cumulative distribution')
+plot(tmp)
