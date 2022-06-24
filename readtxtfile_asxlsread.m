@@ -13,7 +13,7 @@ icol = 1;
             token = ' ';
             line = line(2:end);
         else
-            [token, line] = strtok(line,char(9));
+            [token, line] = strtok(line,{char(9),' ',',' });
         end
     numtoken=str2num(token);
     if isempty(numtoken)|numel(numtoken)>1
