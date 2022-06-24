@@ -3569,7 +3569,7 @@ e_Anovarep_predictor.tag     = 'e_Anovarep_predictor';
 e_Anovarep_predictor.strtype = 's';
 e_Anovarep_predictor.num     = [0 inf];
 e_Anovarep_predictor.val     = {'Name column'};
-e_Anovarep_predictor.help    = {'Use the exact column title to recognize which covariable, Such as AGE or Gender'}
+e_Anovarep_predictor.help    = {'Use the exact column title to recognize which covariable, Such as AGE or Gender'};
 
 
 
