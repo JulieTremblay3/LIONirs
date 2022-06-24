@@ -3535,7 +3535,7 @@ e_Anova1GR.help    = {['Enter the group to include in the ANOVA (refer to group 
 
 b_anova1_Mat        = cfg_branch;
 b_anova1_Mat.tag    = 'b_anova1_Mat';
-b_anova1_Mat.name   = 'Anova one way (UNFISHED TO TEST)' ;
+b_anova1_Mat.name   = 'Anova one way (UNTESTED)' ;
 b_anova1_Mat.val    = {e_Anova1GR};
 b_anova1_Mat.help   = {'Find One-way analysis of variance anova1 list the group to evaluate in the anova fdr correction'};
 
@@ -3549,7 +3549,7 @@ b_ANCOVA_Covariable.help    = {'Use the exact column title to recognize which co
 
 b_ANCOVA_Mat        = cfg_branch;
 b_ANCOVA_Mat.tag    = 'b_ANCOVA_Mat';
-b_ANCOVA_Mat.name   = 'ANCOVA (UNFISHED TO TEST)' ;
+b_ANCOVA_Mat.name   = 'ANCOVA (UNTESTED)' ;
 b_ANCOVA_Mat.val    = {e_Anova1GR,b_ANCOVA_Covariable};
 b_ANCOVA_Mat.help   = {'ANCOVA (Analysis of covariance) use the matlab function aoctool' };
 
@@ -3587,7 +3587,7 @@ e_anovarep_model.help    = {'Use Wilkinson notation to define your model see hel
 
 b_anovarep_Mat        = cfg_branch;
 b_anovarep_Mat.tag    = 'b_anovarep_Mat';
-b_anovarep_Mat.name   = 'Anova repeted measure (UNFISHED TO TEST)' ;
+b_anovarep_Mat.name   = 'Anova repeted measure (UNTESTED)' ;
 b_anovarep_Mat.val    = {e_Anovarep_withinsubjectGR,e_Anovarep_predictor, e_anovarep_model};
 b_anovarep_Mat.help   = {'Apply Anova repeted measure model, fonction fitrm. ',...
     'You must paired subject as repeted measure in the groupe identification,',...
