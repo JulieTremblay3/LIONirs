@@ -3425,6 +3425,16 @@ f_matrix.num     = [1 Inf];     % Number of inputs required
 f_matrix.help    = {'Enter the list of connectivity matrix to test statistically.',...
     'column 1 dir, column 2 name,  column 3 zone id, column 4 group 1 include 0 exclude'}; 
 
+e_TtestOneSample_meanvalue         = cfg_entry;
+e_TtestOneSample_meanvalue.name    = 'Hypothetical mean value';
+e_TtestOneSample_meanvalue.tag     = 'e_TtestOneSample_meanvalue';       
+e_TtestOneSample_meanvalue.strtype = 'r';
+e_TtestOneSample_meanvalue.num     = [1 Inf];     
+e_TtestOneSample_meanvalue.val     = {0}; 
+e_TtestOneSample_meanvalue.help    = {'Enter the hypothetical mean value'};
+
+
+
 e_TtestOneSampleGR         = cfg_entry; %path
 e_TtestOneSampleGR.name    = 'Group identification';
 e_TtestOneSampleGR.tag     = 'e_TtestOneSampleGR';       
@@ -3436,7 +3446,7 @@ e_TtestOneSampleGR.help    = {['Enter the group to apply the one sample t-test (
 b_TtestOneSamplematrix        = cfg_branch;
 b_TtestOneSamplematrix.tag    = 'b_TtestOneSamplematrix';
 b_TtestOneSamplematrix.name   = 'One-sample t-test' ;
-b_TtestOneSamplematrix.val    = {m_TtestOneSample_matrix,e_TtestOneSampleGR};
+b_TtestOneSamplematrix.val    = {m_TtestOneSample_matrix,e_TtestOneSample_meanvalue,e_TtestOneSampleGR};
 b_TtestOneSamplematrix.help   = {'The one-sample t-test is a parametric test of the location parameter when the population standard deviation is unknown.',
     'T = mean(X)/(STD(x)*sqrt(n))'};
 
@@ -3466,7 +3476,7 @@ b_PermutationTest.help   = {'Compared 2 groups using permutation '};
 b_PairedTtest        = cfg_branch;
 b_PairedTtest.tag    = 'b_PairedTtest';
 b_PairedTtest.name   = 'Paired t-test' ;
-b_PairedTtest.val    = {m_TtestOneSample_matrix, e_TtestOneSampleGR, e_TtestOneSampleGR2};
+b_PairedTtest.val    = {m_TtestOneSample_matrix, e_TtestOneSample_meanvalue, e_TtestOneSampleGR, e_TtestOneSampleGR2};
 b_PairedTtest.help   = {'Compute Paired Ttest using repeated measures identify subject in the xls.  The subject list must be placed in order. The first subject in group 1 will be paired with the first subject in group 2 in the subject list.  The subtraction of each subject will be saved in the results folder.'};
 
 
@@ -3475,6 +3485,15 @@ b_exportNBSformat.tag    = 'b_exportNBSformat';
 b_exportNBSformat.name   = 'Export NBS format' ;
 b_exportNBSformat.val    = {};
 b_exportNBSformat.help   = {'Export to NBS network based statistic format. A Zalesky(2010) [doi: 10.1016/j.neuroimage.2010.06.041]. '};
+
+e_GLMGR         = cfg_entry; %path
+e_GLMGR.name    = 'Group to use';
+e_GLMGR.tag     = 'e_GLMGR';       
+e_GLMGR.strtype = 's';
+e_GLMGR.num     = [1 Inf];     
+e_GLMGR.val     = {'all'}; 
+e_GLMGR.help    = {['Enter the group of the subject to use, subject no in this list will just be exclude keep all to use all subject.']}; 
+
 
 
 b_Covariable_Mat         =  cfg_entry;
@@ -3504,7 +3523,7 @@ b_substractidCovariable_Mat.help    = {'Subtract one covariable and save residua
 b_GLM_Mat        = cfg_branch;
 b_GLM_Mat.tag    = 'b_GLM_Mat';
 b_GLM_Mat.name   = 'GLM' ;
-b_GLM_Mat.val    = {b_Covariable_Mat b_substractidCovariable_Mat};
+b_GLM_Mat.val    = {e_GLMGR,b_Covariable_Mat b_substractidCovariable_Mat};
 b_GLM_Mat.help   = {'Apply the general linear model, Specify covariable as regressor y=b1*x1+b2*x2+...+c, do not forget to include a covariable for the constant. Use the function regress.m in matlab'};
 
 
@@ -3535,7 +3554,7 @@ e_Anova1GR.help    = {['Enter the group to include in the ANOVA (refer to group 
 
 b_anova1_Mat        = cfg_branch;
 b_anova1_Mat.tag    = 'b_anova1_Mat';
-b_anova1_Mat.name   = 'Anova one way (UNTESTED)' ;
+b_anova1_Mat.name   = 'Anova one way' ;
 b_anova1_Mat.val    = {e_Anova1GR};
 b_anova1_Mat.help   = {'Find One-way analysis of variance anova1 list the group to evaluate in the anova fdr correction'};
 
@@ -3549,7 +3568,7 @@ b_ANCOVA_Covariable.help    = {'Use the exact column title to recognize which co
 
 b_ANCOVA_Mat        = cfg_branch;
 b_ANCOVA_Mat.tag    = 'b_ANCOVA_Mat';
-b_ANCOVA_Mat.name   = 'ANCOVA (UNTESTED)' ;
+b_ANCOVA_Mat.name   = 'ANCOVA' ;
 b_ANCOVA_Mat.val    = {e_Anova1GR,b_ANCOVA_Covariable};
 b_ANCOVA_Mat.help   = {'ANCOVA (Analysis of covariance) use the matlab function aoctool' };
 
@@ -3587,7 +3606,7 @@ e_anovarep_model.help    = {'Use Wilkinson notation to define your model see hel
 
 b_anovarep_Mat        = cfg_branch;
 b_anovarep_Mat.tag    = 'b_anovarep_Mat';
-b_anovarep_Mat.name   = 'Anova repeted measure (UNTESTED)' ;
+b_anovarep_Mat.name   = 'Anova repeted measure' ;
 b_anovarep_Mat.val    = {e_Anovarep_withinsubjectGR,e_Anovarep_predictor, e_anovarep_model};
 b_anovarep_Mat.help   = {'Apply Anova repeted measure model, fonction fitrm. ',...
     'You must paired subject as repeted measure in the groupe identification,',...

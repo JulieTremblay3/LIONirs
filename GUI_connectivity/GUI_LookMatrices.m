@@ -57,7 +57,7 @@ handles.output = hObject;
 setappdata(0,'GUI_LookMat',handles.GUI_LookMat)
 
 
-newmfile = mfilename('fullpath');
+newmfile = mfilename('fullpath');;
  [path,name,ext1] = fileparts(newmfile);
            listtemplate = [];
 
@@ -1184,7 +1184,7 @@ filename{id}
 MAT = DATA{id}.MAT;
 zonelist = DATA{id}.ZoneList;
 A = [MAT(:,str2num(token))]';
-[file,path]= uiputfile([filename{id},remain,'.mat'])
+[file,path]= uiputfile([filename{id},remain,'.mat']);
 save([path,file],'A','zonelist','-mat')
 
 
@@ -1283,17 +1283,17 @@ function btn_Connectogram_Callback(hObject, eventdata, handles)
 
 if get(handles.popupmenu_linkoption,'value')==1 %connectogramme 
     % Check zone order for the connectogram. 
-    fileorderconnectogramme  = get(handles.edit_linkSettingmapConnectogram,'string')
-    fid = fopen( fileorderconnectogramme,'r')
-    id = 1
+    fileorderconnectogramme  = get(handles.edit_linkSettingmapConnectogram,'string');
+    fid = fopen( fileorderconnectogramme,'r');
+    id = 1;
     try
-    get(handles.listbox_selectedzone,'string')
+    get(handles.listbox_selectedzone,'string');
     while ~feof(fid)
-        tline = fgetl(fid)
-        listselected{id} = tline
+        tline = fgetl(fid);
+        listselected{id} = tline;
         id = id+1;
     end
-        fclose(fid)
+        fclose(fid);
     catch
         disp('Enter a list order for connectogram')
     end
@@ -1305,7 +1305,7 @@ elseif get(handles.popupmenu_linkoption,'value')==3 %2d map
 end
 
 DATA = get(handles.GUI_LookMat,'UserData');
-id = get(handles.popup_listsujet, 'value')
+id = get(handles.popup_listsujet, 'value');
 MAT = DATA{id}.MAT;
 
 
@@ -1383,7 +1383,7 @@ end
     for izone = 1:numel(DATA{id}.zone.plotLst)
         chzone = DATA{id}.zone.plotLst{izone}
         labelzone = DATA{id}.zone.label{izone}
-         x = strmatch({labelzone} , {listok{ilistzone}}, 'exact')
+         x = strmatch({labelzone} , {listok{ilistzone}}, 'exact');
          if ~isempty(x)
 %             for ichzone = 1:numel(chzone)
 %                 ich = chzone(ichzone);
@@ -1421,25 +1421,25 @@ end
 
 
 
-colorlistline = zeros(size(MAT,1),3)
+colorlistline = zeros(size(MAT,1),3);
 
-tmp = [find(idzone), numel(idzone)]
-tmphald = floor(find(idzone) + (tmp(2:end) - tmp(1:end-1))/2)
-idmiddle = zeros(1,numel(idzone))
+tmp = [find(idzone), numel(idzone)];
+tmphald = floor(find(idzone) + (tmp(2:end) - tmp(1:end-1))/2);
+idmiddle = zeros(1,numel(idzone));
 idmiddle(tmphald ) = idzone(find(idzone));
 % Create custom node labels
 myLabel = cell(length(x));
 %line(numel(listok))
 idcolor = 1;
-if get(handles.popup_connectogramlabel,'value')==1
+if get(handles.popup_connectogramlabel,'value')==1;
 for i = 1:length(idzone)
     if idmiddle(i) %idzone(i)
         myLabel{i,1} =  DATA{id}.zone.label{idmiddle(i)};
-        idcolor = idcolor + 1
+        idcolor = idcolor + 1;
     else
         myLabel{i,1} =  ' '; 
     end
-    colorhomemade(i,:) =  colorlistline(idcolor,:)
+    colorhomemade(i,:) =  colorlistline(idcolor,:);
 end
 
 for i = 1:length(idzone)    
@@ -1449,7 +1449,7 @@ end
 
 elseif get(handles.popup_connectogramlabel,'value')==2
 for i=1:numel(idzone)
-     myLabel{i,1} = [sprintf('%03.0f', idlist(i)), List(idlist(i),:)]
+     myLabel{i,1} = [sprintf('%03.0f', idlist(i)), List(idlist(i),:)];
     
 end
 end
@@ -1481,11 +1481,11 @@ function btn_2DMAP_Callback(hObject, eventdata, handles)
 % hObject    handle to btn_2DMAP (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-newmfile = mfilename('fullpath')
-[path,name,ext1] = fileparts(newmfile)
-pathin = [path,'Template']
+newmfile = mfilename('fullpath');
+[path,name,ext1] = fileparts(newmfile);
+pathin = [path,'Template'];
  
-load(fullfile(pathin,'DoubleBanana_M00.zone'),'-mat')
+load(fullfile(pathin,'DoubleBanana_M00.zone'),'-mat');
 Loc= load(fullfile(pathin,'1020doubleBananapositionmap.mat'));
 
 
@@ -1622,17 +1622,17 @@ function btn_loadZoneselected_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-[file,path] = uigetfile('.txt')
-fid = fopen([path,file],'r')
-id = 1
-get(handles.listbox_selectedzone,'string')
+[file,path] = uigetfile('.txt');
+fid = fopen([path,file],'r');
+id = 1;
+get(handles.listbox_selectedzone,'string');
 while ~feof(fid)
-    tline = fgetl(fid)
-    listok{id} = tline
+    tline = fgetl(fid);
+    listok{id} = tline;
     id = id+1;
 end
-fclose(fid)
-set(handles.listbox_selectedzone,'string',listok)
+fclose(fid);
+set(handles.listbox_selectedzone,'string',listok);
 guidata(handles.GUI_LookMat, handles);
 updateNetAllView(handles)
 
@@ -1668,14 +1668,14 @@ function btn_EntersettingLink_Callback(hObject, eventdata, handles)
 
 
 if get(handles.popupmenu_linkoption,'value')==1
-  [file,path] =  uigetfile({'*.xlsx';'*.xls'; '*.txt';'*.*'})
-   set(handles.edit_linkSettingmapConnectogram,'string',[path,file]) %connectogramme
+  [file,path] =  uigetfile({'*.xlsx';'*.xls'; '*.txt';'*.*'});
+   set(handles.edit_linkSettingmapConnectogram,'string',[path,file]); %connectogramme
 elseif get(handles.popupmenu_linkoption,'value')==2
-    [file,path] =  uigetfile({ '*.xlsx';'*.xls';'*.txt';'*.*'})
-   set(handles.edit_linkSettingmapConnectogram,'string',[path,file])
+    [file,path] =  uigetfile({ '*.xlsx';'*.xls';'*.txt';'*.*'});
+   set(handles.edit_linkSettingmapConnectogram,'string',[path,file]);
 elseif get(handles.popupmenu_linkoption,'value')==3
-   [file,path] =  uigetfile('.mat')
-   set(handles.edit_linkSettingmap2dmap,'string',[path,file])
+   [file,path] =  uigetfile('.mat');
+   set(handles.edit_linkSettingmap2dmap,'string',[path,file]);
 end
     
 guidata(handles.GUI_LookMat, handles);
@@ -1853,7 +1853,7 @@ function Make_newfigure_axesviewlink_Callback(hObject, eventdata, handles)
 % hObject    handle to Make_newfigure_axesviewlink (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-handles = plot_axes_linkConnectogramm(handles,1)
+handles = plot_axes_linkConnectogramm(handles,1);
 
 % --------------------------------------------------------------------
 function context_link_Callback(hObject, eventdata, handles)
@@ -1879,10 +1879,10 @@ function context_link_histogramme_Callback(hObject, eventdata, handles)
 
 DATA = get(handles.GUI_LookMat,'UserData');
 id = get(handles.popup_listsujet, 'value');
-linkselected = get(handles.context_link_name,'label')
-[tok,rem] = strtok(linkselected,'=')
-[linkij,rem] = strtok(rem,'=')
-[linkname,rem] = strtok(rem,'=')
+linkselected = get(handles.context_link_name,'label');
+[tok,rem] = strtok(linkselected,'=');
+[linkij,rem] = strtok(rem,'=');
+[linkname,rem] = strtok(rem,'=');
 valG1 = [];
 valG2 = [];
 groupeall = [];
@@ -1893,11 +1893,11 @@ end
 figure;hold on
 for igr = 1:max(groupeall)
     idgroupe =  find(groupeall==igr);
-    valG1 = []
+    valG1 = [];
 for id = 1:numel(idgroupe)
       idsubjet = idgroupe(id);
     if DATA{idsubjet}.GR == igr
-        eval(['new=DATA{',num2str(idsubjet),'}.MAT',linkij,';'])
+        eval(['new=DATA{',num2str(idsubjet),'}.MAT',linkij,';']);
         if get(handles.radio_fisher,'value')
             new =1/2*(log((1+new )./(1-new )));
         end
@@ -1917,16 +1917,16 @@ end
  bar(igr,nanmean(valG1),'facealpha',0.5,'displayname',['mean group ',num2str(igr) ]);
 end
 
-xlabel('Groups')
+xlabel('Groups');
    if get(handles.radio_fisher,'value')==0
-        ylabel('Connectivity score')
+        ylabel('Connectivity score');
    elseif get(handles.radio_fisher,'value')==1
-       ylabel('Connectivity score (Fisher)')
+       ylabel('Connectivity score (Fisher)');
    end
 %bar(2,nanmean(valG2),'facealpha',0.5)
-[filepath,name,ext] =fileparts(get(handles.edit_subjetxls,'string'))
+[filepath,name,ext] =fileparts(get(handles.edit_subjetxls,'string'));
 
-title([linkname,' ' , name])
+title([linkname,' ' , name]);
 
 
 
@@ -2051,13 +2051,13 @@ function btn_savelisttxt_Callback(hObject, eventdata, handles)
 % hObject    handle to btn_savelisttxt (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[file,path] = uiputfile('.txt')
-fid = fopen([path,file],'w')
-tmp = get(handles.listbox_selectedzone,'string')
+[file,path] = uiputfile('.txt');
+fid = fopen([path,file],'w');
+tmp = get(handles.listbox_selectedzone,'string');
 for i=1:size(tmp,1)
-    fprintf(fid,'%s\n',tmp{i})
+    fprintf(fid,'%s\n',tmp{i});
 end
-fclose(fid)
+fclose(fid);
 
 
 
@@ -2142,14 +2142,30 @@ DATA = get(handles.GUI_LookMat,'UserData');
 namesubject = get(handles.popup_listsujet, 'string');
 id = get(handles.popup_listsujet, 'value');
 MAT = DATA{id}.MAT;
+
 figure
 xbins= 100
 subplot(2,1,1)
 hist(MAT(:),xbins)
-  [ftshist,binpos] =hist(MAT(:),xbins );
+[ftshist,binpos] =hist(MAT(:),xbins );
 title(['Distribution ', namesubject{id}])
 xlabel(['x '])
+tmp = cumsum(ftshist)
+subplot(2,1,2)
+plot(binpos,tmp./max(tmp)*100)
+ylabel('P(X<x) (%)')
+xlabel(['x '])
+title('Cumulative distribution')
 
+figure 
+idremove = find(MAT==0)
+MAT(idremove)=[];
+xbins= 100
+subplot(2,1,1)
+hist(MAT(:),xbins)
+[ftshist,binpos] =hist(MAT(:),xbins );
+title(['Distribution ', namesubject{id},'excluding 0'])
+xlabel(['x '])
 tmp = cumsum(ftshist)
 subplot(2,1,2)
 plot(binpos,tmp./max(tmp)*100)
