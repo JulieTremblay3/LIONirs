@@ -18,9 +18,16 @@ catch
     disp(['Verify the file location or if the file is already open']);
     return
 end
-    %Load the matrices same as any
+
+%TRY TO REMOVE nan SUJBECT AT THE END
+iremoverow = 
+for i = 
+ISNAN(info{:,1}
+
+
+%Load the matrices same as any    
 groupeall = [];
-for isubject=2:size(info,1)
+for isubject=2:size(info,1)   
     id = isubject-1;
     tmp = info{isubject,2};
     if strcmp(tmp(end-2:end),'mat')
@@ -72,10 +79,12 @@ for isubject=2:size(info,1)
         %Define Additional covariable
         idcov = 1 ;
         for icolumn = 5:size(info,2)
+            if ~ischar(info{isubject,icolumn})
             eval( ['DATA{id}.cov',num2str(idcov),' = ', num2str(info{isubject,icolumn}),';']);
             idcov=idcov+1;
             if isubject==2
                 infocov = [infocov ;info(1,icolumn)];
+            end
             end
         end
     end
@@ -1063,7 +1072,7 @@ elseif isfield(job.c_statmatrix,'b_anova1_Mat')
                     filename = fullfile(dir1,['STATS_Anova ','GR ',num2str(GROUPELIST), ' ', ZoneList{i},' to ' ZoneList{i},' p= ',num2str(p),'.mat']);
                     save(filename,'stats');
                 end
-           v %if pcould not be
+            catch %if pcould not be
                 for icomp=1:size(c,1)
                     eval(['diff(',num2str(icomp),',',num2str(i),',',num2str(j),')','=nan;']);
                     eval(['pdiff(',num2str(icomp),',',num2str(i),',',num2str(j),')','=','nan',';']);
@@ -1262,6 +1271,7 @@ elseif isfield(job.c_statmatrix,'b_ANCOVA_Mat')
                     eval(['diff(',num2str(icomp),',',num2str(i),',',num2str(j),')','=','nan',';']);
                     eval(['pdiff(',num2str(icomp),',',num2str(i),',',num2str(j),')','=','nan',';']);
                  end
+                 disp(['Error stat for link ' num2str(i) 'to ',num2str(j) ])
             end    
              end
         end
@@ -1422,6 +1432,8 @@ elseif isfield(job.c_statmatrix,'b_anovarep_Mat')
                     else
                         if size(T1,1)~=size(GR,1)
                             disp(['Error: repeated measure needs an equal number of measurement. First group has ', num2str(size(T1,1)), ' measurements while the other has ', num2str(size(GR,1)), ' measurements.' ]);
+                            disp('Stats failed');
+                            return
                         else
                             T1 = addvars(T1,GR,'NewVariableNames',{['G',num2str(igr)]});
                         end
@@ -1475,7 +1487,8 @@ elseif isfield(job.c_statmatrix,'b_anovarep_Mat')
                 end          
 
               catch                      
-        
+                 disp('Error fitrm')
+                
               end
             end
         end  

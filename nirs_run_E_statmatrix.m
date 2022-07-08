@@ -18,9 +18,18 @@ catch
     disp(['Verify the file location or if the file is already open']);
     return
 end
-    %Load the matrices same as any
+
+%TRY TO REMOVE nan SUJBECT AT THE END
+iremoverow = [];
+for i = 1: size(info,1);
+if isnan(info{i,1});
+    iremoverow= [iremoverow,i];
+end
+end
+info(iremoverow,:)=[];
+%Load the matrices same as any    
 groupeall = [];
-for isubject=2:size(info,1)
+for isubject=2:size(info,1)   
     id = isubject-1;
     tmp = info{isubject,2};
     if strcmp(tmp(end-2:end),'mat')
@@ -72,10 +81,12 @@ for isubject=2:size(info,1)
         %Define Additional covariable
         idcov = 1 ;
         for icolumn = 5:size(info,2)
+            if ~ischar(info{isubject,icolumn})
             eval( ['DATA{id}.cov',num2str(idcov),' = ', num2str(info{isubject,icolumn}),';']);
             idcov=idcov+1;
             if isubject==2
                 infocov = [infocov ;info(1,icolumn)];
+            end
             end
         end
     end
@@ -1478,7 +1489,8 @@ elseif isfield(job.c_statmatrix,'b_anovarep_Mat')
                 end          
 
               catch                      
-        
+                 disp('Error fitrm')
+                
               end
             end
         end  
