@@ -114,7 +114,7 @@ fprintf(fid,'%s\r',['DataFile=',[name, '.dat']]);
 [pathstr, name, ext] = fileparts(file);
 
 fprintf(fid,'%s\r\n',['MarkerFile=',[name, '.vmrk']]);
-fprintf(fid,'%s%s\r\n','DataFormat=',infoBV.dataformat);
+fprintf(fid,'%s%s\r\n','DataFormat=',infoBV.DataFormat);
 fprintf(fid,'%s\r\n','; Data orientation: VECTORIZED=ch1,pt1, ch1,pt2..., MULTIPLEXED=ch1,pt1, ch2,pt1 ...');
 fprintf(fid,'%s%s\r\n','DataOrientation=', infoBV.DataOrientation);
 fprintf(fid,'%s%s\r\n','DataType=', infoBV.DataType);
