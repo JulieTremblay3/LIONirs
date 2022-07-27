@@ -564,12 +564,39 @@ function vout = nirs_cfg_vout_readhomerfile(job)
     vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
 end
 
+
+input_GenericDataExportBV         = cfg_files; %Select raw BOXY data files for this subject 
+input_GenericDataExportBV.name    = 'Select .dat'; % The displayed name
+input_GenericDataExportBV.tag     = 'input_GenericDataExportBV';    %file names
+input_GenericDataExportBV.ufilter = '.dat';    %
+input_GenericDataExportBV.num     = [1 Inf];     % Number of inputs required 
+input_GenericDataExportBV.help    = {'Select Generic Data Export from BrainVision Analyser'}; 
+
+
+% Executable Branch
+E_GenericDataExportBV      = cfg_exbranch;      
+E_GenericDataExportBV.name = 'Read .dat (Generic Data export BV)';            
+E_GenericDataExportBV.tag  = 'E_GenericDataExportBV'; 
+E_GenericDataExportBV.val  = {input_GenericDataExportBV, age1,output_path};   
+E_GenericDataExportBV.prog = @nirs_run_readGenericDataExportBV;  
+E_GenericDataExportBV.vout = @nirs_cfg_vout_GenericDataExportBV;
+E_GenericDataExportBV.help = {'Select raw generic data export from brain vision analyser. Patch pour load EEG file and use target PCA for cardiac correction without ECG. '};
+
+function vout = nirs_cfg_vout_GenericDataExportBV(job)
+    vout = cfg_dep;                    
+    vout.sname      = 'NIRS.mat';       
+    vout.src_output = substruct('.','NIRSmat'); 
+    vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
+end
+
 % Create the two branch required.
 b_importProject         = cfg_branch; % Contains the project file selector.
 b_importProject.tag     = 'b_importProject';
 b_importProject.name    = 'Import .prj';
 b_importProject.val     = {prjfile};
 b_importProject.help    = {'Import a project file that already exists'};
+
+
 
 % Folder selector.
 e_MultimodalPath          = cfg_files; %path
@@ -697,6 +724,136 @@ function vout = nirs_cfg_vout_E_aux2manualtrig(job)
     vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
 end
 
+
+f_correlationsignal         = cfg_files; %Select raw BOXY data files for this subject 
+f_correlationsignal.name    = 'Select .fig signal model to find'; % The displayed name
+f_correlationsignal.tag     = 'f_correlationsignal';    %file names
+f_correlationsignal.ufilter = '.fig';    %
+f_correlationsignal.num     = [1 Inf];     % Number of inputs required 
+f_correlationsignal.help    = {'Select .fig with the model of curve to find in the data.'}; 
+
+e_onset        = cfg_entry; %subfolder new branch
+e_onset.name    = 'Create a new branch of analysis in the subfolder';
+e_onset.tag     = 'e_onset';       
+e_onset.strtype = 's';
+e_onset.num     = [1 Inf];     
+e_onset.val     = {'8'}; 
+e_onset.help    = {'Use integer to be mark as a trigger.'}; 
+
+e_correlationsignal_LPF       = cfg_entry; %subfolder new branch
+e_correlationsignal_LPF.name    = 'Create a new branch of analysis in the subfolder';
+e_correlationsignal_LPF.tag     = 'e_correlationsignal_LPF';       
+e_correlationsignal_LPF.strtype = 's';
+e_correlationsignal_LPF.num     = [1 Inf];     
+e_correlationsignal_LPF.val     = {'No'}; 
+e_correlationsignal_LPF.help    = {'Use a numerical value to apply Low pass filter before correlation. The filter will only be apply to mark the event with the correlation'}; 
+
+
+e_correlationsignal_HPF       = cfg_entry; %subfolder new branch
+e_correlationsignal_HPF.name    = 'High Pass Filter';
+e_correlationsignal_HPF.tag     = 'e_correlationsignal_HPF';       
+e_correlationsignal_HPF.strtype = 's';
+e_correlationsignal_HPF.num     = [1 Inf];     
+e_correlationsignal_HPF.val     = {'No'}; 
+e_correlationsignal_HPF.help    = {'Use a numerical value to apply High pass filter before correlation.'}; 
+
+%General entry use by any modules
+zonecorrelation         = cfg_files; 
+zonecorrelation.name    = 'zone';
+zonecorrelation.tag     = 'zonecorrelation';      
+zonecorrelation.filter  = 'zone';
+zonecorrelation.ufilter = '.zone$';    
+zonecorrelation.num     = [1 Inf];     % Number of inputs required 
+zonecorrelation.help    = {'Select a zone where to apply correlation. Could be global if all channel.'};
+
+%Create marker based on correlation on signal based on recording
+E_createonset_correlationsignal     = cfg_exbranch;
+E_createonset_correlationsignal.name = 'Mark based on correlation';
+E_createonset_correlationsignal.tag  = 'E_createonset_correlationsignal';
+E_createonset_correlationsignal.val  = {NIRSmat,DelPreviousData, f_correlationsignal, e_onset,e_correlationsignal_LPF  , e_correlationsignal_HPF, zonecorrelation};
+E_createonset_correlationsignal.prog = @nirs_run_E_createonset_correlationsignal;
+E_createonset_correlationsignal.vout = @nirs_cfg_vout_E_createonset_correlationsignal;
+E_createonset_correlationsignal.help = {'Use ISS AUX trig to create editable manual trig file to be used with manual trig.',...
+    'A file will be created in the current directory under the name (fileid_trigid_trig.m).' };
+
+function vout = nirs_cfg_vout_E_createonset_correlationsignal(job)
+    vout = cfg_dep;                    
+    vout.sname      = 'NIRS.mat';       
+    vout.src_output = substruct('.','NIRSmat'); 
+    vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
+end
+
+e_onset_trig        = cfg_entry; %subfolder new branch
+e_onset_trig.name    = 'Trigger';
+e_onset_trig.tag     = 'e_onset_trig';       
+e_onset_trig.strtype = 's';
+e_onset_trig.num     = [1 Inf];     
+e_onset_trig.val     = {'8'}; 
+e_onset_trig.help    = {'Use integer to be mark as a trigger in the display GUI to indicate the onset event.'}; 
+
+e_CardiacExpectedFrequency         = cfg_entry; %subfolder new branch
+e_CardiacExpectedFrequency.name    = 'Expected cardiac beat (Hz)';
+e_CardiacExpectedFrequency.tag     = 'e_CardiacExpectedFrequency';       
+e_CardiacExpectedFrequency.strtype = 's';
+e_CardiacExpectedFrequency.num     = [1 Inf];     
+e_CardiacExpectedFrequency.val     = {'2'}; 
+e_CardiacExpectedFrequency.help    = {'Use to help to determine the time window to dectect the local maximal peak of the cardiac artifact'}; 
+
+e_Cardiac_HighPass         = cfg_entry; %subfolder new branch
+e_Cardiac_HighPass.name    = 'High Pass detection (Hz)';
+e_Cardiac_HighPass.tag     = 'e_Cardiac_HighPass';       
+e_Cardiac_HighPass.strtype = 's';
+e_Cardiac_HighPass.num     = [1 Inf];     
+e_Cardiac_HighPass.val     = {'10'}; 
+e_Cardiac_HighPass.help    = {'Apply a High pass filter to ease the detection of the high frequency artefact of the cardiac pulse and use the local maximal to dectection on this channel '}; 
+
+
+%Create marker based on correlation on signal based on recording
+E_markCardiac_TargetPCA     = cfg_exbranch;
+E_markCardiac_TargetPCA.name = 'Mark cardiac artifact (EEG)';
+E_markCardiac_TargetPCA.tag  = 'E_markCardiac_TargetPCA';
+E_markCardiac_TargetPCA.val  = {NIRSmat,DelPreviousData,e_CardiacExpectedFrequency, e_Cardiac_HighPass, e_onset_trig};
+E_markCardiac_TargetPCA.prog = @nirs_run_E_markCardiac_TargetPCA;
+E_markCardiac_TargetPCA.vout = @nirs_cfg_vout_E_markCardiac_TargetPCA;
+E_markCardiac_TargetPCA.help = {'Mark cardiac artifac in EEG (without ECG) using target PCA.',...
+    'Apply a high pass filter to facilitate the identification of the cardiac artifact.',...
+    'use the local maximal peak and select a small time window to apply the target PCA and substract the first component' };
+
+
+function vout = nirs_cfg_vout_E_markCardiac_TargetPCA(job)
+    vout = cfg_dep;                    
+    vout.sname      = 'NIRS.mat';       
+    vout.src_output = substruct('.','NIRSmat'); 
+    vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
+end
+
+e_Cardiac_Window            = cfg_entry; %subfolder new branch
+e_Cardiac_Window.name    = 'Target PCA time window (ms)';
+e_Cardiac_Window.tag     = 'e_Cardiac_Window';       
+e_Cardiac_Window.strtype = 's';
+e_Cardiac_Window.num     = [1 Inf];     
+e_Cardiac_Window.val     = {'100'}; 
+e_Cardiac_Window.help    = {'Time window around the local maximum to apply the target PCA'}; 
+
+
+%Create marker based on correlation on signal based on recording
+E_correctCardiac_TargetPCA     = cfg_exbranch;
+E_correctCardiac_TargetPCA.name = 'Correct using Target PCA on marker';
+E_correctCardiac_TargetPCA.tag  = 'E_correctCardiac_TargetPCA';
+E_correctCardiac_TargetPCA.val  = {NIRSmat,DelPreviousData,e_Cardiac_Window,e_onset_trig};
+E_correctCardiac_TargetPCA.prog = @nirs_run_E_correctCardiac_TargetPCA;
+E_correctCardiac_TargetPCA.vout = @nirs_cfg_vout_E_correctCardiac_TargetPCA;
+E_correctCardiac_TargetPCA.help = {'Correct cardiac artifac in EEG (without ECG) using target PCA.',...
+    'Apply a high pass filter to facilitate the identification of the cardiac artifact.',...
+    'use the local maximal peak and select a small time window to apply the target PCA and substract the first component' };
+
+
+function vout = nirs_cfg_vout_E_correctCardiac_TargetPCA(job)
+    vout = cfg_dep;                    
+    vout.sname      = 'NIRS.mat';       
+    vout.src_output = substruct('.','NIRSmat'); 
+    vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Module 2b DataOnset insert manual trig definition in the data E_manualtrig
@@ -922,7 +1079,7 @@ E_normalization.vout = @nirs_cfg_vout_normalize;
 E_normalization.help = {'Normalize raw data, transfer optical intensity in delta optical density;',...
     'dOD  = log(I/Io).'};
 %make NIRS.mat available as a dependency
-function vout = nirs_cfg_vout_normalize(job)
+function vout = nirs_cfg_vout_normalize(~)
 vout = cfg_dep;                    
 vout.sname      = 'NIRS.mat';       
 vout.src_output = substruct('.','NIRSmat'); 
@@ -3662,14 +3819,14 @@ M_readMultimodal.help   = {'Read EEG or Auxiliary format to do visualized multim
 M_readNIRS        = cfg_choice; 
 M_readNIRS.name   = 'Read data';
 M_readNIRS.tag    = 'M_readNIRS';
-M_readNIRS.values = {E_readNIRxscout,E_rawhomer, E_readSNIRF,boxy1,  M_readMultimodal}; 
+M_readNIRS.values = {E_readNIRxscout,E_rawhomer, E_readSNIRF,boxy1, E_GenericDataExportBV, M_readMultimodal}; 
 M_readNIRS.help   = {'These modules read NIRS data in different formats.'};
 
 %Module segment or concatenate data 
 M_Segment        =   cfg_choice; 
 M_Segment.name   =  'Segment/Onset';
 M_Segment.tag    = 'M_Segment';
-M_Segment.values = {E_segment ,E_Concatenate_file,E_Concatenate_nirsmat,E_aux2manualtrig,E_manualtrig}; 
+M_Segment.values = {E_segment ,E_Concatenate_file,E_Concatenate_nirsmat,E_aux2manualtrig,E_manualtrig,E_createonset_correlationsignal }; 
 M_Segment.help   = {'These modules segment or combine data.'};
 
 
@@ -3709,12 +3866,18 @@ M_datawritenirs.tag    = 'M_datawritenirs';
 M_datawritenirs.values = {E_writeNIRSHomer,  E_writeSNIRF, E_NIR_segment,E_writeHMR}; 
 M_datawritenirs.help   = {'These modules convert nir file in .nirs, last module of data export, support the export of field such as data (d),coordinate (SD), trigger (s), time (t),do not support noise artifact marking or aux export'};
 
+%Module  Write external file
+M_others        =  cfg_choice; 
+M_others.name   = 'Additional function';
+M_others.tag    = 'M_others';
+M_others.values = {E_markCardiac_TargetPCA, E_correctCardiac_TargetPCA}; %,E_createonset_correlationsignal
+M_others.help   = {'These modules convert nir file in .nirs, last module of data export, support the export of field such as data (d),coordinate (SD), trigger (s), time (t),do not support noise artifact marking or aux export'};
 
 %Module Utility
 M_Utility        = cfg_choice; 
 M_Utility.name   = 'Utility NIRSmat';
 M_Utility.tag    = 'M_Utility';
-M_Utility.values = {E_NIRSmatdiradjust, E_NIRSmatcreatenewbranch  E_createseedlist E_qualityreport E_zone2channellist E_channellist2zone E_VIDEO E_viewNIRS M_datawritenirs}; %
+M_Utility.values = {E_NIRSmatdiradjust, E_NIRSmatcreatenewbranch  E_createseedlist E_qualityreport E_zone2channellist E_channellist2zone E_VIDEO E_viewNIRS M_datawritenirs M_others }; %
 M_Utility.help   = {'Utility on NIRSmat function.'};
 
 nirsHSJ        = cfg_choice;

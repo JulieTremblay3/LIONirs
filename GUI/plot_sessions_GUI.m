@@ -1286,6 +1286,7 @@ if 0 %numel(handles.NIRS.Dt.fir.pp)==oldmodule
     %         in save noise
     
     [ind_dur_ch] = read_vmrk_find(vmrk_path,mrk_type_arr);
+    
     if ~isempty(ind_dur_ch)
         maxpoint  = ind_dur_ch(:,1)+ind_dur_ch(:,2);
         badind = find(maxpoint>size(noise,1));
@@ -1623,7 +1624,9 @@ try
         vmrk_path = [x(1:end-3),'vmrk'];
         %         handles.file_vmrk = handles.NIRS.Dt.fir.pp(end).p{idfile}; %used
         %         in save noise
-        [ind_dur_ch] = read_vmrk_find(vmrk_path,mrk_type_arr);
+        [ind_dur_ch1] = read_vmrk_find(vmrk_path,mrk_type_arr);
+         [ind_dur_ch2] = read_vmrk_find(vmrk_path,'Bad Interval');
+         ind_dur_ch=[ind_dur_ch1;ind_dur_ch2];
         if ~isempty(ind_dur_ch)
             maxpoint  = ind_dur_ch(:,1)+ind_dur_ch(:,2);
             badind = find(maxpoint>size(noise,1));
@@ -1632,7 +1635,7 @@ try
                 ind_dur_ch(badind,2)=size(noise,1)- ind_dur_ch(badind,1);
             end 
             for Idx = 1:size(noise,2)
-                mrks = find(ind_dur_ch(:,3)==Idx);
+                mrks = find(ind_dur_ch(:,3)==Idx| ind_dur_ch(:,3)==0);
                 ind = ind_dur_ch(mrks,1);
                 indf = ind + ind_dur_ch(mrks,2) - 1;
                 if ~isempty(ind)

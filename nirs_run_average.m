@@ -641,7 +641,12 @@ if avtype==0 %save data file for multiple subjects average %NON vérifier
         fwrite_NIR(outfile2,stdav);
         fwrite_NIR(outfile3,nbevents);
         try
-            ChannelLabels = ConvertmlIDsrs2label(NIRS);
+                try
+                    info = read_vhdr_brainvision((fullfile(dir1,[fil1,'.vhdr'])));
+                    ChannelLabels = info.label;
+                catch
+                    ChannelLabels = ConvertmlIDsrs2label(NIRS);
+                end
             SamplingInterval =floor(1000000/NIRS.Cf.dev.fs);
             nirs_boxy_write_vhdr(outfilevhdr,... %Output file
                         outfile,... %DataFile

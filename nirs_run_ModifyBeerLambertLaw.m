@@ -137,7 +137,12 @@ for Idx=1:size(job.NIRSmat,1)
              end
                  
             try
-            ChannelLabels = ConvertmlIDsrs2label(NIRS);
+                try
+                    info = read_vhdr_brainvision((fullfile(dir1,[fil1,'.vhdr'])));
+                    ChannelLabels = info.label;
+                catch
+                    ChannelLabels = ConvertmlIDsrs2label(NIRS);
+                end
             SamplingInterval =floor(1000000/NIRS.Cf.dev.fs);
              nirs_boxy_write_vhdr(outfilevhdr,... %Output file
                         outfile,... %DataFile

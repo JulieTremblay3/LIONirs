@@ -1,170 +1,166 @@
-%___________________________________________________________________
-% Copyright (C) 2019 LION Lab, Centre de recherche CHU Sainte-Justine 
-% www.lionlab.umontreal.ca
-%___________________________________________________________________
-function out = nirs_run_filter(job)
+function out = nirs_run_E_markCardiac_TargetPCA(job)
+%Remode linear trend
 %filename prefix 
-prefix = 'f'; %for "filtered"
+prefix = 'i'; %for "identify marker"
 DelPreviousData  = job.DelPreviousData;
 
-[lowcut,applylowcut] = str2num(job.lowcutfreq);
-[ highcut ,applyhighcut] = str2num(job.highcutfreq);
 
-filt_ord = job.filterorder;
-paddingsym = job.paddingsymfilter; %symetrie padding on the signal to avoid edge on the filtering
-interpolate = job.interpolatebadfilter;  %interpolate bad interval
 for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
     %Load NIRS.mat information
+%     try
         NIRS = [];
         load(job.NIRSmat{filenb,1});
-   
+        [dir2,tmp,tmp] = fileparts(job.NIRSmat{filenb,1});
+
         %use last step of preprocessing
         lst = length(NIRS.Dt.fir.pp);
         rDtp = NIRS.Dt.fir.pp(lst).p; % path for files to be processed
         NC = NIRS.Cf.H.C.N;
         fs = NIRS.Cf.dev.fs;
-        
-         %Verify job.NIRS.mat location 
-         %dir2 will be the new location 
-        [dir2,tmp,tmp] = fileparts(job.NIRSmat{filenb,1});
-
-        
-        fprintf('%s\n',['File processed using filter low pass=', num2str(lowcut) ,' high pass=' , num2str(highcut),' order=', num2str(filt_ord),'  butterword zero phase filter (function butter.m and filtfilt.m)']);
-        if paddingsym
-            fprintf('%s\n','Using mirror padding')
-        end
+        fprintf('%s\n',['File mark for cardiac artifact']);
+       
+   
         for f=1:size(rDtp,1) %Loop over all files of a NIRS.mat 
 %             try
-        figon=0;
+                d = fopen_NIR(rDtp{f,1},NC);              
+                [dir1,fil1,~] = fileparts(rDtp{f});             
+                sizebloctocheck = size(d',1);     
+           
 
-                d = fopen_NIR(rDtp{f,1},NC);
-                if figon
-                figure;subplot(3,1,1);plot(d')
-                end
-                 [dir1,fil1,~] = fileparts(rDtp{f});
-                vmrk_path = fullfile(dir1,[fil1 '.vmrk']);
-                [ind_dur_ch] = read_vmrk_find(vmrk_path,'bad_step');
-                %d = NaN*ones(size(d));
-                
-                if paddingsym
-                    dtmp = [fliplr(d),d,fliplr(d)];
-                    tstart = size(d,2)+1;
-                    tstop = size(d,2)*2;
-                    %figure;plot(dtmp')
-                    d = dtmp;
-                end 
-                id = find(isnan(d));
-                if ~isempty(id)
-                  d(id) = 0;
-               end
+                CardiacExpectedFrequency = str2num(job.e_CardiacExpectedFrequency);
+                maxwindow=(1/CardiacExpectedFrequency)/ (1/fs);     
+                maxpeak = [1]; %a enlever après
+                HighPass_filter = str2num(job.e_Cardiac_HighPass);    
+                Wn = HighPass_filter*2/fs;
+                 filt_ord =4;
+                 [fb,fa]=butter(filt_ord,Wn,'high');
+                 idx = 1;
+                  dfilt = filtfilt(fb,fa,d(:,:)');  
+        
               
-                if ~isempty(ind_dur_ch)&&  interpolate == 1
-                    if paddingsym
-                        ind_dur_chpre  = ind_dur_ch;
-                        ind_dur_chpre(:,1)  = tstart-ind_dur_ch(:,1)-ind_dur_ch(:,2);
-                        ind_dur_chmid = ind_dur_ch;
-                        ind_dur_chmid(:,1) =ind_dur_ch(:,1)+tstart-1;
-                        ind_dur_chpost = ind_dur_ch;
-                        ind_dur_chpost(:,1) = (tstart-ind_dur_ch(:,1)-ind_dur_ch(:,2))+tstop;
-                        ind_dur_chtot = [ind_dur_chpre;ind_dur_chmid;ind_dur_chpost];
+                iwindow = 0;
+                curvepeak = sum(abs(dfilt),2);
+                while iwindow < (size(curvepeak,1)-round(maxwindow*3/2))
+                    try
+                    iwindow = iwindow + 2;
+                    [val,id] = max(curvepeak(iwindow: iwindow+round(maxwindow*3/2)));
+                    if id==1
+                        1;
+                    else
+                        idreal = id+iwindow;
+                        if idreal~=maxpeak(end)
+                            maxpeak =  [maxpeak,idreal];
+                            iwindow =  iwindow+round(maxwindow/2);
+                            curvepeak(iwindow: (iwindow+round(maxwindow/2)))=0;
+                        end
                     end
-                    [dinterp] = interpolate_bad(d,ind_dur_chtot);
-                else
-                    dinterp = d;
-                end 
-                if figon
-                    subplot(3,1,2);plot(d')
-                    subplot(3,1,3);plot(dinterp')
+                    catch
+                      
+                    end
+                    
                 end
+                maxpeak(1)=[];
+               %     figure;plot(curvepeak(iwindow: iwindow+maxwindow))
+               %FIGURE TEST 
+%                  figure; subplot(2,1,1);hold on ; plot(dfilt(1:1000,:),'b')                   
+%                  figure; hold on ; plot(sum(abs(dfilt(1:10000,:)),2),'b')
+%                   time = 1/fs:1/fs:size(dfilt,1)*1/fs;
+%                  plot(time,curvepeak,'b')
+%                  plot(time(maxpeak),ones(numel(maxpeak),1)*0.6,'rx')
 
-                for Idx = 1:NC %Loop over all channels
-                    if 1 %NIRS.Cf.H.C.ok(Idx,f) ~= 0;  %If the channel was not previously flagged. %DO ALL
-                        %LOWPASS
-                        if applylowcut
-                            Wn = lowcut*2/fs;
-                            [fb,fa]=butter(filt_ord,Wn);
-                            dfilt(Idx,:) = filtfilt(fb,fa,dinterp(Idx,:));                 
-                        else
-                            dfilt(Idx,:) = dinterp(Idx,:);
-                        end
-                        %HIGHPASS
-                        if applyhighcut
-                            Wn = highcut*2/fs;
-                            [fb,fa]=butter(filt_ord,Wn,'high');
-                            dfilt(Idx,:) = filtfilt(fb,fa,dfilt(Idx,:));
-                            dfilt(Idx,:) = dfilt(Idx,:);
-                        end
-                    end
-                end
-                %plot response
-                if paddingsym
-                    dfilt = dfilt(:,tstart:tstop);
-                end
+%                 %PCA HERE 
+%                 PCAd =d';
+%                  warning('off')
+%                 halfwindowsize = round(((str2num(job.e_Cardiac_Window)/1000)/(1/fs))./2);
+%                 for imarker=1:numel(maxpeak)
+%                 
+%                         idstart = maxpeak(imarker)- halfwindowsize;
+%                         idstop = maxpeak(imarker)+ halfwindowsize;
+%                              
+%                         %Detrent DATA segment for centrering before PCA
+%                         intensnorm = PCAd(idstart:idstop,:) ;
+%                         X = 1:1:size(intensnorm,1);
+%                         Mb1 =  ((intensnorm(end,:)-intensnorm(1,:))./numel(X))';
+%                          Mb2 =  intensnorm(1,:)'; %offset
+%                         A = reshape(X,numel(X),1)*reshape( Mb1,1,numel(Mb1)) +ones(numel(X),1)*reshape( Mb2,1,numel(Mb2));
+%                         spar = intensnorm - A;
+%                        
+%                         %SUBTRACT FIRST PCA
+%                         c = spar'*spar;
+%                         [v,s,foo]=svd(c);
+%                         svs = diag(s);
+%                         u = spar*v*inv(s);
+%                         lstSV=1;
+%                         Xm =  u(:,lstSV)*s(lstSV,lstSV)*v(:,lstSV)';
+%                         PCAd(idstart:idstop,:) = spar+A-Xm;
+%                    
+%                 end
+%                  warning('on')
+ 
+                
                 [dir1,fil1,ext1] = fileparts(rDtp{f});
                 infilevmrk = fullfile(dir1,[fil1 '.vmrk']);
                 try
                 infilevhdr = fullfile(dir1,[fil1 '.vhdr']);    
                 catch
                 end
+                
+                if ~exist(dir2,'dir'), mkdir(dir2); end
                 outfile = fullfile(dir2,[prefix fil1 ext1]);
                 outfilevmrk = fullfile(dir2,[prefix fil1 '.vmrk']);
                 outfilevhdr = fullfile(dir2,[prefix fil1 '.vhdr']);
 
                
-                fwrite_NIR(outfile,dfilt); 
-                clear dfilt
+                fwrite_NIR(outfile,d); 
                 fprintf('%s\n',outfile);
  
                 %write new .vmrk file 
                 try
                 copyfile(infilevmrk,outfilevmrk);
-                catch
-                end
+                catch;end
                 try
-                copyfile(infilevhdr,outfilevhdr);
+  
                     try
                         info = read_vhdr_brainvision((fullfile(dir1,[fil1,'.vhdr'])));
                         ChannelLabels = info.label;
                     catch
                         ChannelLabels = ConvertmlIDsrs2label(NIRS);
                     end
-                SamplingInterval =floor(1000000/NIRS.Cf.dev.fs);
-                nirs_boxy_write_vhdr(outfilevhdr,... %Output file
-                            fileOut,... %DataFile
-                            outfilevmrk,... %MarkerFile,...
-                            'nirs_run_filter',... %Function that created the header
-                            '',... %Channel Resolution
-                            '',... %Channel Units
-                            ChannelLabels,... %names given as a column of cells
-                            SamplingInterval,...
-                            size(dfilt,2)); %SamplingInterval in microseconds
-    
-                
+                    SamplingInterval =floor(1000000/NIRS.Cf.dev.fs);
+                    nirs_boxy_write_vhdr(outfilevhdr,... %Output file
+                        outfile,... %DataFile
+                        outfilevmrk,... %MarkerFile,...
+                        'nirs_E_correctCardiac_TargetPCA',... %Function that created the header
+                        '',... %Channel Resolution
+                        '',... %Channel Units
+                        ChannelLabels,... %names given as a column of cells
+                        SamplingInterval,...
+                        size(d,2)); %SamplingInterval in microseconds
                 catch
                 end
                  if DelPreviousData
-                    try
-                    delete(rDtp{f,1});                    
-                    delete(infilevmrk);
-                    delete(infilevhdr);
+                    delete(rDtp{f,1});
+                    delete(infilevmrk)
+                    delete(infilevhdr)
                     disp(['Delete previous .nir data file: ',rDtp{f,1}]);
-                    catch                        
-                    end
-                     
                 end
                 %add outfile name to NIRS
                 if f == 1
-                    NIRS.Dt.fir.pp(lst+1).pre = 'Filtered';
+                    NIRS.Dt.fir.pp(lst+1).pre = 'Mark cardiac artefac';
                     NIRS.Dt.fir.pp(lst+1).job = job;
                 end 
+                newtrigger = str2num(job.e_onset_trig);
                 NIRS.Dt.fir.pp(lst+1).p{f,1} = outfile;
+                tmpaux5 = NIRS.Dt.fir.aux5{1,1};
+                tmpaux5 = [tmpaux5;[ones(numel(maxpeak),1)*newtrigger,maxpeak']];
+                NIRS.Dt.fir.aux5{1,1} =  tmpaux5;
+                
         end
             save(fullfile(dir2,'NIRS.mat'),'NIRS');
             job.NIRSmat{1} =fullfile(dir2,'NIRS.mat');
 
 end
 out.NIRSmat = job.NIRSmat;
-
 function [num, den, z, p] = butter(n, Wn, varargin)
 %BUTTER Butterworth digital and analog filter design.
 %   [B,A] = BUTTER(N,Wn) designs an Nth order lowpass digital

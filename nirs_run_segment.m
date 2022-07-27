@@ -103,7 +103,7 @@ for filenb = 1:size(job.NIRSmat,1)
                 'Sample: ',sprintf('%.0f ', indstim )]);
                 
             %disp(['Find ', num2str(numel(indstim_EEG)), ' EEG trigger ',idtrigEEG , sprintf('\n'),'Time: ', sprintf('%.2f, ',EEG.infoBV.SamplingInterval/1000000*indstim_EEG),'seconds to sync', sprintf('\n'),'Sample: ',sprintf('%d, ',indstim_EEG) ])
-             
+             try
             if numel(indstim)==1
                 %trig could be ajuste to start and end of the bloc no need
                 %to define fix start stop cause only one trigger exist. 
@@ -123,6 +123,11 @@ for filenb = 1:size(job.NIRSmat,1)
                 end
                  
             end
+             catch
+                 disp('Failed NIRS segment trig could not be found to segment please verify your data or your parameter')
+                 out.NIRSmat = job.NIRSmat;
+                 return
+             end
                 
               switch job.pretime
                   case 'start'
@@ -441,7 +446,11 @@ for filenb = 1:size(job.NIRSmat,1)
                   end
                 %dnorm=log(dnorm)
                 %WRITE THE RESEGMENTATION
-                NIRS.Dt.fir.sizebloc{ifile}=size(dnorm,2);
+                try
+                    NIRS.Dt.fir.sizebloc{ifile}=size(dnorm,2);
+                catch
+                    NIRS.Dt.fir.sizebloc(ifile)=size(dnorm,2);
+                end
                 fwrite_NIR(outfile,dnorm);
                 
                 
@@ -474,9 +483,13 @@ for filenb = 1:size(job.NIRSmat,1)
                 %             infilewmrk = fullfile(dir1,[fil1 '.vmrk']);
                 %             outfilevmrk = fullfile(dir1,[prefix fil1 '.vmrk']);
                 %             copyfile(infilewmrk,outfilevmrk);
-                
-                ChannelLabels = ConvertmlIDsrs2label(NIRS);
-                nirs_boxy_write_vhdr(fileOutRoot_vhdr,... %Output file
+                try 
+                    info = read_vhdr_brainvision((fullfile(dir1,[fil1,'.vhdr'])));
+                    ChannelLabels = info.label;
+                catch
+                    ChannelLabels = ConvertmlIDsrs2label(NIRS);
+                end
+                    nirs_boxy_write_vhdr(fileOutRoot_vhdr,... %Output file
                     outfile,... %DataFile
                     fileOutRoot_vmrk,... %MarkerFile,...
                     'nirs_run_segment',... %Function that created the header
@@ -485,7 +498,9 @@ for filenb = 1:size(job.NIRSmat,1)
                     ChannelLabels,... %names given as a column of cells
                     1/NIRS.Cf.dev.fs*1000000,... %SamplingInterval in microseconds
                     nstim); %SamplingInterval in microseconds
-                
+                                   
+               
+
                 SD.Markers{1,1}.Type='New Segment';
                 SD.Markers{1,1}.Description='';
                 SD.Markers{1,1}.Position=1;
@@ -555,3 +570,5 @@ for filenb = 1:size(job.NIRSmat,1)
         job.NIRSmat{1} =fullfile(dir2,'NIRS.mat');
 end
     out.NIRSmat = job.NIRSmat;
+
+    

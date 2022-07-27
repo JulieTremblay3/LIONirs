@@ -1082,10 +1082,23 @@ elseif isfield(job.c_statmatrix,'b_anova1_Mat')
                 panova(i,j) = 1;
                 nanova(i,j) = numel(iduse(isgood));
             end
+            else
+                panova(i,j) = nan;
             end
-        end
+        end    
     end
 
+    [FRD,Q] = mafdr(panova(:)','LAMBDA',[0.0001:0.01:0.95]);
+    Q = reshape(Q,size(panova));
+    %SAVE FDR
+    file = [name,labelnode,'ANOVAFDR p',num2str(alpha_threshold),'.mat'];
+    matcorr = double( Q<alpha_threshold);
+    meancorr = double( Q<alpha_threshold);
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    disp(['Save: ', fullfile(dir1,[file])]);
+    new = [{dir1},{file}, {ZONEid},{0} ];
+    infonew = [infonew;new];
+        
     for igr = 1:numel(GROUPELIST)
         iduse = find(  sum(groupeall==GROUPELIST(igr),2));
         file = [name,labelnode,'meanGR',num2str(GROUPELIST(igr)),'.mat'];
@@ -1109,7 +1122,8 @@ elseif isfield(job.c_statmatrix,'b_anova1_Mat')
         new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
         infonew = [infonew;new];
      end
-    
+  
+        
     for icomp = 1:size(diff,1)
          file = [name,labelnode,'diffGR',labelmultcompare{icomp},'.mat'];
         meanG1 = squeeze(diff(icomp,:,:)); 
@@ -1275,10 +1289,49 @@ elseif isfield(job.c_statmatrix,'b_ANCOVA_Mat')
                  end
                  disp(['Error stat for link ' num2str(i) 'to ',num2str(j) ])
             end    
+             else
+                 panovaGroupe(i,j) = nan;
+                 panovaCoV(i,j) = nan; 
+                 panovaGroupebyCoV(i,j) = nan;
              end
-        end
+        
     end
-
+    end
+    [FRD,Q] = mafdr(panovaGroupe(:));
+    Q = reshape(Q,size(panovaGroupe));
+    %SAVE FDR
+    file = [name,labelnode,'ANCOVAFDR groupe p',num2str(alpha_threshold),'.mat'];
+    matcorr = double( Q<alpha_threshold);
+    meancorr = double( Q<alpha_threshold);
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    disp(['Save: ', fullfile(dir1,[file])]);
+    new = [{dir1},{file}, {ZONEid},{0} ];
+    infonew = [infonew;new];
+    
+      [FRD,Q] = mafdr( panovaCoV(:));
+    Q = reshape(Q,size( panovaCoV));
+    %figure;hist(panovaCoV(:))
+    %SAVE FDR
+    file = [name,labelnode,'ANCOVAFDR COV p',num2str(alpha_threshold),'.mat'];
+    matcorr = double( Q<alpha_threshold);
+    meancorr = double( Q<alpha_threshold);
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    disp(['Save: ', fullfile(dir1,[file])]);
+    new = [{dir1},{file}, {ZONEid},{0} ];
+    infonew = [infonew;new];
+    
+    [FRD,Q] = mafdr(panovaGroupebyCoV(:));
+    Q = reshape(Q,size(panovaGroupebyCoV));
+    %SAVE FDR
+    file = [name,labelnode,'ANCOVAFDR groupe p',num2str(alpha_threshold),'.mat'];
+    matcorr = double( Q<alpha_threshold);
+    meancorr = double( Q<alpha_threshold);
+    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    disp(['Save: ', fullfile(dir1,[file])]);
+    new = [{dir1},{file}, {ZONEid},{0} ];
+    infonew = [infonew;new];
+    
+    
     for igr = 1:numel(GROUPELIST)
         iduse = find(  sum(groupeall==GROUPELIST(igr),2));
         file = [name,labelnode,'meanGR',num2str(GROUPELIST(igr)),'.mat'];
@@ -1495,6 +1548,8 @@ elseif isfield(job.c_statmatrix,'b_anovarep_Mat')
             end
         end  
         end
+        
+        
     for ifval = 1:numel(Panova) 
         file = [name,labelnode,' fanova', num2str(ifval) ,'.mat'];
         matcorr = eval(['fanova', num2str(ifval)]);

@@ -930,6 +930,37 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
         NC = NIRS.Cf.H.C.N;
         fDtp = NIRS.Dt.fir.pp(end).p;
         d1 = fopen_NIR(fDtp{fileDtp{ievent}},NC)';
+        [dir1,fil1,ext] = fileparts(fDtp{fileDtp{ievent}});
+        vmrk_path = fullfile(dir1,[fil1,'.vmrk']);
+        %         handles.file_vmrk = handles.NIRS.Dt.fir.pp(end).p{idfile}; %used
+        %         in save noise
+        mrk_type_arr = cellstr('bad_step');
+        mrks = [];
+        ind = [];
+        noise =  logical(zeros(size(d1)));
+        [ind_dur_ch] = read_vmrk_find(vmrk_path,mrk_type_arr);
+        if ~isempty(ind_dur_ch)
+            maxpoint  = ind_dur_ch(:,1)+ind_dur_ch(:,2);
+            badind = find(maxpoint>size(noise,1));
+            if ~isempty(badind)
+                disp(['Warning file ' vmrk_path ' marker : ' num2str(badind') ' are out of range in the data file']);
+                ind_dur_ch(badind,2)=size(noise,2)- ind_dur_ch(badind,1);
+            end
+            for Idx = 1:size(noise,2)
+                mrks = find(ind_dur_ch(:,3)==Idx);
+                ind = ind_dur_ch(mrks,1);
+                indf = ind + ind_dur_ch(mrks,2) - 1;
+                if ~isempty(ind)
+                    try
+                        for i = 1:numel(ind)
+                            noise(ind(i):indf(i),Idx) = 1;
+                        end
+                    catch
+                        msgbox('Noise reading problem')
+                    end
+                end
+            end
+        end
         if 1 %trcmp(upper(chDtp{ievent}),'HBO')
             tmpGLM.listgood = 1:NC; %do all
         elseif strcmp(upper(chDtp{ievent}),'HBR')
@@ -946,6 +977,13 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
         tstop = find(tHRF<= stopDtp{ievent});
         tmpGLM.indt = [tstart(end),tstop(end)];%Time indice
         tmpGLM.spar = d1(tmpGLM.indt(1):tmpGLM.indt(end),:);
+        %add labelisbad
+        pourcentagenoise = sum(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:)))./numel(d1(tmpGLM.indt(1):tmpGLM.indt(end),:));
+        if pourcentagenoise > 0.05
+            labelisbad = 'bad';
+        else
+             labelisbad = 'ok';
+        end
         iRegressor =  2;
         if isfield(NIRS.Dt,'AUX')
             for iAUX = 1:numel(NIRS.Dt.AUX)
@@ -1184,8 +1222,8 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                 PARCOMP.ComponentToKeep = tmpGLM.selected;
                 PARCOMP.idreg = tmpGLM.idreg;
                 labelid  = labelDtp{ievent} ;
-                PARCOMP.label= [labelid,'_', label,'GLM', sprintf('%03.0f',size(PARCOMP,2))];
-                disp([labelid,'_',label, 'GLM', sprintf('%03.0f',size(PARCOMP,2))]);
+                PARCOMP.label= [ labelisbad, labelid,'_', label,'GLM', sprintf('%03.0f',size(PARCOMP,2))];
+                disp([ labelisbad, labelid,'_',label, 'GLM', sprintf('%03.0f',size(PARCOMP,2))]);
                 PARCOMP.type = 'GLM';
                 PARCOMP.topo =  beta(iselected,:);
                 newfile = 1;
@@ -1209,8 +1247,8 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                 PARCOMP(id+1).ComponentToKeep = tmpGLM.selected;
                 PARCOMP(id+1).idreg = tmpGLM.idreg;
                 labelid  = labelDtp{ievent} ;
-                PARCOMP(id+1).label= [labelid,'_',label,'GLM', sprintf('%03.0f',size(PARCOMP,2))];
-                disp([labelid,'_',label ,'GLM', sprintf('%03.0f',size(PARCOMP,2))]);
+                PARCOMP(id+1).label= [ labelisbad, labelid,'_',label,'GLM', sprintf('%03.0f',size(PARCOMP,2))];
+                disp([ labelisbad, labelid,'_',label ,'GLM', sprintf('%03.0f',size(PARCOMP,2))]);
                 PARCOMP(id+1).type = 'GLM';
                 PARCOMP(id+1).topo =  beta(iselected,:);
                 newfile = 1;
