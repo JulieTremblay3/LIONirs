@@ -733,15 +733,24 @@ f_correlationsignal.num     = [1 Inf];     % Number of inputs required
 f_correlationsignal.help    = {'Select .fig with the model of curve to find in the data.'}; 
 
 e_onset        = cfg_entry; %subfolder new branch
-e_onset.name    = 'Create a new branch of analysis in the subfolder';
+e_onset.name    = 'Trigger';
 e_onset.tag     = 'e_onset';       
 e_onset.strtype = 's';
 e_onset.num     = [1 Inf];     
 e_onset.val     = {'8'}; 
 e_onset.help    = {'Use integer to be mark as a trigger.'}; 
 
+e_correlationsignal_min       = cfg_entry; %subfolder new branch
+e_correlationsignal_min.name    = 'Correlation minimal';
+e_correlationsignal_min.tag     = 'e_correlationsignal_min';       
+e_correlationsignal_min.strtype = 's';
+e_correlationsignal_min.num     = [1 Inf];     
+e_correlationsignal_min.val     = {'0.6'}; 
+e_correlationsignal_min.help    = {'Use minimal correlation value to be mark as a local peak of correlation to mark the event'}; 
+
+
 e_correlationsignal_LPF       = cfg_entry; %subfolder new branch
-e_correlationsignal_LPF.name    = 'Create a new branch of analysis in the subfolder';
+e_correlationsignal_LPF.name    = 'Low Pass Filter';
 e_correlationsignal_LPF.tag     = 'e_correlationsignal_LPF';       
 e_correlationsignal_LPF.strtype = 's';
 e_correlationsignal_LPF.num     = [1 Inf];     
@@ -764,13 +773,13 @@ zonecorrelation.tag     = 'zonecorrelation';
 zonecorrelation.filter  = 'zone';
 zonecorrelation.ufilter = '.zone$';    
 zonecorrelation.num     = [1 Inf];     % Number of inputs required 
-zonecorrelation.help    = {'Select a zone where to apply correlation. Could be global if all channel.'};
+zonecorrelation.help    = {'Select a zone where to apply correlation.'};
 
 %Create marker based on correlation on signal based on recording
 E_createonset_correlationsignal     = cfg_exbranch;
 E_createonset_correlationsignal.name = 'Mark based on correlation';
 E_createonset_correlationsignal.tag  = 'E_createonset_correlationsignal';
-E_createonset_correlationsignal.val  = {NIRSmat,DelPreviousData, f_correlationsignal, e_onset,e_correlationsignal_LPF  , e_correlationsignal_HPF, zonecorrelation};
+E_createonset_correlationsignal.val  = {NIRSmat,DelPreviousData, f_correlationsignal, e_onset,e_correlationsignal_min ,e_correlationsignal_LPF  , e_correlationsignal_HPF, zonecorrelation};
 E_createonset_correlationsignal.prog = @nirs_run_E_createonset_correlationsignal;
 E_createonset_correlationsignal.vout = @nirs_cfg_vout_E_createonset_correlationsignal;
 E_createonset_correlationsignal.help = {'Use ISS AUX trig to create editable manual trig file to be used with manual trig.',...
@@ -849,6 +858,35 @@ E_correctCardiac_TargetPCA.help = {'Correct cardiac artifac in EEG (without ECG)
 
 
 function vout = nirs_cfg_vout_E_correctCardiac_TargetPCA(job)
+    vout = cfg_dep;                    
+    vout.sname      = 'NIRS.mat';       
+    vout.src_output = substruct('.','NIRSmat'); 
+    vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
+end
+
+
+
+E_correctCardiac_exportBVFolder        = cfg_files;
+E_correctCardiac_exportBVFolder.name    = 'Select output folder'; 
+E_correctCardiac_exportBVFolder.tag     = 'E_correctCardiac_exportBVFolder';       %file names
+E_correctCardiac_exportBVFolder.filter   = {'dir'};
+E_correctCardiac_exportBVFolder.ufilter = '.*';    
+E_correctCardiac_exportBVFolder.num     = [1 Inf];       % Number of inputs required 
+E_correctCardiac_exportBVFolder.help    = {'Select the output folder where to export data.'}; 
+
+
+
+%Create marker based on correlation on signal based on recording
+E_correctCardiac_exportBV     = cfg_exbranch;
+E_correctCardiac_exportBV.name = 'Save generic data export BV';
+E_correctCardiac_exportBV.tag  = 'E_correctCardiac_exportBV';
+E_correctCardiac_exportBV.val  = {NIRSmat,DelPreviousData,E_correctCardiac_exportBVFolder};
+E_correctCardiac_exportBV.prog = @nirs_run_E_correctCardiac_exportBV;
+E_correctCardiac_exportBV.vout = @nirs_cfg_vout_E_correctCardiac_exportBV;
+E_correctCardiac_exportBV.help = {'Save Data corrected to be reimported in BrainVision ' };
+
+
+function vout = nirs_cfg_vout_E_correctCardiac_exportBV(job)
     vout = cfg_dep;                    
     vout.sname      = 'NIRS.mat';       
     vout.src_output = substruct('.','NIRSmat'); 
@@ -1034,7 +1072,8 @@ pretime.num     = [1 Inf];
 pretime.val     = {'5'}; 
 pretime.help    = {'Time to include before the trigger.',...
     'Write keyword ''start'' to go to the beginning of the raw segment.',...
-    'Define as a positive value, as example 5 seconds before the onset. Unintuitively, -30 will give you 30 seconds after the trigger.'};
+    'Define as a positive value, as example 5 seconds before the onset. Unintuitively, -30 will give you 30 seconds after the trigger.',...
+    'To write 0 use ''0'''};
 
 posttime         = cfg_entry;
 posttime.name    = 'PostTime';
@@ -3590,6 +3629,35 @@ e_TtestOneSample_meanvalue.num     = [1 Inf];
 e_TtestOneSample_meanvalue.val     = {0}; 
 e_TtestOneSample_meanvalue.help    = {'Enter the hypothetical mean value'};
 
+e_npermutation         =  cfg_entry;
+e_npermutation.name    = 'Nb permutations';
+e_npermutation.tag     = 'e_npermutation';       
+e_npermutation.strtype = 's';
+e_npermutation.num     = [0 inf];
+e_npermutation.val     = {'500'};
+e_npermutation.help    = {'Define the number of non parametric permutations to use.'};
+
+b_permutation        = cfg_branch;
+b_permutation.tag    = 'b_permutation';
+b_permutation.name   = 'Yes' ;
+b_permutation.val    = {e_npermutation};
+b_permutation.help   = {'Apply permutation test'};
+
+
+b_Nopermutation        = cfg_branch;
+b_Nopermutation.tag    = 'b_Nopermutation';
+b_Nopermutation.name   = 'No' ;
+b_Nopermutation.val    = {};
+b_Nopermutation.help   = {'Do not apply permutation test'};
+
+
+c_statpermutation        = cfg_choice;
+c_statpermutation.tag     = 'c_statpermutation';
+c_statpermutation.name    = 'Do you want to apply permutations ?';
+c_statpermutation.values  = {b_permutation,b_Nopermutation };
+c_statpermutation.val     = {b_Nopermutation}; %Default option
+c_statpermutation.help    = {'Use permutation to create the empirical null distribution to calculate.',...
+    'Compared each link perm to its permuted distribution and also the max link value among the comparaison multiple comparaison to be more restrictive. See: Lage-Castellanos, A., Martínez-Montes, E., Hernández-Cabrera, J.A., Galán, L., 2010. False discovery rate and permutation test: An evaluation in ERP data analysis. Statistics in Medicine 29, 63–74. https://doi.org/10.1002/sim.3784'};
 
 
 e_TtestOneSampleGR         = cfg_entry; %path
@@ -3615,13 +3683,7 @@ e_TtestOneSampleGR2.num     = [1 Inf];
 e_TtestOneSampleGR2.val     = {2}; 
 e_TtestOneSampleGR2.help    = {['Enter the second group compared (refer to group value in the xls file).']}; 
 
-e_npermutation         =  cfg_entry;
-e_npermutation.name    = 'Nb permutations';
-e_npermutation.tag     = 'e_npermutation';       
-e_npermutation.strtype = 's';
-e_npermutation.num     = [0 inf];
-e_npermutation.val     = {'500'};
-e_npermutation.help    = {'Define the number of non parametric permutations to use.'};
+
 
 
 b_PermutationTest = cfg_branch;
@@ -3650,7 +3712,6 @@ e_GLMGR.strtype = 's';
 e_GLMGR.num     = [1 Inf];     
 e_GLMGR.val     = {'all'}; 
 e_GLMGR.help    = {['Enter the group of the subject to use, subject no in this list will just be exclude keep all to use all subject.']}; 
-
 
 
 b_Covariable_Mat         =  cfg_entry;
@@ -3712,11 +3773,11 @@ e_Anova1GR.help    = {['Enter the group to include in the ANOVA (refer to group 
 b_anova1_Mat        = cfg_branch;
 b_anova1_Mat.tag    = 'b_anova1_Mat';
 b_anova1_Mat.name   = 'Anova one way' ;
-b_anova1_Mat.val    = {e_Anova1GR};
+b_anova1_Mat.val    = {e_Anova1GR, c_statpermutation};
 b_anova1_Mat.help   = {'Find One-way analysis of variance anova1 list the group to evaluate in the anova fdr correction'};
 
 b_ANCOVA_Covariable         =  cfg_entry;
-b_ANCOVA_Covariable.name    = 'Covariable';
+b_ANCOVA_Covariable.name    = 'Covariable (only one)';
 b_ANCOVA_Covariable.tag     = 'b_Covariable_Mat';       
 b_ANCOVA_Covariable.strtype = 's';
 b_ANCOVA_Covariable.num     = [0 inf];
@@ -3725,9 +3786,35 @@ b_ANCOVA_Covariable.help    = {'Use the exact column title to recognize which co
 
 b_ANCOVA_Mat        = cfg_branch;
 b_ANCOVA_Mat.tag    = 'b_ANCOVA_Mat';
-b_ANCOVA_Mat.name   = 'ANCOVA' ;
+b_ANCOVA_Mat.name   = 'ANCOVA (AOCtool)' ;
 b_ANCOVA_Mat.val    = {e_Anova1GR,b_ANCOVA_Covariable};
 b_ANCOVA_Mat.help   = {'ANCOVA (Analysis of covariance) use the matlab function aoctool' };
+
+
+e_fitMANCOVAN_GR         = cfg_entry; %path
+e_fitMANCOVAN_GR.name    = 'Group identification';
+e_fitMANCOVAN_GR.tag     = 'e_fitMANCOVAN_GR';       
+e_fitMANCOVAN_GR.strtype = 's';
+e_fitMANCOVAN_GR.num     = [1 Inf];     
+e_fitMANCOVAN_GR.val     = {'1, 2, 3'}; 
+e_fitMANCOVAN_GR.help    = {['Enter the group to include in the ANOVA (refer to group value in the xls file).']};
+
+b_fitMANCOVAN_Covariable         =  cfg_entry;
+b_fitMANCOVAN_Covariable.name    = 'Covariable';
+b_fitMANCOVAN_Covariable.tag     = 'b_fitMANCOVAN_Covariable';       
+b_fitMANCOVAN_Covariable.strtype = 's';
+b_fitMANCOVAN_Covariable.num     = [0 inf];
+b_fitMANCOVAN_Covariable.val     = {'Name column'};
+b_fitMANCOVAN_Covariable.help    = {'Use the exact column title to recognize which covariable.'};
+
+
+
+b_fitMANCOVAN_Mat        = cfg_branch;
+b_fitMANCOVAN_Mat.tag    = 'b_fitMANCOVAN_Mat';
+b_fitMANCOVAN_Mat.name   = 'MANCOVAN (univariate avova with covariate)' ;
+b_fitMANCOVAN_Mat.val    = {e_fitMANCOVAN_GR,b_fitMANCOVAN_Covariable, c_statpermutation};
+b_fitMANCOVAN_Mat.help   = {'ANCOVA equivalent du modèle linéaire général univarié de SPSS avec facteur fixe de groupe et covariable continue.  William Gruner (2022). MANCOVAN (https://www.mathworks.com/matlabcentral/fileexchange/27014-mancovan), MATLAB Central File Exchange. Retrieved October 24, 2022. '};
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 e_Anovarep_withinsubjectGR       =  cfg_entry;
@@ -3769,11 +3856,42 @@ b_anovarep_Mat.help   = {'Apply Anova repeted measure model, fonction fitrm. ',.
     'You must paired subject as repeted measure in the groupe identification,',...
     'first observation of group 1 will be paired with first observation of group 2. '};
 
+b_anovarep_Mat        = cfg_branch;
+b_anovarep_Mat.tag    = 'b_anovarep_Mat';
+b_anovarep_Mat.name   = 'Anova repeted measure' ;
+b_anovarep_Mat.val    = {e_Anovarep_withinsubjectGR,e_Anovarep_predictor, e_anovarep_model};
+b_anovarep_Mat.help   = {'Apply Anova repeted measure model, fonction fitrm. ',...
+    'You must paired subject as repeted measure in the groupe identification,',...
+    'first observation of group 1 will be paired with first observation of group 2. '};
+
+
+
+
+b_kruskalwallis_Mat        = cfg_branch;
+b_kruskalwallis_Mat.tag    = 'b_kruskalwallis_Mat';
+b_kruskalwallis_Mat.name   = 'Kruskal Wallis' ;
+b_kruskalwallis_Mat.val    = {e_Anova1GR, c_statpermutation };
+b_kruskalwallis_Mat.help   = {'Apply kruskalwallis, For permutation: Odiase, J.I., Ogbonmwan, S.M., 2005. JMASM20: Exact Permutation Critical Values For The Kruskal-Wallis One-Way ANOVA. J. Mod. App. Stat. Meth. 4, 609–620. https://doi.org/10.22237/jmasm/1130804820'};
+
+
+b_manova1_Covariable         =  cfg_entry;
+b_manova1_Covariable.name    = 'Covariable ';
+b_manova1_Covariable.tag     = 'b_Covariable_Mat';       
+b_manova1_Covariable.strtype = 's';
+b_manova1_Covariable.num     = [0 inf];
+b_manova1_Covariable.val     = {'Name column'};
+b_manova1_Covariable.help    = {'Use the exact column title to recognize which covariable. Need toolbox '};
+
+b_manova1_Mat        = cfg_branch;
+b_manova1_Mat.tag    = 'b_manova1_Mat';
+b_manova1_Mat.name   = 'manova (manova1)' ;
+b_manova1_Mat.val    = {e_Anova1GR, b_manova1_Covariable};
+b_manova1_Mat.help   = {'Apply manova on specific groups.'};
 
 c_statmatrix         = cfg_choice;
 c_statmatrix.tag     = 'c_statmatrix';
 c_statmatrix.name    = 'Choose the statistical test';
-c_statmatrix.values  = {b_TtestOneSamplematrix,b_PermutationTest,b_PearsonCorr_Mat, b_GLM_Mat, b_exportNBSformat b_PairedTtest,b_zscore_Mat,b_anova1_Mat,b_ANCOVA_Mat,b_anovarep_Mat};
+c_statmatrix.values  = {b_TtestOneSamplematrix,b_PermutationTest,b_PearsonCorr_Mat, b_GLM_Mat, b_exportNBSformat b_PairedTtest,b_zscore_Mat,b_anova1_Mat,b_anovarep_Mat,b_kruskalwallis_Mat, b_fitMANCOVAN_Mat};%b_ANCOVA_Mat,
 c_statmatrix.val     = {b_TtestOneSamplematrix}; %Default option
 c_statmatrix.help    = {'Select one of the statistical tests. TEST'};
 
@@ -3870,7 +3988,7 @@ M_datawritenirs.help   = {'These modules convert nir file in .nirs, last module 
 M_others        =  cfg_choice; 
 M_others.name   = 'Additional function';
 M_others.tag    = 'M_others';
-M_others.values = {E_markCardiac_TargetPCA, E_correctCardiac_TargetPCA}; %,E_createonset_correlationsignal
+M_others.values = {E_markCardiac_TargetPCA, E_correctCardiac_TargetPCA, E_correctCardiac_exportBV,E_createonset_correlationsignal}; %,E_createonset_correlationsignal
 M_others.help   = {'These modules convert nir file in .nirs, last module of data export, support the export of field such as data (d),coordinate (SD), trigger (s), time (t),do not support noise artifact marking or aux export'};
 
 %Module Utility

@@ -301,7 +301,7 @@ end
 %     iddouble= find([col==row(i)&row==col(i)]);
 %        iddoublelist = [iddoublelist,iddouble];
 % end
-  
+ 
 for iorder = 1:length(idchrono)
        i = idchrono(iorder);
        max(idlist);
@@ -314,12 +314,21 @@ for iorder = 1:length(idchrono)
      if  abs(row(i) - col(i)) - length(adjacencyMatrix)/2 == 0;
          if ~isnan(newcolor)
            u = [cos(t(row(i)));sin(t(row(i)))];
-            v = [cos(t(col(i)));sin(t(col(i)))];
-           h =  line(...
+            v = [cos(t(col(i)));sin(t(col(i)))];            
+               LINKNAME =  ['(i,j)=(',num2str(idlist(row(i))),',',num2str(idlist(col(i))),')=(',List(idlist(row(i)),:),',',List(idlist(col(i)),:) ,')', '=', num2str(MAT(idlist(row(i)),idlist(col(i))))];
+         if numel(idlist) == numel(idlabel)
+             tmp = idlabel{row(i)};
+             tmp2 = idlabel{col(i)} ;
+             LINKNAME = [LINKNAME,' (' tmp(1:end-4),',',tmp2(1:end-4),')'];
+         end
+               h =  line(...
               [u(1);v(1)],...
               [u(2);v(2)],...
               'LineWidth',4,...
-              'Color', newcolor);     
+              'Color', newcolor,'displayname',LINKNAME );    
+            if newfigure ==0
+                set(h,'uicontextmenu',handles.context_link);
+            end
          end
      else
    
@@ -341,8 +350,12 @@ for iorder = 1:length(idchrono)
        theta = linspace(thetaLim(1),thetaLim(2)).';
     end
      %DRAW ARC OF CIRCLEnum2str( u1),',',num2str( v1),
-   LINKNAME =  ['(i,j)=(',num2str(idlist(row(i))),',',num2str(idlist(col(i))),')=(',List(idlist(row(i)),:),',',List(idlist(col(i)),:) ,')'];
- 
+   LINKNAME =  ['(i,j)=(',num2str(idlist(row(i))),',',num2str(idlist(col(i))),')=(',List(idlist(row(i)),:),',',List(idlist(col(i)),:) ,')', '=', num2str(MAT(idlist(row(i)),idlist(col(i))))];
+     if numel(idlist) == numel(idlabel)
+             tmp = idlabel{col(i)};
+             tmp2 = idlabel{row(i)} ;
+             LINKNAME = [LINKNAME,' (' tmp(1:end-4),',',tmp2(1:end-4),')'];
+     end
    if ~isnan(newcolor)
         h = line( r*cos(theta)+x0,...
                   r*sin(theta)+y0,...

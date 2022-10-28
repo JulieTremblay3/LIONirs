@@ -69,6 +69,7 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
             % ici group channel with the same noise latency
             figureon = m_extractcomponentfigure;
             ind = find((sum(noise,2)./size(noise,2))>nbchminimum );
+            ind = find((sum(noise,2)./size(noise,2)));
             inddiff = diff(ind);
             if isempty(ind)
                 disp(['No noisy event found then no component are extracted in file ', fil1])
@@ -310,13 +311,16 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
             % ici group channel with the same noise latency
             figureon = m_extractcomponentfigure;
             
-            %             figure;imagesc(noise')
+            % figure;imagesc(noise')
+            % figure;plot(sum(noise,2))
             ind = find((sum(noise,2)./size(noise,2))>nbchminimum );
+            ind = find((sum(noise,2)./size(noise,2)) );
             inddiff = diff(ind);
             if isempty(ind)
                 disp(['No noisy event found then no component are extracted in file ', fil1])
                 break
             end
+            try
             idsep = find(inddiff>indconsecutifthreshold);
             if isempty(idsep)
                 idstart  =[ind(1)];
@@ -324,6 +328,9 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
             else
                 idstart  =[ind(1);ind(idsep(1:end)+1)];
                 idstop =  [ind(idsep(1:end)-1);ind(end)];
+            end
+            catch
+                1
             end
             eventbadstartstop = [idstart,idstop] ;
             for ievent=1:size(eventbadstartstop,1)
@@ -446,8 +453,8 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                                 end
                                 %Choose among try the smallest time course and the largest sum distance
                                 
-                                rejeterhightimecourse =(mean(sumA(:)))< sumA';
-                                rejectwavelengthdistance = mean(abs(distC(:))) > abs(distC)';
+                                rejeterhightimecourse =(mean(sumA(:)))<= sumA';
+                                rejectwavelengthdistance = mean(abs(distC(:))) >= abs(distC)';
                                 oneortheother = rejeterhightimecourse|rejectwavelengthdistance;
                                 tcmp= indt*1/fs;
                                 clear   rejeterhightimecourse  rejectwavelengthdistance
@@ -488,10 +495,14 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                             %                             if 1 %minimal distance between wavelenght et maximum event amplitude
                             %                                 [val,ComponentToKeep]=max([1-abs(C(1,:)-C(2,:)) + sum(A)]);
                             %                             end
+                            try
                             Ac = A(:,ComponentToKeep); Bc = B(:,ComponentToKeep); Cc = C(:,ComponentToKeep);
                             [Xm]=nmodel(({Ac,Bc,Cc}));
                             data = cat(3,d(indt,1:end/2),d(indt,end/2+1:end));
                             data(:,listgood,:) = data(:,listgood,:)-Xm;
+                            catch
+                                1
+                            end
                             if 0 %figureon==1
                                 figure
                                 subplot(3,2,3);plot(Factors{1});subplot(3,2,4);plot(Factors{2});subplot(3,2,5);plot(Factors{3});
@@ -924,7 +935,9 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
         catch
             NIRSmat = fullfile(NIRSDtp{ievent},'NIRS.mat');
         end
+        try
         load(NIRSmat);
+       
         Regressorlist=AUXid{ievent,:};
         disp(NIRSmat);
         NC = NIRS.Cf.H.C.N;
@@ -1256,6 +1269,9 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
             save(fullfile(NIRSDtp{ievent},'SelectedFactors.mat'),'PARCOMP');
         end
         %disp(['Error unable to GLM on ' , NIRSmat])
+       catch
+           disp('XLS line do not contain valid NIRS.mat file')
+       end
     end
     try
         filenamexls = fullfile(NIRSDtp{ievent},['Export ', labelid,'.xlsx']);  
@@ -1578,8 +1594,9 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_AVG')
             save(fullfile(NIRSDtp{ievent},'SelectedFactors.mat'),'PARCOMP');
         catch
             disp(['Error unable to AVG on ' , NIRSmat])
-        end
+        end   
     end
+    
 end
 out.NIRSmat = {NIRSmat};
 

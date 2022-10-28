@@ -118,9 +118,10 @@ function Draw_Optodes( oDispOpt, oInterDlgComm, oHelmet )
                     case 'ISS'
                      vColor = [255/255, 40/255,40/255];
                     case  'IMAGINC' %or NIRx nomenclature
-                     vColor = [0,0,255/255]; %Bleu
+                     vColor =  [0, 1, 1]; %[255/255, 40/255,40/255]; %[0,0,255/255]; %Bleu pale [0, 1, 1]
+                     
                      case  'NIRx' %or NIRx nomenclature
-                      vColor = [0,0,255/255]; %Bleu
+                      vColor = [255/255, 40/255,40/255]; %[0,0,255/255]; %Bleu
                 end
 
                 %Source

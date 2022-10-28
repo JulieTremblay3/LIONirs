@@ -40,10 +40,12 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 infilevmrk = fullfile(dir1,[fil1 '.vmrk']);
                 outfilevmrk = fullfile(dirmat,[prefix fil1 '.vmrk']);
                 copyfile(infilevmrk,outfilevmrk);    
+                try %to accomodate old version data without vhdr
                 infilevhdr = fullfile(dir1,[fil1 '.vhdr']);
                 outfilevhdr = fullfile(dirmat,[prefix fil1 '.vhdr']);
                 copyfile(infilevhdr,outfilevhdr);  
-            
+                catch
+                end
         
         if f == 1
             NIRS.Dt.fir.pp(lst+1).pre = 'Manual Gui Substract Component ';
@@ -404,9 +406,21 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
         end
 
     end
+   
     PARCOMP(toremove)=  [];
-    %Apply module to ensure that the oparation is accessible form the
+    %Apply module to ensure that the operation is accessible form the
     %manual step
+    try
+        PARCORR
+    catch
+        disp(['The subtraction could not be perform : no component with the label ''', job.i_substractcomponent_label,'''could be found'])
+            %save the NIRS.mat new structure
+        [dir1,~,~] = fileparts(rDtp{f});
+        save(fullfile(dir1,'NIRS.mat'),'NIRS');
+        job.NIRSmat{1} = fullfile(dir1,'NIRS.mat');
+        out.NIRSmat = job.NIRSmat;
+        return
+    end
     for id=1:numel(PARCORR)
         PARCORR(id).module = length(NIRS.Dt.fir.pp);
         PARCORR(id).modulestr = 'Manual Gui Substract Component';
@@ -428,3 +442,4 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
 end
 out.NIRSmat = job.NIRSmat;
 
+ 

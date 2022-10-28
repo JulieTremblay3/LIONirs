@@ -181,7 +181,9 @@ end
 
 % figure 
 % plot(spar(:,:,1))
+tic
 [Factors,it,err,corcondia] = parafac(spar(:,:,:),Nc,opt,const,Oldload,fixMode,weights);
+toc
 PMI{currentsub}.tmpPARAFAC.Factors = Factors;
 
 set(guiHOMER,'UserData',PMI);

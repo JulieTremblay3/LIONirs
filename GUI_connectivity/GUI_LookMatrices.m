@@ -22,7 +22,7 @@ function varargout = GUI_LookMatrices(varargin)
 
 % Edit the above text to modify the response to help GUI_LookMatrices
 
-% Last Modified by GUIDE v2.5 21-Jun-2022 10:26:16
+% Last Modified by GUIDE v2.5 08-Sep-2022 10:52:57
 
 % Begin initialization code - DO NOT EDITspm
 gui_Singleton = 1;
@@ -134,9 +134,9 @@ end
 
 groupeall = [];
 for isubject=2:size(info,1)
-
+    try
     id = isubject-1;
-    tmp = info{isubject,2};
+    tmp = info{isubject,2}; 
     if strcmp(tmp(end-2:end),'mat')
         try
             MAT = load(fullfile(info{isubject,1}, [info{isubject,2}]));
@@ -174,7 +174,11 @@ for isubject=2:size(info,1)
 %     DATA{id}.MAT = MAT.meancorrPearsonFisher
     DATA{id}.path = info{isubject,1};
     DATA{id}.name = info{isubject,2};
-    DATA{id}.MATtrial =  MAT.matcorr;
+    if isfield( MAT,'matcorr')
+        DATA{id}.MATtrial =  MAT.matcorr;
+    else
+           DATA{id}.MATtrial = [];
+    end
     DATA{id}.GR = info{isubject,4};
     infocov = [];
     if size(info,2) > 4
@@ -215,7 +219,11 @@ for isubject=2:size(info,1)
   end
   list_subject{id} =DATA{id}.name;
   groupeall = [groupeall; info{isubject,4}];
+    catch
+        disp(['Error loading',  info{isubject,2}])
+    end
 end
+id = 1
 %avg zone groupe 
 idnew = size(info,1)-1; %placer les moyennes a la fin des sujets existants. 
 for igroupe = 0:max(groupeall)
@@ -225,12 +233,10 @@ for igroupe = 0:max(groupeall)
    idlabelall= DATA{idsubject(1)}.zone.label; %zone premier sujet du groupe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
    MATAVGALL = zeros(numel(idlabelall),numel(idlabelall),numel(idsubject));
    for isubject = 1:numel(idsubject)
-       ML = DATA{idsubject(isubject)}.zone.ml;
-        try 
+        try
+       ML = DATA{idsubject(isubject)}.zone.ml;       
        List = strvcat(DATA{idsubject(isubject)}.ZoneList);
-        catch
-            1
-        end
+        
        MATAVG = zeros(numel(idlabelall));
        MAT = DATA{idsubject(isubject)}.MAT;
        idlist = [];
@@ -323,6 +329,9 @@ for igroupe = 0:max(groupeall)
            end
        end
        MATAVGALL(:,:,isubject) = MATAVG;
+        catch
+            disp(['Error load line',num2str(isubject)])
+        end
    end
        %Entrer les valeurs moyenne du groupe comme un sujet, les nouveaux canaux sont faux, 
        %il sont la pour l'uniformiter des données afin référer au zone.           
@@ -368,7 +377,11 @@ for  igroupe = 1:max(groupeall)
         if ~isempty(idsubject)
               idnew = idnew +1;
         for isubject = 1:numel(idsubject)
+            try
              MATall(:,:,isubject) = DATA{idsubject(isubject)}.MAT;
+            catch
+             MATall(:,:,isubject) = nan;
+            end
         end    
        DATA{idnew}.ZoneList = DATA{1}.ZoneList;
        DATA{idnew}.MAT =  nanmean(MATall,3);
@@ -1887,7 +1900,11 @@ valG1 = [];
 valG2 = [];
 groupeall = [];
 for i=1:numel(DATA)
+    try
     groupeall=[groupeall,DATA{1,i}.GR];
+    catch
+        groupeall=[groupeall,0];
+    end
 end
 
 figure;hold on
@@ -2172,3 +2189,49 @@ plot(binpos,tmp./max(tmp)*100)
 ylabel('P(X<x) (%)')
 xlabel(['x '])
 title('Cumulative distribution')
+
+
+% --------------------------------------------------------------------
+function context_link_CopyValue_Callback(hObject, eventdata, handles)
+% hObject    handle to context_link_CopyValue (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+1
+DATA = get(handles.GUI_LookMat,'UserData');
+id = get(handles.popup_listsujet, 'value');
+linkselected = get(handles.context_link_name,'label');
+[tok,rem] = strtok(linkselected,'=');
+[linkij,rem] = strtok(rem,'=');
+[linkname,rem] = strtok(rem,'=');
+valG1 = [];
+valG2 = [];
+groupeall = [];
+for i=1:numel(DATA)
+    try
+    groupeall=[groupeall,DATA{1,i}.GR];
+    catch
+        groupeall=[groupeall,0];
+    end
+end
+
+figure;hold on
+[filepath,name,ext] =fileparts(get(handles.edit_subjetxls,'string'));
+copytxt = sprintf('%s\n', [linkselected,' ', name]);
+for   idsubjet   = 1:numel(DATA)
+        try
+        eval(['new=DATA{',num2str(idsubjet),'}.MAT',linkij,';']);
+        if get(handles.radio_fisher,'value')
+            new =1/2*(log((1+new )./(1-new )));
+        end
+        valG1 = [valG1,new];
+        copytxt = [copytxt,sprintf('%d\n',new)];
+        catch
+          copytxt= [copytxt,sprintf('%s\n','Nan')];
+        end
+end
+
+
+
+clipboard('copy', copytxt)
+   
+

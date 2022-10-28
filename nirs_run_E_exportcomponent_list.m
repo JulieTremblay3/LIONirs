@@ -9,7 +9,12 @@ if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
     try
         [data, text, rawData] = xlsread(job.f_component_list{1});
     catch
+        try
          [data, text, rawData] = readtxtfile_asxlsread(job.f_component_list{1});
+        catch
+            disp(['Failed could not open: ',job.f_component_list{1}])
+            return
+        end
     end
 elseif strcmp(ext,'.txt')   
     [data, text, rawData] = readtxtfile_asxlsread(job.f_component_list{1});
@@ -34,7 +39,11 @@ NIRSDtp = rawData(2:end,id.NIRSDtp);
 typeDtp = rawData(2:end,id.typeDtp);
 COMPDtp = rawData(2:end,id.labelDtp); 
 ListDtp = rawData(2:end,id.ListDtp);
+try
 labeloutDtp = rawData(2:end,id.labelout);
+catch
+    disp('Please add a column with the label ''Name'' to identify a label to the export file')
+end
 [pathoutlist, namelist, ext] = fileparts(job.f_component_list{1});
 removeid = job.v_component_list_remove;
 allsubject = [];

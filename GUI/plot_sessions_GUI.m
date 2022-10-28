@@ -4015,6 +4015,18 @@ indstop = indstop(end);
 lstok = find(PMI{currentsub}.data(cf).MeasListAct(PMI{currentsub}.plotLst));
 plotLst = PMI{currentsub}.plotLst(lstok);
 
+%FFT
+% Fs = 1/(PMI{currentsub}.data(cf).HRF.tHRF(2)-PMI{currentsub}.data(cf).HRF.tHRF(1));
+% Y = fft(PMI{currentsub}.data(cf).HRF.AvgC(indstart:indstop,plotLst));
+% L = size(Y,1)
+% P2 = abs(Y/L)
+% P1 = P2(1:L/2+1,:);
+% P1(2:end-1,:) = 2*P1(2:end-1,:);
+% f = Fs*(0:(L/2))/L;
+% figure;plot(f,P1) 
+
+
+
 nch = size(PMI{currentsub}.data(cf).HRF.AvgC,2);
 [val,ind]=sort(sum(PMI{currentsub}.data(cf).HRF.AvgC(indstart:indstop,plotLst)));
 nbselect = str2num(answer{2});
@@ -5434,7 +5446,7 @@ elseif strcmp(listmethod{idval},'Component') %substract selected componenet PCA 
     [pathstr, name, ext] = fileparts(handles.NIRSpath{1});
     idcomp = get(handles.listbox_Component,'value');
     %substraction from the list update list CorrectionApply
-    if strcmp(PARCOMP(idcomp).type,'PARAFAC') %in substract component
+    if strcmp(PARCOMP(idcomp).type,'PARAFAC')| strcmp(PARCOMP(idcomp).type,'MVTPARAFAC')%in substract component
         try
             load(fullfile(pathstr,'CorrectionApply.mat'))
             newfile = 0;

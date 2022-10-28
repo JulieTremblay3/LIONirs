@@ -38,7 +38,9 @@ for filenb = 1:size(job.NIRSmat,1)
         d = fopen_NIR(rDtp{f},NC);     
        [dir1,fil1,ext1] = fileparts(rDtp{f});
         vmrk_path = fullfile(dir1,[fil1 '.vmrk']);
-        [ind_dur_ch] = read_vmrk_find(vmrk_path,'bad_step');
+        [ind_dur_ch1] = read_vmrk_find(vmrk_path,'bad_step');
+        [ind_dur_ch2] = read_vmrk_find(vmrk_path,'Bad Interval');
+        ind_dur_ch = [ind_dur_ch1 ind_dur_ch2]
         nsample = size(d,2);
          noise = ind_dur_ch2mat(ind_dur_ch, nsample,NC)';
   

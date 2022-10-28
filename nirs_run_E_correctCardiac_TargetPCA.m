@@ -40,7 +40,12 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 
                         idstart = maxpeak(imarker)- halfwindowsize;
                         idstop = maxpeak(imarker)+ halfwindowsize;
-                             
+                        if idstart<1
+                            idstart = 1;
+                        end
+                        if idstop>size(PCAd,1)
+                             idstop = size(PCAd,1);
+                        end
                         %Detrent DATA segment for centrering before PCA
                         intensnorm = PCAd(idstart:idstop,:) ;
                         X = 1:1:size(intensnorm,1);

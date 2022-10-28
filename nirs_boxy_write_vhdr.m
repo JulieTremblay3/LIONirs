@@ -14,6 +14,9 @@ info = [];
 if numel(varargin)>=1
     info.datapoint = varargin{1};
 end
+if numel(varargin)>=2
+    infoBV = varargin{2};
+end
 NumberOfChannels=numel(ChannelLabels);
 
 fid = fopen(OutputFile,'wt'); %write
@@ -71,6 +74,27 @@ ch_str=[',,' ChannelResolution ',' ChannelUnits];
 for Cidx=1:NumberOfChannels
     fprintf(fid,'%s%s%s%s%s\n',...
         'Ch',num2str(Cidx),'=',ChannelLabels{Cidx,1},ch_str);
+end
+try
+    infoBV;
+    %more text
+fprintf(fid,'\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n%s\n',... %
+'[Channel User Infos]',...
+'; Each entry: Prop<Number>=Ch<ChannelNumber>,<Type>,<Name>,<Value>,<Value2>,...,<ValueN>',...
+'; Property number must be unique. Types can be int, single, string, bool, byte, double, uint',...
+'; or arrays of those, indicated int-array etc',...
+'; Array types have more than one value, number of values determines size of array.',...
+'; Fields are delimited by commas, commas in strings are written \1',...
+'; Properties are assigned to channels using their channel number.',...
+'[Coordinates]',...
+'; Each entry: Ch<Channel number>=<Radius>,<Theta>,<Phi>'); 
+%channel coord
+for Cidx=1:NumberOfChannels
+    fprintf(fid,'%s\n',...
+        ['Ch',num2str(Cidx),'=', num2str(infoBV.coor_r(Cidx)),',',num2str(infoBV.coor_theta(Cidx)),',',num2str(infoBV.coor_phi(Cidx)) ] );
+end
+
+catch    
 end
 fclose(fid);
 end

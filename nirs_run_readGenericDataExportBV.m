@@ -64,16 +64,24 @@ listsrs = [018001,020003,022005,024007,026009,028011,030013,032015,017002,019004
 82065,84067,86069,88071,90073,92075,94077,96079,81066,83068,85070,87072,89074,91076,93078,95080,...
 114097,116099,118101,120103,122105,124107,126109,128111,113098,115100,117102,119104,121106,123108,125110,127112];
 
-
-[x,y,z] = sph2cart(infoBV.coor_theta,infoBV.coor_phi,infoBV.coor_r);
+try
+[x,y,z] = sph2cart(infoBV.coor_theta*pi/180,infoBV.coor_phi*pi/180,infoBV.coor_r);
 NIRS.Cf.H.S.N =[Nb_Sources_Disp]; %Nb of source
 for i=1:Nb_Sources_Disp
         NIRS.Cf.H.S.r.o.mm.p(:,i) =[x(i),y(i),z(i)]; 
         NIRS.Cf.H.D.r.o.mm.p(:,i) =[x(i),y(i),z(i)]; 
         MeasList(i,:)= [i ,i ,1,1];
 end
- 
-
+catch
+    for i=1:Nb_Sources_Disp
+        NIRS.Cf.H.S.r.o.mm.p(:,i) =[0,0,0]; 
+        NIRS.Cf.H.D.r.o.mm.p(:,i) =[0,0,0]; 
+        MeasList(i,:)= [i ,i ,1,1];
+    end
+end
+%  [coor_theta, coor_phi, coor_r] = cart2sph(y,x,z)
+% coor_theta*180/pi
+% coor_phi*180/pi
 %PARAMETRE  
 NIRS.Dt.s.age = job.age1;
 NIRS.Dt.ana.T1 = ''; %FICHIER DE IRM
@@ -127,6 +135,11 @@ for Idx_File=1:numel(job.input_GenericDataExportBV)
         z2 =  NIRS.Cf.H.D.r.o.mm.p(3,DATA.ml(i,2));
         NIRS.Cf.H.C.gp(i,1) = sqrt((x2-x1)^2+(y2-y1)^2+ (z2-z1)^2);%À CALCULER DISTANCE GÉOMETRIQUE
         NIRS.Cf.H.C.ok(i,Idx_File) = 1;
+        try
+            NIRS.Cf.H.C.label{i} = infoBV.name_ele{i};
+        catch
+             NIRS.Cf.H.C.label{i} = 'ND';
+        end
     end
     NIRS.Cf.H.C.N = numel(NIRS.Cf.H.C.n);
     NIRS.Cf.H.C.ok = ones(NIRS.Cf.H.C.N,numel(job.input_GenericDataExportBV)); 

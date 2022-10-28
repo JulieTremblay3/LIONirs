@@ -9,7 +9,11 @@ for imodule = numel(NIRS.Dt.fir.pp):-1:1
     end
     for ifile = 1:numel(NIRS.Dt.fir.pp(imodule).p)
     %Find the new root dir 
+    try
         fileloc_previous = NIRS.Dt.fir.pp(imodule).p{ifile};
+    catch
+        fileloc_previous = NIRS.Dt.fir.pp(imodule).p
+    end
         [dir1,file1,ext1]=fileparts(fileloc_previous);
     %Descendre les répertoire pour trouver la partie qui doit être modifier
     %
