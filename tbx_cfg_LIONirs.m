@@ -3604,6 +3604,74 @@ m_nodeunit.values    = {1,2};
 m_nodeunit.val       = {1};
 m_nodeunit.help      = {'Apply the statistics on each node. Define nodes as each channel or each average of zone channels.'};
 
+
+e_neighbourdist         =  cfg_entry;
+e_neighbourdist.name    = 'Neighbor';
+e_neighbourdist.tag     = 'e_neighbourdist';       
+e_neighbourdist.strtype = 's';
+e_neighbourdist.num     = [0 inf];
+e_neighbourdist.val     = {'link'};
+e_neighbourdist.help    = {'Define how neighbor will be define:',...
+    'Write ''link'' to consider optode with commun link together.',...
+    'Write a number such as ''5'' to define the distance between optode to be include in a neighboring to define a cluster.',... 
+    'All optode with a distance lower will be consider as neighbors.',...
+    'Write ''all'' to use all possible other link as neighbors, that will result to one big cluster'};
+
+b_MCT_ClusterBased         = cfg_branch;
+b_MCT_ClusterBased.tag    = 'b_MCT_ClusterBased';
+b_MCT_ClusterBased.name   = 'Cluster Based' ;
+b_MCT_ClusterBased.val    = {e_neighbourdist};
+b_MCT_ClusterBased.help   = {'Cluster based permutation'};
+
+b_MCT_Max         = cfg_branch;
+b_MCT_Max.tag    = 'b_MCT_Max';
+b_MCT_Max.name   = 'No' ;
+b_MCT_Max.val    = {};
+b_MCT_Max.help   = {'Use the maximal univariate comparaison to create null distribution; Troendle, J.F., 1995. A Stepwise Resampling Method of Multiple Hypothesis Testing. Journal of the American Statistical Association 90, 370–378. https://doi.org/10.1080/01621459.1995.10476522'};
+
+ 
+
+c_statMultipleComparaisonTesting        = cfg_choice;
+c_statMultipleComparaisonTesting.tag     = 'c_statMultipleComparaisonTesting';
+c_statMultipleComparaisonTesting.name    = 'Multiple Comparaison';
+c_statMultipleComparaisonTesting.values  = {b_MCT_Max, b_MCT_ClusterBased};
+c_statMultipleComparaisonTesting.val     = {b_MCT_ClusterBased}; %Default option
+c_statMultipleComparaisonTesting.help    = {'Cluster-based permutation adapt clusterstat function from fieldtrip function and see for reference Maris, E., Oostenveld, R., 2007. Nonparametric statistical testing of EEG- and MEG-data. Journal of Neuroscience Methods 164, 177–190. https://doi.org/10.1016/j.jneumeth.2007.03.024'};
+
+
+
+e_npermutation         =  cfg_entry;
+e_npermutation.name    = 'Nb permutations';
+e_npermutation.tag     = 'e_npermutation';       
+e_npermutation.strtype = 's';
+e_npermutation.num     = [0 inf];
+e_npermutation.val     = {'500'};
+e_npermutation.help    = {'Define the number of non-parametric permutations to use.'};
+
+b_permutation        = cfg_branch;
+b_permutation.tag    = 'b_permutation';
+b_permutation.name   = 'Yes' ;
+b_permutation.val    = {e_npermutation, c_statMultipleComparaisonTesting};
+b_permutation.help   = {'Apply permutation test'};
+
+
+b_Nopermutation        = cfg_branch;
+b_Nopermutation.tag    = 'b_Nopermutation';
+b_Nopermutation.name   = 'No' ;
+b_Nopermutation.val    = {};
+b_Nopermutation.help   = {'Do not apply permutation test'};
+
+
+c_statpermutation        = cfg_choice;
+c_statpermutation.tag     = 'c_statpermutation';
+c_statpermutation.name    = 'Univariate permutations';
+c_statpermutation.values  = {b_permutation,b_Nopermutation };
+c_statpermutation.val     = {b_Nopermutation}; %Default option
+c_statpermutation.help    = {'Use permutation to create the empirical null distribution to calculate.',...
+    'Compared each link perm to its permuted distribution and also the max link value among the comparaison multiple comparaison to be more restrictive. See: Lage-Castellanos, A., Martínez-Montes, E., Hernández-Cabrera, J.A., Galán, L., 2010. False discovery rate and permutation test: An evaluation in ERP data analysis. Statistics in Medicine 29, 63–74. https://doi.org/10.1002/sim.3784'};
+
+
+
 m_TtestOneSample_matrix        = cfg_menu;
 m_TtestOneSample_matrix.tag    = 'm_TtestOneSample_matrix';
 m_TtestOneSample_matrix.name   = 'Tailed ';
@@ -3629,35 +3697,6 @@ e_TtestOneSample_meanvalue.num     = [1 Inf];
 e_TtestOneSample_meanvalue.val     = {0}; 
 e_TtestOneSample_meanvalue.help    = {'Enter the hypothetical mean value'};
 
-e_npermutation         =  cfg_entry;
-e_npermutation.name    = 'Nb permutations';
-e_npermutation.tag     = 'e_npermutation';       
-e_npermutation.strtype = 's';
-e_npermutation.num     = [0 inf];
-e_npermutation.val     = {'500'};
-e_npermutation.help    = {'Define the number of non parametric permutations to use.'};
-
-b_permutation        = cfg_branch;
-b_permutation.tag    = 'b_permutation';
-b_permutation.name   = 'Yes' ;
-b_permutation.val    = {e_npermutation};
-b_permutation.help   = {'Apply permutation test'};
-
-
-b_Nopermutation        = cfg_branch;
-b_Nopermutation.tag    = 'b_Nopermutation';
-b_Nopermutation.name   = 'No' ;
-b_Nopermutation.val    = {};
-b_Nopermutation.help   = {'Do not apply permutation test'};
-
-
-c_statpermutation        = cfg_choice;
-c_statpermutation.tag     = 'c_statpermutation';
-c_statpermutation.name    = 'Do you want to apply permutations ?';
-c_statpermutation.values  = {b_permutation,b_Nopermutation };
-c_statpermutation.val     = {b_Nopermutation}; %Default option
-c_statpermutation.help    = {'Use permutation to create the empirical null distribution to calculate.',...
-    'Compared each link perm to its permuted distribution and also the max link value among the comparaison multiple comparaison to be more restrictive. See: Lage-Castellanos, A., Martínez-Montes, E., Hernández-Cabrera, J.A., Galán, L., 2010. False discovery rate and permutation test: An evaluation in ERP data analysis. Statistics in Medicine 29, 63–74. https://doi.org/10.1002/sim.3784'};
 
 
 e_TtestOneSampleGR         = cfg_entry; %path
@@ -3684,18 +3723,22 @@ e_TtestOneSampleGR2.val     = {2};
 e_TtestOneSampleGR2.help    = {['Enter the second group compared (refer to group value in the xls file).']}; 
 
 
-
-
-b_PermutationTest = cfg_branch;
+b_PermutationTest         = cfg_branch;
 b_PermutationTest.tag    = 'b_PermutationTest';
 b_PermutationTest.name   = 'Unpaired permutation t-test' ;
 b_PermutationTest.val    = {e_npermutation, e_TtestOneSampleGR, e_TtestOneSampleGR2};
 b_PermutationTest.help   = {'Compared 2 groups using permutation '};
 
+b_UnpairedTtest        = cfg_branch;
+b_UnpairedTtest.tag    = 'b_UnpairedTtest';
+b_UnpairedTtest.name   = 'Unpaired t-test' ;
+b_UnpairedTtest.val    = { e_TtestOneSampleGR, e_TtestOneSampleGR2, c_statpermutation};%m_TtestOneSample_matrix,
+b_UnpairedTtest.help   = {'Compute Unpaired Ttest using using group in the xls. Use or not permutation test. Without permutation Cohen d size effet and tvalue will be computed'};
+
 b_PairedTtest        = cfg_branch;
 b_PairedTtest.tag    = 'b_PairedTtest';
 b_PairedTtest.name   = 'Paired t-test' ;
-b_PairedTtest.val    = {m_TtestOneSample_matrix, e_TtestOneSample_meanvalue, e_TtestOneSampleGR, e_TtestOneSampleGR2};
+b_PairedTtest.val    = {m_TtestOneSample_matrix, e_TtestOneSample_meanvalue, e_TtestOneSampleGR, e_TtestOneSampleGR2, c_statpermutation};
 b_PairedTtest.help   = {'Compute Paired Ttest using repeated measures identify subject in the xls.  The subject list must be placed in order. The first subject in group 1 will be paired with the first subject in group 2 in the subject list.  The subtraction of each subject will be saved in the results folder.'};
 
 
@@ -3774,7 +3817,7 @@ b_anova1_Mat        = cfg_branch;
 b_anova1_Mat.tag    = 'b_anova1_Mat';
 b_anova1_Mat.name   = 'Anova one way' ;
 b_anova1_Mat.val    = {e_Anova1GR, c_statpermutation};
-b_anova1_Mat.help   = {'Find One-way analysis of variance anova1 list the group to evaluate in the anova fdr correction'};
+b_anova1_Mat.help   = {'Find One-way analysis of variance anova1 list the group to evaluate in the anova fdr correction. Eta2 size effect are compute using Harald Hentschke (2022). hhentschke/measures-of-effect-size-toolbox (https://github.com/hhentschke/measures-of-effect-size-toolbox), GitHub. Retrieved November 16, 2022.  '};
 
 b_ANCOVA_Covariable         =  cfg_entry;
 b_ANCOVA_Covariable.name    = 'Covariable (only one)';
@@ -3811,9 +3854,13 @@ b_fitMANCOVAN_Covariable.help    = {'Use the exact column title to recognize whi
 
 b_fitMANCOVAN_Mat        = cfg_branch;
 b_fitMANCOVAN_Mat.tag    = 'b_fitMANCOVAN_Mat';
-b_fitMANCOVAN_Mat.name   = 'MANCOVAN (univariate avova with covariate)' ;
+b_fitMANCOVAN_Mat.name   = 'ANCOVA (analysis of covariance with covariate)' ;
 b_fitMANCOVAN_Mat.val    = {e_fitMANCOVAN_GR,b_fitMANCOVAN_Covariable, c_statpermutation};
-b_fitMANCOVAN_Mat.help   = {'ANCOVA equivalent du modèle linéaire général univarié de SPSS avec facteur fixe de groupe et covariable continue.  William Gruner (2022). MANCOVAN (https://www.mathworks.com/matlabcentral/fileexchange/27014-mancovan), MATLAB Central File Exchange. Retrieved October 24, 2022. '};
+b_fitMANCOVAN_Mat.help   = {'ANCOVA : Analysis of covariance (ANCOVA) is a general linear model which blends ANOVA and regression.',...
+    'ANCOVA evaluates whether the means of a dependent variable (DV) are equal across levels of a categorical independent variable (IV) groups',...
+    'while statistically controlling for the effects of other continuous variables that are not of primary interest, known as covariates (CV) or nuisance variables.',... 
+    'equivalent to SPSS univariate linear general model with fix factor of groupe and selected covariates.',...
+    'Use: William Gruner (2022). MANCOVAN (https://www.mathworks.com/matlabcentral/fileexchange/27014-mancovan), MATLAB Central File Exchange. Retrieved October 24, 2022. '};
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -3891,9 +3938,9 @@ b_manova1_Mat.help   = {'Apply manova on specific groups.'};
 c_statmatrix         = cfg_choice;
 c_statmatrix.tag     = 'c_statmatrix';
 c_statmatrix.name    = 'Choose the statistical test';
-c_statmatrix.values  = {b_TtestOneSamplematrix,b_PermutationTest,b_PearsonCorr_Mat, b_GLM_Mat, b_exportNBSformat b_PairedTtest,b_zscore_Mat,b_anova1_Mat,b_anovarep_Mat,b_kruskalwallis_Mat, b_fitMANCOVAN_Mat};%b_ANCOVA_Mat,
+c_statmatrix.values  = {b_TtestOneSamplematrix,b_UnpairedTtest, b_PairedTtest, b_PearsonCorr_Mat, b_GLM_Mat,b_zscore_Mat,b_anova1_Mat,b_anovarep_Mat,b_kruskalwallis_Mat, b_fitMANCOVAN_Mat, b_exportNBSformat,b_PermutationTest};%b_ANCOVA_Mat aoctool remove,
 c_statmatrix.val     = {b_TtestOneSamplematrix}; %Default option
-c_statmatrix.help    = {'Select one of the statistical tests. TEST'};
+c_statmatrix.help    = {'Select one of the statistical tests.'};
 
 % Folder selector
 e_statmatrixPath          = cfg_files; %path

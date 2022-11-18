@@ -2304,27 +2304,6 @@ elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
                 end
             end
         end
-        try
-            [FRD,Q] = mafdr(panova(:)','LAMBDA',[0.0001:0.01:0.95]);
-            Q = reshape(Q,size(panova));
-            %SAVE FDR
-            file = [name,labelnode,'KrustalWallisFDR Q','.mat'];
-            matcorr = double(Q);
-            meancorr = double(Q);
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
-            disp(['Save: ', fullfile(dir1,[file])]);
-            new = [{dir1},{file}, {ZONEid},{0} ];
-            infonew = [infonew;new];
-              file = [name,labelnode,'KrustalWallisFDR Q 1-Q','.mat'];
-            matcorr = double(1-Q);
-            meancorr = double(1-Q);
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
-            disp(['Save: ', fullfile(dir1,[file])]);
-            new = [{dir1},{file}, {ZONEid},{0} ];
-            infonew = [infonew;new];
-        catch
-        end
-    
     if isfield(job.c_statmatrix.b_kruskalwallis_Mat.c_statpermutation,'b_permutation')
         % implementation max for each
         nperm= str2num(job.c_statmatrix.b_kruskalwallis_Mat.c_statpermutation.b_permutation.e_npermutation);
@@ -2397,12 +2376,18 @@ elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
         end
          
         %check p univarite permutation distribution
-        for ilink=1:numel(chi_groupe) 
-                    if sum(xecdf<=chi_groupe(ilink))==0
-                        pperm(ilink)= 1;
+        for i=1:size(chi_groupe,1)
+            for j=1:size(chi_groupe,1)
+                if i==j
+                    pperm(i,j) = nan;
+                else
+                    if sum(xecdf<=chi_groupe(i,j))==0
+                        pperm(i,j)= nan;
                     else
-                        pperm(ilink) = 1-fecdf(sum(xecdf<=chi_groupe(ilink)));
-                    end            
+                        pperm(i,j) = 1-fecdf(sum(xecdf<=chi_groupe(i,j)));
+                    end
+                end
+            end
         end
         
         %equivalent tmax Lage-Castellanos, A., Martínez-Montes, E., Hernández-Cabrera, J.A., Galán, L., 2010. False discovery rate and permutation test: An evaluation in ERP data analysis. Statistics in Medicine 29, 63–74. https://doi.org/10.1002/sim.3784
@@ -2412,11 +2397,17 @@ elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
         %            hist(dist_sup(:),100)
         [fecdf,xecdf] = ecdf( [dist_sup]);
         %'Exal Prob chi2 permutation max';
-        for ilink=1:numel(chi_groupe)
-            if sum(xecdf<=chi_groupe(ilink))==0
-                ppermmax(ilink)=1;
-            else
-                ppermmax(ilink) = 1-fecdf(sum(xecdf<=chi_groupe(ilink)));
+        for i=1:size(chi_groupe,1)
+            for j=1:size(chi_groupe,1)
+                if i==j
+                    ppermmax(i,j) = 1;
+                else
+                    if sum(xecdf<=chi_groupe(i,j))==0
+                        ppermmax(i,j)=1;
+                    else
+                        ppermmax(i,j) = 1-fecdf(sum(xecdf<=chi_groupe(i,j)));
+                    end
+                end
             end
         end
 
@@ -2452,7 +2443,9 @@ elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
         infonew = [infonew;new];
         
         file = [name,labelnode,'KrustalWallis',num2str(nperm), 'Permmax 1-p.mat'];
-        matcorr = zeros(size(MATall,2),size(MATall,2));        
+        matcorr = double( 1-ppermmax);
+        meancorr = double( 1-ppermmax);
+         matcorr = zeros(size(MATall,2),size(MATall,2));        
         matcorr(idhalf)= double( 1-ppermmax);
         matcorr = matcorr +flipud(rot90(matcorr));
         meancorr = matcorr;
@@ -2464,7 +2457,20 @@ elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
         
     end  % Fin permutation
     
-
+    try
+        [FRD,Q] = mafdr(panova(:)','LAMBDA',[0.0001:0.01:0.95]);
+        Q = reshape(Q,size(panova));
+        %SAVE FDR
+        file = [name,labelnode,'KrustalWallisFDR Q','.mat'];
+        matcorr = double(Q);
+        meancorr = double(Q);
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        disp(['Save: ', fullfile(dir1,[file])]);
+        new = [{dir1},{file}, {ZONEid},{0} ];
+        infonew = [infonew;new];
+    catch
+    end
+    
     
    
     
