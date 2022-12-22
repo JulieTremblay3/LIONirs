@@ -770,10 +770,11 @@ e_correlationsignal_HPF.help    = {'Use a numerical value to apply High pass fil
 zonecorrelation         = cfg_files; 
 zonecorrelation.name    = 'zone';
 zonecorrelation.tag     = 'zonecorrelation';      
-zonecorrelation.filter  = 'zone';
-zonecorrelation.ufilter = '.zone$';    
+zonecorrelation.filter  = {'ele','zone','txt'};
+zonecorrelation.ufilter = '.*';    
 zonecorrelation.num     = [1 Inf];     % Number of inputs required 
-zonecorrelation.help    = {'Select a zone where to apply correlation.'};
+zonecorrelation.help    = {'Select a .zone create in the GUI to design channel where to apply correlation.',...
+    'Or .ele file listing few electrode to find there label. Fp1 0 0 0'};
 
 %Create marker based on correlation on signal based on recording
 E_createonset_correlationsignal     = cfg_exbranch;
@@ -782,8 +783,7 @@ E_createonset_correlationsignal.tag  = 'E_createonset_correlationsignal';
 E_createonset_correlationsignal.val  = {NIRSmat,DelPreviousData, f_correlationsignal, e_onset,e_correlationsignal_min ,e_correlationsignal_LPF  , e_correlationsignal_HPF, zonecorrelation};
 E_createonset_correlationsignal.prog = @nirs_run_E_createonset_correlationsignal;
 E_createonset_correlationsignal.vout = @nirs_cfg_vout_E_createonset_correlationsignal;
-E_createonset_correlationsignal.help = {'Use ISS AUX trig to create editable manual trig file to be used with manual trig.',...
-    'A file will be created in the current directory under the name (fileid_trigid_trig.m).' };
+E_createonset_correlationsignal.help = {'Add trig based correlation on feature on the signal' };
 
 function vout = nirs_cfg_vout_E_createonset_correlationsignal(job)
     vout = cfg_dep;                    

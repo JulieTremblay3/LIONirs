@@ -223,7 +223,7 @@ for isubject=2:size(info,1)
         disp(['Error loading',  info{isubject,2}])
     end
 end
-id = 1
+id = 1;
 %avg zone groupe 
 idnew = size(info,1)-1; %placer les moyennes a la fin des sujets existants. 
 for igroupe = 0:max(groupeall)

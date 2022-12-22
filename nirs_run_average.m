@@ -155,7 +155,7 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
                             noise(Idx,ind(i):indf(i)) = 1;
                         end
                     catch
-                        msgbox('Noise reading problem')
+                        disp('Noise reading problem')
                     end
                 end
             end

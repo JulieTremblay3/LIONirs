@@ -1304,7 +1304,7 @@ if 0 %numel(handles.NIRS.Dt.fir.pp)==oldmodule
                         noise(ind(i):indf(i),Idx) = 1;
                     end
                 catch
-                    msgbox('Noise reading problem')
+                    disp('Noise reading problem')
                 end
             end
         end
@@ -1644,7 +1644,7 @@ try
                             noise(ind(i):indf(i),Idx) = 1;
                         end
                     catch
-                        msgbox('Noise reading problem')
+                        disp('Noise reading problem')
                     end
                 end
             end
@@ -2160,9 +2160,93 @@ PMI{currentsub}.data(cf).HRF.AvgC  = d1;
 idfile = get(handles.popupmenu_file,'value');
 outfile = handles.NIRS.Dt.fir.pp(end).p{idfile};
 fwrite_NIR(outfile,d1');
+[filepath,name,ext] =  fileparts(outfile);
+fileOutRoot_vmrk= fullfile(filepath,[name ,'.vmrk']);
+
+try
+    %update the VMRI for new marker 
+    [label,ind_dur_ch] = read_vmrk_all(fileOutRoot_vmrk);
+    %also in multimodal file  
+    aux5 = handles.NIRS.Dt.fir.aux5{1};
+    for itrig = 1:size(aux5)
+        labelnew{itrig,1} = 'trigger';
+         labelnew{itrig,2} = ['S  ',num2str(aux5(itrig,1))];
+         ind_dur_chnew(itrig,1)= aux5(itrig,2);
+         ind_dur_chnew(itrig,2)= 1;
+         ind_dur_chnew(itrig,3)= 0;
+    end
+    
+
+    k = strfind(label,'trigger');
+    %REMOVE ALL PREVIOUS TRIGGER
+    idremove = [];
+    for i=1:size(k,1)
+        if k{i,1}
+            idremove = [idremove,i];
+        end
+    end
+    
+    label(idremove,:)=[];
+    ind_dur_ch(idremove,:)=[];
+    ind_dur_ch = [ind_dur_ch;ind_dur_chnew];
+    label = [ label;labelnew];
+    write_vmrk_all(fileOutRoot_vmrk,ind_dur_ch, label);
+    
+    %save trig in the eeg file
+    if isfield(handles.NIRS.Dt,'EEG') 
+                    try 
+                    %WRITE IN SUB FILE.... or add sync_timesec
+                    [dirEEG,filEEG,extEEG]= fileparts(handles.NIRS.Dt.EEG.pp(end).p{idfile});                    
+                    
+                        
+                        [dataseg,info,labelEEG,ind_dur_chEEG] = fopen_EEG(handles.NIRS.Dt.EEG.pp(end).p{idfile}, 1, 1);
+                        fsEEG = 1/(info.SamplingInterval/10e5);
+                       
+                        aux5 = handles.NIRS.Dt.fir.aux5{1};
+                        for itrig = 1:size(aux5) 
+                            labelnew{itrig,1} = 'trigger';
+                             labelnew{itrig,2} = ['S  ',num2str(aux5(itrig,1))];
+                             ind_dur_chnewEEG(itrig,1)= ((aux5(itrig,2)*1/handles.NIRS.Cf.dev.fs)+handles.NIRS.Dt.EEG.pp(end).sync_timesec{idfile})*fsEEG;
+                             ind_dur_chnewEEG(itrig,2)= 1;
+                             ind_dur_chnewEEG(itrig,3)= 0; 
+                        end
+                        handles.NIRS.Cf.dev.fs
+                        info.SamplingInterval
+                        k = strfind(labelEEG,'trigger');
+                        %REMOVE ALL PREVIOUS TRIGGER
+                        idremove = [];
+                        for i=1:size(k,1)
+                            if k{i,1}
+                                idremove = [idremove,i];
+                            end
+                        end
+                        if ~isempty( idremove)
+                            labelEEG(idremove,:)=[];
+                            ind_dur_chEEG(idremove,:)=[];
+                        end
+                         %ADD NEW IN EEG
+                     
+                         ind_dur_ch=[ind_dur_chEEG;ind_dur_chnewEEG];
+                         label=[labelEEG;labelnew];
+                         fileEEGvmrk = fullfile(dirEEG,[filEEG '.vmrk']);
+                         write_vmrk_all(fileEEGvmrk,ind_dur_ch, label);
+                    catch
+                        disp(['Error vmrk could', fileEEGvmrk,'not be update'])
+                    end
+                    
+       end
+    
+    
+    
+catch
+    disp(['Error save: ' fileOutRoot_vmrk])
+end
+
+
 
 set(guiHOMER,'UserData',PMI);
 updatedisplay(handles);
+
 
 
 % --- Executes on button press in radiobutton8.
@@ -2617,7 +2701,7 @@ for ifilenb =1:filenblist
                         noise(ind(i):indf(i),Idx) = 1;
                     end
                 catch
-                    msgbox('Noise reading problem')
+                    disp('Noise reading problem')
                 end
             end
         end
@@ -9638,8 +9722,49 @@ elseif strcmp(listmethod{idval},'ICA') %ICA
     %
     % elseif get(handles.popupmethodselected,'value')==9 %PARAFAC WAVELET
     %     btn_PARAFACWAVELET_Callback(hObject, eventdata, handles)
+elseif strcmp(listmethod{idval},'NPLS') %ICA
+    %set(handles.radio_Parafac,'value',1)
+guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
+currentsub=1;
+PMI = get(guiHOMER,'UserData');
+cf = PMI{currentsub}.currentFile;
+
+time_start = str2num(get(handles.edit_time_start,'string')); %Debut segment
+time_stop = str2num(get(handles.edit_time_stop,'string'));  %Fin segment
+if isempty(time_start); indstart = 1;else;
+    indstart= find(time_start>PMI{currentsub}.data(cf).HRF.tHRF);
+    if isempty(indstart)
+        indstart = 1;
+    end
+end
+
+if isempty(time_stop);
+    indstop =numel(PMI{currentsub}.data(cf).HRF.tHRF);
+else
+    indstop= find(time_stop>PMI{currentsub}.data(cf).HRF.tHRF);
+    if isempty(indstop)
+        indstop = numel(PMI{currentsub}.data(cf).HRF.tHRF);
+    end
     
 end
+indstart = indstart(end);
+indstop = indstop(end);
+NIRS = handles.NIRS
+try
+     gui_NPLSIO(indstart,indstop, NIRS);
+catch ME
+    switch ME.identifier
+        case 'MATLAB:UndefinedFunction'
+            p = mfilename('fullpath');
+            [pathname,filename,ext]=fileparts(p);
+            disp(['Error function NPLS not found add the fonction in matlab path: addpath(''',pathname(1:end-4), '\NPLS'')'])
+        otherwise
+            rethrow(ME)
+    end
+end    
+end 
+
+
 function  btn_GLM_Callback(hObject, eventdata, handles)
 guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
 currentsub=1;

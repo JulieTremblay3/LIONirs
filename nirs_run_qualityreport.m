@@ -47,7 +47,7 @@ for filenb=1:size(job.NIRSmat,1)
                         noise(ind(i):indf(i),Idx) = 1;
                     end
                 catch
-                    msgbox('Noise reading problem')
+                    disp('Noise reading problem')
                 end
             end
         end

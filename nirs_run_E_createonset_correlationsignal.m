@@ -28,10 +28,9 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
         xdata(:,iline)= get(hlines(iline),'xdata');
     end
     close(hfig)
+
     %check if data and artefac have the same sample rate, else just add
     %a warning but continue
-    load(job.zonecorrelation{1},'-mat');
-    channeluse = zone.plotLst{1};
     Fs_model =  1/(xdata(2,1)-xdata(1,1));
     if round(Fs_model)~=round(fs)
         disp('Warning: signal model and data do not have the same sample rate.')
@@ -40,9 +39,34 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
     for f=1:size(rDtp,1) %Loop over all files of a NIRS.mat
         %             try
         
-        d = fopen_NIR(rDtp{f,1},NC);
-        [dir1,fil1,~] = fileparts(rDtp{f});
-        dfilt =d(:,:)';
+     d = fopen_NIR(rDtp{f,1},NC);
+     [dir1,fil1,~] = fileparts(rDtp{f});
+     dfilt =d(:,:)';
+     [filepath,name,ext] = fileparts(job.zonecorrelation{1});
+    if strcmp(ext,'.zone')
+        load(job.zonecorrelation{1},'-mat');
+        channeluse = zone.plotLst{1};
+    elseif strcmp(ext,'.ele')
+        try
+            [nameele,x,y,z] = readelefile(job.zonecorrelation{1});
+        catch
+            disp(['Failed could not open the ele file : ', job.zonecorrelation{1} ,' for channel selection'])
+            return
+        end
+       channeluse = [];
+       infilevhdr = fullfile(dir1,[fil1 '.vhdr']);
+       info = read_vhdr_brainvision(infilevhdr);
+       for ilabel=1:numel(nameele)
+           for ifind = 1:numel(info.label)
+               if strcmp(info.label{ifind }, nameele{ilabel});
+                 channeluse = [channeluse,ifind ];  
+               end
+           end   
+       end
+    end
+        
+        
+
         sizebloctocheck = size(dfilt,1);
         maxwindow = size(artifact,1)-1;
         if ~isempty(str2num(job.e_correlationsignal_LPF))%Lowpass
@@ -81,6 +105,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
             end
         end
         toc
+       % figure;plot(r);figure;plot(artmean)
         
         if isfield(NIRS.Cf.H.C,'label')
             labelall = [];

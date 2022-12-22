@@ -529,6 +529,9 @@ end
 
 function info = NIRxreadHDR(file)
         fid=fopen(file);
+        if fid==-1
+            disp(['Could not open: ',file])
+        end
         while ~feof(fid)
             line = fgetl(fid);
             if strfind(line,'SamplingRate')

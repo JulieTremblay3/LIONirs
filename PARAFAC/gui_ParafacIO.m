@@ -67,6 +67,10 @@ cf = PMI{currentsub}.currentFile;
 d = PMI{currentsub}.data(cf).HRF.AvgC;
 
 indt = tstart(end):tstop(end);
+if tstart(end)==tstop(end)
+    disp('Please verify time start and time stop.')
+    msgbox('Please verify time start and time stop.')
+end
 intensnorm = d(indt,:);
   
 %Detrent DATA segment for centrering 

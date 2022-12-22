@@ -59,7 +59,7 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
                                 noise(ind(i):indf(i),Idx) = 1;
                             end
                         catch
-                            msgbox('Noise reading problem')
+                           disp('Noise reading problem')
                         end
                     end
                 end
@@ -301,7 +301,7 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                                 noise(ind(i):indf(i),Idx) = 1;
                             end
                         catch
-                            msgbox('Noise reading problem')
+                            disp('Noise reading problem')
                         end
                     end
                 end
@@ -625,7 +625,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
                             noise(ind(i):indf(i),Idx) = 1;
                         end
                     catch
-                        msgbox('Noise reading problem')
+                        disp('Noise reading problem')
                     end
                 end
             end
@@ -969,7 +969,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                             noise(ind(i):indf(i),Idx) = 1;
                         end
                     catch
-                        msgbox('Noise reading problem')
+                        disp('Noise reading problem')
                     end
                 end
             end

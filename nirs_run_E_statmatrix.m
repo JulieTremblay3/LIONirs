@@ -103,10 +103,12 @@ for isubject=2:size(info,1)
         list_subject{id} =DATA{id}.name;
         groupeall = [groupeall; info{isubject,4}];
         clear MAT
-    catch
+    catch em
         disp(['Error with line', num2str(isubject)])
+        disp(em.identifier)
+        disp(em.message)
         groupeall = [groupeall; info{isubject,4}];
-    end
+    end 
 end 
 alpha_threshold = job.e_statcomponent_alpha;
 if job.m_nodeunit==1 %channel mode
@@ -226,9 +228,25 @@ matid(idhalf);
 %  matgr1 = matgr1 +flipud(rot90(matgr1))
 %  to be back in matrices !
 try
-    chanpos = DATA{1}.zone.pos(1:end/2,1:3);
+    %not all channel could be use in the final matrice get the position
+    %from one subjet and ensure you associate label in the Data.ZoneList to
+    %a position in the zone.ml first col source second col detector
+    sujet = 24 %need projet V5
+    zonelist = DATA{sujet}.ZoneList;
+    chanpos = zeros(numel(zonelist),3);
+
+    for id=1:size(zonelist)
+        name = zonelist{id};
+        [DetL,SrsL] =strtok(name,' ');
+        SDdetL = StrBoxy2SDDet(DetL);
+        SDsrsL =str2num(SrsL(3:end));
+        idml = find(DATA{sujet}.zone.ml(:,1)==  SDsrsL & DATA{sujet}.zone.ml(:,2)==  SDdetL & DATA{sujet}.zone.ml(:,4)== 1);
+        if ~isempty(idml)
+        chanpos(id,:) =  DATA{1}.zone.pos(idml,1:3);
+        end
+    end
 catch
-   [file,path] = uigetfile('.mat','Please select channel position')
+   disp('Multiple comparaison cluster could not find channel position, use all cluster')
 end
 
 [filepath,name,ext] = fileparts(xlslistfile);
@@ -408,7 +426,8 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
                 [h,p,ci,stats] = ttest2(halfMAT(g1,ilink), halfMAT(g2,ilink));
                 pval(:,ilink) = p;                               
                 tval(:,ilink) = stats.tstat;      
-           
+                try; cohend(:,ilink)=computeCohen_d(halfMAT(g1,ilink), halfMAT(g2,ilink),'independent');catch;end
+
                 for idperm=1:nperm
                     Yval = halfMAT( iduse,ilink);
                     GR = permfix(idperm,:);
@@ -423,17 +442,33 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
         t_dist_all =  tvalperm ;
         [fecdf,xecdf] = ecdf(t_dist_all(:));
         clustercritical=xecdf(sum(fecdf<(1-alpha_threshold)));
+        disp(['critical for clustering p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
          %  figure;hist(t_dist_all(:),1000)
                if isfield(job.c_statmatrix.b_UnpairedTtest.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting,'b_MCT_ClusterBased')
                 statrand = permute(tvalperm(1,:,:), [3 2 1]);
                 statobs = permute(tval(1,:),[2,1]);
                  tmp = randperm(numel(statrand));
                  statrand =reshape(statrand(tmp),size(statrand,1),size(statrand,2));
-                   neighbourdist = job.c_statmatrix.b_UnpairedTtest.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_neighbourdist;
-                disp(['critical for clustering p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
-                [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, neighbourdist,clustercritical, statobs, statrand );
-                save(fullfile(dir1,'Unpairedttest_stat.mat'),'stat')
-                disp(['Save cluster', fullfile(dir1,'Unpairedttest_stat.mat') ])
+                 neighbourdist = job.c_statmatrix.b_UnpairedTtest.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_neighbourdist;
+                 disp(['critical for clustering p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
+                 [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, neighbourdist,clustercritical, statobs, statrand );
+                 save(fullfile(dir1,'Unpairedttest_stat.mat'),'stat')
+                 disp(['Save cluster', fullfile(dir1,'Unpairedttest_stat.mat') ])
+                
+                %View link for neighbor
+                if 0
+                    for ilink=1:300
+                    file = [name,labelnode,num2str(nperm),' neiglink',num2str(ilink),'.mat'];
+                    matcorr = zeros(size(MATall,2),size(MATall,2));
+                    matcorr(idhalf)=matneig(:,ilink);
+                    matcorr = matcorr +flipud(rot90(matcorr));
+                    meancorr = matcorr;
+                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    disp(['Save: ', fullfile(dir1,[file])]);
+                    new = [{dir1},{file}, {ZONEid},{0} ];
+                    infonew = [infonew;new];
+                    end
+                end
                 
                 if isfield(stat,'posclusterslabelmat')
                     for iposcluster = 1:numel(stat.posclusters)
@@ -470,7 +505,25 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
     end 
 
     try %optionnal cohend 
-        file = [name,labelnode,'Cohend',num2str(alpha_threshold),'.mat'];
+        file = [name,labelnode,'Cohend_TPositive','.mat'];
+        matcorr = zeros(size(MATall,2),size(MATall,2));
+        matcorr(idhalf)=squeeze(cohend(:)).*squeeze(tval(:)>0);
+        matcorr = matcorr +flipud(rot90(matcorr));
+        meancorr = matcorr;    
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        disp(['Save: ', fullfile(dir1,[file])]);
+        new = [{dir1},{file}, {ZONEid},{1} ];
+        infonew = [infonew;new];
+        file = [name,labelnode,'Cohend_TNegative','.mat'];
+        matcorr = zeros(size(MATall,2),size(MATall,2));
+        matcorr(idhalf)=squeeze(cohend(:)).*squeeze(tval(:)<0);;
+        matcorr = matcorr +flipud(rot90(matcorr));
+        meancorr = matcorr;    
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        disp(['Save: ', fullfile(dir1,[file])]);
+        new = [{dir1},{file}, {ZONEid},{1} ];
+        infonew = [infonew;new];
+        file = [name,labelnode,'Cohend','.mat'];
         matcorr = zeros(size(MATall,2),size(MATall,2));
         matcorr(idhalf)=squeeze(cohend(:));
         matcorr = matcorr +flipud(rot90(matcorr));
@@ -479,6 +532,7 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{1} ];
         infonew = [infonew;new];
+        
     catch
         disp(['Error save: ', fullfile(dir1,[file])]);
         disp('Error computeCohen_d')
@@ -488,12 +542,36 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
         disp(['Add the fonction in matlab path: addpath(''',pathname, '\External\computeCohen_d'')'])
         disp('And verify if Fisher transform is not apply twice, data must be real')
     end
-     
+
     
      try
         file = [name,labelnode,'UnpairedTtest tval','.mat'];
         matcorr = zeros(size(MATall,2),size(MATall,2));
         matcorr(idhalf)=squeeze(tval(:));
+        matcorr = matcorr +flipud(rot90(matcorr));
+        meancorr = matcorr;    
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        disp(['Save: ', fullfile(dir1,[file])]);
+        new = [{dir1},{file}, {ZONEid},{1} ];
+        infonew = [infonew;new];
+        
+        file = [name,labelnode,'UnpairedTtest -tval','.mat'];
+        matcorr = zeros(size(MATall,2),size(MATall,2));
+        matcorr(idhalf)=-squeeze(tval(:));
+        matcorr = matcorr +flipud(rot90(matcorr));
+        meancorr = matcorr;
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        disp(['Save: ', fullfile(dir1,[file])]);
+        new = [{dir1},{file}, {ZONEid},{1} ];
+        infonew = [infonew;new];
+    catch
+        disp(['File : ', file ' could not be create'])
+     end
+
+      try
+        file = [name,labelnode,'UnpairedTtest 1-pval','.mat'];
+        matcorr = zeros(size(MATall,2),size(MATall,2));
+        matcorr(idhalf)=squeeze(1-pval(:));
         matcorr = matcorr +flipud(rot90(matcorr));
         meancorr = matcorr;
     
@@ -504,7 +582,6 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
     catch
         disp(['File : ', file ' could not be create'])
     end
-
     
     if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
         copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
@@ -1006,14 +1083,16 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
         infonew = [infonew;new];
     end
     
-    
+    try
     file = ['R2_cov=',covariablestring];
-    matcorr =r2;
+    matcorr =r2; 
     meancorr =matcorr;
     save(fullfile(dir1,file),'ZoneList','matcorr','meancorr');
     new = [{dir1},{file},{ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
     infonew = [infonew;new];
     disp( ['Save R2: ', fullfile(info{isubject,1},file)])
+    catch
+    end
     
     file = ['F stat_cov=',covariablestring];
     matcorr =F;
@@ -2879,7 +2958,7 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
                         [ T, p,  Fanova, Panova, stats ] = mancovan( Yval( idok), GR( idok),CovariateX( idok,:));
                         Fanoval(:,i,j) = Fanova;
                         Panoval(:,i,j) = Panova;
-                        Banoval(:,i,j) =   stats.B(2:end);
+                        Banoval(:,i,j) = stats.B(2:end);
                              
                     catch
                         disp('Error MANCOVAN')
@@ -2888,7 +2967,7 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
                         [pathname,filename,ext]=fileparts(p);
                         disp(['Add the fonction in matlab path: addpath(''',pathname, '\External\mancovan_496'')'])
                         disp('And verify if Fisher transform is not apply twice, data must be real')
-                        return
+                        %return
                     end
                 end
             end
@@ -2984,7 +3063,8 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
                     [pathname,filename,ext]=fileparts(p);
                     disp(['Add the fonction in matlab path: addpath(''',pathname, '\External\mancovan_496'')'])
                     disp('And verify if Fisher transform is not apply twice, data must be real')
-                    return
+                    Fanova = 0;
+                    Panova =1;
                 end
                 Fanoval(:,ilink) = Fanova;
                 Panoval(:,ilink) = Panova;
@@ -3015,7 +3095,10 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
         f_dist_all(find(isnan(f_dist)))=[];
         [fecdf,xecdf] = ecdf( f_dist_all);
         clustercritical=xecdf(sum(fecdf<(1-alpha_threshold)));
-        
+%         figure; 
+%         plot(xecdf,fecdf)
+%         xlabel('xecfg=valeur de F')
+%         ylabel('fecdf=F(x) cumulative distribution function')
         if isfield(job.c_statmatrix.b_fitMANCOVAN_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting,'b_MCT_ClusterBased')
             for icomp = 1:size(Fanoval,1)
                 statrand = permute(f_dist(icomp,:,:), [3 2 1]);

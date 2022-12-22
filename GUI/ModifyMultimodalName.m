@@ -66,7 +66,11 @@ set(handles.popupmenu_NIRS, 'Value', 1);
 
 if isfield(NIRS.Dt,'EEG')
     set(handles.listbox_EEGLIST,'string', NIRS.Dt.EEG.pp(end).p{1} );
-    set(handles.edit_offsetEEG,'string', num2str(NIRS.Dt.EEG.pp(end).sync_timesec{1}) );
+    try
+        set(handles.edit_offsetEEG,'string', num2str(NIRS.Dt.EEG.pp(end).sync_timesec{1}) );
+    catch
+        set(handles.edit_offsetEEG,'string', ' ');
+    end
 end
 if isfield(NIRS.Dt,'AUX')
     AUXname = [];

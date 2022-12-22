@@ -19,14 +19,14 @@ function [stat neiglinkmat]= FindClusterBasedPermutationInMatrix(chanpos,neighbo
 % label           %nele x 1 cell name of the ele
 % distance        %geodesic distance for neighbours match unit with x,y,z 
 if isempty(chanpos)
-    load('C:\data\EEGClinique\Script_Janie\chanpos.mat')
-   % neighbourdist='150';
-    disp('LOAD POUR JANIE')
+%     load('C:\data\EEGClinique\Script_Janie\chanpos.mat')
+%    % neighbourdist='150';
+%     disp('LOAD POUR JANIE')
 end
 for i=1:size(chanpos,1)
    listelectrode{i,1} = ['C',num2str(i)];    
-end
-
+end 
+%neighbourdist = 'sig';
 if strcmp(neighbourdist,'all')
    neiglinkmat(:,:)=ones(numel(statobs));  
    disp(['Neighborgs use all link'])
@@ -72,10 +72,19 @@ elseif strcmp(neighbourdist,'link')
     end   
    %  figure;imagesc(neiglinkmat)
        disp(['Neighborgs with commun link between them'])
-
+elseif strcmp(neighbourdist,'sig') %allow neigborg among sig value
+    neiglinkmat(:,:)=zeros(numel(statobs)); 
+    idpos = find(statobs>clustercritval);
+    idminus = find(statobs<(-clustercritval));   
+    for id = 1:numel(idpos)
+        neiglinkmat(idpos(id),idpos)=1;
+    end
+    for id = 1:numel( idminus)
+        neiglinkmat( idminus(id), idminus)=1;
+    end
 else %distance entre les électrodes 
-    neighbourdist = str2num(neighbourdist);  
-    neighbours = compneighbstructfromgradelec(chanpos,listelectrode,neighbourdist);
+    neighbourdistnb = str2num(neighbourdist);  
+    neighbours = compneighbstructfromgradelec(chanpos,listelectrode,neighbourdistnb);
    % neighbours = compneighbstructfromgradelec(chanpos,listelectrode,0);
     id = 1;
     nele = numel(listelectrode);
@@ -119,10 +128,13 @@ else %distance entre les électrodes
     
  %   figure;imagesc(neiglinkmat)
     disp(['Neighborgs for clustering use optode with a distance ',num2str(neighbourdist),' between them'])
+    
 end  
    
 
-
+figure;
+imagesc(neiglinkmat);
+title(['Neighbor definition: ',neighbourdist ])
 
 %%%% FIN to find neiglinkmat
 %     neiglinkmat(21,:)=0

@@ -13,7 +13,7 @@ for Idx = 1:nch
                 mat(ind(i):indf(i),Idx) = 1;
             end
         catch
-            msgbox('Noise reading problem')
+            disp('Noise reading problem')
         end
     end
 end
@@ -28,7 +28,7 @@ end
                 mat(ind(i):indf(i),:) = 1;
             end
         catch
-            msgbox('Noise reading problem')
+            disp('Noise reading problem')
         end
     end
 
