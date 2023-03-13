@@ -803,6 +803,7 @@ IO_HelmetMTG_Display(handles,option)
 
 function updatedisplay(handles)
 %try
+
 guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
 currentsub=1;
 PMI = get(guiHOMER,'UserData');
@@ -814,7 +815,7 @@ try
     plotLst_ok = PMI{currentsub}.plotLst; %Get the actual plotting list
 catch
     plotLst_ok = 1;
-    PMI{currentsub}.plotLst = 1;
+    PMI{currentsub}.plotLst = 1; 
 end
 if ~isfield(PMI{currentsub}.data(cf),'MeasListAct')
     bad_ch = [];
@@ -862,6 +863,8 @@ if ~isempty(guiHelmet)
             fhresetview = getappdata(guiHelmet,'fhresetview');
             fhresetview(Helmethandles);
             figure(handles.figure1);
+           %fhresetview = getappdata(guiHelmet, slider_time_Callback(hObject, eventdata, handles)
+            
         end
     else
         Helmethandles = guihandles(guiHelmet);
@@ -1851,8 +1854,8 @@ for i = 1:length(brushedData)
 end
 PMI{currentsub}.data(cf).HRF.noise  = copy_channel_noise(PMI{currentsub}.data(cf).HRF.noise);
 % end
-
-
+% figure
+% imagesc(PMI{currentsub}.data(cf).HRF.noise)
 %look new old bad step
 ind_dur_ch_2 = mat2d2ind_dur_ch(PMI{currentsub}.data(cf).HRF.noise');
 label_2 = cell(size(ind_dur_ch_2,1),2);
@@ -4725,7 +4728,7 @@ if strcmp(eventdata.Key,'c')
     else
         indstop= find(posxstop>PMI{currentsub}.data(cf).HRF.tHRF);
     end
-    PMI{currentsub}.data(cf).HRF.noise(:,plotLst)= 0;
+    PMI{currentsub}.data(cf).HRF.noise(:,:)= 0;
     set(guiHOMER,'UserData',PMI);
     updatedisplay(handles);
 end
@@ -5084,6 +5087,7 @@ function btn_PARAFAC_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 %set(handles.radio_Parafac,'value',1)
+
 guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
 currentsub=1;
 PMI = get(guiHOMER,'UserData');
@@ -5163,7 +5167,12 @@ end
 % end
 
 if strcmp(listmethod{idval},'Parafac')  %substractPARAFAC
+    try
     indt = [PMI{currentsub}.tmpPARAFAC.indt(1):PMI{currentsub}.tmpPARAFAC.indt(2)];%Time indice
+    catch
+        disp('You must get parafac first')
+        return
+    end
     intensnorm = d(indt,:);
     %Detrent DATA segment for centrering
     X = 1:1:size(intensnorm,1);
@@ -9712,6 +9721,8 @@ elseif strcmp(listmethod{idval},'PCA') %get(handles.popupmethodselected,'value')
     btn_PCA_Callback(hObject, eventdata, handles)
 elseif strcmp(listmethod{idval},'GLM')
     btn_GLM_Callback(hObject, eventdata, handles)
+elseif  strcmp(listmethod{idval},'Offset Adjustment')
+    disp('Offset Adjustment do not need to get decomposition, only press ''-'' button to apply the offset correction.')
 elseif strcmp(listmethod{idval},'ICA') %ICA
     btn_ICA_Callback(hObject, eventdata, handles)
     % elseif get(handles.popupmethodselected,'value')==4 %Wavelet

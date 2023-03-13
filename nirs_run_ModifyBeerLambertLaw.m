@@ -46,7 +46,7 @@ for Idx=1:size(job.NIRSmat,1)
             disp('Problem loading extinctions');
         end
  
-       for iwl =1:size(wl,2)
+       for iwl =1:numel(wl)
         % Differential path length factor -- DPF
         if isfield(job.C_ODtoHbOHbR_DPF,'b_ODtoHbOHbR_DPF1')%'From Scholkmann and Wolf 2013'
              wav = wl(iwl);%                
@@ -87,14 +87,14 @@ for Idx=1:size(job.NIRSmat,1)
             %if ~strcmp(fil1(1:3),prefix)       %???           
                 try 
                     d = fopen_NIR(rDtp{f},NC); 
-                    inv_exs2 = kron(inv_exs,eye(NC/size(wl,2)));
+                    inv_exs2 = kron(inv_exs,eye(NC/numel(wl)));
                     EPF = zeros(1,NC); %EPF = L * PPF = L * DPF/PVF at each wavelength
                     for Ci = 1:NC
                         EPF(1,Ci) = Cgp(Ci,1)*DPF(Cwl(1,Ci),1)./PVF(1,Cwl(1,Ci)); 
                     end
                 catch                        
                     d = fopen_NIR(rDtp{f},numel(rNC{f}));
-                    inv_exs2 = kron(inv_exs,eye(numel(rNC{f})/size(wl,2)));                    
+                    inv_exs2 = kron(inv_exs,eye(numel(rNC{f})/numel(wl)));                    
                     EPF = zeros(1,numel(rNC{f})); %EPF = L * PPF = L * DPF/PVF at each wavelength
                     for Ci = 1:numel(rNC{f})
                         EPF(1,Ci) = Cgp(Ci,1)*DPF(Cwl(1,Ci),1)./PVF(1,Cwl(1,Ci)); 
@@ -1001,6 +1001,7 @@ vLambdaLipid = [
     844	0.000145;
     846	0.000138;
     848	0.000135;
+    850	0.000132;
     852	0.000130;
     854	0.000130;
     856	0.000137;

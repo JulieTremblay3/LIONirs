@@ -19,7 +19,11 @@ if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
 elseif strcmp(ext,'.txt')   
     [data, text, rawData] = readtxtfile_asxlsread(job.f_component_list{1});
 end
-    
+    rawxlsoutHBO = [{'Dir'},{'Observation'},{'ROI zone or ChannelList'},{'Label'} ]; % file to help to organised your statistics
+    rawxlsoutHBOmean = [{'Dir'},{'Observation'},{'ROI zone or ChannelList'},{'Label'} ]; % file to help to organised your statistics
+
+    rawxlsoutHBR = [{'Dir'},{'Observation'},{'ROI zone or ChannelList'},{'Label'} ]; % file to help to organised your statistics
+    rawxlsoutHBRmean = [{'Dir'},{'Observation'},{'ROI zone or ChannelList'},{'Label'} ];
 for icol = 1:size(rawData,2)
     if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat folder')))
         id.NIRSDtp = icol;
@@ -130,14 +134,20 @@ for filenb = 1:size(NIRSDtp,1)
                         [listHBOch, listHBRch, listnameHbO, listnameHbR, zonelist] = findchinChannelList(NIRS, ChannelListfile,listgood);
                         topo = PARCOMP(icomp).topo;
                         labelall = [labelall,{PARCOMP(icomp).label}];
-                  
-                        A = nan(size(listHBOch,1),1);
-                        idok = find(~isnan(listHBOch));
-                        A(idok,1) = topo(listHBOch(idok));
+                        
+                        if  isempty(findstr(strtrim(upper(PARCOMP(icomp).label)),'OK')) &  ~isempty(findstr(strtrim(upper(PARCOMP(icomp).label)),'BAD'))%repered bad label to set nan to avoid confusion with other label ensure OK there and BAD absent before to set nan
+                            A = nan(size(listHBOch,1),1);
+                            disp([strtrim(upper(PARCOMP(icomp).label)),'set nan in mean'])
+                        else
+                            A = nan(size(listHBOch,1),1);
+                            idok = find(~isnan(listHBOch));
+                            A(idok,1) = topo(listHBOch(idok));
+                        end
                         alllabel = [alllabel,{PARCOMP(icomp).label}];                  
                         allbHbO = [allbHbO,A];
                         save(fullfile(pathoutlist,['TopoHbO ',labelout,PARCOMP(icomp).label,'.mat']),'A' ,'zonelist','srsfile' );
                         disp(['Create export: ', fullfile(pathoutlist,['TopoHbO ',labelout,PARCOMP(icomp).label,'.mat'])])
+                        rawxlsoutHBO =   [rawxlsoutHBO ;[{pathoutlist}, {['TopoHbO ',labelout,PARCOMP(icomp).label,'.mat']},{ChannelListfile} ,{labelout}]];
                         clear A
                    
                         A = nan(size(listHBRch,1),1);
@@ -190,10 +200,12 @@ for filenb = 1:size(NIRSDtp,1)
             idkeep(idremovebloc) = [];
         end
         Amean = nanmean(allbHbO,2);
+        nOK=sum(~(sum(isnan(allbHbO))==size(allbHbO,1)))
         allsubjectHBO = [allsubjectHBO,allbHbO];
         A = [Amean];
-        save(fullfile(pathoutlist,['HBOmean ',labelout,'.mat']),'A' ,'zonelist','srsfile' );  
+        save(fullfile(pathoutlist,['HBOmean ',labelout,'n',num2str(nOK),'.mat']),'A' ,'zonelist','srsfile' );  
         disp(['Create export: ', fullfile(pathoutlist,['HBOmean ',labelout,'.mat'])])
+        rawxlsoutHBOmean= [rawxlsoutHBOmean;[{pathoutlist},{['HBOmean ',labelout,'n',num2str(nOK),'.mat']},{ChannelListfile} ,{labelout}]];
         Amean = nanmean(allbHbR,2);
         A = [Amean];
         allsubjectHBR = [allsubjectHBR,allbHbR];
@@ -320,5 +332,10 @@ if 0
     subplot(2,2,4);
     imagesc(Tglmall)
     title(NIRSDtp{1})
+   
 end
+xlswrite(fullfile(pathoutlist,'TemplateStat_TopoHbO.xlsx'),rawxlsoutHBO)
+disp(['Save ',fullfile(pathoutlist,'TemplateStat_TopoHbO.xlsx'),' list events export filed available for stats'])
+xlswrite(fullfile(pathoutlist,'TemplateStat_MeanHbO.xlsx'),rawxlsoutHBOmean)
+disp(['Save ',fullfile(pathoutlist,'TemplateStat_MeanHbO.xlsx'),' list events export filed available for stats'])
 out.NIRSmat = {fullfile(NIRSDtp{1},'NIRS.mat')};

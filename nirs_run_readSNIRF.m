@@ -75,6 +75,7 @@ end
 DATA.d = snirf.data.dataTimeSeries;
 DATA.t = snirf.data.time;
 fq=1/(DATA.t(2)-DATA.t(1));
+try
 if ~isempty(snirf.stim)
     DATA.s = zeros(size(DATA.d,1), numel(snirf.stim));
     for istim = 1 : numel(snirf.stim)
@@ -104,18 +105,49 @@ end
         fprintf(']}\n');
     end
     fprintf('\n');
-
-for i = 1:size(snirf.aux,2)
-    aux(:,i) = snirf.aux(i).dataTimeSeries;
+    for i = 1:size(snirf.aux,2)
+        aux(:,i) = snirf.aux(i).dataTimeSeries;
+    end
+catch %for FRESH data format
+   FileName= inputsnirf{1}
+   Events = importdata([FileName(1:end-10),'events.tsv']);
+   DATA.s = zeros(size(DATA.d,1),1);
+   DATA.s(Events.data(:,2))=Events.data(:,1);
 end
 
 
-DATA.SD.Lambda = snirf.probe.wavelengths; 
-DATA.SD.SrcPos = snirf.probe.sourcePos2D;
-DATA.SD.DetPos = snirf.probe.detectorPos2D;
-DATA.SD.nSrc = size(snirf.probe.sourcePos2D,1);
-DATA.SD.nDets = size(snirf.probe.detectorPos2D,1);
-DATA.SD.SpatialUnit = 'mm';
+
+try
+    DATA.SD.Lambda = snirf.probe.wavelengths; 
+    DATA.SD.SrcPos = snirf.probe.sourcePos2D;
+    DATA.SD.DetPos = snirf.probe.detectorPos2D;
+    DATA.SD.nSrc = size(snirf.probe.sourcePos2D,1);
+    DATA.SD.nDets = size(snirf.probe.detectorPos2D,1);
+    DATA.SD.SpatialUnit = 'mm';
+catch %Ajustement for FRESH snirf data coordinate are not embended in sNIRF format use tsv optode file 
+          disp('WARNING snirf format missing field adjust for FRESH project only')
+          A = importdata([FileName(1:end-26),'optodes.tsv'])
+          for ich=1:size(A.data,1)
+              label = A.textdata{ich+1,1};
+              if strcmp(label(1),'S')
+                sourcePos(str2num(label(2:end)),:)=A.data(ich,:);
+              elseif strcmp(label(1),'D')
+                detectorPos(str2num(label(2:end)),:)=A.data(ich,:);
+              end
+          end
+           
+           DATA.SD.SrcPos =  sourcePos;
+           DATA.SD.DetPos = detectorPos;
+           DATA.SD.SpatialUnit = 'm';
+           Channels = importdata([FileName(1:end-10),'channels.tsv']);
+          DATA.SD.Lambda = [760,850];
+           
+           DATA.SD.nSrc = size(sourcePos,1);
+           DATA.SD.nDets = size(detectorPos,1);
+     
+end
+
+
 source_lst = [];
 detector_lst = [];
 wavelength_lst = [];
@@ -237,7 +269,8 @@ for Idx_File=1:numel(job.inputSNIRF)
        for i=1:size(DATA.s,2)
           timesample= find(DATA.s(:,i));
           for js = 1:numel(timesample)
-            aux5 = [aux5;i,timesample(js)];
+            aux5 = [aux5; DATA.s(timesample(js),i),timesample(js)];
+           
           end
        end
    else

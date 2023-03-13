@@ -1233,21 +1233,26 @@ sMtg = get_Mtg( DispHelm );
 vHoles = get_vHoles( DispHelm );
 if get(handles.radio_guiSPMnirsHSJ,'value')==1
     guiHOMER = getappdata(0,'guiHOMER');
+    DispParameter.reset = 1;
 elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
     guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
+    DispParameter.reset = 1;
 elseif get(handles.radio_guiSPMnirsHSJ,'value')==3
     guiHOMER = getappdata(0,'gui_SPMvideo');
+    DispParameter.reset = 1;
+else
+     DispParameter.reset = 1;
 end
 PMI =get(guiHOMER,'UserData');
 DispParameter.axes1 = handles.axes_Mtg2;
 DispParameter.viewhelmet = get(handles.radio_holes,'value');
 %     DispParameter.viewhelmet = 1;
-DispParameter.reset = 1;
+
 DispParameter.channel = get(handles.radio_Channel,'value');
 DispParameter.viewfront = get(handles.radio_viewfront,'value');
 if get(handles.radio_viewdistance,'value')& get(handles.popup_labelch,'value')==1
     DispParameter.D1label = 1;
-    DispParameter.dist = 0;
+    DispParameter.dist = 0;0
     DispParameter.idnb = 0;
     DispParameter.nbavg =0;
     if isfield(handles,'d1')

@@ -10,12 +10,13 @@ for filenb=1:size(job.NIRSmat,1) %JT
         [ones(size(NIRS.Cf.H.C.id,2)/2,1);ones(size(NIRS.Cf.H.C.id,2)./2,1).*2]];
 
         [path, fname, extension]=fileparts(job.NIRSmat{filenb,1});
-        [file, path] = uiputfile(fullfile(path,'channellist.txt'));
+       % [file, path] = uiputfile(fullfile(path,'channellist.txt'));
+        filenameChannelList = fullfile(path,'channellist.txt')
       % ChannelLabels = ConvertmlIDsrs2label(NIRS)        
     %   NIRS.Cf.dev.n = 'NIRx'
         switch NIRS.Cf.dev.n
             case 'ISS Imagent'
-                fid = fopen([path,file],'w');               
+                fid = fopen(filenameChannelList,'w');               
                 for i = 1:size(ML_new,1)/2   
                     strDet = SDDet2strboxy_ISS(ML_new(i,2));
                     strSrs = SDPairs2strboxy_ISS(ML_new(i,1));
@@ -23,7 +24,7 @@ for filenb=1:size(job.NIRSmat,1) %JT
                 end
                 fclose(fid)
             case 'NIRx'
-                 fid = fopen([path,file],'w');               
+                 fid = fopen(filenameChannelList,'w');               
                     for i = 1:size(ML_new,1)/2   
                     strDet = SDDet2strboxy(ML_new(i,2));
                     strSrs = SDPairs2strboxy(ML_new(i,1));
@@ -31,7 +32,7 @@ for filenb=1:size(job.NIRSmat,1) %JT
                     end
                     fclose(fid);
             case 'NIRSx'
-                 fid = fopen([path,file],'w');               
+                 fid = fopen(filenameChannelList,'w');               
                     for i = 1:size(ML_new,1)/2   
                     strDet = SDDet2strboxy(ML_new(i,2));
                     strSrs = SDPairs2strboxy(ML_new(i,1));
@@ -39,7 +40,7 @@ for filenb=1:size(job.NIRSmat,1) %JT
                     end
                     fclose(fid);
             case 'NIRS FILE HOMER'
-                    fid = fopen([path,file],'w');               
+                    fid = fopen(filenameChannelList,'w');               
                     for i = 1:size(ML_new,1)/2   
                     strDet = SDDet2strboxy(ML_new(i,2));
                     strSrs = SDPairs2strboxy(ML_new(i,1));
@@ -47,7 +48,7 @@ for filenb=1:size(job.NIRSmat,1) %JT
                     end
                     fclose(fid);
              otherwise
-                    fid = fopen([path,file],'w');               
+                    fid = fopen(filenameChannelList,'w');               
                     for i = 1:size(ML_new,1)/2   
                     strDet = SDDet2strboxy(ML_new(i,2));
                     strSrs = SDPairs2strboxy(ML_new(i,1));
@@ -55,6 +56,6 @@ for filenb=1:size(job.NIRSmat,1) %JT
                     end
                     fclose(fid);
         end
-    disp(['Channel list save: ', [path,file]])
+    disp(['Channel list save: ', filenameChannelList])
 end
 out.NIRSmat = job.NIRSmat;

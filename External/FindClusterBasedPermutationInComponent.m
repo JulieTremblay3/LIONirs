@@ -1,4 +1,4 @@
-function [stat neiglinkmat]= FindClusterBasedPermutationInMatrix(chanpos,neighbourdist,clustercritval, statobs, statrand )
+function [stat neigmat]= FindClusterBasedPermutationInComponent(chanpos,neighbourdist,clustercritval, statobs, statrand )
 % Description: run clusterstat from fieldtrip
 % input: 
 % chanpos: channel position to define neighbour
@@ -27,120 +27,31 @@ for i=1:size(chanpos,1)
    listelectrode{i,1} = ['C',num2str(i)];    
 end 
 %neighbourdist = 'sig';
-if strcmp(neighbourdist,'all')
-   neiglinkmat(:,:)=ones(numel(statobs));  
-   disp(['Neighborgs use all link'])
-elseif strcmp(neighbourdist,'link')
-   %debut neiglinkmat
-%     neighbourdist = str2num(neighbourdist);  
-%     neighbours = compneighbstructfromgradelec(chanpos,listelectrode,neighbourdist);
-   % neighbours = compneighbstructfromgradelec(chanpos,listelectrode,0);
-    id = 1;
-    nele = numel(listelectrode);
-    matid = zeros(nele,nele);
-    for ielex=1:nele
-        ielex;
-        ieley = 1;
-        while ieley < ielex 
-            option{id}.ele1 =  listelectrode{ielex};
-            option{id}.ele2 =listelectrode{ieley};
-            option{id}.matposition = [ielex,ieley];      
-            matid(ielex,ieley)=id;
-            neiglink(id).label1 = [listelectrode{ielex}];
-            neiglink(id).label2 =  [listelectrode{ieley}];
-             iele1(id)=ielex;
-             iele2(id) =ieley;
-%             neiglink(id).neighblabel =[neighbours(ielex).neighblabel;neighbours(ieley).neighblabel];
-%             [seln] = match_str(listelectrode, neiglink(id).neighblabel);
-%             neiglink(id).neigiele = seln;
-            ieley = ieley + 1;
-            id = id + 1;
-        end
-    end
-    idhalf=find(matid);
-    loc=matid(idhalf);
-    %check link relate electrode
-    neiglinkmat = false(length(neiglink),length(neiglink));
 
-    %reoder with link
-    iele_row_link =   iele1(loc);
-    iele_col_link =   iele2(loc);
-
-    for ilink=1:length(neiglink)
-         listlink= find(iele_row_link  == iele_row_link(ilink) |iele_row_link   == iele_col_link(ilink)|iele_col_link   == iele_row_link(ilink)|iele_col_link   == iele_col_link(ilink) );
-         neiglinkmat(ilink,listlink) = true;
-    end   
-   %  figure;imagesc(neiglinkmat)
-       disp(['Neighborgs with commun link between them'])
-elseif strcmp(neighbourdist,'sig') %allow neigborg among sig value
-    neiglinkmat(:,:)=zeros(numel(statobs)); 
-    idpos = find(statobs>clustercritval);
-    idminus = find(statobs<(-clustercritval));   
-    for id = 1:numel(idpos)
-        neiglinkmat(idpos(id),idpos)=1;
-    end
-    for id = 1:numel( idminus)
-        neiglinkmat( idminus(id), idminus)=1;
-    end
-else %distance entre les électrodes 
     neighbourdistnb = str2num(neighbourdist);  
     neighbours = compneighbstructfromgradelec(chanpos,listelectrode,neighbourdistnb);
-   % neighbours = compneighbstructfromgradelec(chanpos,listelectrode,0);
-    id = 1;
-    nele = numel(listelectrode);
-    matid = zeros(nele,nele);
-    for ielex=1:nele
-        ielex;
-        ieley = 1;
-        while ieley < ielex 
-            option{id}.ele1 =  listelectrode{ielex};
-            option{id}.ele2 =listelectrode{ieley};
-            option{id}.matposition = [ielex,ieley];      
-            matid(ielex,ieley)=id;
-            neiglink(id).label1 = [listelectrode{ielex}];
-            neiglink(id).label2 =  [listelectrode{ieley}];
-             iele1(id)=ielex;
-             iele2(id) =ieley;
-            neiglink(id).neighblabel =[neighbours(ielex).neighblabel;neighbours(ieley).neighblabel];
-            [seln] = match_str(listelectrode, neiglink(id).neighblabel);
-            neiglink(id).neigiele = seln;
-            ieley = ieley + 1;
-            id = id + 1;
-        end
-    end
-    idhalf=find(matid);
-    loc=matid(idhalf);
-    %check link relate electrode
-    neiglinkmat = false(length(neiglink),length(neiglink));
-    allneighb = {neiglink.neighblabel};
-    %reoder with link
-    iele_row_link =   iele1(loc);
-    iele_col_link =   iele2(loc);
-    %iele1 valeur de l'électrode 1 pour se lien (1 to 99)
-    %iele2 valeur de l'électrode 2 pour se lien (1 to 99)
-    %eiglink(ilink).neigiele liste des voisins associés au 2 electrode du lien.
-    for ilink=1:length(neiglink)
-        idloc = loc(ilink);
-        %look for close neighbours one or the other of the electrode imply 
-        listlink= find(sum([iele_row_link  == neiglink(idloc).neigiele ; iele_col_link  == neiglink(idloc).neigiele])>1);
-        neiglinkmat(ilink,listlink) = true;       
+    neigmat = zeros(length(neighbours))
+
+    for ich=1:length(neighbours)
+           %look for close neighbours one or the other of the electrode imply 
+           ich
+            [seln] = match_str( listelectrode, neighbours(ich).neighblabel);
+        neigmat(ich,seln) = true;       
     end 
     
  %   figure;imagesc(neiglinkmat)
-    disp(['Neighborgs for clustering use optode with a distance ',num2str(neighbourdist),' between them'])
+    disp(['Neighborgs for clustering use optode with a distance of ',num2str(neighbourdist),' between them'])
     
-end  
+
    
+% 
+% figure;
+% imagesc(neigmat);
+% title(['Neighbor definition: ',neighbourdist ])
 
-figure;
-imagesc(neiglinkmat);
-title(['Neighbor definition: ',neighbourdist ])
 
-%%%% FIN to find neiglinkmat
-%     neiglinkmat(21,:)=0
-%     neiglinkmat(:,21)=0
 cfg.clustertail = 0;
-cfg.connectivity     = neiglinkmat;
+cfg.connectivity = neigmat;
 cfg.latency = 'all';
 cfg.frequency = 'all';
 cfg.numrandomization = 'all';
@@ -344,7 +255,7 @@ cfg.clustertail      = ft_getopt(cfg, 'clustertail',      cfg.tail);
 cfg.connectivity     = ft_getopt(cfg, 'connectivity',     false);
 
 % ensure that the preferred SPM version is on the path
-ft_hastoolbox(cfg.spmversion, 1);
+%ft_hastoolbox(cfg.spmversion, 1);
 
 if isempty(cfg.dim)
   ft_error('cfg.dim should be defined and not empty');
@@ -565,9 +476,9 @@ else
 end
 
 % do the clustering on the randomized data
-ft_progress('init', cfg.feedback, 'computing clusters for the thresholded test statistic computed from the randomized design');
+%ft_progress('init', cfg.feedback, 'computing clusters for the thresholded test statistic computed from the randomized design');
 for i = 1:Nrand
-  ft_progress(i/Nrand, 'computing clusters in randomization %d from %d\n', i, Nrand);
+%  ft_progress(i/Nrand, 'computing clusters in randomization %d from %d\n', i, Nrand);
   if needpos
     if spacereshapeable
       tmp = zeros([1 cfg.dim]);
@@ -663,7 +574,7 @@ for i = 1:Nrand
     end
   end % needneg
 end % for 1:Nrand
-ft_progress('close');
+%ft_progress('close');
 
 % compare the values for the observed clusters with the randomization distribution
 if needpos
@@ -898,7 +809,7 @@ function [cluster, numcluster] = findcluster(onoff, spatdimneighbstructmat, vara
 % $Id$
 
 % the calling code should ensure that SPM is on the path, preferably the latest version
-ft_hastoolbox('spm', -1);
+%ft_hastoolbox('spm', -1);
 
 siz           = size(onoff);
 spatdimlength = siz(1);

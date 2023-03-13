@@ -218,7 +218,9 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
                         else %If the channel is bad (flagged in NIRS.Cf.H.C.ok)
                             A(Ich,:,trialnb) = ones(1,numel(av_ind(1,atrig):av_ind(2,atrig)))*NaN;
                             report_temp(Ich,f) = 0;
-                           
+                            if atrig== length(ind_trig)
+                            disp(['Channel ', num2str(Ich), ' was rejected']);
+                            end
                         end
                 end
                 trialnb = trialnb+1;

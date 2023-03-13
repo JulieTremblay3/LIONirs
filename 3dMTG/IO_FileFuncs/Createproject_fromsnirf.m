@@ -17,10 +17,28 @@ elseif strcmp(ext, '.snirf')
         disp('Please install https://github.com/fNIRS/snirf_homer3 to support snirf class compatibility ')
         return
     end
-    NIRS.SD.Lambda = snirf.probe.wavelengths; 
-    NIRS.SD.SrcPos = snirf.probe.sourcePos2D;
-    NIRS.SD.DetPos = snirf.probe.detectorPos2D;
-    NIRS.SD.SpatialUnit = 'mm';
+    try             
+        NIRS.SD.Lambda = snirf.probe.wavelengths; 
+        NIRS.SD.SrcPos = snirf.probe.sourcePos2D;
+        NIRS.SD.DetPos = snirf.probe.detectorPos2D;
+        NIRS.SD.SpatialUnit = 'mm';
+    catch %Ajustement for FRESH snirf data coordinate are not embended in sNIRF format use tsv optode file 
+          A = importdata([FileName(1:end-26),'optodes.tsv']);
+          for ich=1:size(A.data,1)
+              label = A.textdata{ich+1,1};
+              if strcmp(label(1),'S');
+                sourcePos(str2num(label(2:end)),:)=A.data(ich,:);
+              elseif strcmp(label(1),'D')
+                detectorPos(str2num(label(2:end)),:)=A.data(ich,:);
+              end
+          end
+           
+           NIRS.SD.SrcPos =  sourcePos;
+           NIRS.SD.DetPos = detectorPos;
+           NIRS.SD.SpatialUnit = 'm';
+           Channels = importdata([FileName(1:end-10),'channels.tsv']);
+           NIRS.SD.Lambda = [760;850];
+    end 
 end
 %load NIRS get SD coordinate and montage information 
  newPrj = IO_Project_Data;

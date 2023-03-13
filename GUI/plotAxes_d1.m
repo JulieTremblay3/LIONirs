@@ -809,7 +809,7 @@ if isfield(handles,'selected_trig')
 else
     %msgbox('NO TRIGGER AVAILABLE')
 end
-if get(handles.radio_3dmontageupdate,'value')
+if 0 %get(handles.radio_3dmontageupdate,'value')
     option.conc = 1;
     option.SPMgui = 1;
     option.restorestetting = 0;

@@ -5,19 +5,23 @@ alphatr = job.e_statcomponent_alpha;
      mkdir(dir1);
  end
 try
-    ttest(ones(20,1),zeros(20,1));   
+   ttest(ones(20,1),zeros(20,1));   
 catch
-         disp('Uncomplete Stats components, Please Install Matlab Statistics and Machine Learning Toolbox')
-         return
+   disp('Uncomplete Stats components, Please Install Matlab Statistics and Machine Learning Toolbox')
+   return
 end
-     
+
+
+
  if isfield(job.c_statcomponent,'b_TtestOneSample')
     AllC = [];
     for i=1:numel(job.c_statcomponent.b_TtestOneSample.f_component)
         load(job.c_statcomponent.b_TtestOneSample.f_component{i},'-mat');
         AllC = [AllC,A];
-        info.zonelistG1{i} = zonelist;
-    end
+        info.zonelistG1{i} = zonelist;        
+    end  
+    save(fullfile(dir1,'MatricebyChannel.mat'), 'AllC','-mat')
+    disp(fullfile(dir1,'MatricebyChannel.mat'))
     info.AllG1 = AllC;
     info.G1 = job.c_statcomponent.b_TtestOneSample.f_component;
      for ich=1:size(AllC,1)       
@@ -41,14 +45,20 @@ end
      save(fullfile(dir1,['ONESAMPLE_Mean n=',num2str(NBSUJET),'.mat']),'A','zonelist')  
      disp(['Save: ',fullfile(dir1,['ONESAMPLE_Mean n=',num2str(NBSUJET),'.mat'])]);
      A = tval;
-     save(fullfile(dir1,['ONESAMPLE_Tmap.mat']),'A','zonelist')
-     disp(['Save: ',fullfile(dir1,['ONESAMPLE_Tmap.mat'])]);
+     save(fullfile(dir1,['ONESAMPLE_Tmap n=',num2str(NBSUJET),'.mat']),'A','zonelist')
+     disp(['Save: ',fullfile(dir1,['ONESAMPLE_Tmap n=',num2str(NBSUJET),'.mat'])]);
      A = mval.*double(pval<alphatr);
      save(fullfile(dir1,['ONESAMPLE_mean_',  num2str(alphatr),'unc.mat']), 'A','zonelist')  
      disp(['Save: ',fullfile(dir1,['ONESAMPLE_mean_',  num2str(alphatr),'unc.mat'])]);
+     A = pval
+      save(fullfile(dir1,['ONESAMPLE_pval_',  num2str(alphatr),'unc.mat']),'A','zonelist')
+     disp(['Save: ',fullfile(dir1,['ONESAMPLE_pval_',  num2str(alphatr),'unc.mat'])]);
      [FDR,Q] = mafdr(pval); %establish fdr among all channels results         
      A = mval.*double(Q<alphatr);
      save(fullfile(dir1,['ONESAMPLE_mean_',  num2str(alphatr),'fdr.mat']),'A','zonelist')
+     disp(['Save: ',fullfile(dir1,['ONESAMPLE_mean_',  num2str(alphatr),'fdr.mat'])]);
+     A = Q;
+     save(fullfile(dir1,['ONESAMPLE_Q_',  num2str(alphatr),'fdr.mat']),'A','zonelist')
      disp(['Save: ',fullfile(dir1,['ONESAMPLE_mean_',  num2str(alphatr),'fdr.mat'])]);
 elseif isfield(job.c_statcomponent,'b_Ttestpaired')   
     if job.c_statcomponent.b_Ttestpaired.m_TtestOneSample == 1
@@ -127,6 +137,30 @@ elseif isfield(job.c_statcomponent,'b_TtestUnpaired')
         AllG2 = [AllG2,A];
         info.zonelistG2{i}=zonelist;
     end
+        try
+        if isfield(job.c_statcomponent.b_TtestUnpaired.c_statpermutation,'b_permutation')
+            %not all channel could be use in the final matrice get the position
+            %from one subjet and ensure you associate label in the Data.ZoneList to
+            %a position in the zone.ml first col source second col detector
+            load(job.c_statcomponent.b_TtestUnpaired.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.b_MCT_ZoneBased{1},'-mat')
+            chanpos = zeros(numel(zonelist),3);
+            for id=1:size(zonelist)
+                name = zonelist{id};
+                [DetL,SrsL] =strtok(name,' ');
+                SDdetL = StrBoxy2SDDet(DetL);
+                SDsrsL =str2num(SrsL(3:end));
+                idml = find(zone.ml(:,1)==  SDsrsL & zone.ml(:,2)==  SDdetL & zone.ml(:,4)== 1);
+                if ~isempty(idml)
+                chanpos(id,:) =  zone.pos(idml,1:3);
+                end
+            end
+        end
+        catch
+             disp('Multiple comparaison cluster could not find channel position, use all cluster')
+        end
+    
+    
+    
      info.AllG1=AllG1;
      info.G1=job.c_statcomponent.b_TtestUnpaired.f_componentG1;
      info.AllG2=AllG2; 
@@ -162,7 +196,52 @@ elseif isfield(job.c_statcomponent,'b_TtestUnpaired')
      A = mval.*double(Q<alphatr);
      save(fullfile(dir1,['TWOSAMPLE_mean_',num2str(alphatr),'fdr.mat']),'A','zonelist');
      disp(['Save: ',fullfile(dir1,['TWOSAMPLE_mean_',num2str(alphatr),'fdr.mat'])]);
-     
+       if  isfield(job.c_statcomponent.b_TtestUnpaired.c_statpermutation,'b_permutation') 
+           halfMAT = [AllG1,AllG2]
+          Randgroupe = [ones(size( AllG1,2),1);ones(size( AllG2,2),1)*2] ;          
+          iduse = [find(Randgroupe==1);find(Randgroupe==2)];
+          nperm = str2num((job.c_statcomponent.b_TtestUnpaired.c_statpermutation.b_permutation.e_npermutation))
+         for iperm=1:nperm
+            permfix(iperm,:) =  randperm(numel(Randgroupe));
+           
+         end
+         for idperm=1:nperm
+         for ich = 1:size(AllG1,1)
+                GR = permfix(idperm,:);
+                [h,p,ci,stats] = ttest2(halfMAT(ich,GR(1:numel(find(Randgroupe==1)))), halfMAT(ich,GR((numel(find(Randgroupe==1))+1):end)));
+                tvalperm(ich,idperm) =stats.tstat;
+         end
+         end
+             t_dist_all =  tvalperm ;
+        [fecdf,xecdf] = ecdf(t_dist_all(:));
+        clustercritical=xecdf(sum(fecdf<(1-alphatr)));
+        disp(['critical for clustering p=', num2str(alphatr),' T=',num2str(clustercritical)])
+         neighbourdist = job.c_statcomponent.b_TtestUnpaired.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_neighbourdist;
+          [stat, matneig] = FindClusterBasedPermutationInComponent(chanpos, neighbourdist,clustercritical, tval, tvalperm );
+           
+          for iposcluster  = 1:numel(stat.posclusters)
+            id = find(stat.posclusterslabelmat==iposcluster);
+            plotall  = zone.plot{1} ;
+            plotLstall = zone.plotLst{1};
+            zone.label{end+1} = ['Pos Cluster', num2str(iposcluster),' ',num2str(stat.posclusters(iposcluster).prob)];
+            zone.plot{end+1} = plotall(id);
+            zone.plotLst{end+1} =    plotLstall( id);
+          end
+            for inegcluster  = 1:numel(stat.negclusters)
+                id = find(stat.negclusterslabelmat==inegcluster);
+                plotall  = zone.plot{1} ;
+                plotLstall = zone.plotLst{1};
+                zone.label{end+1} = ['Neg Cluster ', num2str(inegcluster),' ',num2str(stat.negclusters(inegcluster).prob)];
+                zone.plot{end+1} = plotall(id);
+                zone.plotLst{end+1} =    plotLstall( id);
+              end
+          
+           [filepathzone,namezone,ext] =fileparts(job.c_statcomponent.b_TtestUnpaired.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.b_MCT_ZoneBased{1});
+
+           save(fullfile(dir1, ['Cluster',namezone,ext]),'zone','-mat');
+           disp(['Save ', fullfile(dir1, ['Cluster',namezone,ext]),...
+               ' with cluster']);
+       end  
 
 elseif isfield(job.c_statcomponent,'c_ANOVAN')
     if isfield(job.c_statcomponent.c_ANOVAN,'b_ANOVAN') %by channel     
@@ -182,10 +261,15 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
      %load the observation if 
     [pathstr, name, ext]=fileparts(raw{2,3});
 
-    AllCOM = [];
+    AllCOM = []; 
     for i=2:size(raw,1)
-        tmp         = load(fullfile(raw{i,1},raw{i,2}),'-mat'); % Load data    
-        fid         = fopen(fullfile(raw{i,1},raw{i,3}));        %Load channel list
+        tmp         = load(fullfile(raw{i,1},raw{i,2}),'-mat'); % Load data  
+        [filepath,name,ext] = fileparts(raw{i,3});
+        if  isempty(filepath) %try to open in same folder
+            fid = fopen(fullfile(raw{i,1},raw{i,3}));        %Load channel list
+        else %try to open channel file directly at the good location folder
+            fid = fopen(raw{i,3});        %Load channel list 
+        end
         chlist      = textscan(fid, '%s%s');
         fclose(fid); 
         %find zone list index
@@ -205,10 +289,11 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
      
      zonelist = tmp.zonelist(idactual);
      
-     
-
+     A = AllCOM'
+     save(fullfile(dir1,'databychannel.mat'), 'A', 'zonelist')
+     disp(['Save ', fullfile(dir1,'databychannel.mat')])
     groupcell = raw(2:end, 4:end);
-    name = raw(1, 4:end);%conditioni  could be a number or a zone label to identify region if zone ! 
+    name = raw(1, 4:end);%conditioni  could be a number or a zone label to identify region if zone use 0 to not be consider ! 
     for i = 1:size(groupcell ,2)
         groupedef{i} = ( groupcell(:,i));
     end
@@ -310,13 +395,21 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
      AllCOM = [];
    
     
-     for i=2:size(raw,1)         
-      tmp= load(fullfile(raw{i,1},raw{i,2}),'-mat');       
+     for i=2:size(raw,1)       
+         try
+            tmp= load(fullfile(raw{i,1},raw{i,2}),'-mat');   
+         catch
+             disp(['Fail to open ',fullfile(raw{i,1},raw{i,2})])
+         end
       try
           zone = load(fullfile(raw{i,1},raw{i,3}),'-mat'); 
       catch
+          try
+          zone = load(raw{i,3},'-mat');
+          catch              
           disp(['Zone expected, file ',fullfile(raw{i,1},raw{i,3}),' could not be load'])
           return
+          end
       end
         labelzone = raw{i,4};
         for izone = 1:numel(zone.zone.label)
@@ -342,6 +435,7 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
      for i = 1:size(groupcell ,2)
         groupedef{i} = ( groupcell(:,i));
      end
+     try
     for ich = 1:size(AllCOM,1)         
          y = AllCOM(ich,:);         
          [p,tbl,stats,terms] = anovan(y',groupedef,'model','interaction','varnames',name,'display','off' );
@@ -354,6 +448,9 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
 %          results = multcompare(stats,'Dimension',[1 2]);
 
     end
+     catch
+         disp('ANOVAN error') 
+     end
     lastcol = [{'Val'};num2cell(y')];
     tmp = [raw,lastcol];
     try
@@ -361,7 +458,125 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
     catch
         writetxtfile_asxlswrite(fullfile(dir1,'ROI.xls'),tmp);
     end
+        disp(['Save extract amplitude by ROI to open outside matlab : winopen ', fullfile(dir1,'ROI.xls')])
     end
+ elseif isfield(job.c_statcomponent,'c_StatcomponentExport')
+     if isfield(job.c_statcomponent.c_StatcomponentExport,'f_componentexportch') %by channel     
+     [filepath,name,ext] = fileparts(job.c_statcomponent.c_StatcomponentExport.f_componentexportch{1});
+     if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
+         try
+            [num,txt,raw] = xlsread(job.c_statcomponent.c_StatcomponentExport.f_componentexportch{1});
+         catch
+            [num,txt,raw] = readtxtfile_asxlsread(job.c_statcomponent.c_StatcomponentExport.f_componentexportch{1});
+         end
+
+     elseif  strcmp(ext,'.txt')
+          [num,txt,raw] = readtxtfile_asxlsread(job.c_statcomponent.c_StatcomponentExport.f_componentexportch{1});
+     end
+     
+     %Case anovan each ch save each average and pval add fdr correction! 
+     %load the observation if 
+    [pathstr, name, ext]=fileparts(raw{2,3});
+
+    AllCOM = []; 
+    for i=2:size(raw,1)
+        tmp         = load(fullfile(raw{i,1},raw{i,2}),'-mat'); % Load data  
+        [filepath,name,ext] = fileparts(raw{i,3});
+        if  isempty(filepath) %try to open in same folder
+            fid = fopen(fullfile(raw{i,1},raw{i,3}));        %Load channel list
+        else %try to open channel file directly at the good location folder
+            fid = fopen(raw{i,3});        %Load channel list 
+        end
+        chlist      = textscan(fid, '%s%s');
+        fclose(fid); 
+        %find zone list index
+        srs         = chlist{1};
+        det         = chlist{2};
+        idactual    = [];
+        %verify the order is constant with the list export 
+        for ichlist = 1:numel(chlist{1})
+            id = strmatch([srs{ichlist},' ', det{ichlist}],tmp.zonelist,'exact');
+            if ~isempty(id)
+                idactual = [idactual,id];
+            end
+        end
+        AllCOM = [AllCOM,tmp.A(idactual)];
+        info.zonelist{i-1} = tmp.zonelist;
+     end
+     
+     zonelist = tmp.zonelist(idactual);
+     
+     A = AllCOM'
+     info = raw;
+     save(fullfile(dir1,'databychannel.mat'), 'A', 'zonelist','info')
+     disp(['Save ', fullfile(dir1,'databychannel.mat')])
+   elseif  isfield(job.c_statcomponent.c_StatcomponentExport,'f_componentexportzone')
+      
+     [filepath,name,ext] = fileparts(job.c_statcomponent.c_StatcomponentExport.f_componentexportzone{1});
+     if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
+         try
+         [num,txt,raw] = xlsread(job.c_statcomponent.c_StatcomponentExport.f_componentexportzone{1});
+         catch
+            [num,txt,raw] = readtxtfile_asxlsread(job.c_statcomponent.c_StatcomponentExport.f_componentexportzone{1});
+         end
+     elseif  strcmp(ext,'.txt')
+         [num,txt,raw] = readtxtfile_asxlsread(job.c_statcomponent.c_StatcomponentExport.f_componentexportzone{1});
+     end
+    
+     %Case anovan each ch save each average and pval add fdr correction! 
+     %load the observation if 
+    [pathstr, name, ext]=fileparts(raw{2,3});
+     AllCOM = [];
+   
+    
+     for i=2:size(raw,1)       
+         try
+            tmp= load(fullfile(raw{i,1},raw{i,2}),'-mat');   
+         catch
+             disp(['Fail to open ',fullfile(raw{i,1},raw{i,2})])
+         end
+      try
+          zone = load(fullfile(raw{i,1},raw{i,3}),'-mat'); 
+      catch
+          try
+          zone = load(raw{i,3},'-mat');
+          catch              
+          disp(['Zone expected, file ',fullfile(raw{i,1},raw{i,3}),' could not be load'])
+          return
+          end
+      end
+        labelzone = raw{i,4};
+        for izone = 1:numel(zone.zone.label)
+            if strcmp(zone.zone.label{izone}, labelzone)
+                goodzone = izone;
+                %zoneidnum{i-1,1} = izone;
+                zoneid{i-1,1} = labelzone;
+            end
+        end
+        plotLst = zone.zone.plotLst{goodzone};
+        AllCOM = [AllCOM,nanmax(tmp.A(plotLst))];
+     end
+ 
+     info.AllCOMP = AllCOM; 
+     info.ROI =   raw(2:end,4);
+     info.groupedef = raw(2:end,2);
+     info.zone =  raw(2:end,3);
+     
+     groupcell = raw(2:end, 5:end);
+     name = raw(1, 5:end);%conditioni  could be a number or a zone label to identify region if zone ! 
+
+     A = AllCOM';
+       lastcol = [{'Val'};num2cell(A)];
+    info = [raw,lastcol];
+     save(fullfile(dir1,'databyzone.mat'), 'A','info')
+     disp(['Save ', fullfile(dir1,'databyzone.mat')])
+    try
+        xlswrite(fullfile(dir1,'ROI.xls'),info)
+    catch
+        writetxtfile_asxlswrite(fullfile(dir1,'ROI.xls'),info);
+    end
+        disp(['Save extract amplitude by ROI to open outside matlab : winopen ', fullfile(dir1,'ROI.xls')])
+     end
  end
 if job.m_statcomponent_saveoption==0
     save(fullfile(dir1,['info.mat']),'info')

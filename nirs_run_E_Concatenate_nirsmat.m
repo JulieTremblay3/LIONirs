@@ -119,7 +119,7 @@ if strcmp(temp(end-3:end),'zone')% USE ZONE TEMPLATE FIRST TO LOOK IN OTHER FILE
               NIRS.Dt.fir.aux5={aux5};
          end
      
-         NIRS.Dt.fir.sizebloc{1} = newsizebloc;
+         NIRS.Dt.fir.sizebloc = newsizebloc;
              NIRS.Cf.H.C.ok = double(sum(abs(dall),2)>0);
              
           %clean up old aux file format use export file format for auxiliary 
@@ -139,7 +139,7 @@ if strcmp(temp(end-3:end),'zone')% USE ZONE TEMPLATE FIRST TO LOOK IN OTHER FILE
             '',... %Channel Units
             NIRS.Cf.H.C.n,... %names given as a column of cells
             1/NIRS.Cf.dev.fs*1e6,... %SamplingInterval in microseconds
-            NIRS.Dt.fir.sizebloc{1}); %SamplingInterval in microseconds 
+            NIRS.Dt.fir.sizebloc); %SamplingInterval in microseconds 
     
     
     
@@ -182,7 +182,7 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
         SrsL= chlist{2};
           name =  DetL{1};
         if numel(name)>1
-            if strcmp(name(1:2),'D0')
+            if strcmp(name(1:1),'D')
                 Devicename = 'NIRx';
             else
                 Devicename  = 'ISS Imagent';
@@ -331,7 +331,7 @@ end
               NIRS.Dt.fir.aux5={aux5};
          end
      
-         NIRS.Dt.fir.sizebloc{1} = newsizebloc;
+         NIRS.Dt.fir.sizebloc = newsizebloc;
              NIRS.Cf.H.C.ok = ones(numel(chlst),1);
           %clean up old aux file format use export file format for auxiliary 
           if isfield(NIRS.Dt.fir,'aux1');NIRS.Dt.fir = rmfield(NIRS.Dt.fir, 'aux1');end      
@@ -350,9 +350,9 @@ end
             '',... %Channel Units
             NIRS.Cf.H.C.n,... %names given as a column of cells
             1/NIRS.Cf.dev.fs*1e6,... %SamplingInterval in microseconds
-            NIRS.Dt.fir.sizebloc{1}); %SamplingInterval in microseconds
+            NIRS.Dt.fir.sizebloc); %SamplingInterval in microseconds
 end
-if isfield(NIRS.Dt,'AUX')
+if isfield(NIRS.Dt,'AUX')  
    NIRS.Dt = rmfield(NIRS.Dt,'AUX');
 end
 if isfield(NIRS.Dt,'EEG')

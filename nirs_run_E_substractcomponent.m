@@ -53,7 +53,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
         end
         fwrite_NIR(outfile,d);     
         NIRS.Dt.fir.pp(lst+1).p{f,1} = outfile;
-  
+
     end
     %Label to find and substract
     [outfolder,fil1,ext1] = fileparts(outfile);
@@ -303,40 +303,47 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 end
                 indstart = PARCOMP(icomp).indt(1);
                 indstop = PARCOMP(icomp).indt(end); 
+               
                 intensnorm = d(PARCOMP(icomp).indt(1):PARCOMP(icomp).indt(end) ,listgood2wv);
                 X = 1:1:size(intensnorm,1);
                 Mb1 =  ((intensnorm(end,:)-intensnorm(1,:))./numel(X))';
                 Mb2 =  intensnorm(1,:)'; %offset
                 A = reshape(X,numel(X),1)*reshape( Mb1,1,numel(Mb1)) +ones(numel(X),1)*reshape( Mb2,1,numel(Mb2));
+                
                 spar = intensnorm - A;
-                Xm = A-1;              
-                if indstart == 1 & (indstop+1)< size(d,1)
-                    d(PARCOMP(icomp).indt(1):PARCOMP(icomp).indt(end) ,listgood2wv) = spar + ones(numel(PARCOMP(icomp).indt),1)*d(indstart,listgood2wv) ;
-                    d(indstop+1:end,listgood2wv) =  d(indstop+1:end,listgood2wv)-...
-                        ones(size(d(indstop+1:end,1)))* (d(indstop+1,listgood2wv) - d(indstart,listgood2wv) ); %offset adjustement
-                    dureetime = (PARCOMP(icomp).indt(end)-PARCOMP(icomp).indt(1))*1/fs;
-                    fprintf(' %3.1f%s\r',dureetime,['s done and offset adjustement']); 
-                elseif indstart == 1 & indstop== size(d,1)
-                     d(PARCOMP(icomp).indt(1):PARCOMP(icomp).indt(end) ,listgood2wv) = spar + ones(numel(PARCOMP(icomp).indt),1)*d(indstart,listgood2wv) ;
-                    d(indstop+1:end,listgood2wv) =  d(indstop+1:end,listgood2wv)-...
-                        ones(size(d(indstop:end,1)))* (d(indstop,listgood2wv) - d(indstart,listgood2wv) ); %offset adjustement
-                    dureetime = (PARCOMP(icomp).indt(end)-PARCOMP(icomp).indt(1))*1/fs;
-                    fprintf(' %3.1f%s\r',dureetime,['s done and offset adjustement']); 
-                elseif (indstop+1)>= size(d,1)
-                    d(PARCOMP(icomp).indt(1):PARCOMP(icomp).indt(end) ,listgood2wv) = spar + ones(numel(PARCOMP(icomp).indt),1)*d(indstart-1,listgood2wv) ;
-                    dureetime = (PARCOMP(icomp).indt(end)-PARCOMP(icomp).indt(1))*1/fs;
-                    fprintf(' %3.1f%s\r',dureetime,['s  done ']);
-                else
-                    try
-                    d(PARCOMP(icomp).indt(1):PARCOMP(icomp).indt(end) ,listgood2wv) = spar + ones(numel(PARCOMP(icomp).indt),1)*d(indstart-1,listgood2wv) ;
-                    d(indstop+1:end,listgood2wv) =  d(indstop+1:end,listgood2wv)-...
-                    ones(size(d(indstop+1:end,1)))* (d(indstop+1,listgood2wv) - d(indstart-1,listgood2wv) );
-                    dureetime = (PARCOMP(icomp).indt(end)-PARCOMP(icomp).indt(1))*1/fs;
-                    fprintf(' %3.1f%s\r ',dureetime,['s  done and offset adjustement']); 
-                    catch
-                        fprintf(' %3.1f%s\r ',dureetime,['s  Error']); 
-                    end
-                end
+                Xm = A-1;    
+                 if ~sum([isnan(intensnorm(end,:)),isnan(intensnorm(1,:))] )                 
+                        if indstart == 1 & (indstop+1)< size(d,1)
+                            d(PARCOMP(icomp).indt(1):PARCOMP(icomp).indt(end) ,listgood2wv) = spar + ones(numel(PARCOMP(icomp).indt),1)*d(indstart,listgood2wv) ;
+                            d(indstop+1:end,listgood2wv) =  d(indstop+1:end,listgood2wv)-...
+                                ones(size(d(indstop+1:end,1)))* (d(indstop+1,listgood2wv) - d(indstart,listgood2wv) ); %offset adjustement
+                            dureetime = (PARCOMP(icomp).indt(end)-PARCOMP(icomp).indt(1))*1/fs;
+                            fprintf(' %3.1f%s\r',dureetime,['s done and offset adjustement']); 
+                        elseif indstart == 1 & indstop== size(d,1)
+                             d(PARCOMP(icomp).indt(1):PARCOMP(icomp).indt(end) ,listgood2wv) = spar + ones(numel(PARCOMP(icomp).indt),1)*d(indstart,listgood2wv) ;
+                            d(indstop+1:end,listgood2wv) =  d(indstop+1:end,listgood2wv)-...
+                                ones(size(d(indstop:end,1)))* (d(indstop,listgood2wv) - d(indstart,listgood2wv) ); %offset adjustement
+                            dureetime = (PARCOMP(icomp).indt(end)-PARCOMP(icomp).indt(1))*1/fs;
+                            fprintf(' %3.1f%s\r',dureetime,['s done and offset adjustement']); 
+                        elseif (indstop+1)>= size(d,1)
+                            d(PARCOMP(icomp).indt(1):PARCOMP(icomp).indt(end) ,listgood2wv) = spar + ones(numel(PARCOMP(icomp).indt),1)*d(indstart-1,listgood2wv) ;
+                            dureetime = (PARCOMP(icomp).indt(end)-PARCOMP(icomp).indt(1))*1/fs;
+                            fprintf(' %3.1f%s\r',dureetime,['s  done ']);
+                        else
+                            try
+                            d(PARCOMP(icomp).indt(1):PARCOMP(icomp).indt(end) ,listgood2wv) = spar + ones(numel(PARCOMP(icomp).indt),1)*d(indstart-1,listgood2wv) ;
+                            d(indstop+1:end,listgood2wv) =  d(indstop+1:end,listgood2wv)-...
+                            ones(size(d(indstop+1:end,1)))* (d(indstop+1,listgood2wv) - d(indstart-1,listgood2wv) );
+                            dureetime = (PARCOMP(icomp).indt(end)-PARCOMP(icomp).indt(1))*1/fs;
+                            fprintf(' %3.1f%s\r ',dureetime,['s  done and offset adjustement']); 
+                            catch
+                                fprintf(' %3.1f%s\r ',dureetime,['s  Error']); 
+                            end
+                        end
+                 else
+                       disp('no offset')
+               
+                 end
                
             
                   try

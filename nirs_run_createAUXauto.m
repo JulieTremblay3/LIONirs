@@ -192,15 +192,44 @@ end
 
 [filepath,name,ext] = fileparts(job.NIRSmat{1});
 filenamexls = fullfile(filepath,'ExtractHRF.xlsx');
-A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0'};
-VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-5),...
-num2cell(onsetall+e_HRFduration+5), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1)  ];
 try
-    xlswrite(filenamexls,[A;VAL])
-    disp(['Create default xls config to GLM ', label, ' extract : ', filenamexls ]);
+    [num,txt,raw] = xlsread(filenamexls)
 catch
-    writetxtfile(filenamexls,[A;VAL]);
-    disp(['Create default xls config to GLM ', label, ' extract : ', filenamexls ]);
+    raw = [];
+end
+e_HRFduration
+    if ~isfield(job.c_createAUXauto.b_HRFtriggeronset,'e_HRF_SDmodel')
+        A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0'};
+        VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-5),...
+            num2cell(onsetall+repmat(e_HRFduration(1),numel(onsetall),1)++10), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1)  ];
+        if isempty(raw);raw = [A;VAL];else; raw = [raw;VAL];end
+    else isfield(job.c_createAUXauto.b_HRFtriggeronset,'e_HRF_SDmodel') 
+        if isempty(job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel{1}) %HRF only
+             [pathdefault, ~,~]= fileparts(NIRS.Dt.fir.pp(1).p{1});
+             disp(['Use default :',fullfile(pathdefault,'Global.zone'),' in the regression'])
+             job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel{1} = fullfile(pathdefault,'Global.zone');
+        end
+        if strcmp(job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel, 'No')
+            A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0'};
+            VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-5),...
+            num2cell(onsetall+repmat(e_HRFduration(1),numel(onsetall),1)+10), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1)  ];
+            if isempty(raw);raw = [A;VAL];else; raw = [raw;VAL];end
+
+        else
+           	A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0', 'X1'};
+            nameSDfile =job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel{1}; %'C:\data\FRESH\Analyzed\STAT_Motor\MotorSD.zone'
+            VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-5),...
+            num2cell(onsetall+repmat(e_HRFduration(1),numel(onsetall),1)+10), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1),repmat({nameSDfile},numel(onsetall),1)  ];
+            if isempty(raw);raw = [A;VAL];else; raw = [raw;VAL];end
+        end
+    end
+
+try
+    xlswrite(filenamexls,raw)
+    disp(['Create default xls config to GLM ', label, ' extract to visualized open : winopen ', filenamexls ]);
+catch
+    writetxtfile(filenamexls,raw);
+    disp(['Create default xls config to GLM ', label, ' extract to visualized open : winopen ', filenamexls ]);
 end
 
 save(job.NIRSmat{1},'NIRS');

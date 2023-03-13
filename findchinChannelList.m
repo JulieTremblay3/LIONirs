@@ -7,14 +7,15 @@ function  [ listHBOch, listHBRch, listnameHbO, listnameHbR, zonelist]= findchinC
         try
             chlist = textscan(fid, '%s%s');
         catch
-            msgbox(['File ', ChannelListfile,' could not be open'])
+            disp(['Error Channel list : ', ChannelListfile,' could not be open'])
         end
         fclose(fid);
         DetL= chlist{1};
         SrsL= chlist{2};
         name =  DetL{1};
+        
         if numel(name)>1
-            if strcmp(name(1:2),'D0')
+            if sum(cell2mat(strfind(DetL, 'D0'))) %imagen do not exporte as D0 use directly D1... to make the difference between systems
                 Devicename = 'NIRx';
             else
                 Devicename  = 'ISS Imagent';

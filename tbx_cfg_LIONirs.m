@@ -2420,24 +2420,94 @@ b_extractcomponent_phys.help = {'Apply subtraction of the short distance physiol
                                     'One signal was scaled to fit the other in a least-squares LS sense the scale estimation is saved as (SHORTGLM) component and must be subtracted.',...
                                     'When artefact period (yellow) are marked, the regression will be apply piecewise for each segment of data conserved.'};
 
+m_replaceglmlist       = cfg_menu;
+m_replaceglmlist.tag    = 'm_replaceglmlist';
+m_replaceglmlist.name   = 'Replace current component ';
+m_replaceglmlist.labels = {'Yes' ,'No'};
+m_replaceglmlist.values = {1,2};
+m_replaceglmlist.val    = {1}; 
+m_replaceglmlist.help   = {''};
+                               
+m_glmlist_autoexport_HbO       = cfg_menu;
+m_glmlist_autoexport_HbO.tag    = 'm_glmlist_autoexport_HbO';
+m_glmlist_autoexport_HbO.name   = 'Export chromophore';
+m_glmlist_autoexport_HbO.labels = {'HbO' ,'HbR'};
+m_glmlist_autoexport_HbO.values = {1,2};
+m_glmlist_autoexport_HbO.val    = {1}; 
+m_glmlist_autoexport_HbO.help   = {''};
+
+i_glmlist_autoexport_Xi         = cfg_entry;
+i_glmlist_autoexport_Xi.name    = 'Select which regressor to export X0=0, X1=1, X2=2...';
+i_glmlist_autoexport_Xi.tag     = 'i_glmlist_autoexport_Xi';       
+i_glmlist_autoexport_Xi.strtype = 'r';
+i_glmlist_autoexport_Xi.num     = [1 Inf];
+i_glmlist_autoexport_Xi.val     = {0}; 
+i_glmlist_autoexport_Xi.help    = {'Associate to the regressor X0, X1, X2,... to export'};
+
+                                
+    % Folder selector.
+f_extractglmlist_autoexport_yes_ChannelList          = cfg_files; %path
+f_extractglmlist_autoexport_yes_ChannelList.name     = 'Enter Channel List'; 
+f_extractglmlist_autoexport_yes_ChannelList.tag      = 'f_extractglmlist_autoexport_yes_ChannelList';
+f_extractglmlist_autoexport_yes_ChannelList.filter   = {'txt'};
+f_extractglmlist_autoexport_yes_ChannelList.ufilter  = '.txt';    %
+f_extractglmlist_autoexport_yes_ChannelList.num      = [0 1];     % Number of inputs required 
+f_extractglmlist_autoexport_yes_ChannelList.help     = {'Channel list is important to ensure channel order is repected if different project configuration are used (source and detector position). If you let this field empty a default channel list for this data file will be create'};    
+
+f_extractglmlist_autoexport_yes          = cfg_files; %path
+f_extractglmlist_autoexport_yes.name     = 'Result folder';
+f_extractglmlist_autoexport_yes.tag      = 'f_extractglmlist_autoexport_yes';
+f_extractglmlist_autoexport_yes.filter   = {'dir'};
+f_extractglmlist_autoexport_yes.ufilter  = '.*';    %
+f_extractglmlist_autoexport_yes.num      = [1 1];     % Number of inputs required 
+f_extractglmlist_autoexport_yes.help     = {'Result of component will be saved in this folder.'};
+   
+b_extractglmlist_autoexport_yes         = cfg_branch;
+b_extractglmlist_autoexport_yes.tag      = 'b_extractglmlist_autoexport_yes';
+b_extractglmlist_autoexport_yes.name     = 'Yes';
+b_extractglmlist_autoexport_yes.val      = {f_extractglmlist_autoexport_yes, f_extractglmlist_autoexport_yes_ChannelList, m_glmlist_autoexport_HbO, i_glmlist_autoexport_Xi, m_replaceglmlist};
+b_extractglmlist_autoexport_yes.help     = {'Result of component will be saved in this folder.'};
+
+e_extractglmlist_autoexport_no        = cfg_entry;
+e_extractglmlist_autoexport_no.name    = 'No';
+e_extractglmlist_autoexport_no.tag     = 'c_extractglmlist_autoexport_no';       
+e_extractglmlist_autoexport_no.strtype = 's';
+e_extractglmlist_autoexport_no.num     = [1 Inf];
+e_extractglmlist_autoexport_no.val     = {'No'}; 
+e_extractglmlist_autoexport_no.help    = {'Do not save extract'};
+                 
+                                
+                                
+c_extractglmlist_autoexport         = cfg_choice; 
+c_extractglmlist_autoexport.tag     = 'c_extractglmlist_autoexport';
+c_extractglmlist_autoexport.name    = 'Export in folder';
+c_extractglmlist_autoexport.values  = {e_extractglmlist_autoexport_no,b_extractglmlist_autoexport_yes};
+c_extractglmlist_autoexport.val     = {e_extractglmlist_autoexport_no}; %Default option
+c_extractglmlist_autoexport.help    = {'Export components directly in a specify folder.'};
+
+                                
 f_extractcomponent_glmlist         = cfg_files;
 f_extractcomponent_glmlist.name    = 'List GLM to identify (xls)'; 
 f_extractcomponent_glmlist.tag     = 'f_extractcomponent_glmlist';       %file names
 f_extractcomponent_glmlist.filter  = {'xlsx','xls','txt'};
 f_extractcomponent_glmlist.ufilter = '.*';
-f_extractcomponent_glmlist.num     = [1 Inf];     % Number of inputs required 
+f_extractcomponent_glmlist.num     = [0 Inf];     % Number of inputs required 
 f_extractcomponent_glmlist.help    = {'Enter the list xls to extract GLM, the list must include the following columns:',...
     '''NIRS.mat folder'': directory of the NIRS.mat to use as: C:\data\Analyze\C01;',...
     '''file'': number to identify the file to use as: 1;',...
     '''tStart'': starting time in seconds to define the beginning of the period where the GLM will be applied as; 10',...
     '''tStop'': time stop in seconds to define the end of the period where the GLM will be applied as; 40',...
     '''Label'': Label identification to write in the event (useful to manage the export)as HRF;',...
-    'Regressor(s) (''X0'', ''X1'',''X2'',''X3'',''X4''...): the regressor could be a name in the aux list, a channel zone (regressor zone 1 apply to zone 1) be realy picky on the spelling as; HRF task '}; 
+    'Regressor(s) (''X0'', ''X1'',''X2'',''X3'',''X4''...): the regressor could be a name in the aux list, a channel zone (regressor zone 1 apply to zone 1) be realy picky on the spelling as; HRF task ',...
+    'If you wish to use the one create in the ''Create AUX'' previous operation call ExtractHRF.xlsx in the current directory let the option empty'}; 
+
+
+
 
 b_extractcomponent_glm          = cfg_branch;
 b_extractcomponent_glm.tag      = 'b_extractcomponent_glm';
 b_extractcomponent_glm.name     = 'Identify GLM';
-b_extractcomponent_glm.val      = {f_extractcomponent_glmlist};
+b_extractcomponent_glm.val      = {NIRSmat, f_extractcomponent_glmlist, c_extractglmlist_autoexport};
 b_extractcomponent_glm.help     = {'Apply multiple linear regressions (regress.m).'};
 
 
@@ -2709,6 +2779,86 @@ e_STATCOMPPath.num      = [1 1];     % Number of inputs required
 e_STATCOMPPath.help     = {'Result of the statistic will be saved in this folder.'};
 
 
+
+f_componentG1.name    = 'Group 1 (components export)'; 
+f_componentG1.tag     = 'f_componentG1';       %file names
+f_componentG1.filter  = 'mat';
+f_componentG1.ufilter = '.mat';    
+f_componentG1.num     = [1 Inf];     % Number of inputs required 
+f_componentG1.help    = {'Enter the list of components to test statistically.'}; 
+
+
+
+f_MCT_ZoneBased        = cfg_files;
+f_MCT_ZoneBased.tag    = 'b_MCT_ZoneBased';
+f_MCT_ZoneBased.name   = 'Zone' ;
+f_MCT_ZoneBased.filter  = 'zone';
+f_MCT_ZoneBased.ufilter = '.zone';    
+f_MCT_ZoneBased.num     = [1 Inf];     % Number of inputs required 
+f_MCT_ZoneBased.help   = {'The cluster need the distance between channel to define neighbord. ',...
+    'The zone is use to define channel position and to define a subset of channel if necessary.',...
+    'Zone must be define in the display GUI or a zone with all channel is automaticly save at the data import step Global.zone'};
+
+
+e_neighbourdist         =  cfg_entry;
+e_neighbourdist.name    = 'Neighbor distance';
+e_neighbourdist.tag     = 'e_neighbourdist';       
+e_neighbourdist.strtype = 's';
+e_neighbourdist.num     = [0 inf];
+e_neighbourdist.val     = {'4'};
+e_neighbourdist.help    = { 'Write a number to define the distance between optode to be include in a neighboring to define a cluster. The unit is the same as the channel position. '};
+
+b_MCT_ClusterBased         = cfg_branch;
+b_MCT_ClusterBased.tag    = 'b_MCT_ClusterBased';
+b_MCT_ClusterBased.name   = 'Cluster Based' ;
+b_MCT_ClusterBased.val    = {e_neighbourdist, f_MCT_ZoneBased};
+b_MCT_ClusterBased.help   = {'Cluster based permutation'};
+
+b_MCT_Max         = cfg_branch;
+b_MCT_Max.tag    = 'b_MCT_Max';
+b_MCT_Max.name   = 'No' ;
+b_MCT_Max.val    = {};
+b_MCT_Max.help   = {'Use the maximal univariate comparaison to create null distribution; Troendle, J.F., 1995. A Stepwise Resampling Method of Multiple Hypothesis Testing. Journal of the American Statistical Association 90, 370–378. https://doi.org/10.1080/01621459.1995.10476522'};
+
+ 
+
+c_statMultipleComparaisonTesting        = cfg_choice;
+c_statMultipleComparaisonTesting.tag     = 'c_statMultipleComparaisonTesting';
+c_statMultipleComparaisonTesting.name    = 'Multiple Comparaison';
+c_statMultipleComparaisonTesting.values  = {b_MCT_Max, b_MCT_ClusterBased};
+c_statMultipleComparaisonTesting.val     = {b_MCT_ClusterBased}; %Default option
+c_statMultipleComparaisonTesting.help    = {'Cluster-based permutation adapt clusterstat function from fieldtrip function and see for reference Maris, E., Oostenveld, R., 2007. Nonparametric statistical testing of EEG- and MEG-data. Journal of Neuroscience Methods 164, 177–190. https://doi.org/10.1016/j.jneumeth.2007.03.024'};
+
+
+e_npermutation         =  cfg_entry;
+e_npermutation.name    = 'Nb permutations';
+e_npermutation.tag     = 'e_npermutation';       
+e_npermutation.strtype = 's';
+e_npermutation.num     = [0 inf];
+e_npermutation.val     = {'500'};
+e_npermutation.help    = {'Define the number of non-parametric permutations to use.'};
+
+
+b_permutation        = cfg_branch;
+b_permutation.tag    = 'b_permutation';
+b_permutation.name   = 'Yes' ;
+b_permutation.val    = {e_npermutation, c_statMultipleComparaisonTesting};
+b_permutation.help   = {'Apply permutation test'};
+
+
+b_Nopermutation        = cfg_branch;
+b_Nopermutation.tag    = 'b_Nopermutation';
+b_Nopermutation.name   = 'No' ;
+b_Nopermutation.val    = {};
+b_Nopermutation.help   = {'Do not apply permutation test'};
+
+c_statcomppermutation        = cfg_choice;
+c_statcomppermutation.tag     = 'c_statpermutation';
+c_statcomppermutation.name    = 'Univariate permutations';
+c_statcomppermutation.values  = {b_permutation,b_Nopermutation };
+c_statcomppermutation.val     = {b_Nopermutation}; %Default option
+c_statcomppermutation.help    = {'Use permutation to create the empirical null distribution.'}
+
 m_TtestOneSample        = cfg_menu;
 m_TtestOneSample.tag    = 'm_TtestOneSample';
 m_TtestOneSample.name   = 'Use ';
@@ -2756,7 +2906,7 @@ f_componentG2.help    = {'Enter the list of components to test statistically.',.
 b_TtestUnpaired        = cfg_branch;
 b_TtestUnpaired.tag    = 'b_TtestUnpaired';
 b_TtestUnpaired.name   = 'Unpaired t-test' ;
-b_TtestUnpaired.val    = {f_componentG1,f_componentG2,m_TtestOneSample};
+b_TtestUnpaired.val    = {f_componentG1,f_componentG2,m_TtestOneSample, c_statcomppermutation};
 b_TtestUnpaired.help   = {'The implementation an unpaired t-test.'};
 
 b_Ttestpaired        = cfg_branch;
@@ -2766,13 +2916,18 @@ b_Ttestpaired.val    = {f_componentG1,f_componentG2,m_TtestOneSample};
 b_Ttestpaired.help   = {'The implementation a paired t-test. To make sure that the test is relevant, the two groups need to be paired data, which means the data can be naturally matched between the two groups.'};
 
 
+
+
 f_anovan         = cfg_files;
 f_anovan.name    = 'Group identification'; 
 f_anovan.tag     = 'f_anovan';       %file names
 f_anovan.filter  = {'xlsx','xls','txt'};
 f_anovan.ufilter =  '.*';    
 f_anovan.num     = [1 Inf];     % Number of inputs required 
-f_anovan.help    = {''}; 
+f_anovan.help    = {'First row: dir',...
+    'Second row: component file name',...
+    'Third row and following for factor identification',... 
+    'In the factor identification used 0 if the subject need to be rejected from the stat.'}; 
 
  
 
@@ -2783,7 +2938,8 @@ b_ANOVAN.val    = {f_anovan};
 b_ANOVAN.help   = {'Apply the anonan on each channel of the xls list. Enter the observation to compute the anovan.',...
     'First row: dir',...
     'Second row: component file name',...
-    'Third row and following for factor identification.'};
+    'Third row and following for factor identification',... 
+    'In the factor identification used 0 if the subject need to be rejected from the stat.'};
 
 
 b_ANOVANzone        = cfg_branch;
@@ -2805,10 +2961,39 @@ c_ANOVAN.val     = {b_ANOVAN};
 c_ANOVAN.help    = {'N-way analysis of variance, the anova could be performed by channel (channelist) or by zone.'};
 
 
+f_componentexportzone         = cfg_files;
+f_componentexportzone.name    = 'Component to export by zone'; 
+f_componentexportzone.tag     = 'f_componentexportzone';       %file names
+f_componentexportzone.filter  = {'xlsx','xls','txt'};
+f_componentexportzone.ufilter =  '.*';    
+f_componentexportzone.num     = [1 Inf];     % Number of inputs required 
+f_componentexportzone.help    = {'First row: dir',...
+    'Second row: component file name .mat file with each channel use for the topo',...
+    'Third row and following for factor identification for further stat'}; 
+
+
+f_componentexportch         = cfg_files;
+f_componentexportch.name    = 'Component to export by channel'; 
+f_componentexportch.tag     = 'f_componentexportch';       %file names
+f_componentexportch.filter  = {'xlsx','xls','txt'};
+f_componentexportch.ufilter =  '.*';    
+f_componentexportch.num     = [1 Inf];     % Number of inputs required 
+f_componentexportch.help    = {'First row: dir',...
+    'Second row: component file name .mat file with each channel use for the topo',...
+    'Third row and following for factor identification for further stat'}; 
+
+c_StatcomponentExport        = cfg_choice;
+c_StatcomponentExport.tag     = 'c_StatcomponentExport';
+c_StatcomponentExport.name    = 'Export' ;
+c_StatcomponentExport.values  = {f_componentexportch, f_componentexportzone};
+c_StatcomponentExport.val     = {f_componentexportch};
+c_StatcomponentExport.help    = {'Create a mat file with all component for stat in external program'};
+
+
 c_statcomponent         = cfg_choice; 
 c_statcomponent.tag     = 'c_statcomponent';
 c_statcomponent.name    = 'Choose the statistical test';
-c_statcomponent.values  = {b_TtestOneSample, b_Ttestpaired,b_TtestUnpaired,c_ANOVAN};
+c_statcomponent.values  = {b_TtestOneSample, b_Ttestpaired,b_TtestUnpaired,c_ANOVAN,c_StatcomponentExport};
 c_statcomponent.val     = {b_TtestOneSample}; %Default option
 c_statcomponent.help    = {'Statistical tests are available: One sample t-test, Paired t-test, Unpaired t-test, Anovan (use matlab Statistics and Machine Learning Toolbox). The first step is to choose which test you want to perform.'};
 
@@ -3138,11 +3323,27 @@ e_HRFduration.num     = [1 inf];
 e_HRFduration.val     = {[30]};
 e_HRFduration.help    = {'Trigger onset'};
 
+e_HRF_SDmodel        = cfg_files;
+e_HRF_SDmodel.tag    = 'e_HRF_SDmodel';
+e_HRF_SDmodel.name   = 'Add SD zone in the model';
+e_HRF_SDmodel.num     = [0 Inf];     % Number of inputs required 
+e_HRF_SDmodel.val{1}  = {''};
+e_HRF_SDmodel.help   = {'Add short distance in the GLM model, If you let this field empty the zone Global.zone will be used as a regressor for the physiology.'};
+
+
+e_HRF_AUXmodel        = cfg_entry;
+e_HRF_AUXmodel.tag    = 'e_HRF_AUXmodel';
+e_HRF_AUXmodel.name   = 'Add AUX in the model';
+e_HRF_AUXmodel.strtype = 's';   
+e_HRF_AUXmodel.num     = [0 Inf];     % Number of inputs required 
+e_HRF_AUXmodel.val  = {''};
+e_HRF_AUXmodel.help   = {'Add auxilairy field in the model'};
+
 
 b_HRFtriggeronset        = cfg_branch;
 b_HRFtriggeronset.tag    = 'b_HRFtriggeronset';
 b_HRFtriggeronset.name   = 'HRF trigger onset';
-b_HRFtriggeronset.val    = {e_HRFtrigger, e_HRFduration e_HRFlabel e_TimetoPeak1, e_FWHM1,e_TimetoPeak2,e_FWHM2,e_DIP,e_AUXdir };
+b_HRFtriggeronset.val    = {e_HRFtrigger, e_HRFduration, e_HRFlabel e_TimetoPeak1, e_FWHM1,e_TimetoPeak2,e_FWHM2,e_DIP,e_AUXdir,e_HRF_SDmodel}; %,,e_HRF_AUXmodel 
 b_HRFtriggeronset.help   = {'Model HRF response using trigger onset and the user defines fix duration.'};
 
 
@@ -3152,6 +3353,7 @@ e_HRFxlsfiles.tag     = 'e_HRFxlsfiles';
 e_HRFxlsfiles.num     = [0 Inf];     % Number of inputs required 
 e_HRFxlsfiles.val{1}  = {''};
 e_HRFxlsfiles.help    = {'Open excel or text file with HRF table onset information. This file must contain 3 columns, first column = onset, second column = duration and third column=weight'}; % help text displayed
+
 
 
 b_HRFxlsonset        = cfg_branch;
@@ -3670,7 +3872,13 @@ c_statpermutation.val     = {b_Nopermutation}; %Default option
 c_statpermutation.help    = {'Use permutation to create the empirical null distribution to calculate.',...
     'Compared each link perm to its permuted distribution and also the max link value among the comparaison multiple comparaison to be more restrictive. See: Lage-Castellanos, A., Martínez-Montes, E., Hernández-Cabrera, J.A., Galán, L., 2010. False discovery rate and permutation test: An evaluation in ERP data analysis. Statistics in Medicine 29, 63–74. https://doi.org/10.1002/sim.3784'};
 
-
+m_export_matrix        = cfg_menu;
+m_export_matrix.tag    = 'm_export_matrix';
+m_export_matrix.name   = 'Export';
+m_export_matrix.labels = {'.mat format', '.xls format' };
+m_export_matrix.values = {1,2};
+m_export_matrix.val    = {1}; 
+m_export_matrix.help   = {'Export all observation in one file for external statistique.'};
 
 m_TtestOneSample_matrix        = cfg_menu;
 m_TtestOneSample_matrix.tag    = 'm_TtestOneSample_matrix';
@@ -3687,7 +3895,7 @@ f_matrix.filter  = {'xlsx','xls','txt'};
 f_matrix.ufilter = '.*';    
 f_matrix.num     = [1 Inf];     % Number of inputs required 
 f_matrix.help    = {'Enter the list of connectivity matrix to test statistically.',...
-    'column 1 dir, column 2 name,  column 3 zone id, column 4 group 1 include 0 exclude'}; 
+    'column 1 dir, column 2 name matrices,  column 3 zone id , column 4 group information label by number 1,2,3.... use 0 to exclude participant, following column be use any other covariables. '}; 
 
 e_TtestOneSample_meanvalue         = cfg_entry;
 e_TtestOneSample_meanvalue.name    = 'Hypothetical mean value';
@@ -3738,7 +3946,7 @@ b_UnpairedTtest.help   = {'Compute Unpaired Ttest using using group in the xls. 
 b_PairedTtest        = cfg_branch;
 b_PairedTtest.tag    = 'b_PairedTtest';
 b_PairedTtest.name   = 'Paired t-test' ;
-b_PairedTtest.val    = {m_TtestOneSample_matrix, e_TtestOneSample_meanvalue, e_TtestOneSampleGR, e_TtestOneSampleGR2, c_statpermutation};
+b_PairedTtest.val    = { m_TtestOneSample_matrix, e_TtestOneSample_meanvalue, e_TtestOneSampleGR, e_TtestOneSampleGR2, c_statpermutation};
 b_PairedTtest.help   = {'Compute Paired Ttest using repeated measures identify subject in the xls.  The subject list must be placed in order. The first subject in group 1 will be paired with the first subject in group 2 in the subject list.  The subtraction of each subject will be saved in the results folder.'};
 
 
@@ -3938,7 +4146,7 @@ b_manova1_Mat.help   = {'Apply manova on specific groups.'};
 c_statmatrix         = cfg_choice;
 c_statmatrix.tag     = 'c_statmatrix';
 c_statmatrix.name    = 'Choose the statistical test';
-c_statmatrix.values  = {b_TtestOneSamplematrix,b_UnpairedTtest, b_PairedTtest, b_PearsonCorr_Mat, b_GLM_Mat,b_zscore_Mat,b_anova1_Mat,b_anovarep_Mat,b_kruskalwallis_Mat, b_fitMANCOVAN_Mat, b_exportNBSformat,b_PermutationTest};%b_ANCOVA_Mat aoctool remove,
+c_statmatrix.values  = {m_export_matrix, b_TtestOneSamplematrix,b_UnpairedTtest, b_PairedTtest, b_PearsonCorr_Mat, b_GLM_Mat,b_zscore_Mat,b_anova1_Mat,b_anovarep_Mat,b_kruskalwallis_Mat, b_fitMANCOVAN_Mat, b_exportNBSformat,b_PermutationTest};%b_ANCOVA_Mat aoctool remove,
 c_statmatrix.val     = {b_TtestOneSamplematrix}; %Default option
 c_statmatrix.help    = {'Select one of the statistical tests.'};
 

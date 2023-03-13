@@ -220,6 +220,7 @@ for isubject=2:size(info,1)
   list_subject{id} =DATA{id}.name;
   groupeall = [groupeall; info{isubject,4}];
     catch
+        groupeall = [groupeall; 0];
         disp(['Error loading',  info{isubject,2}])
     end
 end
@@ -230,7 +231,13 @@ for igroupe = 0:max(groupeall)
 
    idsubject = find(groupeall==igroupe);
    if ~isempty(idsubject)
-   idlabelall= DATA{idsubject(1)}.zone.label; %zone premier sujet du groupe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+       for igoodforzone=1:numel(idsubject)
+              if isfield(DATA{1,idsubject(igoodforzone)},'zone')
+                 idlabelall= DATA{idsubject(igoodforzone)}.zone.label; %zone premier sujet du groupe           
+                 idmod = idsubject(igoodforzone);
+              end       
+       end
+       
    MATAVGALL = zeros(numel(idlabelall),numel(idlabelall),numel(idsubject));
    for isubject = 1:numel(idsubject)
         try
@@ -257,7 +264,7 @@ for igroupe = 0:max(groupeall)
                idlisti = [];
                for ichzone = 1:numel(chzone);
                    ich = chzone(ichzone);
-                   switch  DATA{id}.System
+                   switch  DATA{idmod}.System
                        case 'ISS Imagent'
                            strDet = SDDet2strboxy_ISS(ML(ich,2));
                            strSrs = SDPairs2strboxy_ISS(ML(ich,1));
@@ -288,11 +295,11 @@ for igroupe = 0:max(groupeall)
                     DATA{idsubject(isubject)}.zone.chMAT{x} = idlisti;
                 end
                 
-                chzone = DATA{id}.zone.plotLst{y};
+                chzone = DATA{idmod}.zone.plotLst{y};
                 idlistj = [];
                 for ichzone = 1:numel(chzone)
                     ich = chzone(ichzone);
-                    switch  DATA{id}.System
+                    switch  DATA{idmod}.System
                         case 'ISS Imagent'
                             strDet = SDDet2strboxy_ISS(ML(ich,2));
                             strSrs = SDPairs2strboxy_ISS(ML(ich,1));      
@@ -372,7 +379,7 @@ for igroupe = 0:max(groupeall)
        clear MAT    
       end
 end
-for  igroupe = 1:max(groupeall)
+for  igroupe = 0:max(groupeall)
     	idsubject = find(groupeall==igroupe);
         if ~isempty(idsubject)
               idnew = idnew +1;
@@ -383,19 +390,19 @@ for  igroupe = 1:max(groupeall)
              MATall(:,:,isubject) = nan;
             end
         end    
-       DATA{idnew}.ZoneList = DATA{1}.ZoneList;
+       DATA{idnew}.ZoneList = DATA{idmod}.ZoneList;
        DATA{idnew}.MAT =  nanmean(MATall,3);
        DATA{idnew}.name = ['AVG ch groupe ',num2str(igroupe)];
        DATA{idnew}.MATtrial =  MATall;
        DATA{idnew}.GR = 0;       
        DATA{idnew}.System = 'ISS';
-       DATA{idnew}.zone.plot =DATA{1}.zone.plot;
-       DATA{idnew}.zone.plotLst = DATA{1}.zone.plotLst;
-       DATA{idnew}.zone.label =  DATA{1}.zone.label;
+       DATA{idnew}.zone.plot =DATA{idsubject(1)}.zone.plot;
+       DATA{idnew}.zone.plotLst = DATA{idsubject(1)}.zone.plotLst;
+       DATA{idnew}.zone.label =  DATA{idsubject(1)}.zone.label;
        DATA{idnew}.zone.color = DATA{idsubject(1)}.zone.color; 
        DATA{idnew}.zone.ml = DATA{idsubject(1)}.zone.ml;
        DATA{idnew}.zone.pos = DATA{idsubject(1)}.zone.pos;
-       DATA{idnew}.zone.chMAT =  DATA{idsubject(1)}.zone.chMAT;
+       DATA{idnew}.zone.chMAT =  DATA{idsubject(1)}.zone.plotLst;
        list_subject{idnew} =DATA{idnew}.name;
         end
         
@@ -925,9 +932,11 @@ ML = DATA{id}.zone.ml;
         %global efficiency
         switch metric
             case 'Global Efficiency'
-                  
+                  try
                 Mat = threshold_absolute( MatCTL, itr);    
-              
+                  catch
+                      disp('Add to set path BNC')
+                  end
                    GE_CTL(id)=mean(efficiency_bin(Mat,1));
          %          Mat = threshold_absolute(   MatCHD, itr);
          %          GE_CHD(id)=mean(efficiency_bin(Mat,1));
@@ -1052,8 +1061,8 @@ xlssheet{1,1} = 'Subject';
 xlssheet{1,2} = 'Groupe';
 xlssheet{1,3} = 'GlobalEfficiency';
 xlssheet{1,4} = 'Clustering coefficient ';
-% xlssheet{1,5} = 'Mean clustering_coef';
-% xlssheet{1,6} = 'Characteristic path length';
+ xlssheet{1,5} = 'Mean clustering_coef';
+xlssheet{1,6} = 'Characteristic path length';
 
 icol = 1
 for isubject=1:nbsubject
@@ -1061,8 +1070,8 @@ for isubject=1:nbsubject
     xlssheet{isubject+1,2} = DATA{isubject}.GR;
     xlssheet{isubject+1,3} = DATA{isubject}.measure.GlobalEfficiency;
     xlssheet{isubject+1,4} = DATA{isubject}.measure.ClusteringCoef;
-%     xlssheet{isubject+1,5} = DATA{isubject}.measure.Mean;
-%     xlssheet{isubject+1,6} = DATA{isubject}.measure.charpath;
+     xlssheet{isubject+1,5} = DATA{isubject}.measure.Mean;
+     xlssheet{isubject+1,6} = DATA{isubject}.measure.charpath;
     
 end   
     listok = get(handles.listbox_selectedzone,'string');

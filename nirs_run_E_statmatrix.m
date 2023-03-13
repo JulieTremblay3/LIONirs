@@ -231,10 +231,9 @@ try
     %not all channel could be use in the final matrice get the position
     %from one subjet and ensure you associate label in the Data.ZoneList to
     %a position in the zone.ml first col source second col detector
-    sujet = 24 %need projet V5
+    sujet = 1 %need projet V5
     zonelist = DATA{sujet}.ZoneList;
     chanpos = zeros(numel(zonelist),3);
-
     for id=1:size(zonelist)
         name = zonelist{id};
         [DetL,SrsL] =strtok(name,' ');
@@ -250,7 +249,15 @@ catch
 end
 
 [filepath,name,ext] = fileparts(xlslistfile);
-if isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
+if  isfield(job.c_statmatrix,'m_export_matrix')
+    if job.c_statmatrix.m_export_matrix == 1
+        dir1 = job.e_statmatrixPath{1}
+        save(fullfile(dir1,'Exportmatrice.mat'),'MATall','info','ZoneList', '-mat')
+        disp(['Save export: ', fullfile(dir1,'Exportmatrice.mat')])
+    else
+        disp('xls export not available yet')
+    end
+elseif isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     AllC = [];
     id =1;
      %Use one or more specific groupe

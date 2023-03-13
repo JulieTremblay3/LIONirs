@@ -862,22 +862,26 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
     
     
 elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
- 
-    [~,~,ext] =fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
+  for ixlsfile = 1:size(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist,1)
+      if isempty(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile})
+          [currentpath,~,~] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.NIRSmat{1})
+          job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile} = fullfile(currentpath,'ExtractHRF.xlsx')
+      end
+    [~,~,ext] =fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
     if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
         try
-            [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
-            [dirxls,filexls,extxls] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
+            [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
+            [dirxls,filexls,extxls] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
             id.Regressor = [];
         catch
-            [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
-            [dirxls,filexls,extxls] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
+            [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
+            [dirxls,filexls,extxls] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
             id.Regressor = []; 
         end
         
     elseif strcmp(ext,'.txt')
-        [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
-        [dirxls,filexls,extxls] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1});
+        [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
+        [dirxls,filexls,extxls] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
         id.Regressor = [];
     end
     for icol=1:size(rawData,2)
@@ -908,7 +912,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
         labelDtp = rawData(2:end,id.labelDtp);
         AUXid = rawData(2:end,id.Regressor );
     catch
-        msgbox(['Please verify the GLM extract xls file : ', job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{1},...
+        msgbox(['Please verify the GLM extract xls file : ', job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile},...
             ' have the following column information : NIRS.mat folder, File, tStart, tStop, label and Xn regressors'])
     end
     
@@ -935,8 +939,12 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
         catch
             NIRSmat = fullfile(NIRSDtp{ievent},'NIRS.mat');
         end
-        try
+        %try
+       
+        disp(['load',NIRSmat])
         load(NIRSmat);
+        
+           
        
         Regressorlist=AUXid{ievent,:};
         disp(NIRSmat);
@@ -1061,7 +1069,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
             for ilist = 1:numel(tmpGLM.AUX.label)
                 if numel(strfind(tmpGLM.AUX.label{ilist},Regressorlist{iReg})) %strcmp(tmpGLM.AUX.label{ilist},Regressorlist{iReg})
                     idreg = [idreg,ilist];
-                    disp([Regressorlist{iReg},' regressor find'])
+                    disp([Regressorlist{iReg},' AUX regressor find'])
                 end
             end
             
@@ -1070,6 +1078,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                 if strcmp(upper(checkzone(end-3:end)),'ZONE')
                     try
                         load(Regressorlist{iReg} ,'-mat'); %try the fullfile correct
+                        disp([Regressorlist{iReg},' zone regressor find'])
                     catch
                         try
                             load(fullfile(dirxls, Regressorlist{iReg} ),'-mat'); %try in the excel folder
@@ -1157,8 +1166,6 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                     end
                 end
             end
-            
-            
         elseif ~numel(ListRegressorZone) %pas de zone de regression juste des auxiliaires
             %PERFORM REGRESSION
             tmpGLM.idreg = idreg;
@@ -1214,6 +1221,12 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                 label = tmpGLM.AUX.label{idreg(iselected)};
             end
             try
+                if isfield(job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport,'b_extractglmlist_autoexport_yes')                  
+                   if job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.m_replaceglmlist == 1;
+                         delete(fullfile(NIRSDtp{ievent},'SelectedFactors.mat'));
+                         job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.m_replaceglmlist = 0;
+                   end
+                end
                 load(fullfile(NIRSDtp{ievent},'SelectedFactors.mat'));
                 newfile = 0;
             catch
@@ -1267,11 +1280,45 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                 newfile = 1;
             end
             save(fullfile(NIRSDtp{ievent},'SelectedFactors.mat'),'PARCOMP');
+            try 
+                if isfield(job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport,'b_extractglmlist_autoexport_yes')                 
+                    srsfile = NIRSmat;
+                    listgood=PARCOMP(end).listgood;
+                    topo = PARCOMP(end).topo;
+                    pathoutlist = job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.f_extractglmlist_autoexport_yes{1};
+                    if isempty(job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.f_extractglmlist_autoexport_yes_ChannelList{1})
+                        job.NIRSmat = job.c_extractcomponent.b_extractcomponent_glm.NIRSmat
+                        nirs_run_createseedlist(job)
+                        job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.f_extractglmlist_autoexport_yes_ChannelList{1} = fullfile(currentpath,'channellist.txt')
+                    end
+                    ChannelListfile = job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.f_extractglmlist_autoexport_yes_ChannelList{1};
+                    [listHBOch, listHBRch, listnameHbO, listnameHbR , zonelist]= findchinChannelList(NIRS, ChannelListfile,listgood);
+                    Xiselected = job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_Xi + 1;
+                      if job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.m_glmlist_autoexport_HbO==1
+                          if find(iselected==Xiselected) %only beta 1
+                                A = nan(size(listHBOch,1),1);
+                                idok = find(~isnan(listHBOch)); 
+                                A(idok,1) = topo(listHBOch(idok));
+                                save(fullfile(pathoutlist,['TopoHbO ',PARCOMP(end).label,'.mat']),'A' ,'zonelist','srsfile' );
+                                disp(['Create export: ', fullfile(pathoutlist,['TopoHbO ',PARCOMP(end).label,'.mat'])])
+                          end
+                      else
+                          if find(iselected==Xiselected) %only beta 1
+                            A = nan(size(listHBRch,1),1);
+                            idok = find(~isnan(listHBRch));
+                            A(idok,1) = topo(listHBRch(idok));
+                            save(fullfile(pathoutlist,['TopoHbR ',PARCOMP(end).label,'.mat']),'A' ,'zonelist','srsfile' );
+                            disp(['Create export: ', fullfile(pathoutlist,['TopoHbR ',PARCOMP(end).label,'.mat'])])
+                          end
+                    end
+                end
+            catch
+            end
         end
         %disp(['Error unable to GLM on ' , NIRSmat])
-       catch
-           disp('XLS line do not contain valid NIRS.mat file')
-       end
+%        catch
+%            disp('XLS line do not contain valid NIRS.mat file')
+%        end
     end
     try
         filenamexls = fullfile(NIRSDtp{ievent},['Export ', labelid,'.xlsx']);  
@@ -1289,6 +1336,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
         end
     catch
     end
+end
 elseif isfield(job.c_extractcomponent,'b_extractcomponent_PARAFAC')
     [~,~,ext] =fileparts(job.c_extractcomponent.b_extractcomponent_PARAFAC.f_component_PARAFAClist{1});
     if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
