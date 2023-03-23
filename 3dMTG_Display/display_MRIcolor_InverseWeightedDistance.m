@@ -47,6 +47,7 @@ tic
 %z on effectue un changement de plan pour éviter ce défaut
 %CAS1 x,y,z standard
 %[Vertex_sph(:,1),Vertex_sph(:,2),Vertex_sph(:,3)] = cart2sph(Vertex_tmp(:,1),Vertex_tmp(:,2),Vertex_tmp(:,3));
+weight = zeros(size(Vertex_tmp,1),numel(PMI{currentsub}.data(cf).MeasListAct));
 for ch = 1:size(ml,1)/2 %Passage 1 coordonné 
     % Coordonnées du canal à tracer
     if PMI{currentsub}.data(cf).MeasListAct(ch)& ml(ch,1)~= 0;

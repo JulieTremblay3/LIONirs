@@ -2444,13 +2444,13 @@ i_glmlist_autoexport_Xi.num     = [1 Inf];
 i_glmlist_autoexport_Xi.val     = {0}; 
 i_glmlist_autoexport_Xi.help    = {'Associate to the regressor X0, X1, X2,... to export'};
 
-i_glmlist_autoexport_labelbad_threshold         = cfg_entry;
-i_glmlist_autoexport_labelbad_threshold.name    = 'Pourcentage of yellow interval to identify as bad in the export';
-i_glmlist_autoexport_labelbad_threshold.tag     = 'i_glmlist_autoexport_labelbad_threshold';       
-i_glmlist_autoexport_labelbad_threshold.strtype = 'r';
-i_glmlist_autoexport_labelbad_threshold.num     = [1 Inf];
-i_glmlist_autoexport_labelbad_threshold.val     = {50}; 
-i_glmlist_autoexport_labelbad_threshold.help    = {'Associate to the export topo the suffix ''bad'' if  the associate interval is mark of more than 50% of Yellow'};
+i_glmlist_autoexport_label         = cfg_entry;
+i_glmlist_autoexport_label.name    = 'Select which regressor to export X0=0, X1=1, X2=2...';
+i_glmlist_autoexport_label.tag     = 'i_glmlist_autoexport_Xi';       
+i_glmlist_autoexport_label.strtype = 'r';
+i_glmlist_autoexport_labelbad_treshold.num     = [1 Inf];
+i_glmlist_autoexport_labelbad_treshold.val     = {0}; 
+i_glmlist_autoexport_labelbad_treshold.help    = {'Associate to the regressor X0, X1, X2,... to export'};
 
 
                                 
@@ -2474,7 +2474,7 @@ f_extractglmlist_autoexport_yes.help     = {'Result of component will be saved i
 b_extractglmlist_autoexport_yes         = cfg_branch;
 b_extractglmlist_autoexport_yes.tag      = 'b_extractglmlist_autoexport_yes';
 b_extractglmlist_autoexport_yes.name     = 'Yes';
-b_extractglmlist_autoexport_yes.val      = {f_extractglmlist_autoexport_yes, f_extractglmlist_autoexport_yes_ChannelList, m_glmlist_autoexport_HbO, i_glmlist_autoexport_Xi, i_glmlist_autoexport_labelbad_threshold,m_replaceglmlist};
+b_extractglmlist_autoexport_yes.val      = {f_extractglmlist_autoexport_yes, f_extractglmlist_autoexport_yes_ChannelList, m_glmlist_autoexport_HbO, i_glmlist_autoexport_Xi, m_replaceglmlist};
 b_extractglmlist_autoexport_yes.help     = {'Result of component will be saved in this folder.'};
 
 e_extractglmlist_autoexport_no        = cfg_entry;

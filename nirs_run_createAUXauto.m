@@ -63,6 +63,7 @@ for ifile =1:numel(rDtp)
             param5=job.c_createAUXauto.b_HRFtriggeronset.e_DIP;
             %  [5.4 5.2 10.8 7.35 0.35]
             H = fmridesign(frametimes,0,[1 0],[],[param1 param2 param3 param4 param5 0]); %Default
+            %figure;plot(H.X(:,1,1))
             Sc1 = conv2(H.X(:,1,1), eventV);
             Scntmp = Sc1(1:end-numel(H.X(:,1,1))+1);
             Scntmp = Scntmp/max(Scntmp);
@@ -491,7 +492,7 @@ for k=1:numresponses
     HS=[hrf d_hrf]/sum(hrf);
     temp=conv2(response(:,k),HS);
     eventmatrix(:,k,1:2)=temp(1:numtimes,:);
-    
+%figure;plot(d_hrf)
     % Shifted hrfs:
     H=zeros(numlags,nd);
     delta=((1:nd)-1)/(nd-1)*(Delta2-Delta1)+Delta1;

@@ -8706,7 +8706,13 @@ else
             return
         end
     elseif strcmp( PMI{1}.videooption.codec,'VideoReader') 
+        try
         [video_example,audio_example]=ReadMyAudioVideo(filenamevideo,[offset+time_start,offset+time_stop]);
+        catch
+            close(h)
+            winopen(filenamevideo)
+            return
+        end
     end
     
     set(handles.btn_Video,'string','Video 1');

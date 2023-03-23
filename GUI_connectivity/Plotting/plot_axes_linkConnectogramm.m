@@ -12,10 +12,10 @@ else
     figure;hold on;
 end
  
-  fileorderconnectogramme  = get(handles.edit_linkSettingmapConnectogram,'string');
-    
-  [filepath,name,ext] = fileparts( fileorderconnectogramme); 
+
   try
+        fileorderconnectogramme  = get(handles.edit_linkSettingmapConnectogram,'string');
+  [filepath,name,ext] = fileparts( fileorderconnectogramme); 
     if strcmp(ext,'.txt')
          [num,txt,rawzonecolor] = readtxtfile_asxlsread(fileorderconnectogramme);     
          if size(rawzonecolor,2)>2
