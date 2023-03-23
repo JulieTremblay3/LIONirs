@@ -1000,7 +1000,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
         tmpGLM.spar = d1(tmpGLM.indt(1):tmpGLM.indt(end),:);
         %add labelisbad
         pourcentagenoise = sum(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:)))./numel(d1(tmpGLM.indt(1):tmpGLM.indt(end),:));
-        if pourcentagenoise > 0.05 
+        if pourcentagenoise > (job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_labelbad_threshold/100)
             labelisbad = 'bad';
         else
              labelisbad = 'ok';
