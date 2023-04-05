@@ -148,7 +148,8 @@ for filenb = 1:size(job.NIRSmat,1)
                       if numel(indstim)==1
                            posttime = size(d,2)- indstim;
                       else
-                          disp('Warning using posttime ''end '', only one trigger are recommand for this special option, multi-segment imply equal posttime.')
+                          disp(['Verify trigger present in file : '  vmrk_path]);
+                          disp('Warning using posttime ''end '', only one trigger are recommand for this special option, multi-segment imply equal posttime.');
                           posttime = size(d,2)- indstim(1);
                       end
                   otherwise

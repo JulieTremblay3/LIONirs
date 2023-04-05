@@ -38,8 +38,10 @@ end
             tval(ich,1) = stats.tstat;
             pval(ich,1)= p;        
             mval(ich,1) = nanmean(AllC(ich,:));
+            
         end
      end
+     N_events=sum(~isnan(AllC),2)
      NBSUJET = numel(job.c_statcomponent.b_TtestOneSample.f_component);
      A = mval;
      save(fullfile(dir1,['ONESAMPLE_Mean n=',num2str(NBSUJET),'.mat']),'A','zonelist')  
@@ -60,6 +62,9 @@ end
      A = Q;
      save(fullfile(dir1,['ONESAMPLE_Q_',  num2str(alphatr),'fdr.mat']),'A','zonelist')
      disp(['Save: ',fullfile(dir1,['ONESAMPLE_mean_',  num2str(alphatr),'fdr.mat'])]);
+     A = N_events;
+     save(fullfile(dir1,['ONESAMPLE_N_events_',  num2str(alphatr),'.mat']),'A','zonelist')
+     disp(['Save: ',fullfile(dir1,['ONESAMPLE_N_events_',  num2str(alphatr),'.mat'])]);
 elseif isfield(job.c_statcomponent,'b_Ttestpaired')   
     if job.c_statcomponent.b_Ttestpaired.m_TtestOneSample == 1
         info.tail = 'both';

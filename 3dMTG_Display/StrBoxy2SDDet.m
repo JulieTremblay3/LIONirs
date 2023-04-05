@@ -65,6 +65,12 @@ elseif strcmp(str, 'D31')
     num=31;
 elseif strcmp(str, 'D32')
     num=32; 
+elseif strcmp(str, 'D33')
+    num=33; 
+elseif strcmp(str, 'D34')
+    num=34; 
+elseif strcmp(str, 'D35')
+    num=35; 
 else    
     num = 0; 
 end

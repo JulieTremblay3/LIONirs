@@ -863,9 +863,9 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
     
 elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
   for ixlsfile = 1:size(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist,1)
-      if isempty(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile})
-          [currentpath,~,~] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.NIRSmat{1})
-          job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile} = fullfile(currentpath,'ExtractHRF.xlsx')
+       [currentpath,~,~] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.NIRSmat{1});
+      if isempty(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile})         
+          job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile} = fullfile(currentpath,'ExtractHRF.xlsx');
       end
     [~,~,ext] =fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
     if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
@@ -874,9 +874,13 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
             [dirxls,filexls,extxls] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
             id.Regressor = [];
         catch
+            try
             [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
             [dirxls,filexls,extxls] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
             id.Regressor = []; 
+            catch
+                disp(['Could not open: ', job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile}]);
+            end
         end
         
     elseif strcmp(ext,'.txt')
@@ -1005,7 +1009,12 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
         else
              labelisbad = 'ok';
         end
-        iRegressor =  2;
+        if job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_nan_chrejected==1
+            %(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:))./numel(d1(tmpGLM.indt(1):tmpGLM.indt(end),1)))
+            ch_remove_for_int =(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:))./numel(d1(tmpGLM.indt(1):tmpGLM.indt(end),1)))< (job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_labelbad_threshold/100);
+            %reshape(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:)),NC/2 ,2) 
+        end 
+            iRegressor =  2; 
         if isfield(NIRS.Dt,'AUX')
             for iAUX = 1:numel(NIRS.Dt.AUX)
                 nameAUX = NIRS.Dt.AUX(iAUX).pp(end).p{fileDtp{ievent}};
@@ -1283,41 +1292,55 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
             try 
                 if isfield(job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport,'b_extractglmlist_autoexport_yes')                 
                     srsfile = NIRSmat;
+                  
                     listgood=PARCOMP(end).listgood;
+                      listbad_ch = ones(numel(listgood),1);
+                     listbad_trial = ones(numel(listgood),1);
+                    if job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_nan_chrejected == 1
+                        listbad_ch=  NIRS.Cf.H.C.ok(listgood);
+                    end
+                    if job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_nan_int_rejected == 1
+                      if sum(~ch_remove_for_int)>0
+                        disp(['Event ', num2str(ievent),' Reject ', num2str(sum(~ch_remove_for_int)),'/',num2str(numel(ch_remove_for_int)), 'CH  noise  >' ,num2str(job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_labelbad_threshold),'%']);
+                        listbad_trial =ch_remove_for_int(listgood)';
+                      end
+                    end 
+                    
                     topo = PARCOMP(end).topo;
                     pathoutlist = job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.f_extractglmlist_autoexport_yes{1};
                     if ~isdir(pathoutlist)
-                        mkdir(pathoutlist)
+                        mkdir(pathoutlist);
                         disp(['Create ' pathoutlist])
                     end
                     if isempty(job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.f_extractglmlist_autoexport_yes_ChannelList{1})
-                        job.NIRSmat = job.c_extractcomponent.b_extractcomponent_glm.NIRSmat
-                        nirs_run_createseedlist(job)
-                        job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.f_extractglmlist_autoexport_yes_ChannelList{1} = fullfile(currentpath,'channellist.txt')
+                        job.NIRSmat = job.c_extractcomponent.b_extractcomponent_glm.NIRSmat;
+                        nirs_run_createseedlist(job);
+                        job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.f_extractglmlist_autoexport_yes_ChannelList{1} = fullfile(currentpath,'channellist.txt');
                     end
                     ChannelListfile = job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.f_extractglmlist_autoexport_yes_ChannelList{1};
-                    [listHBOch, listHBRch, listnameHbO, listnameHbR , zonelist]= findchinChannelList(NIRS, ChannelListfile,listgood);
+                    [listHBOch, listHBRch, listnameHbO, listnameHbR , zonelist]= findchinChannelList(NIRS, ChannelListfile,PARCOMP(end).listgood);
                     Xiselected = job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_Xi + 1;
-                      
+                     listbad = listbad_trial(:)&listbad_ch(:);
                     if job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.m_glmlist_autoexport_HbO==1
                           if find(iselected==Xiselected) %only beta 1
                                 A = nan(size(listHBOch,1),1);
-                                idok = find(~isnan(listHBOch)); 
+                                idok = find(listbad(listHBOch)); 
                                 A(idok,1) = topo(listHBOch(idok));
-                                save(fullfile(pathoutlist,['TopoHbO ',PARCOMP(end).label,'.mat']),'A' ,'zonelist','srsfile' );
-                                disp(['Create export: ', fullfile(pathoutlist,['TopoHbO ',PARCOMP(end).label,'.mat'])])
+                                save(fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile' );
+                                disp(['Create export: load(''', fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat'')'])]);
                           end
                       else
                           if find(iselected==Xiselected) %only beta 1
                             A = nan(size(listHBRch,1),1);
-                            idok = find(~isnan(listHBRch));
+                            idok = find(listbad(listHBRch));
                             A(idok,1) = topo(listHBRch(idok));
-                            save(fullfile(pathoutlist,['TopoHbR ',PARCOMP(end).label,'.mat']),'A' ,'zonelist','srsfile' );
-                            disp(['Create export: ', fullfile(pathoutlist,['TopoHbR ',PARCOMP(end).label,'.mat'])])
+                            save(fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile' );
+                            disp(['Create export: load(''', fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat'')'])])
                           end
                     end
                 end
             catch
+                disp('WARNING topo could not be exported')
             end
         end
         %disp(['Error unable to GLM on ' , NIRSmat])

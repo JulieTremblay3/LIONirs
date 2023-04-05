@@ -198,13 +198,12 @@ try
 catch
     raw = [];
 end
-e_HRFduration
     if ~isfield(job.c_createAUXauto.b_HRFtriggeronset,'e_HRF_SDmodel')
         A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0'};
         VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-5),...
             num2cell(onsetall+repmat(e_HRFduration(1),numel(onsetall),1)++10), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1)  ];
         if isempty(raw);raw = [A;VAL];else; raw = [raw;VAL];end
-    else isfield(job.c_createAUXauto.b_HRFtriggeronset,'e_HRF_SDmodel') 
+    elseif isfield(job.c_createAUXauto.b_HRFtriggeronset,'e_HRF_SDmodel'); 
         if isempty(job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel{1}) %HRF only
              [pathdefault, ~,~]= fileparts(NIRS.Dt.fir.pp(1).p{1});
              disp(['Use default :',fullfile(pathdefault,'Global.zone'),' in the regression'])

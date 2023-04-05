@@ -2426,7 +2426,7 @@ m_replaceglmlist.name   = 'Replace current component ';
 m_replaceglmlist.labels = {'Yes' ,'No'};
 m_replaceglmlist.values = {1,2};
 m_replaceglmlist.val    = {1}; 
-m_replaceglmlist.help   = {''};
+m_replaceglmlist.help   = {'Avoid to run twice the extract GLM on the data, juste erase the present component if they have some in the actual data'};
                                
 m_glmlist_autoexport_HbO       = cfg_menu;
 m_glmlist_autoexport_HbO.tag    = 'm_glmlist_autoexport_HbO';
@@ -2445,15 +2445,33 @@ i_glmlist_autoexport_Xi.val     = {0};
 i_glmlist_autoexport_Xi.help    = {'Associate to the regressor X0, X1, X2,... to export'};
 
 i_glmlist_autoexport_labelbad_threshold         = cfg_entry;
-i_glmlist_autoexport_labelbad_threshold.name    = 'Pourcentage of yellow interval to identify as bad in the export';
+i_glmlist_autoexport_labelbad_threshold.name    = 'Percentage of yellow interval to identify trial as rejected';
 i_glmlist_autoexport_labelbad_threshold.tag     = 'i_glmlist_autoexport_labelbad_threshold';       
 i_glmlist_autoexport_labelbad_threshold.strtype = 'r';
 i_glmlist_autoexport_labelbad_threshold.num     = [1 Inf];
 i_glmlist_autoexport_labelbad_threshold.val     = {50}; 
-i_glmlist_autoexport_labelbad_threshold.help    = {'Associate to the export topo the suffix ''bad'' if  the associate interval is mark of more than 50% of Yellow'};
+i_glmlist_autoexport_labelbad_threshold.help    = {'Associate to the export topo the suffix ''bad'' if  the associate interval is mark of more than 50% of Yellow',...
+                                                    'If you wish also to force them as a missing value use Reject to Rejected trial instead of keep'};
 
+i_glmlist_autoexport_nan_chrejected         = cfg_menu;
+i_glmlist_autoexport_nan_chrejected.name    = 'Rejected channel set Beta as NAN';
+i_glmlist_autoexport_nan_chrejected.tag     = 'i_glmlist_autoexport_nan_chrejected';       
+i_glmlist_autoexport_nan_chrejected.labels  = {'Reject' ,'Keep'};
+i_glmlist_autoexport_nan_chrejected.values  = {1,2};
+i_glmlist_autoexport_nan_chrejected.val     = {1}; 
+i_glmlist_autoexport_nan_chrejected.help    = {'Set as missing value (NAN) the ''Beta'' for rejected channel in dotted for the export '};
 
-                                
+                        
+i_glmlist_autoexport_nan_int_rejected         = cfg_menu;
+i_glmlist_autoexport_nan_int_rejected.name    = 'Rejected trial set Beta as NAN';
+i_glmlist_autoexport_nan_int_rejected.tag     = 'i_glmlist_autoexport_nan_int_rejected';       
+i_glmlist_autoexport_nan_int_rejected.labels  = {'Reject' ,'Keep'};
+i_glmlist_autoexport_nan_int_rejected.values  = {1,2};
+i_glmlist_autoexport_nan_int_rejected.val     = {2}; 
+i_glmlist_autoexport_nan_int_rejected.help    = {'Set as missing value (NAN) the ''Beta'' for rejected interval in yellow,'...
+    'use the Percentage of yellow interval to identify bad trial',... 
+    'use keep if they were corrected '};
+
     % Folder selector.
 f_extractglmlist_autoexport_yes_ChannelList          = cfg_files; %path
 f_extractglmlist_autoexport_yes_ChannelList.name     = 'Enter Channel List'; 
@@ -2474,7 +2492,7 @@ f_extractglmlist_autoexport_yes.help     = {'Result of component will be saved i
 b_extractglmlist_autoexport_yes         = cfg_branch;
 b_extractglmlist_autoexport_yes.tag      = 'b_extractglmlist_autoexport_yes';
 b_extractglmlist_autoexport_yes.name     = 'Yes';
-b_extractglmlist_autoexport_yes.val      = {f_extractglmlist_autoexport_yes, f_extractglmlist_autoexport_yes_ChannelList, m_glmlist_autoexport_HbO, i_glmlist_autoexport_Xi, i_glmlist_autoexport_labelbad_threshold,m_replaceglmlist};
+b_extractglmlist_autoexport_yes.val      = {f_extractglmlist_autoexport_yes, f_extractglmlist_autoexport_yes_ChannelList, m_glmlist_autoexport_HbO, i_glmlist_autoexport_Xi, i_glmlist_autoexport_labelbad_threshold,i_glmlist_autoexport_nan_chrejected,i_glmlist_autoexport_nan_int_rejected,m_replaceglmlist};
 b_extractglmlist_autoexport_yes.help     = {'Result of component will be saved in this folder.'};
 
 e_extractglmlist_autoexport_no        = cfg_entry;
@@ -2501,7 +2519,8 @@ f_extractcomponent_glmlist.tag     = 'f_extractcomponent_glmlist';       %file n
 f_extractcomponent_glmlist.filter  = {'xlsx','xls','txt'};
 f_extractcomponent_glmlist.ufilter = '.*';
 f_extractcomponent_glmlist.num     = [0 Inf];     % Number of inputs required 
-f_extractcomponent_glmlist.help    = {'Enter the list xls to extract GLM, the list must include the following columns:',...
+f_extractcomponent_glmlist.help    = {'Enter the list xls to extract GLM, Let the field empty if you want to used the default configuration create by CreateAUX using trigger',...
+    'the list must include the following columns:',...
     '''NIRS.mat folder'': directory of the NIRS.mat to use as: C:\data\Analyze\C01;',...
     '''file'': number to identify the file to use as: 1;',...
     '''tStart'': starting time in seconds to define the beginning of the period where the GLM will be applied as; 10',...

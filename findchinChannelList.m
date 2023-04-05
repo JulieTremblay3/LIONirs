@@ -1,5 +1,5 @@
 function  [ listHBOch, listHBRch, listnameHbO, listnameHbR, zonelist]= findchinChannelList(NIRS, ChannelListfile, listgood)
-
+       
         ML_new= [NIRS.Cf.H.C.id(2:3,listgood)',...
         ones(numel(listgood),1),...
         NIRS.Cf.H.C.wl(listgood)'];
@@ -41,6 +41,8 @@ function  [ listHBOch, listHBRch, listnameHbO, listnameHbR, zonelist]= findchinC
             zonelist{i,1} = [DetL{i} ' ' SrsL{i}];
             L1 = find(ML_new(:,1)==SDsrsL & ML_new(:,2)==SDdetL & ML_new(:,4)==1);
             L2 = find(ML_new(:,1)==SDsrsL & ML_new(:,2)==SDdetL & ML_new(:,4)==2);
+%             L1 = find(ML(:,1)==SDsrsL & ML(:,2)==SDdetL & ML(:,4)==1);
+%             L2 = find(ML(:,1)==SDsrsL & ML(:,2)==SDdetL & ML(:,4)==2);
             if isempty(L1)
                 listHBOch(i,1)= nan;
                 listHBRch(i,1)= nan;
@@ -49,11 +51,12 @@ function  [ listHBOch, listHBRch, listnameHbO, listnameHbR, zonelist]= findchinC
                 listnameHbO{i,1}= [DetL{i} ' ' SrsL{i},'HbO','NO FOUND'];
                 listnameHbR{i,1}= [DetL{i} ' ' SrsL{i},'HbR','NO FOUND'];
             else
-                listHBOch(i,1)= L1;
-                listHBRch(i,1)= L2;
+                listHBOch(i,1)= L1(1);
+                listHBRch(i,1)= L2(1);
                 listname{i,1} = [DetL{i} ' ' SrsL{i}];
                 listnameHbO{i,1} = [DetL{i} ' ' SrsL{i},'HbO'];
                 listnameHbR{i,1} = [DetL{i} ' ' SrsL{i},'HbR'];
             end
+           
                      
         end

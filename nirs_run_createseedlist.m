@@ -11,7 +11,7 @@ for filenb=1:size(job.NIRSmat,1) %JT
 
         [path, fname, extension]=fileparts(job.NIRSmat{filenb,1});
        % [file, path] = uiputfile(fullfile(path,'channellist.txt'));
-        filenameChannelList = fullfile(path,'channellist.txt')
+        filenameChannelList = fullfile(path,'channellist.txt');
       % ChannelLabels = ConvertmlIDsrs2label(NIRS)        
     %   NIRS.Cf.dev.n = 'NIRx'
         switch NIRS.Cf.dev.n

@@ -418,7 +418,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
     %Apply module to ensure that the operation is accessible form the
     %manual step
     try
-        PARCORR
+        PARCORR;
     catch
         disp(['The subtraction could not be perform : no component with the label ''', job.i_substractcomponent_label,'''could be found'])
             %save the NIRS.mat new structure
