@@ -82,7 +82,7 @@ for filenb = 1:size(job.NIRSmat,1) %For every specified NIRS.mat file
         ind_trig = [];
         aux_trig = NIRS.Dt.fir.aux5{f};
         for b = 1:size(trig,2)
-            ind_trig = [ind_trig; aux_trig(aux_trig == trig(b),2)];
+            ind_trig = [ind_trig; aux_trig(aux_trig(:,1) == trig(b),2)];
         end
         if isempty(ind_trig)
 %             errordlg(['The selected trigger(s) are not avalaible for :',rDtp{f,1}],'Averaging Error');

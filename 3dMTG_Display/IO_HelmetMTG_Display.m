@@ -1008,7 +1008,7 @@ elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
                 sprintf(['check ', DetL,' ', SrsL]);
                 listname{i,1} = [DetL ' ' SrsL];
             else
-                listHBOch(i,1)= L1;           
+                listHBOch(i,1)= L1(1);           
                 listname{i,1} = [DetL ' ' SrsL];    
             end
         end
