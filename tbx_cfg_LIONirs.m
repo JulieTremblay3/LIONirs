@@ -3351,6 +3351,22 @@ e_HRFduration.num     = [1 inf];
 e_HRFduration.val     = {[30]};
 e_HRFduration.help    = {'Trigger onset'};
 
+e_HRFpretime        = cfg_entry; 
+e_HRFpretime.name    = 'Pretime (s)'; 
+e_HRFpretime.tag     = 'e_HRFpretime';      
+e_HRFpretime.strtype = 'r';       
+e_HRFpretime.num     = [0 inf];     
+e_HRFpretime.val     = {['']};
+e_HRFpretime.help    = {'Pretime interval, let empty to use same as normalization pretime'};
+
+e_HRFposttime        = cfg_entry; 
+e_HRFposttime.name    = 'Posttime (s)'; 
+e_HRFposttime.tag     = 'e_HRFposttime';      
+e_HRFposttime.strtype = 'r';       
+e_HRFposttime.num     = [0 inf];     
+e_HRFposttime.val     = {['']};
+e_HRFposttime.help    = {'Posttime interval, let empty to use same as normalization posttime'};
+
 e_HRF_SDmodel        = cfg_files;
 e_HRF_SDmodel.tag    = 'e_HRF_SDmodel';
 e_HRF_SDmodel.name   = 'Add SD zone in the model';
@@ -3371,7 +3387,7 @@ e_HRF_AUXmodel.help   = {'Add auxilairy field in the model'};
 b_HRFtriggeronset        = cfg_branch;
 b_HRFtriggeronset.tag    = 'b_HRFtriggeronset';
 b_HRFtriggeronset.name   = 'HRF trigger onset';
-b_HRFtriggeronset.val    = {e_HRFtrigger, e_HRFduration, e_HRFlabel e_TimetoPeak1, e_FWHM1,e_TimetoPeak2,e_FWHM2,e_DIP,e_AUXdir,e_HRF_SDmodel}; %,,e_HRF_AUXmodel 
+b_HRFtriggeronset.val    = {e_HRFtrigger, e_HRFduration, e_HRFpretime, e_HRFposttime,e_HRFlabel e_TimetoPeak1, e_FWHM1,e_TimetoPeak2,e_FWHM2,e_DIP,e_AUXdir,e_HRF_SDmodel}; %,,e_HRF_AUXmodel 
 b_HRFtriggeronset.help   = {'Model HRF response using trigger onset and the user defines fix duration.'};
 
 

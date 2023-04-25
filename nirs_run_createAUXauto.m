@@ -198,10 +198,28 @@ try
 catch
     raw = [];
 end
+pretime = str2num(job.c_createAUXauto.b_HRFtriggeronset.e_HRFpretime);
+postime = str2num(job.c_createAUXauto.b_HRFtriggeronset.e_HRFposttime);
+if isempty(pretime)
+for istep=1:numel(NIRS.Dt.fir.pp)
+    if ~isempty(strfind(NIRS.Dt.fir.pp(istep).pre,  'Normalization'))
+       pretime =  str2num(NIRS.Dt.fir.pp(istep).job.normtype.b_choicenormstim.pretime);
+    end
+end
+end
+if isempty(postime)
+for istep=1:numel(NIRS.Dt.fir.pp)
+    if ~isempty(strfind(NIRS.Dt.fir.pp(istep).pre,  'Normalization'))
+       postime =  str2num(NIRS.Dt.fir.pp(istep).job.normtype.b_choicenormstim.posttime);
+    end
+end
+end
+
+
     if ~isfield(job.c_createAUXauto.b_HRFtriggeronset,'e_HRF_SDmodel')
         A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0'};
-        VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-5),...
-            num2cell(onsetall+repmat(e_HRFduration(1),numel(onsetall),1)++10), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1)  ];
+        VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-pretime),...
+            num2cell(onsetall+postime), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1)  ];
         if isempty(raw);raw = [A;VAL];else; raw = [raw;VAL];end
     elseif isfield(job.c_createAUXauto.b_HRFtriggeronset,'e_HRF_SDmodel'); 
         if isempty(job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel{1}) %HRF only
@@ -211,15 +229,15 @@ end
         end
         if strcmp(job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel, 'No')
             A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0'};
-            VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-5),...
-            num2cell(onsetall+repmat(e_HRFduration(1),numel(onsetall),1)+10), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1)  ];
+            VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-pretime),...
+            num2cell(onsetall+postime), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1)  ];
             if isempty(raw);raw = [A;VAL];else; raw = [raw;VAL];end
 
         else
            	A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0', 'X1'};
             nameSDfile =job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel{1}; %'C:\data\FRESH\Analyzed\STAT_Motor\MotorSD.zone'
-            VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-5),...
-            num2cell(onsetall+repmat(e_HRFduration(1),numel(onsetall),1)+10), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1),repmat({nameSDfile},numel(onsetall),1)  ];
+            VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-pretime),...
+            num2cell(onsetall+postime), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1),repmat({nameSDfile},numel(onsetall),1)  ];
             if isempty(raw);raw = [A;VAL];else; raw = [raw;VAL];end
         end
     end

@@ -57,6 +57,7 @@ handles.output = hObject;
 NIRSpath = varargin{1};
 load(NIRSpath {1});
 filepath = [];
+id = get(handles.popupmenu_NIRS,'value')
 for i = 1:numel(NIRS.Dt.fir.pp(end).p)
    filepath = [filepath NIRS.Dt.fir.pp(end).p(i)];
 end
@@ -69,6 +70,7 @@ if isfield(NIRS.Dt,'EEG')
     try
         set(handles.edit_offsetEEG,'string', num2str(NIRS.Dt.EEG.pp(end).sync_timesec{1}) );
     catch
+        disp('WARNING verify EEG sync time')
         set(handles.edit_offsetEEG,'string', ' ');
     end
 end
@@ -79,7 +81,12 @@ if isfield(NIRS.Dt,'AUX')
     end
         set(handles.listbox_AUXLIST,'string', AUXname);
         set(handles.listbox_AUXLIST,'value', 1);
-        set(handles.edit_offsetAUX,'string', num2str(NIRS.Dt.AUX(1).pp(end).sync_timesec{1}));
+        try
+             set(handles.edit_offsetAUX,'string', num2str(NIRS.Dt.AUX(1).pp(end).sync_timesec{1}));
+        catch
+             disp('WARNING verify AUX sync time')
+             set(handles.edit_offsetAUX,'string', ' ');
+        end
 end
 if isfield(NIRS.Dt,'Video')
     set(handles.listbox_Video,'string', NIRS.Dt.Video.pp(end).p{1} );
@@ -459,16 +466,39 @@ function popupmenu_NIRS_Callback(hObject, eventdata, handles)
 
 id = get(handles.popupmenu_NIRS,'value');
 load(handles.NIRSpath{1});
-set(handles.listbox_EEGLIST,'string', NIRS.Dt.EEG.pp(end).p{id} );
-set(handles.listbox_AUXLIST,'string', NIRS.Dt.AUX.pp(end).p{id} );
-set(handles.listbox_Video,'string', NIRS.Dt.Video.pp(end).p{id} );
-set(handles.listbox_Audio,'string',NIRS.Dt.Audio.pp(end).p{id} );   
+try
+    set(handles.listbox_EEGLIST,'string', NIRS.Dt.EEG.pp(end).p{id} );
+    set(handles.edit_offsetEEG,'string',num2str(NIRS.Dt.EEG.pp(end).sync_timesec{id}));
+catch
+    disp('Warning empty EEG file')
+    set(handles.listbox_EEGLIST,'string', '');
+    set(handles.edit_offsetEEG,'string','');
+end
+try
+    set(handles.listbox_AUXLIST,'string', NIRS.Dt.AUX.pp(end).p{id} );
+    set(handles.edit_offsetAUX,'string',num2str(NIRS.Dt.AUX.pp(end).sync_timesec{id}));
+catch
+    disp('Warning empty AUX file')
+    set(handles.listbox_AUXLIST,'string', '' );
+    set(handles.edit_offsetAUX,'string','');
+end
 
-set(handles.edit_offsetEEG,'string',num2str(NIRS.Dt.EEG.pp(end).sync_timesec{id}));
-set(handles.edit_offsetAUX,'string',num2str(NIRS.Dt.AUX.pp(end).sync_timesec{id}));
-set(handles.edit_offsetVideo,'string',num2str(NIRS.Dt.Video.pp(end).sync_timesec{id}));
-set(handles.edit_offsetAudio,'string',num2str(NIRS.Dt.Audio.pp(end).sync_timesec{id}));
-
+try
+    set(handles.listbox_Video,'string', NIRS.Dt.Video.pp(end).p{id} );
+    set(handles.edit_offsetVideo,'string',num2str(NIRS.Dt.Video.pp(end).sync_timesec{id}));
+catch
+    disp('Warning empty VIDEO file')
+    set(handles.listbox_Video,'string', '' );
+    set(handles.edit_offsetVideo,'string','');
+end
+try
+    set(handles.listbox_Audio,'string',NIRS.Dt.Audio.pp(end).p{id} );   
+    set(handles.edit_offsetAudio,'string',num2str(NIRS.Dt.Audio.pp(end).sync_timesec{id}));
+catch
+    disp('Warning empty AUDIO file')
+    set(handles.listbox_Audio,'string', '' );
+    set(handles.edit_offsetAudio,'string','');
+end
 
 % --- Executes during object creation, after setting all properties.
 function popupmenu_NIRS_CreateFcn(hObject, eventdata, handles)

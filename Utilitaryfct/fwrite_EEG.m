@@ -8,7 +8,11 @@ function fwrite_EEG(filename,EEG,pstart,pstop )
 %EEG.ind_dur_ch indice duration channel marker 
 %pstart in sample 
 %pstop in sample  
-[dirEEG,filEEG,extEEG]= fileparts(filename);          
+[dirEEG,filEEG,extEEG]= fileparts(filename);   
+if ~isdir(dirEEG)
+    mkdir(dirEEG)
+    disp(['Create dir: ',dirEEG])
+end
 outfileEEG_vmrk= fullfile(dirEEG,[filEEG '.vmrk']);
 outfileEEG_vhdr = fullfile(dirEEG,[filEEG '.vhdr']);
     try

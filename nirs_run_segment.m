@@ -40,7 +40,7 @@ for filenb = 1:size(job.NIRSmat,1)
         vmrk_path = fullfile(dir1,[fil1 '.vmrk']);
         [ind_dur_ch1] = read_vmrk_find(vmrk_path,'bad_step');
         [ind_dur_ch2] = read_vmrk_find(vmrk_path,'Bad Interval');
-        ind_dur_ch = [ind_dur_ch1 ind_dur_ch2]
+        ind_dur_ch = [ind_dur_ch1 ind_dur_ch2];
         nsample = size(d,2);
          noise = ind_dur_ch2mat(ind_dur_ch, nsample,NC)';
   
@@ -68,6 +68,7 @@ for filenb = 1:size(job.NIRSmat,1)
         if isfield(NIRS.Dt,'AUX')            
             for iaux = 1:numel(NIRS.Dt.AUX)
                 fileaux = NIRS.Dt.AUX(iaux).pp(moduleaux).p{f}; %OPEN EEG HERE
+                AUX(iaux).file = fileaux;
                 [AUX(iaux).data,AUX(iaux).infoBV,AUX(iaux).marker,AUX(iaux).ind_dur_ch]=fopen_EEG(fileaux);
             end
         end
@@ -234,20 +235,22 @@ for filenb = 1:size(job.NIRSmat,1)
                     %PRESEGMENTATION ALLREALY DONE.
                     if isfield(NIRS.Dt.AUX(iaux).pp(moduleaux),'sync_timesec')
                     tstart= NIRS.Dt.AUX(iaux).pp(moduleaux).sync_timesec{f};
-                    tstop = tstart+size(d,2)*1/NIRS.Cf.dev.fs;
+                    tstop = tstart+size(d,2)*1/NIRS.Cf.dev.fs*AUX(iaux).infoBV.SamplingInterval/1000000;
                     indstim*1/NIRS.Cf.dev.fs;
                     valtimestim =        AUX(iaux).ind_dur_ch(idstimAUX{iaux},1).*AUX(iaux).infoBV.SamplingInterval/1000000;
                     triginside = find(valtimestim>tstart & valtimestim<tstop)        ;           
                     tmp = idstimAUX{iaux} ;
                     idstimAUX{iaux} = tmp(triginside);
                     end
-                    
+                           disp(['Find ', num2str(numel(idstimAUX{iaux})), ' AUX file',AUX(iaux).file, ' trigger ', sprintf('S%3.0f, ',trigger),sprintf('\n'),...
+                            'Time: ', sprintf('%.2f ',AUX(iaux).infoBV.SamplingInterval/1000000.* AUX(iaux).ind_dur_ch(idstimAUX{iaux})),'seconds to segment',sprintf('\n'),...
+                            'Sample: ',sprintf('%.0f ', AUX(iaux).ind_dur_ch(idstimAUX{iaux},1)) ])
                      %itrigger =[itrigger, ones(1,numel(idstim)).*trigger(itypestim)];
-                    if numel(indstim)==numel(idstimAUX{iaux}) %gerer les cas stim agree dimention only
+                    if numel(indstim)==numel(idstimAUX{iaux}) %gerer les cas stim agree dimension only
                         indstim_AUX{iaux} = AUX(iaux).ind_dur_ch(idstimAUX{iaux},1);
                          % disp(['Find AUX onset time: ', sprintf('%.2f ',AUX.infoBV.SamplingInterval/1000000*indstim_AUX{iaux}),'seconds to sync' ])
                         disp(['Find ', num2str(numel( indstim_AUX{iaux})), ' AUX trigger ', sprintf('S%3.0f, ',trigger) ,...
-                            sprintf('\n'),'Time: ', sprintf('%.2f, ',AUX.infoBV.SamplingInterval/1000000*indstim_AUX{iaux}),'seconds to sync', sprintf('\n'),'Sample: ',sprintf('%d, ',indstim_AUX{iaux}) ]);
+                            sprintf('\n'),'Time: ', sprintf('%.2f, ',AUX(iaux).infoBV.SamplingInterval/1000000*indstim_AUX{iaux}),'seconds to sync', sprintf('\n'),'Sample: ',sprintf('%d, ',indstim_AUX{iaux}) ]);
 
                     else
 %                         idtocheckAUX = AUX(iaux).ind_dur_ch(idstimAUX{iaux},1);
@@ -267,12 +270,12 @@ for filenb = 1:size(job.NIRSmat,1)
                             temp = idstimAUX{iaux};
                             indstim_AUX{iaux}= AUX(iaux).ind_dur_ch(temp(1),1);
                             disp(['Use only first trig ', num2str(numel( indstim_AUX{iaux})), ' AUX trigger ', sprintf('S%3.0f, ',trigger) ,...
-                            sprintf('\n'),'Time: ', sprintf('%.2f, ',AUX.infoBV.SamplingInterval/1000000*indstim_AUX{iaux}),'seconds to sync', sprintf('\n'),'Sample: ',sprintf('%d, ',indstim_AUX{iaux}) ]);
+                            sprintf('\n'),'Time: ', sprintf('%.2f, ',AUX(iaux).infoBV.SamplingInterval/1000000*indstim_AUX{iaux}),'seconds to sync', sprintf('\n'),'Sample: ',sprintf('%d, ',indstim_AUX{iaux}) ]);
                         else 
                             indstim_AUX{iaux} = AUX(iaux).ind_dur_ch(idstimAUX{iaux},1);
                             disp('Error unequal AUX trigger identification review vmrk')
                             disp(['Find ', num2str(numel( indstim_AUX{iaux})), ' AUX trigger ', sprintf('S%3.0f, ',trigger) ,...
-                            sprintf('\n'),'Time: ', sprintf('%.2f, ',AUX.infoBV.SamplingInterval/1000000*indstim_AUX{iaux}),'seconds to sync', sprintf('\n'),'Sample: ',sprintf('%d, ',indstim_AUX{iaux}) ]);
+                            sprintf('\n'),'Time: ', sprintf('%.2f, ',AUX(iaux).infoBV.SamplingInterval/1000000*indstim_AUX{iaux}),'seconds to sync', sprintf('\n'),'Sample: ',sprintf('%d, ',indstim_AUX{iaux}) ]);
                         end
                     end
                     
