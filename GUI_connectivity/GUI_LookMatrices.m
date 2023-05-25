@@ -1980,6 +1980,7 @@ colorlink = lines(max(groupeall));
 
 figure;hold on
 for id = 1:numel(DATA)
+    try
     if DATA{id}.GR > 0
     eval(['COH=DATA{',num2str(id),'}.MAT',linkij,';'])    
     eval(['namesubject = DATA{',num2str(id),'}.name;'])
@@ -1987,6 +1988,9 @@ for id = 1:numel(DATA)
     hplot= plot(COV,COH,'x','displayname',['G',num2str(DATA{id}.GR),namesubject]);
     set(hplot,'color',colorlink(DATA{id}.GR ,:));
   
+    end
+    catch
+        
     end
 end
 

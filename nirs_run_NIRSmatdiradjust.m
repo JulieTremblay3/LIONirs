@@ -1,7 +1,7 @@
 function out = nirs_run_NIRSmatdiradjust(job)
-
-load(job.NIRSmat{1,1});
-[NIRSmatnewdir,name,ext] = fileparts(job.NIRSmat{1,1});
+for imat =1:numel(job.NIRSmat)
+load(job.NIRSmat{imat,1});
+[NIRSmatnewdir,name,ext] = fileparts(job.NIRSmat{imat,1});
 
 for imodule = numel(NIRS.Dt.fir.pp):-1:1
     if imodule == 2
@@ -89,5 +89,7 @@ if isfield(job.c_MultimodalPath,'b_MultimodalPath_yes')
     end
 end
 
-save(job.NIRSmat{1,1},'NIRS');
+save(job.NIRSmat{imat,1},'NIRS');
+clear NIRS
+end
 out.NIRSmat = job.NIRSmat;

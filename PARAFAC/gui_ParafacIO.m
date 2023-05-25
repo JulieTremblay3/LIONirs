@@ -57,6 +57,9 @@ function gui_ParafacIO_OpeningFcn(hObject, eventdata, handles, varargin)
 
 %CALCUL INTERACTIF PARAFAC SELECTIONNNER POUR LA FENETRE DE TEMPS DANS LE
 %GUI
+if isempty(varargin)
+    resetview(handles,0)
+else
 handles.output = hObject;
 tstart = varargin{1};
 tstop = varargin{2};
@@ -92,6 +95,7 @@ listgood = find(double(PMI{currentsub}.data(cf).MeasListAct==1).*double(MeasList
 
 
 
+nbcomp = str2num(get(handles.edit_nbComponent,'string'));
 t = PMI{currentsub}.data(cf).HRF.tHRF;
 spar = cat(3,spar(:,1:end/2),spar(:,end/2+1:end));
 spartmp = spar(:,listgood,:);
@@ -100,17 +104,18 @@ PMI{1}.tmpPARAFAC.selected =1;
 PMI{currentsub}.tmpPARAFAC.spar = spartmp;                    %Data initial
 PMI{currentsub}.tmpPARAFAC.listgood = listgood ; 
 PMI{currentsub}.tmpPARAFAC.indt = [tstart(end),tstop(end)];%Time indice
+PMI{currentsub}.tmpPARAFAC.dotted = zeros(nbcomp,1); 
+
 set(guiHOMER,'UserData',PMI);
 btn_Parafac_Callback(hObject, eventdata, handles)
 
-nbcomp = str2num(get(handles.edit_nbComponent,'string'));
 label = [];
 for i=1:nbcomp
     label = [label,{['F',num2str(i)]}];
 end
 set(handles.popupmenu_Factor,'string',label)
 
-
+end
 % Update handles structure
 guidata(hObject, handles);
 
@@ -189,6 +194,7 @@ tic
 [Factors,it,err,corcondia] = parafac(spar(:,:,:),Nc,opt,const,Oldload,fixMode,weights);
 toc
 PMI{currentsub}.tmpPARAFAC.Factors = Factors;
+PMI{currentsub}.tmpPARAFAC.dotted = zeros(Nc,1); 
 
 set(guiHOMER,'UserData',PMI);
 guidata(hObject, handles);
@@ -260,10 +266,21 @@ PMI = get(guiHOMER,'UserData');
 
     for i=1:Nc
          if PMI{1}.tmpPARAFAC.selected==i
-            plot(t, FacTime(:,i),'color',colorlist(i,:),'linewidth',4 )
+             
+            hline = plot(t, FacTime(:,i),'color',colorlist(i,:),'linewidth',4 );
          else
-            plot(t, FacTime(:,i),'color',colorlist(i,:) )
+            hline = plot(t, FacTime(:,i),'color',colorlist(i,:) );
          end
+         try
+         if PMI{currentsub}.tmpPARAFAC.dotted(i)==1
+             set(hline,'linestyle','--');
+         else
+              set(hline,'linestyle','-');
+         end
+         catch
+             1
+         end
+         
     end
 
     if newfigure==0

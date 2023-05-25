@@ -988,6 +988,9 @@ elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
         disp(['Project: ',[path,name]])
         d1 = load('-mat',[path name]);
         if isfield(d1,'zonelist')
+            if isempty(d1.zonelist)
+                 d1 = d1.A;      
+            else
         zonelist = d1.zonelist;
         val = d1.A;
         d1 = zeros( size(PMI{1}.data.MeasList,1)/2,1);     
@@ -1020,6 +1023,7 @@ elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
             disp('where not found');
         end
          d1(listHBOch(idfind)) = val(idfind);
+            end
         else
              d1 = d1.A;                   
         end            

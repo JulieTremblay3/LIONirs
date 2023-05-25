@@ -12,10 +12,9 @@ if strcmp(ext, '.nirs')
 elseif strcmp(ext, '.snirf') 
     try
         snirf = SnirfClass(FileName);
-    catch ME
+    catch M
         msgbox('Please install https://github.com/fNIRS/snirf_homer3 to support snirf class compatibility ')
         disp('Please install https://github.com/fNIRS/snirf_homer3 to support snirf class compatibility ')
-        rethrow(ME) 
         return
     end
     NIRS.SD.Lambda = snirf.probe.wavelengths; 

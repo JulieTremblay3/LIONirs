@@ -18,7 +18,12 @@ end
     for i=1:numel(job.c_statcomponent.b_TtestOneSample.f_component)
         load(job.c_statcomponent.b_TtestOneSample.f_component{i},'-mat');
         AllC = [AllC,A];
-        info.zonelistG1{i} = zonelist;        
+        try
+        info.zonelistG1{i} = zonelist;    
+        catch
+            zonelist = [];
+             info.zonelistG1{i} = [];
+        end
     end  
     save(fullfile(dir1,'MatricebyChannel.mat'), 'AllC','-mat')
     disp(fullfile(dir1,'MatricebyChannel.mat'))

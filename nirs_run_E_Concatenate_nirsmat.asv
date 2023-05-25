@@ -140,7 +140,7 @@ if strcmp(temp(end-3:end),'zone')% USE ZONE TEMPLATE FIRST TO LOOK IN OTHER FILE
          end
      
          NIRS.Dt.fir.sizebloc = newsizebloc;
-             NIRS.Cf.H.C.ok = ones(size(dall,1),1);
+             NIRS.Cf.H.C.ok = ones(a(dall),2)>0);
              
           %clean up old aux file format use export file format for auxiliary 
           if isfield(NIRS.Dt.fir,'aux1');NIRS.Dt.fir = rmfield(NIRS.Dt.fir, 'aux1');end      

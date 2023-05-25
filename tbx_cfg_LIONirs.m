@@ -958,10 +958,21 @@ m_Concatenate_option.help   = {'Merge data off all nirs and block selected.',...
     'Merge only does not correct any offset while merge and detrend does a detrending operation on each block before to merge them.'};
 
 
+f_Concatenate_outdir        = cfg_files;
+f_Concatenate_outdir.name    = 'Select output folder'; 
+f_Concatenate_outdir.tag     = 'f_writeNIRSdir';       %file names
+f_Concatenate_outdir.filter  = {'dir'};
+f_Concatenate_outdir.ufilter = '.*';    
+f_Concatenate_outdir.num     = [0 1];      % Number of inputs required 
+f_Concatenate_outdir.val    = {''};
+f_Concatenate_outdir.help    = {'Select the output folder where to save data. By default if you let empty it will save in the current NIRS.mat file'}; 
+
+
+
 E_Concatenate_file      = cfg_exbranch;
 E_Concatenate_file.name = 'Concatenate blocks in NIRS.mat';
 E_Concatenate_file.tag  = 'E_Concatenate_file';
-E_Concatenate_file.val  = {NIRSmat,m_Concatenate_option,e_Concatenate_blocid};
+E_Concatenate_file.val  = {NIRSmat,m_Concatenate_option,e_Concatenate_blocid, f_Concatenate_outdir  };
 E_Concatenate_file.prog = @nirs_run_E_Concatenate_file;
 E_Concatenate_file.vout = @nirs_cfg_vout_E_Concatenate_file;
 E_Concatenate_file.help = {'Join several blocks in the NIRS.mat, support EEG or AUX multimodal information, additional files Allxxx.dat will be created. Does not support video.'};
@@ -1354,12 +1365,20 @@ i_cardiacwidth.val       = {[0]};
 i_cardiacwidth.help      = {'Define the range to compute the coherence around the peak.'}; 
 
 
+m_cardiacwavelenght           = cfg_menu; 
+m_cardiacwavelenght.tag       = 'm_cardiacwavelenght';    
+m_cardiacwavelenght.name      = 'Wavength to apply rejection'; 
+m_cardiacwavelenght.labels    = {'First','Second', 'Both','Any'};
+m_cardiacwavelenght.values    = {1,2,3,4};  
+m_cardiacwavelenght.val       = {[4]};
+m_cardiacwavelenght.help      = {'Define the wavelenght were rejected channel will be selected. The cardiac coherence is perform on both optical wavelenght',...
+    'You could reject channel base on the first wavelenght only, the second only, both of them need to be good or any of them need to be good to keep the channel as valid'}; 
 
 % Executable Branch
 E_chcardiaccontrol      = cfg_exbranch;
 E_chcardiaccontrol.name = 'Cardiac Detection';
 E_chcardiaccontrol.tag  = 'E_chcardiaccontrol';
-E_chcardiaccontrol.val  = {NIRSmat, i_Freq_cardiac i_COHTRESHOLD_cardiac i_minch_cardiac i_cardiacwidth };
+E_chcardiaccontrol.val  = {NIRSmat, i_Freq_cardiac i_COHTRESHOLD_cardiac i_minch_cardiac i_cardiacwidth m_cardiacwavelenght };
 E_chcardiaccontrol.prog = @nirs_run_chcardiaccontrol;
 E_chcardiaccontrol.vout = @nirs_run_vout_chcardiaccontrol;
 E_chcardiaccontrol.help = {'Detection of the cardiac beat using coherence measure among channels and the module rejects channels without any cardiac evidence.'};
@@ -2559,6 +2578,36 @@ b_extractcomponent_PARAFAC.val      = {f_extractcomponent_PARAFAClist};
 b_extractcomponent_PARAFAC.help     = {'Display option for HSJ helmet.'};
 
 
+
+f_extractAVGlist_autoexport_yes          = cfg_files; %path
+f_extractAVGlist_autoexport_yes.name     = 'Result folder';
+f_extractAVGlist_autoexport_yes.tag      = 'f_extractAVGlist_autoexport_yes';
+f_extractAVGlist_autoexport_yes.filter   = {'dir'};
+f_extractAVGlist_autoexport_yes.ufilter  = '.*';    %
+f_extractAVGlist_autoexport_yes.num      = [1 1];     % Number of inputs required 
+f_extractAVGlist_autoexport_yes.help     = {'Result of component will be saved in this folder.'};
+   
+b_extractAVGlist_autoexport_yes         = cfg_branch;
+b_extractAVGlist_autoexport_yes.tag      = 'b_extractAVGlist_autoexport_yes';
+b_extractAVGlist_autoexport_yes.name     = 'Yes';
+b_extractAVGlist_autoexport_yes.val      = {f_extractAVGlist_autoexport_yes};
+b_extractAVGlist_autoexport_yes.help     = {'Result of component will be saved in this folder.'};
+
+e_extractAVGlist_autoexport_no        = cfg_entry;
+e_extractAVGlist_autoexport_no.name    = 'No';
+e_extractAVGlist_autoexport_no.tag     = 'c_extractAVGlist_autoexport_no';       
+e_extractAVGlist_autoexport_no.strtype = 's';
+e_extractAVGlist_autoexport_no.num     = [1 Inf];
+e_extractAVGlist_autoexport_no.val     = {'No'}; 
+e_extractAVGlist_autoexport_no.help    = {'Do not save extract'};
+
+c_extractAVGlist_autoexport         = cfg_choice; 
+c_extractAVGlist_autoexport.tag     = 'c_extractAVGlist_autoexport';
+c_extractAVGlist_autoexport.name    = 'Export in folder';
+c_extractAVGlist_autoexport.values  = {e_extractAVGlist_autoexport_no,b_extractAVGlist_autoexport_yes};
+c_extractAVGlist_autoexport.val     = {e_extractAVGlist_autoexport_no}; %Default option
+c_extractAVGlist_autoexport.help    = {'Export components directly in a specify folder.'};
+
 f_extractcomponent_AVGlist         = cfg_files;
 f_extractcomponent_AVGlist.name    = 'List AVG to identify (xls)'; 
 f_extractcomponent_AVGlist.tag     = 'f_component_AVGlist';       %file names
@@ -2572,12 +2621,12 @@ f_extractcomponent_AVGlist.help    = {'NIRS.mat folder: Directory to locate the 
     '''tStartavg'': to get the average starting point;',... 
     '''tStopavg'': to get the average stopping point;',... 
     '''Label'': Write label in the component name;',... 
-    '''ZoneDisplay'': use the first zone channel to plot the average. Keep the zone file in the same folder as the excel ExtractAVG setting.'}; 
+    '''ZoneDisplay'': use the first zone channel to plot the average. Or let it empty Keep the zone file in the same folder as the excel ExtractAVG setting.'}; 
 
 b_extractcomponent_AVG          = cfg_branch;
 b_extractcomponent_AVG.tag      = 'b_extractcomponent_AVG';
 b_extractcomponent_AVG.name     = 'Identify AVG';
-b_extractcomponent_AVG.val      = {f_extractcomponent_AVGlist};
+b_extractcomponent_AVG.val      = {f_extractcomponent_AVGlist, c_extractAVGlist_autoexport};
 b_extractcomponent_AVG.help     = {'Find the average of a time period for each channel.'};
 
 i_extractnoise_labelPARAFAC         = cfg_entry;
@@ -2885,7 +2934,7 @@ c_statcomppermutation.tag     = 'c_statpermutation';
 c_statcomppermutation.name    = 'Univariate permutations';
 c_statcomppermutation.values  = {b_permutation,b_Nopermutation };
 c_statcomppermutation.val     = {b_Nopermutation}; %Default option
-c_statcomppermutation.help    = {'Use permutation to create the empirical null distribution.'}
+c_statcomppermutation.help    = {'Use permutation to create the empirical null distribution.'};
 
 m_TtestOneSample        = cfg_menu;
 m_TtestOneSample.tag    = 'm_TtestOneSample';
@@ -3048,6 +3097,8 @@ EEG_files.tag     = 'EEG_files';
 EEG_files.num     = [0 Inf];     % Number of inputs required 
 EEG_files.val{1}  = {''};
 EEG_files.help    = {'Open EEG files.'}; % help text displayed
+
+
 
 %%%%%%MODULE 6
 % Executable Branch
@@ -3239,12 +3290,22 @@ AUX_files.num     = [0 Inf];     % Number of inputs required
 AUX_files.val{1}  = {''};
 AUX_files.help    = {'Open AUX files. '}; % help text displayed
 
-%%%%%%MODULE 6
+
+AUX_files_paired_NIRS         = cfg_menu;
+AUX_files_paired_NIRS.name    = 'Sync option';
+AUX_files_paired_NIRS.tag     = 'AUX_files_paired_NIRS';       
+AUX_files_paired_NIRS.labels  = {'Defaults ','Paired one to one with NIRS file'};
+AUX_files_paired_NIRS.values  = {0,1};
+AUX_files_paired_NIRS.val     = {0};
+AUX_files_paired_NIRS.help    = {'Usualy we do expect one AUX file for one nirs file but for some particular the sessions could be cut in two recording use the option paired one to one with nirs file if you enconter this cas, in that case you are limited to one AUX file by nirs file.'};
+
+
+
 % Executable Branch
 E_readAUX      = cfg_exbranch;      
 E_readAUX.name = 'Read AUX' ;            
 E_readAUX.tag  = 'E_readAUX'; 
-E_readAUX.val  = {NIRSmat,AUX_files};   
+E_readAUX.val  = {NIRSmat,AUX_files, AUX_files_paired_NIRS};   
 E_readAUX.prog = @nirs_run_readAUX;  
 E_readAUX.vout = @nirs_cfg_vout_readAUX;
 E_readAUX.help = {'Read simultaneous AUX data; Note trig must be synchronized with the NIRS',... 
@@ -3584,12 +3645,20 @@ b_Granger.help   = {'Perform time domain Multivariate granger causality, Use MVG
                     'this toolbox are Copyright (C) Lionel Barnett and Anil K. Seth, 2012.',...
                     'Please include in Matlab set path the mvgc_v1.0 toolbox,it cause some conflic with other built in matlab function,',...
                     'then we recomand to remove the folder from the set path after used to avoid potential conflics'};
-            
+                
+RespirationBBM           = cfg_menu;
+RespirationBBM.tag       = 'RespirationBBM';
+RespirationBBM.name      = 'Respiration beat by minute';
+RespirationBBM.labels    = {'Yes','No'};
+RespirationBBM.values    = {1, 0};
+RespirationBBM.val       = {1};
+RespirationBBM.help      = {'Mesure in the auxilairy (Resp) channel to save in the structure the rate of respiration by minute. It could be use later to help to determine the state of the participant. '};
+         
                      
 b_PearsonBootstrap         = cfg_branch;
 b_PearsonBootstrap.tag     = 'b_PearsonBootstrap';
 b_PearsonBootstrap.name    = 'Circular bootstrap';
-b_PearsonBootstrap.val     = {i_TrialLenght_crossspectrum,i_RandomSample_crossspectrum,i_OutlierControl_crossspectrum};
+b_PearsonBootstrap.val     = {i_TrialLenght_crossspectrum,i_RandomSample_crossspectrum,i_OutlierControl_crossspectrum, RespirationBBM};
 b_PearsonBootstrap.help    = {'Use circular bootstrap to compute cross-correlation analysis.'};
                 
 m_Pearson           = cfg_menu;

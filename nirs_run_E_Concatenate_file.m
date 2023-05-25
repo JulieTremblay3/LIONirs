@@ -3,9 +3,11 @@ function out = nirs_run_E_Concatenate_file(job)
 % This function is built to merge several bloc in the same NIRS.mat
 % Look for Concatenate_NIRS to merge different NIRS.mat restriction of only test for one bloc... used concatenate file before.
 prefix = 'All';
+   dall = [];
+    ind_dur_chtmp =[];
+    labeltmp=[] ;
 
-
-for filenb=1:1 %only one NIRS.mat merge file inside
+for filenb=1:numel(job.NIRSmat) %only one NIRS.mat merge file inside
     NIRS = [];
     load(job.NIRSmat{filenb,1});
     [dir2,tmp,tmp] = fileparts(job.NIRSmat{filenb,1});
@@ -22,9 +24,7 @@ for filenb=1:1 %only one NIRS.mat merge file inside
     end
     NC = NIRS.Cf.H.C.N;
     fs = NIRS.Cf.dev.fs;
-    dall = [];
-    ind_dur_chtmp =[];
-    labeltmp=[] ;
+ 
     if isfield(NIRS.Dt,'EEG')
         moduleEEG =  numel(NIRS.Dt.EEG(end).pp);
     end
@@ -144,16 +144,17 @@ for filenb=1:1 %only one NIRS.mat merge file inside
         %     end
         
         
-        dall = [dall, d];
+  
         [label_all,ind_dur_ch_all] = read_vmrk_all(infilevmrk);
-        if f>1
-            offsetsizebloc = offsetsizebloc+NIRS.Dt.fir.sizebloc{f-1};
-            ind_dur_ch_all(:,1)=ind_dur_ch_all(:,1)+ offsetsizebloc;
+        if f>1 | filenb > 1          
+            ind_dur_ch_all(:,1)=ind_dur_ch_all(:,1)+ (size(dall,2)-1);
         end
+        dall = [dall, d];
         ind_dur_chtmp = [ind_dur_chtmp;ind_dur_ch_all];
         labeltmp = [labeltmp;label_all];
     end
     if isfield(NIRS.Dt,'AUX') %Concatenate auxilary
+        try
         for iaux = 1:numel(NIRS.Dt.AUX)
             AUX{iaux}.data = [];
             AUX{iaux}.marker = [];
@@ -191,16 +192,21 @@ for filenb=1:1 %only one NIRS.mat merge file inside
             NIRS.Dt.AUX(iaux).pp(moduleaux+1).p{1} = outfileAUX;
             NIRS.Dt.AUX(iaux).pp(moduleaux+1).sync_timesec{1} = 0;
             fwrite_EEG(outfileAUX, AUX{iaux},1,AUX{iaux}.infoBV.DataPoints );
+                 
+        end
+         catch
+                disp('AUX file could not be concatenated')     
         end
     end
     if isfield(NIRS.Dt,'EEG') %Concatenate EEG
+        try
         for iEEG = 1:numel(NIRS.Dt.EEG)
             EEG{iEEG}.data = [];
             EEG{iEEG}.marker = [];
             EEG{iEEG}.ind_dur_ch = [];
             offsetsizebloc = 0;
             for f=1:size(rDtp,1)
-                fileEEG = NIRS.Dt.EEG(iEEG).pp(end).p{idselected(f)}
+                fileEEG = NIRS.Dt.EEG(iEEG).pp(end).p{idselected(f)};
                  tstartf = NIRS.Dt.EEG(iEEG).pp(moduleaux).sync_timesec{idselected(f)};
                 tstopf = tstartf+ size( d,2)*1/NIRS.Cf.dev.fs;
                 
@@ -223,14 +229,20 @@ for filenb=1:1 %only one NIRS.mat merge file inside
             NIRS.Dt.EEG(iEEG).pp(moduleEEG+1).sync_timesec{1} = 0;
             fwrite_EEG(outfileEEG, EEG{iEEG},1,EEG{iEEG}.infoBV.DataPoints );
         end
+        catch
+            disp('EEG file could not be concatenated')   
+        end
     end
     
-    
+  end  
     [dir1,fil1,ext1] = fileparts(rDtp{1,1});
     NIRS.Dt.fir.sizebloc{1} =newsizebloc;
     %.nir format
     % if NewDirCopyNIRS
     %     dir2 = [dir1 filesep NewNIRSdir];
+    if ~isempty(job.f_writeNIRSdir)
+        dir2 = job.f_writeNIRSdir{1};
+    end
     if ~exist(dir2,'dir'), mkdir(dir2); end
     outfile = fullfile(dir2,[prefix fil1 ext1]);
     outfile2 = fullfile(dir2,[prefix fil1 '_std' ext1]);
@@ -279,9 +291,10 @@ for filenb=1:1 %only one NIRS.mat merge file inside
 
     NIRS.Cf.H.C.ok(:,1) = (sum(NIRS.Cf.H.C.ok,2)>=size(NIRS.Cf.H.C.ok,2)/2);  %Ensure tant channel in less than 50 % of the bloc are kept as remove channel
     save(fullfile(dir2,'NIRS.mat'),'NIRS');
+    disp(['Concatenate bloc inside file ', fullfile(dir2,'NIRS.mat')])
     job.NIRSmat{1} =fullfile(dir2,'NIRS.mat');
     
-end
 
 
-out.NIRSmat = job.NIRSmat;
+
+out.NIRSmat = {job.NIRSmat{1}};

@@ -205,6 +205,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
         
         
         if isfield(job.I_chcorrlist_type,'b_Pearson')
+            BPMmean = [];
             if isfield(job.I_chcorrlist_type.b_Pearson.c_Pearson,'m_Pearson') %by segment
             for i=1:numel(listHBO)
                 if listHBO(i)
@@ -236,6 +237,63 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                 end
             end
             elseif isfield(job.I_chcorrlist_type.b_Pearson.c_Pearson,'b_PearsonBootstrap') %by segment
+                if isfield( job.I_chcorrlist_type.b_Pearson.c_Pearson.b_PearsonBootstrap,'RespirationBBM')
+                  if job.I_chcorrlist_type.b_Pearson.c_Pearson.b_PearsonBootstrap.RespirationBBM                                
+                  try                         
+                   filename = NIRS.Dt.AUX.pp(end).p{1};
+                   tstart=NIRS.Dt.AUX.pp(end).sync_timesec{1};
+                   tstop = size(d1,2)*1/NIRS.Cf.dev.fs+ tstart;
+                   [data,infoBV,label,ind_dur_ch] = fopen_EEG(filename,tstart,tstop);
+                   sw = 1/(infoBV.SamplingInterval/1e6);
+                   dt = infoBV.SamplingInterval/1e6;
+                   resp = data(:,2);
+                   time = dt:dt:numel(resp )*dt;
+         
+                   ipeak = [];
+                        iwindow = 1;
+                        while iwindow < (numel(resp)-1000)
+                            [val ,i] = max(resp(iwindow: iwindow+sw));
+                            resp(iwindow: iwindow+i*2) = 0;
+                             ipeak = [ipeak, iwindow+i];
+                            iwindow = iwindow+i*2;
+
+                        end
+                        deltapeak = ipeak(2:end) - ipeak(1:end-1);
+                        idout = find(deltapeak>800);
+                        
+                        deltapeak(idout)= nan;
+                        idout = find(deltapeak<300);
+                        deltapeak(idout)= nan;
+                        idok = find(~isnan(deltapeak));
+                        hbpm = figure;
+                        subplot(3,1,1);
+                        plot(time(:), data(:,2));hold on; plot( time(ipeak(idok)) , data(ipeak(idok),2),'x');
+                        time = 0.002:0.002:numel(resp )*0.002;
+                        title('Respiration Belt peak detection to fin beat by minute');
+                        subplot(3,1,2);
+                        plot(time(ipeak(idok)), (1./(deltapeak(idok).*0.002)*60));
+                        tR_BPM = time(ipeak(idok)); %time where the respiration beat by minute is measure s
+                        valR_BPM  =(1./(deltapeak(idok).*0.002)*60);
+                        byminute = (1./(deltapeak(idok).*0.002)*60);
+                        for i=1:numel(byminute)-100
+                            
+                            rolldeltapeak(i) = nanmean(byminute(i:i+40));
+                        end
+                        title(' beat by minute');
+                        subplot(3,1,3);
+                        plot(time(ipeak(idok(1:numel(rolldeltapeak)))), rolldeltapeak(1:numel(rolldeltapeak)));
+                        title('Roll average beat by minute');
+                         pathout = job.I_chcorrlistoutpath;
+                        if ~isdir(pathout)
+                            mkdir(pathout);
+                        end
+                        saveas(hbpm,fullfile(pathout,[filloutput,'BPM.jpg']))
+                        disp(['SAVE respiration BPM:',fullfile(pathout,[filloutput,'BPM.jpg'])])
+                  catch
+                      disp(['Failed to compute respiration BPM file', filename])
+                  end
+                end
+                end
                 fs = NIRS.Cf.dev.fs;                         % Sample frequency (Hz)
                 tseg = job.I_chcorrlist_type.b_Pearson.c_Pearson.b_PearsonBootstrap.i_TrialLenght_crossspectrum;
                 t = 0:1/fs:tseg;
@@ -274,6 +332,16 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                 end
                 pause(0.001)
                 dat = d1(:,Bloc(ibloc,1):Bloc(ibloc,2));
+                
+                    try
+                    timeblocstart = 1/NIRS.Cf.dev.fs*Bloc(ibloc,1);
+                    timeblocstop = 1/NIRS.Cf.dev.fs*Bloc(ibloc,2);
+                    idin = find(tR_BPM> timeblocstart & tR_BPM<timeblocstop);
+                    BPMmean(ibloc)=nanmean(valR_BPM( idin));
+                    catch
+                        
+                    end
+                
            for i=1:numel(listHBO)
                 if listHBO(i)
                     j = 1;
@@ -1273,10 +1341,10 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
             meancorrHbR =  1/2*(log((1+nanmean(meancorrHbR,3))./(1-nanmean(meancorrHbR,3))));
         end
         
-        save(fullfile(pathout,[filloutput,'_HBO','_Pearson','.mat']),'ZoneList','matcorr','meancorr', 'totaltrialgood'  )
+        save(fullfile(pathout,[filloutput,'_HBO','_Pearson','.mat']),'ZoneList','matcorr','meancorr', 'totaltrialgood','BPMmean'  )
         disp(['Save Pearson matrix: ',  fullfile(pathout,[filloutput,'_HBO','_Pearson','.mat'])])
         matcorr = matcorrHbR; meancorr = meancorrHbR;
-        save(fullfile(pathout,[filloutput,'_HBR','_Pearson','.mat']),'ZoneList','matcorr','meancorr', 'totaltrialgood'  )
+        save(fullfile(pathout,[filloutput,'_HBR','_Pearson','.mat']),'ZoneList','matcorr','meancorr', 'totaltrialgood','BPMmean'  )
         disp(['Save Pearson matrix: ',  fullfile(pathout,[filloutput,'_HBR','_Pearson','.mat'])])
     elseif isfield(job.I_chcorrlist_type,'b_Hilbert')
         save(fullfile(pathout,[filloutput,'_HBO','_Hilbert','.mat']),'ZoneList','matcorr','meancorr', 'totaltrialgood'  )

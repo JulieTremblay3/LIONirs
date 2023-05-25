@@ -673,10 +673,10 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
             
             % add event start
             eventbadstartstop = [idstart,idstop] ;
-            temp =   permute(eventbadstartstop, [2,1])
+            temp =   permute(eventbadstartstop, [2,1]);
             temp= [1;temp(:); size(noise,1)];
-            eventint=  reshape(temp,2,numel(temp)/2)
-            eventgoodstartstop=permute(eventint, [2,1])
+            eventint=  reshape(temp,2,numel(temp)/2);
+            eventgoodstartstop=permute(eventint, [2,1]);
         end
         %%%%%%%jusqu'ici proposition Laura
         
@@ -713,10 +713,10 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
         
         for iRegressor = 1:numel(ListRegressorZone)
             tmp = upper(zone.label{ListRegressorZone(iRegressor)});
-            zoneidentification = tmp(10:end)
+            zoneidentification = tmp(10:end);
             for izone = 1:numel(zone.label)
                 tmpzone = upper(zone.label{izone});
-                if strcmp( strtrim(zoneidentification), strtrim(tmpzone))
+                if strcmp( strtrim(zoneidentification), strtrim(tmpzone));
                     ListChannelZone = [ListChannelZone,izone];
                 end
             end
@@ -1548,6 +1548,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_PARAFAC')
         
     end
 elseif isfield(job.c_extractcomponent,'b_extractcomponent_AVG')
+    
     [~,~,ext] =fileparts(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
     if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
         [pathstr, name, ext]= fileparts(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
@@ -1615,23 +1616,39 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_AVG')
             intensnorm = d(indt(1):indt(end),:);
             tstartw = find(tHRF<=startwDtp{ievent});
             tstopw = find(tHRF<= stopwDtp{ievent});
-            try
-                load(fullfile(pathstr,[zoneDtp{ievent},'.zone']),'-mat')
+            try 
+                load(zoneDtp{ievent},'-mat')
+                %
             catch
+                try
+                load(fullfile(pathstr,[zoneDtp{ievent},'.zone']),'-mat')
+                catch
                 zone.plotLst{1} = 1;
+                end
             end
             
             Xm = zeros(size(intensnorm,1), numel(zone.plotLst));
+            AVG = zeros(NC,1 )
             for izone = 1:numel(zone.plotLst)
-                plotLst = zone.plotLst{izone}
+                plotLst = zone.plotLst{izone};
                 Xm(:,izone) = nanmean(intensnorm(:,plotLst),2);
-                %  figure;plot(Xm)
+                AVG(plotLst,1) = nanmean(nanmean(intensnorm(:,plotLst),2));
             end
-            AVG = nanmean(d(tstartw(end) :tstopw(end),listgood));
+            if isfield(job.c_extractcomponent.b_extractcomponent_AVG.c_extractAVGlist_autoexport,'b_extractAVGlist_autoexport_yes')
+                pathoutlist = job.c_extractcomponent.b_extractcomponent_AVG.c_extractAVGlist_autoexport.b_extractAVGlist_autoexport_yes.f_extractAVGlist_autoexport_yes{1};
+                %review to improve channel list
+                A = nanmean(d(tstartw(end) :tstopw(end),1:NC/2))';
+                zonelist = []
+                save(fullfile(pathoutlist,['TopoHbO',labelDtp{ievent},'event',sprintf('%03.0f',ievent),'.mat']),'A','zonelist' );
+                disp(['Save :', fullfile(pathoutlist,['TopoHbO',labelDtp{ievent},'event',sprintf('%03.0f',ievent),'.mat'])])
+                A = nanmean(d(tstartw(end) :tstopw(end),NC/2+1:end))';
+                save(fullfile(pathoutlist,['TopoHbR',labelDtp{ievent},'event',sprintf('%03.0f',ievent),'.mat']),'A','zonelist' );
+                disp(['Save :', fullfile(pathoutlist,['TopoHbR',labelDtp{ievent},'event',sprintf('%03.0f',ievent),'.mat'])])
+            end
+            
             %check the get PARAFAC
             try
-                load(fullfile(NIRSDtp{ievent},'SelectedFactors.mat'));
-                
+                load(fullfile(NIRSDtp{ievent},'SelectedFactors.mat'));                
                 newfile = 0;
             catch
                 clear PARCOMP
@@ -1670,7 +1687,8 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_AVG')
             save(fullfile(NIRSDtp{ievent},'SelectedFactors.mat'),'PARCOMP');
         catch
             disp(['Error unable to AVG on ' , NIRSmat])
-        end   
+        end  
+        disp('Warning function to be revised')
     end
     
 end

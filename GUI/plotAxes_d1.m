@@ -137,6 +137,7 @@ if get(handles.popup_view,'value') ==1 %Visualisation des canaux selectionnés un
             h = plot(PMI{currentsub}.data(cf).HRF.tHRF(idstart:idstop),d1(idstart:idstop),'LineStyle',':','linewidth',parameter_linewidth);
             %Affichage error bar
             if get(handles.popup_average,'value')==2
+                try
                 AvgStdErr = PMI{currentsub}.data(cf).HRF.AvgStdErr(:,plotLst(i));
                 he = errorbar(PMI{currentsub}.data(cf).HRF.tHRF, d1,AvgStdErr );
                 set(he,'color',PMI{currentsub}.color(idxc,:));
@@ -144,6 +145,8 @@ if get(handles.popup_view,'value') ==1 %Visualisation des canaux selectionnés un
                 set(he,'Displayname',['ch',num2str(plotLst(i)),'_',srs, '_', det]);
                 if ~newfigure
                     set(he,'uicontextmenu',handles.remove_bad_ch)
+                end
+                catch
                 end
             end
         else

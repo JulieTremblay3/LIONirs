@@ -47,6 +47,7 @@ for filenb = 1:size(job.NIRSmat,1)
         if isfield(NIRS.Dt,'EEG')
             try
                 fileeeg=NIRS.Dt.EEG.pp(moduleEEG).p{f}; %OPEN EEG HERE
+                 EEG.file = fileeeg;
                 [EEG.data,EEG.infoBV,EEG.marker,EEG.ind_dur_ch]=fopen_EEG(fileeeg);
             catch
             end
@@ -66,7 +67,7 @@ for filenb = 1:size(job.NIRSmat,1)
         
         try
         if isfield(NIRS.Dt,'AUX')            
-            for iaux = 1:numel(NIRS.Dt.AUX)
+            for iaux = 1:numel(NIRS.Dt.AUX)               
                 fileaux = NIRS.Dt.AUX(iaux).pp(moduleaux).p{f}; %OPEN EEG HERE
                 AUX(iaux).file = fileaux;
                 [AUX(iaux).data,AUX(iaux).infoBV,AUX(iaux).marker,AUX(iaux).ind_dur_ch]=fopen_EEG(fileaux);
@@ -177,6 +178,10 @@ for filenb = 1:size(job.NIRSmat,1)
                         
                         idstimEEG = [idstimEEG;strmatch(idtrigEEG,EEG.marker(:,2))];
                     end
+ 
+                if job.m_SegmentTrig==1
+               
+                else
                       if isfield(NIRS.Dt.EEG.pp(moduleEEG),'sync_timesec')
                         tstart= NIRS.Dt.EEG.pp(moduleEEG).sync_timesec{f};
                         tstop = tstart+size(d,2)*1/NIRS.Cf.dev.fs     ;               
@@ -184,8 +189,14 @@ for filenb = 1:size(job.NIRSmat,1)
                         triginside = find(valtimestim>tstart & valtimestim<tstop)      ;             
                          tmp = idstimEEG ;
                          idstimEEG = tmp(triginside);
-                    end
-                    
+                      end
+                end                         
+                 
+                         disp(['Find ', num2str(numel(idstimEEG)), ' AUX file ',EEG.file, ' trigger ', sprintf('S%3.0f, ',trigger),sprintf('\n'),...
+                            'Time: ', sprintf('%.2f ',EEG.infoBV.SamplingInterval/1000000.* EEG.ind_dur_ch(idstimEEG)),'seconds to segment',sprintf('\n'),...
+                            'Sample: ',sprintf('%.0f ', EEG.ind_dur_ch(idstimEEG,1)) ])
+                        
+                        
                     idtrigEEG = ['S',sprintf('%3.0f',trigger)];
                     if numel(indstim)==numel(idstimEEG) %gerer les cas stim agree dimention only
                         indstim_EEG = EEG.ind_dur_ch(idstimEEG,1);
@@ -204,7 +215,7 @@ for filenb = 1:size(job.NIRSmat,1)
                     fsEEG = 1/(EEG.infoBV.SamplingInterval/1000000); %uS en seconde
                     pretimeEEG = round(fsEEG*pretime/fs)-1;
                     posttimeEEG = round(fsEEG*posttime/fs);
-                catch
+                catch 
                     disp('Error EEG could not be open and synchronised')
                 end
             end
@@ -233,16 +244,20 @@ for filenb = 1:size(job.NIRSmat,1)
                         idstimAUX{iaux} = [idstimAUX{iaux};strmatch(deblank(idtrigAUX{iaux}),deblank(AUX(iaux).marker(:,2)))];
                     end
                     %PRESEGMENTATION ALLREALY DONE.
-                    if isfield(NIRS.Dt.AUX(iaux).pp(moduleaux),'sync_timesec')
-                    tstart= NIRS.Dt.AUX(iaux).pp(moduleaux).sync_timesec{f};
-                    tstop = tstart+size(d,2)*1/NIRS.Cf.dev.fs*AUX(iaux).infoBV.SamplingInterval/1000000;
-                    indstim*1/NIRS.Cf.dev.fs;
-                    valtimestim =        AUX(iaux).ind_dur_ch(idstimAUX{iaux},1).*AUX(iaux).infoBV.SamplingInterval/1000000;
-                    triginside = find(valtimestim>tstart & valtimestim<tstop)        ;           
-                    tmp = idstimAUX{iaux} ;
-                    idstimAUX{iaux} = tmp(triginside);
-                    end
-                           disp(['Find ', num2str(numel(idstimAUX{iaux})), ' AUX file',AUX(iaux).file, ' trigger ', sprintf('S%3.0f, ',trigger),sprintf('\n'),...
+                      if job.m_SegmentTrig==1
+                          
+                      else
+                        if isfield(NIRS.Dt.AUX(iaux).pp(moduleaux),'sync_timesec')
+                        tstart= NIRS.Dt.AUX(iaux).pp(moduleaux).sync_timesec{f};
+                        tstop = tstart+size(d,2)*1/NIRS.Cf.dev.fs*AUX(iaux).infoBV.SamplingInterval/1000000;
+                        indstim*1/NIRS.Cf.dev.fs;
+                        valtimestim =        AUX(iaux).ind_dur_ch(idstimAUX{iaux},1).*AUX(iaux).infoBV.SamplingInterval/1000000;
+                        triginside = find(valtimestim>tstart & valtimestim<tstop)        ;           
+                        tmp = idstimAUX{iaux} ;
+                        idstimAUX{iaux} = tmp(triginside);
+                        end
+                      end
+                           disp(['Find ', num2str(numel(idstimAUX{iaux})), ' AUX file ',AUX(iaux).file, ' trigger ', sprintf('S%3.0f, ',trigger),sprintf('\n'),...
                             'Time: ', sprintf('%.2f ',AUX(iaux).infoBV.SamplingInterval/1000000.* AUX(iaux).ind_dur_ch(idstimAUX{iaux})),'seconds to segment',sprintf('\n'),...
                             'Sample: ',sprintf('%.0f ', AUX(iaux).ind_dur_ch(idstimAUX{iaux},1)) ])
                      %itrigger =[itrigger, ones(1,numel(idstim)).*trigger(itypestim)];
@@ -289,7 +304,7 @@ for filenb = 1:size(job.NIRSmat,1)
                 end
             end   
         end
-        disp(['PreTime: ',num2str(pretime*1/fs), ' s ,PostTime: ' ,num2str(posttime*1/fs), ' s Apply to create ', num2str(numel(indstim)),' segments']);
+        disp(['PreTime: ',num2str(pretime*1/fs), ' s ,PostTime: ' ,num2str(posttime*1/fs), ' s Apply to create ', num2str(numel(indstim)),' segments at raw time: ', num2str(indstim'*1/fs) ]);
         nstim = posttime + pretime + 1;
          
         t = 1/fs:1/fs:1/fs*size(d,2);
@@ -325,7 +340,7 @@ for filenb = 1:size(job.NIRSmat,1)
                 if isfield(NIRS.Dt,'EEG')
                     try
                     %WRITE IN SUB FILE.... or add sync_timesec
-                    [dirEEG,filEEG,extEEG]= fileparts(NIRS.Dt.EEG.pp(end).p{f});                    
+                    [dirEEG,filEEG,extEEG]= fileparts(NIRS.Dt.EEG.pp(moduleEEG).p{f});                    
                     outfileEEG = fullfile(dirEEG,[filEEG bloc '.dat']);
                     stimlist=indstim_EEG;                      
                     if flagsegmentEEG %not used create copy of EEG file segmented
@@ -339,15 +354,16 @@ for filenb = 1:size(job.NIRSmat,1)
                         datasegR = EEG.data(indstim_EEG(istim)-pretimeEEG:indstim_EEG(istim)+posttimeEEG,:);
                         fwrite_EEG(outfileEEG,EEG,indstim_EEG(istim)-pretimeEEG,indstim_EEG(istim)+posttimeEEG);
                         bloc                       
-                        NIRS.Dt.EEG.pp(moduleEEG+1).p{ifile,1}=outfileEEG;                            
+                        NIRS.Dt.EEG.pp(moduleEEG+1).p{ifile,1}=outfileEEG;                             
                     else  %apply reference to file and indicate offset time
                         NIRS.Dt.EEG.pp(moduleEEG+1).p{ifile} = NIRS.Dt.EEG.pp(moduleEEG).p{f};
-                        NIRS.Dt.EEG.pp(moduleEEG+1).sync_timesec{ifile} = (indstim_EEG(istim)-pretimeEEG)*1/fsEEG;                        
+                        NIRS.Dt.EEG.pp(moduleEEG+1).sync_timesec{ifile} = (indstim_EEG(istim)-pretimeEEG)*1/fsEEG;  
+                        disp(['EEG sync time ', num2str(NIRS.Dt.EEG.pp(moduleEEG+1).sync_timesec{ifile} ) ' sec'])
                     end
                     catch
                         disp('Error Segment EEG could not be open and synchronised')
                     end
-                    
+                     
                 end
                 if isfield(NIRS.Dt,'Video')
                     if ~isempty(NIRS.Dt.Video.pp(moduleVideo).offset)
@@ -422,11 +438,11 @@ for filenb = 1:size(job.NIRSmat,1)
                     try
                     for iAUX = 1:numel(NIRS.Dt.AUX)
                         
-                        [dirAUX,filAUX,extAUX]= fileparts(NIRS.Dt.AUX(iAUX).pp(moduleaux).p{f});
+                        [dirAUX,filAUX,extAUX]= fileparts(NIRS.Dt.AUX(iAUX).pp(moduleaux).p{f}); %AUX(f).file             
                         outfileAUX{iAUX} = fullfile(dirAUX,[filAUX bloc '.dat']);
                         %write and segment EEG file in homologous bloc
                         stimlist=indstim_AUX{iAUX};
-                        
+                      
                         if flagsegmentAUX
                             if (max(stimlist)+posttimeAUX{iAUX})>size(AUX(iAUX).data,1)
                             %msgbox('Warning out of range padding in the last bloc aux')
@@ -438,8 +454,9 @@ for filenb = 1:size(job.NIRSmat,1)
                             fwrite_EEG(outfileAUX{iAUX},AUX(iAUX),stimlist(istim)-pretimeAUX{iAUX},stimlist(istim)+posttimeAUX{iAUX});
                             NIRS.Dt.AUX(iAUX).pp(moduleaux+1).p{ifile,1}=outfileAUX{iAUX};
                         else
-                            NIRS.Dt.AUX(iAUX).pp(moduleaux+1).p{ifile,1}=NIRS.Dt.AUX(iAUX).pp(moduleaux).p{f};
+                            NIRS.Dt.AUX(iAUX).pp(moduleaux+1).p{ifile,1}=NIRS.Dt.AUX(iAUX).pp(moduleaux).p{f}; 
                             NIRS.Dt.AUX(iAUX).pp(moduleaux+1).sync_timesec{ifile,1} = (stimlist(istim)-pretimeAUX{iAUX})*1/fsAUX{iAUX};
+                             disp(['AUX sync time ', num2str(NIRS.Dt.AUX(iAUX).pp(moduleaux+1).sync_timesec{ifile,1}) ' sec'])
                         end
                         bloc;
                     end
@@ -449,7 +466,7 @@ for filenb = 1:size(job.NIRSmat,1)
                        % msgbox('AUX could not be segment')
                        disp('Error AUX could not be segmented');
                 end
-                  end
+                end
                 %dnorm=log(dnorm)
                 %WRITE THE RESEGMENTATION
                 try

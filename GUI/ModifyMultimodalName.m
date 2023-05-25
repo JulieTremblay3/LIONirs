@@ -172,8 +172,9 @@ function listbox_AUXLIST_Callback(hObject, eventdata, handles)
 %        contents{get(hObject,'Value')} returns selected item from listbox_AUXLIST
 
 load(handles.NIRSpath{1});
+id = get(handles.popupmenu_NIRS,'value');
 val = get(handles.listbox_AUXLIST,'value');
-set(handles.edit_offsetAUX,'string', num2str(NIRS.Dt.AUX(val).pp(end).sync_timesec{1}));
+set(handles.edit_offsetAUX,'string', num2str(NIRS.Dt.AUX(val).pp(end).sync_timesec{id}));
  
 % NIRS.Dt.AUX.pp(end).p{1} = get(handles.listbox_AUXLIST,'string');
 % save(handles.NIRSpath{1},'NIRS'); 
@@ -470,15 +471,26 @@ try
     set(handles.listbox_EEGLIST,'string', NIRS.Dt.EEG.pp(end).p{id} );
     set(handles.edit_offsetEEG,'string',num2str(NIRS.Dt.EEG.pp(end).sync_timesec{id}));
 catch
-    disp('Warning empty EEG file')
+   % disp('Warning empty EEG file')
     set(handles.listbox_EEGLIST,'string', '');
     set(handles.edit_offsetEEG,'string','');
 end
-try
-    set(handles.listbox_AUXLIST,'string', NIRS.Dt.AUX.pp(end).p{id} );
-    set(handles.edit_offsetAUX,'string',num2str(NIRS.Dt.AUX.pp(end).sync_timesec{id}));
+try 
+      AUXname = [];
+    for i=1:numel(NIRS.Dt.AUX) 
+        AUXname= [AUXname;  NIRS.Dt.AUX(i).pp(end).p(id)] ;
+    end
+        set(handles.listbox_AUXLIST,'string', AUXname);
+        set(handles.listbox_AUXLIST,'value', 1);
+        try
+             set(handles.edit_offsetAUX,'string', num2str(NIRS.Dt.AUX(1).pp(end).sync_timesec{id}));
+        catch
+             disp('WARNING verify AUX sync time')
+             set(handles.edit_offsetAUX,'string', ' ');
+        end
+    
 catch
-    disp('Warning empty AUX file')
+  %  disp('Warning empty AUX file')
     set(handles.listbox_AUXLIST,'string', '' );
     set(handles.edit_offsetAUX,'string','');
 end
@@ -487,7 +499,7 @@ try
     set(handles.listbox_Video,'string', NIRS.Dt.Video.pp(end).p{id} );
     set(handles.edit_offsetVideo,'string',num2str(NIRS.Dt.Video.pp(end).sync_timesec{id}));
 catch
-    disp('Warning empty VIDEO file')
+%    disp('Warning empty VIDEO file')
     set(handles.listbox_Video,'string', '' );
     set(handles.edit_offsetVideo,'string','');
 end
@@ -495,7 +507,7 @@ try
     set(handles.listbox_Audio,'string',NIRS.Dt.Audio.pp(end).p{id} );   
     set(handles.edit_offsetAudio,'string',num2str(NIRS.Dt.Audio.pp(end).sync_timesec{id}));
 catch
-    disp('Warning empty AUDIO file')
+  %  disp('Warning empty AUDIO file')
     set(handles.listbox_Audio,'string', '' );
     set(handles.edit_offsetAudio,'string','');
 end

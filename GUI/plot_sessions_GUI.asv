@@ -10375,6 +10375,7 @@ both =  reshape(listCH,numel(listCH)/2,2);
 chHbO = find(sum(both,2));
 chHbR =   chHbO + numel(listCH)/2;
 
+strcmp(get(handles.Context_MenuExportZone_All,'checked'),'off') %only one curve
 if strcmp(get(handles.Context_MenuExportZone_All,'checked'),'off') %only one curve
     figure; hold on
     plotLst = PMI{currentsub}.zone.plotLst{num};
@@ -10388,24 +10389,16 @@ if strcmp(get(handles.Context_MenuExportZone_All,'checked'),'off') %only one cur
     % plot(PMI{currentsub}.data.HRF.AvgC(:,chHbO))
     
    
-    if isfield(PMI{currentsub}.data(cf).HRF,'AvgStdErr');
-        for ichHBO = 1:numel(chHbO)
-            srs = SDPairs2strboxy(PMI{currentsub}.data(cf).MeasList(chHbO( ichHBO),1));
-            det = SDDet2strboxy(PMI{currentsub}.data(cf).MeasList(chHbO( ichHBO),2));
-            AvgStdErr = PMI{currentsub}.data(cf).HRF.AvgStdErr;
-            he = errorbar(PMI{currentsub}.data(cf).HRF.tHRF, PMI{currentsub}.data.HRF.AvgC(:,chHbO( ichHBO)),AvgStdErr(:,chHbO( ichHBO)) );
-            set(he,'color',colorid);
-            set(he,'Displayname',['HbO',label,'ch',num2str(chHbO( ichHBO)),'_',srs, '_', det]);      
-        end
-         for ichHBR = 1:numel(chHbR)
-            srs = SDPairs2strboxy(PMI{currentsub}.data(cf).MeasList(chHbR( ichHBR),1));
-            det = SDDet2strboxy(PMI{currentsub}.data(cf).MeasList(chHbR( ichHBR),2));
-            AvgStdErr = PMI{currentsub}.data(cf).HRF.AvgStdErr;
-            he = errorbar(PMI{currentsub}.data(cf).HRF.tHRF, PMI{currentsub}.data.HRF.AvgC(:,chHbR( ichHBR)),AvgStdErr(:,chHbR( ichHBR)) );
-            set(he,'color',colorid);
-            set(he,'Displayname',['HbO',label,'ch',num2str(chHbR( ichHBR)),'_',srs, '_', det]);  
-         end
-    end
+if isfield(PMI{currentsub}.data(cf).HRF,'AvgStdErr')
+    
+    he = errorbar(PMI{currentsub}.data(cf).HRF.tHRF, d1,AvgStdErr );
+                set(he,'color',PMI{currentsub}.color(idxc,:));
+                set(he,'Tag',num2str(plotLst(i)))
+                set(he,'Displayname',['ch',num2str(plotLst(i)),'_',srs, '_', det]);
+                if ~newfigure
+                    set(he,'uicontextmenu',handles.remove_bad_ch)
+                end
+end
     plot(PMI{currentsub}.data.HRF.tHRF,nanmean(PMI{currentsub}.data.HRF.AvgC(:,chHbO),2),'displayname',['HbO',label],'color',colorid,'linewidth',4);
     plot(PMI{currentsub}.data.HRF.tHRF,nanmean(PMI{currentsub}.data.HRF.AvgC(:,chHbR),2),'displayname',['HbR',label],'color',colorid,'linestyle','--','linewidth',4);
     set(gca,'fontsize',20)
@@ -10422,26 +10415,6 @@ else
         chHbO = find(sum(both,2));
         chHbR =   chHbO + numel(listCH)/2;
         % plot(PMI{currentsub}.data.HRF.AvgC(:,chHbO))
-        
-        
-    if isfield(PMI{currentsub}.data(cf).HRF,'AvgStdErr')
-        for ichHBO = 1:numel(chHbO)
-            srs = SDPairs2strboxy(PMI{currentsub}.data(cf).MeasList(chHbO( ichHBO),1));
-            det = SDDet2strboxy(PMI{currentsub}.data(cf).MeasList(chHbO( ichHBO),2));
-        	AvgStdErr = PMI{currentsub}.data(cf).HRF.AvgStdErr;
-            he = errorbar(PMI{currentsub}.data(cf).HRF.tHRF, PMI{currentsub}.data.HRF.AvgC(:,chHbO( ichHBO)),AvgStdErr(:,chHbO( ichHBO)) );
-            set(he,'color',colorid);
-            set(he,'Displayname',['HbO',label,'ch',num2str(chHbR( ichHBO)),'_',srs, '_', det]);      
-        end
-        for ichHBR = 1:numel(chHbR)
-            srs = SDPairs2strboxy(PMI{currentsub}.data(cf).MeasList(chHbR( ichHBR),1));
-            det = SDDet2strboxy(PMI{currentsub}.data(cf).MeasList(chHbR( ichHBR),2));
-            AvgStdErr = PMI{currentsub}.data(cf).HRF.AvgStdErr;
-            he = errorbar(PMI{currentsub}.data(cf).HRF.tHRF, PMI{currentsub}.data.HRF.AvgC(:,chHbR( ichHBR)),AvgStdErr(:,chHbR( ichHBR)) );
-            set(he,'color',colorid);
-            set(he,'Displayname',['HbO',label,'ch',num2str(chHbR( ichHBR)),'_',srs, '_', det]);      
-        end
-    end
         plot(PMI{currentsub}.data.HRF.tHRF,nanmean(PMI{currentsub}.data.HRF.AvgC(:,chHbO),2),'displayname',['HbO',label],'color',colorid,'linewidth',4);
         plot(PMI{currentsub}.data.HRF.tHRF,nanmean(PMI{currentsub}.data.HRF.AvgC(:,chHbR),2),'displayname',['HbR',label],'color',colorid,'linestyle','--','linewidth',4);
         set(gca,'fontsize',20)

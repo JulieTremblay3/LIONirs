@@ -53,7 +53,7 @@ pourcentagetr = job.i_minch_cardiac/100;
                 end
             end
             if ~isempty(removetrial)
-                yall(:,:,removetrial)=[];
+                yall(:,:,removetrial)=[]; 
                 totaltrialgood = size(yall,3);
             else
                 totaltrialgood = size(yall,3);
@@ -258,8 +258,26 @@ pourcentagetr = job.i_minch_cardiac/100;
             end  
             
             nbch = size(matcorr,1);
+            
+            if job.m_cardiacwavelenght==1 %only first wavelenght
+                 measlistok = sum([matcorr(:,:,f)>COHtr])>(nbch*pourcentagetr )
+                 measlistok = reshape(measlistok,1,numel(measlistok));
+                 disp([num2str(sum( measlistok)),'/', num2str(numel( measlistok)),' good channels on first wavelenghts'])
+
+            elseif job.m_cardiacwavelenght==2  %only second wavelenght
+                measlistok =  sum([matcorrHbR(:,:,f)>COHtr])>(nbch*pourcentagetr );
+                 measlistok = reshape(measlistok,1,numel(measlistok));
+                 disp([num2str(sum( measlistok)),'/', num2str(numel( measlistok)),' good channels on seconds wavelenghts'])
+            elseif  job.m_cardiacwavelenght==3  %both wavelenght
+                 measlistok = sum([matcorr(:,:,f)>COHtr])>(nbch*pourcentagetr )& sum([matcorrHbR(:,:,f)>COHtr])>(nbch*pourcentagetr );
+                 measlistok = reshape(measlistok,1,numel(measlistok));
+                 disp([num2str(sum( measlistok)),'/', num2str(numel( measlistok)),' good channels on both wavelenghts'])
+             elseif  job.m_cardiacwavelenght ==4
+                 measlistok = sum([matcorr(:,:,f)>COHtr])>(nbch*pourcentagetr )| sum([matcorrHbR(:,:,f)>COHtr])>(nbch*pourcentagetr );
+                 measlistok = reshape(measlistok,1,numel(measlistok));
+                 disp([num2str(sum( measlistok)),'/', num2str(numel( measlistok)),' good channels on one or the other wavelenghts'])
+            end
               measlistok = sum([matcorr(:,:,f)>COHtr])>(nbch*pourcentagetr )& sum([matcorrHbR(:,:,f)>COHtr])>(nbch*pourcentagetr );
-              measlistok = reshape(measlistok,1,numel(measlistok));
              subplot(5,4, [13,14,17,18]);hold on
              xlabel('CH id','fontsize',12)
              ylabel('CH id','fontsize',12)
