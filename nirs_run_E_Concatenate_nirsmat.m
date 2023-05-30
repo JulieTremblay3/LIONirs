@@ -11,7 +11,11 @@ if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
     try
         [data, text, rawData] = xlsread(job.f_nirsmatinfo{1});
     catch
+        try
          [data, text, rawData] = readtxtfile_asxlsread(job.f_nirsmatinfo{1});
+        catch
+            disp(['Could not open file: ', job.f_nirsmatinfo{1}])
+        end
     end
 elseif strcmp(ext,'.txt')
     [data, text, rawData] = readtxtfile_asxlsread(job.f_nirsmatinfo{1});

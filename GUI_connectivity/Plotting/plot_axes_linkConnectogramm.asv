@@ -263,12 +263,6 @@ end
 end
 %
 %%
-temp = linspace(-pi,pi,numel(idzonecolor)); %to avoid 0 tan
-%CONTOUR CERCLE
-for i = 1:length(temp )-1
-    defcolor = DATA{id}.zone.color(idzonecolor(i),:);
-    plot([cos(temp(i)),cos(temp(i+1))],[sin(temp(i)),sin(temp(i+1))],'color',  defcolor,'linewidth',6)
-end
 
 x = MAT(idlist,idlist);
 id0 = find(isnan(x));
@@ -301,7 +295,12 @@ for i=1:length(adjacencyMatrix)
    edge(i).Color = [0 0 0];
 end 
 
-
+temp = linspace(-pi,pi,numel(idzonecolor)); %to avoid 0 tan
+%CONTOUR CERCLE
+for i = 1:length(temp )-1
+    defcolor = DATA{id}.zone.color(idzonecolor(i),:);
+    plot([cos(temp(i)),cos(temp(i+1))],[sin(temp(i)),sin(temp(i+1))],'color',  defcolor,'linewidth',5)
+end
 
 [row,col,v] = find(adjacencyMatrix);
 if isempty(row)
@@ -387,6 +386,5 @@ for iorder = 1:length(idchrono)
      end
    end
        end
-       xlim = ([- 1 1]);
-       ylim = ([- 1 1]);
+       xl
 end

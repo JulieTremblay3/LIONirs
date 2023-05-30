@@ -22,7 +22,7 @@ function varargout = plot_sessions_GUI(varargin)
 
 % Edit the above text to modify the response to help plot_sessions_GUI
 
-% Last Modified by GUIDE v2.5 25-May-2023 09:48:04
+% Last Modified by GUIDE v2.5 25-May-2023 14:41:26
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -11992,3 +11992,73 @@ if strcmp(get(handles.context_AVGwithSTDerror,'checked'),'on');
 else
     set(handles.context_AVGwithSTDerror,'checked','on');
 end
+
+
+% --- Executes on button press in previousTrigger.
+function previousTrigger_Callback(hObject, eventdata, handles)
+% hObject    handle to previousTrigger (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+tstart = str2num(get(handles.edit_start,'string'));
+window_tstart = str2num(get(handles.edit_time_start,'string'));
+window_tstop = str2num(get(handles.edit_time_stop,'string'));
+idfile = get(handles.popupmenu_file,'value');
+ trigtoget = get(handles.popupmenu8, 'value');
+ trig_list = get(handles.popupmenu8, 'String');
+ trigid = trig_list{trigtoget};
+ trignumber = str2num(trigid(1:end-4));
+    handles.triggers = handles.NIRS.Dt.fir.aux5{idfile};
+ trigselected =   find( handles.triggers(:,1)== trignumber);
+    timetrigselected =  1/handles.NIRS.Cf.dev.fs *  handles.triggers( trigselected,2);
+    idfind = find(  timetrigselected >= window_tstart   & timetrigselected <= window_tstop);
+    try
+    offset = timetrigselected(idfind(1)-1) - timetrigselected(idfind(1));
+    catch
+        offset =  timetrigselected(1)-window_tstart-1; 
+        disp(['Could not find next trigger: ',trigid(1:end-4), ', place time window start and stop around this trigger.']);      
+    end
+  
+      if tstart+offset < 0
+         set(handles.edit_start,'string', num2str(0.001));
+    else
+        set(handles.edit_start,'string', num2str(tstart+offset));
+    end
+   set(handles.edit_time_start,'string', num2str(window_tstart+offset));
+   set(handles.edit_time_stop,'string', num2str(window_tstop+offset));
+
+updatedisplay(handles);
+
+% --- Executes on button press in nextTrigger.
+function nextTrigger_Callback(hObject, eventdata, handles)
+% hObject    handle to nextTrigger (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+tstart = str2num(get(handles.edit_start,'string'));
+window_tstart = str2num(get(handles.edit_time_start,'string'));
+window_tstop = str2num(get(handles.edit_time_stop,'string'));
+idfile = get(handles.popupmenu_file,'value');
+ trigtoget = get(handles.popupmenu8, 'value');
+ trig_list = get(handles.popupmenu8, 'String');
+ trigid = trig_list{ trigtoget};
+ trignumber = str2num(trigid(1:end-4));
+    handles.triggers = handles.NIRS.Dt.fir.aux5{idfile};
+ trigselected =   find( handles.triggers(:,1)== trignumber);
+    timetrigselected =  1/handles.NIRS.Cf.dev.fs *  handles.triggers( trigselected,2);
+    idfind = find(  timetrigselected >= window_tstart   & timetrigselected <= window_tstop);
+    try
+        offset = timetrigselected(idfind(1)+1) - timetrigselected(idfind(1));
+    catch
+        disp(['Could not find next trigger: ',trigid(1:end-4),' place time window start and stop around this trigger.'])
+        offset =  timetrigselected(1)-window_tstart-1; 
+    end
+    if tstart+offset < 0
+         set(handles.edit_start,'string', num2str(0.001));
+    else
+        set(handles.edit_start,'string', num2str(tstart+offset));
+    end
+   set(handles.edit_time_start,'string', num2str(window_tstart+offset));
+   set(handles.edit_time_stop,'string', num2str(window_tstop+offset));
+
+updatedisplay(handles);
