@@ -158,10 +158,11 @@ for isubject=2:size(info,1)
                 DATA{id}.ZoneList = MAT.ZoneList;
                 DATA{id}.MAT = MAT.meancorr;
             end
-        catch
-            disp(['ERROR loading' ,fullfile(info{isubject,1}, info{isubject,2}),'.mat']);
+        catch EM
+            %disp(['ERROR loading ' ,fullfile(info{isubject,1}, info{isubject,2}),'.mat']);
+            disp(EM.message)
             DATA{id}.MAT = nan(size(DATA{1,1}.MAT));
-            DATA{id}.ZoneList  = DATA{1,1}.ZoneList;
+            DATA{id}.ZoneList  = DATA{1,1}.ZoneList; %probleme si 1 is  missing
         end
     end
 
@@ -215,7 +216,11 @@ for isubject=2:size(info,1)
   end
   names = fieldnames(zone);
   for iname = 1:numel(names)
-      eval(['DATA{id}.zone.',names{iname},' =zone.',names{iname},';']);
+      try
+        eval(['DATA{id}.zone.',names{iname},' =zone.',names{iname},';']);
+      catch
+          disp('Could not open zone file' )
+      end
   end
   list_subject{id} =DATA{id}.name;
   groupeall = [groupeall; info{isubject,4}];
@@ -230,14 +235,20 @@ idnew = size(info,1)-1; %placer les moyennes a la fin des sujets existants.
 for igroupe = 0:max(groupeall)
 
    idsubject = find(groupeall==igroupe);
+   
    if ~isempty(idsubject)
+       try
        for igoodforzone=1:numel(idsubject)
               if isfield(DATA{1,idsubject(igoodforzone)},'zone')
                  idlabelall= DATA{idsubject(igoodforzone)}.zone.label; %zone premier sujet du groupe           
                  idmod = idsubject(igoodforzone);
               end       
        end
-       
+       catch
+           1
+       end
+  
+  
    MATAVGALL = zeros(numel(idlabelall),numel(idlabelall),numel(idsubject));
    for isubject = 1:numel(idsubject)
         try
@@ -1206,6 +1217,7 @@ filename{id}
 MAT = DATA{id}.MAT;
 zonelist = DATA{id}.ZoneList;
 A = [MAT(:,str2num(token))]';
+A(str2num(token))=nan;
 [file,path]= uiputfile([filename{id},remain,'.mat']);
 save([path,file],'A','zonelist','-mat')
 
@@ -1973,13 +1985,17 @@ covname = get(handles.popupmenu_covariable,'string');
 valG1 = [];
 valG2 = [];
 groupeall = [];
+try
 for i=1:numel(DATA)
     groupeall=[groupeall,DATA{1,i}.GR];
+end
+catch
+    1
 end
 colorlink = lines(max(groupeall));
 
 figure;hold on
-for id = 1:numel(DATA)
+for id = 1:numel(DATA) 
     try
     if DATA{id}.GR > 0
     eval(['COH=DATA{',num2str(id),'}.MAT',linkij,';'])    

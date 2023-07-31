@@ -14,6 +14,12 @@ else
     subplot(10,10,[12:19,22:29,32:39,42:49,52:59,62:69,72:79,82:89]);hold on;
     set(gca,'visible', 'off')
     axis square
+    listfile = get( handles.popup_listsujet,'string');
+     set(gcf,'WindowState','maximized')
+    value  = get( handles.popup_listsujet,'value');
+    filefrom = get(handles.edit_subjetxls,'string')
+    text(-2,-1.2, listfile{value},'fontsize',20)
+    text(-2,-1.3, filefrom,'fontsize',20)
 end
  
 
@@ -114,7 +120,7 @@ end
                %     idzone =[idzone, izone];
                % else
                     idzone =[idzone,izone, zeros(1,numel(idch)-1)];
-                    idzonecolor = [idzonecolor, ilistzone.*ones(1,numel(idch))];
+                    idzonecolor = [idzonecolor, izone.*ones(1,numel(idch))];
                     %  end
 %             end
             idlabel = [idlabel, {[DATA{id}.zone.label{izone}, sprintf('_%03.0f',ilistzone)]}];
@@ -135,7 +141,7 @@ else
 end
 if get(handles.popup_ConnectogramColor,'value')==1 %jet colormap list only no mask need
     if get(handles.radio_negativemap,'value')
-        colorMap = flipud(jet(100));
+        colorMap = flipud(jet(100)); 
     else
         colorMap = jet(100);
     end
@@ -149,6 +155,8 @@ if get(handles.popup_ConnectogramColor,'value')==1 %jet colormap list only no ma
         end
     end
      colorMatrix = colorMatrix(idlist,idlist);
+     set( handles.axes_AJD,'colormap', colorMap)
+    
 elseif get(handles.popup_ConnectogramColor,'value')==2 %jet colormap mask/color needed  
     if maskcolor
     cmin = str2num(get(handles.edit_cmin,'string'));
@@ -218,6 +226,34 @@ elseif get(handles.popup_ConnectogramColor,'value')==4 %black color
     colorMap = zeros(100,3);
     colorMatrix = ones(size(MAT));
     colorMatrix = colorMatrix(idlist,idlist);
+elseif get(handles.popup_ConnectogramColor,'value')==5 %cool 
+    colorMap = cool(100) ;
+      cmin = str2num(get(handles.edit_cmin,'string'));
+    cmax = str2num(get(handles.edit_cmax,'string'));
+    cstep = (cmax-cmin)/100;
+    cf=cmin:cstep:cmax-cstep;
+    for i=1:size(MAT,1)
+        for j = 1:size(MAT,2)
+        colorMatrix(i,j) = sum(cf<MAT(i,j));
+        end
+    end
+     colorMatrix = colorMatrix(idlist,idlist);
+     colormap( colorMap)
+     caxis([cmin,cmax])
+elseif get(handles.popup_ConnectogramColor,'value')==6 %winter
+    colorMap = winter(100) ;
+      cmin = str2num(get(handles.edit_cmin,'string'));
+    cmax = str2num(get(handles.edit_cmax,'string'));
+    cstep = (cmax-cmin)/100;
+    cf=cmin:cstep:cmax-cstep;
+    for i=1:size(MAT,1)
+        for j = 1:size(MAT,2)
+        colorMatrix(i,j) = sum(cf<MAT(i,j));
+        end
+    end
+     colorMatrix = colorMatrix(idlist,idlist);
+     colormap( colorMap);
+     caxis([cmin,cmax]);
 end
 %figure;imagesc(colorMatrix)
 
@@ -290,7 +326,7 @@ factor = 1.1;
 coordinate = zeros(length(adjacencyMatrix),2);
 for i=1:length(adjacencyMatrix)  
   plot(cos(t(i)),sin(t(i)),'o','color','k');
-  edge(i)=text(cos(t(i))*factor, sin(t(i))*factor,label{i},'fontsize',14) ; 
+  edge(i)=text(cos(t(i))*factor, sin(t(i))*factor,label{i},'fontsize',16) ; 
   if abs(t(i)) > pi/2
     edge(i).Rotation=(180*(t(i)/pi + 1));
     edge(i).HorizontalAlignment = 'right';

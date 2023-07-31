@@ -2876,6 +2876,7 @@ f_MCT_ZoneBased.help   = {'The cluster need the distance between channel to defi
     'The zone is use to define channel position and to define a subset of channel if necessary.',...
     'Zone must be define in the display GUI or a zone with all channel is automaticly save at the data import step Global.zone'};
 
+%THIS USED in component 
 
 e_neighbourdist         =  cfg_entry;
 e_neighbourdist.name    = 'Neighbor distance';
@@ -3919,6 +3920,14 @@ m_nodeunit.values    = {1,2};
 m_nodeunit.val       = {1};
 m_nodeunit.help      = {'Apply the statistics on each node. Define nodes as each channel or each average of zone channels.'};
 
+%use for stat matrice
+e_minnbchan         =  cfg_entry;
+e_minnbchan.name    = 'minnbchan';
+e_minnbchan.tag     = 'e_minnbchan';       
+e_minnbchan.strtype = 's';
+e_minnbchan.num     = [0 inf];
+e_minnbchan.val     = {'4'};
+e_minnbchan.help    = { 'Minnbchan number is a parameter to define minimal number of commun neighbord to be include in the neighboring.' };
 
 e_neighbourdist         =  cfg_entry;
 e_neighbourdist.name    = 'Neighbor';
@@ -3935,7 +3944,7 @@ e_neighbourdist.help    = {'Define how neighbor will be define:',...
 b_MCT_ClusterBased         = cfg_branch;
 b_MCT_ClusterBased.tag    = 'b_MCT_ClusterBased';
 b_MCT_ClusterBased.name   = 'Cluster Based' ;
-b_MCT_ClusterBased.val    = {e_neighbourdist};
+b_MCT_ClusterBased.val    = {e_neighbourdist, e_minnbchan};
 b_MCT_ClusterBased.help   = {'Cluster based permutation'};
 
 b_MCT_Max         = cfg_branch;
@@ -4105,9 +4114,35 @@ b_substractidCovariable_Mat.help    = {'Subtract one covariable and save residua
 b_GLM_Mat        = cfg_branch;
 b_GLM_Mat.tag    = 'b_GLM_Mat';
 b_GLM_Mat.name   = 'GLM' ;
-b_GLM_Mat.val    = {e_GLMGR,b_Covariable_Mat b_substractidCovariable_Mat};
+b_GLM_Mat.val    = {e_GLMGR,b_Covariable_Mat b_substractidCovariable_Mat,c_statpermutation};
 b_GLM_Mat.help   = {'Apply the general linear model, Specify covariable as regressor y=b1*x1+b2*x2+...+c, do not forget to include a covariable for the constant. Use the function regress.m in matlab'};
 
+b_LME_formula         =  cfg_entry;
+b_LME_formula.name    = 'Formula';
+b_LME_formula.tag     = 'b_LME_formula';       
+b_LME_formula.strtype = 's';
+b_LME_formula.num     = [0 inf];
+b_LME_formula.val     = {'columnlabel~MAT+(1+id)'};
+b_LME_formula.help    = {'Apply LME formula using wilkinson notation, please look on matlab documentation fitlme to see the formula example',...
+                        'avoid space in column label to enter column label directly in the formula definition as example ',... 
+                        'y ~ X1 + X2       => Fixed effects for the intercept, X1 (column label) and X2 (column label). This is equivalent to y ~ 1 + X1 + X2.',...
+                        'y ~ -1 + X1 + X2  => No intercept and fixed effects for X1 and X2. The implicit intercept term is suppressed by including -1',... 
+                        'y ~ 1 + (1 | g1)  => Fixed effects for the intercept plus random effect for the intercept for each level of the grouping variable g1.',...
+                        'y ~ X1 + (X1 | g1)=> Random intercept and slope, with possible correlation between them. This is equivalent to y ~ 1 + X1 + (1 + X1|g1)',...
+                        'y ~ X1 + (1 | g1) + (-1 + X1 | g1) => Independent random effects terms for intercept and slope.',...
+                        'y ~ 1 + (1 | g1) + (1 | g2) + (1 | g1:g2) =>Random intercept model with independent main effects for g1 and g2, plus an independent interaction effect.' };
+                       
+b_LME_Mat        = cfg_branch;
+b_LME_Mat.tag    = 'b_LME_Mat';
+b_LME_Mat.name   = 'LME' ;
+b_LME_Mat.val    = {e_GLMGR, b_LME_formula,c_statpermutation};
+b_LME_Mat.help   = {'Fit linear mixed-effects model function FitLME.m '};
+
+b_fitLM_Mat        = cfg_branch;
+b_fitLM_Mat.tag    = 'b_LM_Mat';
+b_fitLM_Mat.name   = 'LM' ;
+b_fitLM_Mat.val    = {e_GLMGR, b_LME_formula,c_statpermutation};
+b_fitLM_Mat.help   = {'Fit linear model function FitLM.m '};
 
 e_GRzscore         = cfg_entry; %path
 e_GRzscore.name    = 'Subject to apply zscore (group)';
@@ -4259,7 +4294,7 @@ b_manova1_Mat.help   = {'Apply manova on specific groups.'};
 c_statmatrix         = cfg_choice;
 c_statmatrix.tag     = 'c_statmatrix';
 c_statmatrix.name    = 'Choose the statistical test';
-c_statmatrix.values  = {m_export_matrix, b_TtestOneSamplematrix,b_UnpairedTtest, b_PairedTtest, b_PearsonCorr_Mat, b_GLM_Mat,b_zscore_Mat,b_anova1_Mat,b_anovarep_Mat,b_kruskalwallis_Mat, b_fitMANCOVAN_Mat, b_exportNBSformat,b_PermutationTest};%b_ANCOVA_Mat aoctool remove,
+c_statmatrix.values  = {m_export_matrix, b_TtestOneSamplematrix,b_UnpairedTtest, b_PairedTtest, b_PearsonCorr_Mat, b_GLM_Mat,b_zscore_Mat,b_anova1_Mat,b_anovarep_Mat,b_kruskalwallis_Mat, b_fitMANCOVAN_Mat, b_exportNBSformat,b_PermutationTest, b_LME_Mat, b_fitLM_Mat};%b_ANCOVA_Mat aoctool remove,
 c_statmatrix.val     = {b_TtestOneSamplematrix}; %Default option
 c_statmatrix.help    = {'Select one of the statistical tests.'};
 
