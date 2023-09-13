@@ -30,6 +30,14 @@ end
 info(iremoverow,:)=[];
 %Load the matrices same as any
 groupeall = [];
+% try
+%     [filepath,name,ext] = fileparts(xlslistfile);
+%     jobreal = job;
+%     disp(['LOAD ',filepath, filesep,'WORKSPACE.mat'])
+%     load(fullfile(filepath, 'WORKSPACE.mat'))
+%     job = jobreal;
+% catch
+
 for isubject=2:size(info,1)
     id = isubject-1;
     try
@@ -47,9 +55,9 @@ for isubject=2:size(info,1)
         else
             try
                 MAT = load(fullfile(info{isubject,1},[ info{isubject,2},'.mat']));
-                disp(['Load ',fullfile(info{isubject,1},[ info{isubject,2},'.mat'])]);
+                disp(['Load ',fullfile(info{isubject,1},[ info{isubject,2},'.mat G',num2str(info{isubject,4})])]);
             catch
-                disp(['Error Load ',fullfile(info{isubject,1},[ info{isubject,2},'.mat'])]);
+                disp(['Error Load ',fullfile(info{isubject,1},[ info{isubject,2},'.mat G',num2str(info{isubject,4})])]);
                 MAT.meancorr = nan(size(DATA{1,1}.MAT));
                 MAT.matcorr =  MAT.meancorr;
                 MAT.ZoneList = DATA{1,1}.ZoneList;
@@ -93,8 +101,10 @@ for isubject=2:size(info,1)
             end
         end
         
-        
+      
         DATA{id}.System = 'ISS';
+     
+        
         load(fullfile(info{isubject,1}, info{isubject,3}),'-mat');
         names = fieldnames(zone);
         for iname = 1:numel(names)
@@ -110,6 +120,7 @@ for isubject=2:size(info,1)
         groupeall = [groupeall; info{isubject,4}];
     end 
 end 
+%end %load already existing export
 alpha_threshold = job.e_statcomponent_alpha;
 if job.m_nodeunit==1 %channel mode
     idsubject = 1:numel(groupeall);
@@ -126,10 +137,17 @@ if job.m_nodeunit==1 %channel mode
     ZoneList =  DATA{end}.ZoneList;
     labelnode = 'c';
 elseif  job.m_nodeunit==2 %use by zone
+   
     MATall =zeros(numel(DATA),numel(DATA{id}.zone.label),numel(DATA{id}.zone.label));
     for isubject = 1:numel(groupeall)
         try
             List = DATA{isubject}.ZoneList;
+            name = List{1};
+             if strcmp(name(1:2),'D0')
+                 DATA{isubject}.System = 'NIRx';
+             else
+                 DATA{isubject}.System = 'ISS';
+             end
             for izone = 1:numel(DATA{isubject}.zone.label)
                 ML = DATA{isubject}.zone.ml;
                 DATA{isubject}.zone.plotLst;
@@ -138,24 +156,37 @@ elseif  job.m_nodeunit==2 %use by zone
                 chzone = DATA{isubject}.zone.plotLst{izone};
                 for ichzone = 1:numel(chzone);
                     ich = chzone(ichzone);
-                    if strcmp(DATA{isubject}.System,'ISS')
-                        strDet = SDDet2strboxy_ISS(ML(ich,2));
-                        strSrs = SDPairs2strboxy_ISS(ML(ich,1));
-                        idch = strmatch([strDet, ' ',strSrs ],List,'exact');
-                    end
+                     switch DATA{isubject}.System
+                        case 'ISS Imagent'
+                            strDet = SDDet2strboxy_ISS(ML(ich,2));
+                            strSrs = SDPairs2strboxy_ISS(ML(ich,1));
+                            idch = strmatch([strDet, ' ',strSrs ],List,'exact');
+                       case 'NIRx'
+                            strDet = SDDet2strboxy(ML(ich,2));
+                            strSrs = SDPairs2strboxy(ML(ich,1));
+                            idch = strmatch([strDet, ' ',strSrs ],List,'exact');  
+                        end
                     idliststr =[idliststr,{[strDet, ' ',strSrs ]}];
                     idlisti = [idlisti, idch];
                 end
+             
                 for jzone = 1:numel(DATA{isubject}.zone.label)
+                    idliststr =  [];
                     idlistj = [];
                     chzone = DATA{isubject}.zone.plotLst{jzone};
                     for ichzone = 1:numel(chzone);
                         ich = chzone(ichzone);
-                        if strcmp(DATA{isubject}.System,'ISS')
+                            switch DATA{isubject}.System
+                        case 'ISS Imagent'
                             strDet = SDDet2strboxy_ISS(ML(ich,2));
                             strSrs = SDPairs2strboxy_ISS(ML(ich,1));
                             idch = strmatch([strDet, ' ',strSrs ],List,'exact');
+                       case 'NIRx'
+                            strDet = SDDet2strboxy(ML(ich,2));
+                            strSrs = SDPairs2strboxy(ML(ich,1));
+                            idch = strmatch([strDet, ' ',strSrs ],List,'exact');  
                         end
+                    idliststr =[idliststr,{[strDet, ' ',strSrs ]}];
                         idlistj = [idlistj, idch];
                     end
                     matROI = DATA{isubject}.MAT(idlisti,idlistj);
@@ -203,7 +234,8 @@ elseif  job.m_nodeunit==2 %use by zone
     zone.color = zone.color;
     zone.ml = MLfake;
     zone.chMAT = plotLst;
-    save(fullfile(info{isubject,1},['avg', info{isubject,3}]),'zone','-mat');
+    dir1 = job.e_statmatrixPath{1}
+    save(fullfile(dir1,['avg', info{isubject,3}]),'zone','-mat');
     ZONEid = ['avg', info{isubject,3}];
 end
 
@@ -231,7 +263,7 @@ try
     %not all channel could be use in the final matrice get the position
     %from one subjet and ensure you associate label in the Data.ZoneList to
     %a position in the zone.ml first col source second col detector
-    sujet = 1 %need projet V5
+    sujet = 1; %need projet V5
     zonelist = DATA{sujet}.ZoneList;
     chanpos = zeros(numel(zonelist),3);
     for id=1:size(zonelist)
@@ -254,7 +286,8 @@ if  isfield(job.c_statmatrix,'m_export_matrix')
         dir1 = job.e_statmatrixPath{1}
         save(fullfile(dir1,'Exportmatrice.mat'),'MATall','info','ZoneList', '-mat')
         disp(['Save export: ', fullfile(dir1,'Exportmatrice.mat')])
-    else
+        save(fullfile(dir1,'WORKSPACE.mat'))
+    else 
         disp('xls export not available yet')
     end
 elseif isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
@@ -313,14 +346,14 @@ elseif isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     file = [name,labelnode,GRname, 'OneSampleTtest mean','.mat'];
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     disp(['Save: ', fullfile(dir1,[file])]);
-    new = [{dir1},{file}, {ZONEid},{1} ];
+    new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new]; 
     file = [name,labelnode,GRname, 'OneSampleTtest meanp',num2str(alpha_threshold),'.mat'];
-    matcorr = meanall.*double(pval<alpha_threshold);
+    matcorr = [];
     meancorr = meanall.*double(pval<alpha_threshold);
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     disp(['Save: ', fullfile(dir1,[file])]);
-    new = [{dir1},{file}, {ZONEid},{1} ];
+    new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
     
     %find fdr
@@ -328,45 +361,59 @@ elseif isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
         [FDR,Q] = mafdr(pval(:));
         Q = reshape(Q,size(pval));        
         file = [name,labelnode,GRname, 'OneSampleTtest meanFDR',num2str(alpha_threshold),'.mat'];
-        matcorr =  meanall.*double(Q<alpha_threshold);
+        matcorr =  [];
         meancorr = meanall.*double(Q<alpha_threshold);
         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
         disp(['Save: ', fullfile(dir1,[file])]);
-        new = [{dir1},{file}, {ZONEid},{1} ];
+        new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
     catch
         disp('Warning: could not perform FDR correction')
     end
     
     % ZoneList = MAT.ZoneList;
-    matcorr =  tval;
+    matcorr =  [];
     meancorr = tval;
     totaltrialgood = mean(dfall(:));
     file = [name,labelnode,GRname, 'OneSampleTtest tval','.mat'];
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     disp(['Save: ', fullfile(dir1,[file])]);
-    new = [{dir1},{file}, {ZONEid},{1} ];
+    new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
     
     file = [name,labelnode,GRname,'OneSampleTtest tvalp',num2str(alpha_threshold),'.mat'];
-    matcorr = tval.*double(pval<alpha_threshold);
+    matcorr =[];
     meancorr = tval.*double(pval<alpha_threshold);
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     disp(['Save: ', fullfile(dir1,[file])]);
-    new = [{dir1},{file}, {ZONEid},{1} ];
+    new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
     
     try
         file = [name,labelnode,GRname,'OneSampleTtest tvalFDR',num2str(alpha_threshold),'.mat'];
-        matcorr = tval.*double(Q<alpha_threshold);
+        matcorr =[];
         meancorr = tval.*double(Q<alpha_threshold);
         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
         disp(['Save: ', fullfile(dir1,[file])]);
-        new = [{dir1},{file}, {ZONEid},{1} ];
+        new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
     catch
         disp(['File : ', file ' could not be create'])
     end
+    
+
+    try
+        file = [name,labelnode,GRname,'OneSampleTtest N.mat'];
+        matcorr = [];
+        meancorr = squeeze(sum(~isnan(MATallG1(:,:,:)),1));;
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        disp(['Save: ', fullfile(dir1,[file])]);
+        new = [{dir1},{file}, {ZONEid},{0} ];
+        infonew = [infonew;new];
+    catch
+        disp(['File : ', file ' could not be create'])
+    end
+    
 
     
     if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
@@ -1440,6 +1487,7 @@ elseif isfield(job.c_statmatrix,'b_LM_Mat')
                 fprintf('\n ');
             end
             datatable.MAT= halfMAT(:,ilink);
+          %  LMEformula = 'AGENIRS_m~MAT+(1|ID)'
             lme = fitlm( datatable,LMEformula); 
             for icov = 1:size(lme.Coefficients,1)               
                 eval(['TCOV',num2str(icov),'(',num2str(ilink),')=lme.Coefficients{',num2str(icov),',3};']);
@@ -1649,34 +1697,73 @@ if isfield(job.c_statmatrix.b_LM_Mat.c_statpermutation,'b_permutation')
 end
 %              
      
-     
+  
 elseif isfield(job.c_statmatrix,'b_LME_Mat') 
-    disp('Not tested LME')
-    dir1 = job.e_statmatrixPath{1};   
+    disp('Warning function LME in developpement')
+      dir1 = job.e_statmatrixPath{1};   
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
-     datatable= readtable(xlslistfile)
+     datatable= readtable(xlslistfile) 
      halfMAT = MATall(:,idhalf);
      LMEformula = job.c_statmatrix.b_LME_Mat.b_LME_formula;
+    try %load precomputed to speed up 
+         datatable.MAT= halfMAT(:,1);
+         lme = fitlme( datatable,LMEformula); 
+         for icov = 1:size(lme.Coefficients,1)           
+               file = ['TCOV',num2str(icov),'_', lme.Coefficients{icov,1},'.mat'];
+               filename = fullfile(dir1,file);
+               eval(['load(''', filename,''')']);
+         end
+         disp('load precomputed tval')
+    catch
+        
+    
+     
      fprintf('%s',['RUN LME : ', LMEformula, ' link:'])
      for ilink=1:numel(idhalf);
          fprintf('%d,',ilink)
              if mod(ilink,30)==0 
                 fprintf('\n ');
             end
-            datatable.MAT= halfMAT(:,ilink);
-            lme = fitlme( datatable,LMEformula);
-            for icov = 2:size(lme.Coefficients,1)               
+            datatable.MAT= halfMAT(:,ilink); 
+            try
+                  lme = fitlme( datatable,LMEformula); 
+            catch
+                disp(['Verify LME formula ', LMEformula, ' and datatable Variable'])
+                disp(datatable.Properties.VariableNames)
+            end
+            eval(['R2ord(',num2str(ilink),')=lme.Rsquared.Ordinary;']);
+            eval(['R2adj(',num2str(ilink),')=lme.Rsquared.Adjusted;']);
+            for icov = 1:size(lme.Coefficients,1)              
                 eval(['TCOV',num2str(icov),'(',num2str(ilink),')=lme.Coefficients{',num2str(icov),',4};']);
                 eval(['ECOV',num2str(icov),'(',num2str(ilink),')=lme.Coefficients{',num2str(icov),',2};']);
                 eval(['pCOV',num2str(icov),'(',num2str(ilink),')=lme.Coefficients{',num2str(icov),',6};']);
             end
                   
      end
-     1
+     1 
      
-         % WRITE Tval in file 
-                            for icov = 2:size(lme.Coefficients,1) 
-                                file = ['TCOV',num2str(icov),'_', lme.Coefficients{icov,1},'.mat']
+         % WRITE result in file 
+                        
+                                file = ['R2Ordinary.mat'];
+                                 meancorr = zeros(size(MATall,2),size(MATall,2));
+                                eval(['meancorr(idhalf) =','R2ord;']);
+                                 meancorr = meancorr +flipud(rot90(meancorr ));                                                    
+                                disp(['Save file: ', fullfile(dir1,[file])]);
+                                save(fullfile(dir1,[file]),'ZoneList','meancorr');
+                                new = [{dir1},{file}, {ZONEid},{0}];
+                                infonew = [infonew;new];                        
+                             
+                                 file = ['R2Ajusted.mat'];
+                                 meancorr = zeros(size(MATall,2),size(MATall,2));
+                                eval(['meancorr(idhalf) =','R2adj;']);
+                                 meancorr = meancorr +flipud(rot90(meancorr ));                                                    
+                                disp(['Save file: ', fullfile(dir1,[file])]);
+                                save(fullfile(dir1,[file]),'ZoneList','meancorr');
+                                new = [{dir1},{file}, {ZONEid},{0}];
+                                infonew = [infonew;new];   
+         
+                            for icov = 1:size(lme.Coefficients,1) 
+                                file = ['TCOV',num2str(icov),'_', lme.Coefficients{icov,1},'.mat'];
                                  meancorr = zeros(size(MATall,2),size(MATall,2));
                                  eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
                                  meancorr = meancorr +flipud(rot90(meancorr ));
@@ -1689,8 +1776,8 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
                                 new = [{dir1},{file}, {ZONEid},{0}];
                                 infonew = [infonew;new];                        
                             end
-                               for icov = 2:size(lme.Coefficients,1) 
-                                file = ['ECOV',num2str(icov),'_', lme.Coefficients{icov,1},'.mat']
+                               for icov = 1:size(lme.Coefficients,1) 
+                                file = ['ECOV',num2str(icov),'_', lme.Coefficients{icov,1},'.mat'];
                                  meancorr = zeros(size(MATall,2),size(MATall,2));
                                  eval(['meancorr(idhalf) =','ECOV',num2str(icov),';']);
                                  meancorr = meancorr +flipud(rot90(meancorr ));
@@ -1704,16 +1791,18 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
                                 infonew = [infonew;new];                        
                             end
          	try
-                xlswrite(fullfile(dir1,['lme', LMEformula, '.xlsx']),infonew);
+         
+                xlswrite(fullfile(dir1,['lme', 'model', '.xlsx']),infonew);
                 disp(['Result .xlsx file saved ' fullfile(dir1,['lme', LMEformula, '.xlsx'])]);
             catch
-                writetxtfile(fullfile(dir1,['lme', LMEformula, '.xlsx']),infonew)
-                 disp(['Result .xlsx file saved ' fullfile(dir1,['lme', LMEformula, '.xlsx'])]);
+                writetxtfile(fullfile(dir1,['lme', 'model', '.xlsx']),infonew)
+                disp(['Result .xlsx file saved ' fullfile(dir1,['lme', LMEformula, '.xlsx'])]);
             end
+        end
 if isfield(job.c_statmatrix.b_LME_Mat.c_statpermutation,'b_permutation')
     try
             nperm = str2num(job.c_statmatrix.b_LME_Mat.c_statpermutation.b_permutation.e_npermutation);          
-            for icov = 2:size(lme.Coefficients,1)   
+            for icov = 1:size(lme.Coefficients,1)   
                 eval(['load(''',dir1,'\TrandCOV',num2str(icov),'.mat'')']);
             end
             disp(['Previous computed permutation ',... 
@@ -1734,14 +1823,14 @@ if isfield(job.c_statmatrix.b_LME_Mat.c_statpermutation,'b_permutation')
                  permfix =  randperm(size(halfMAT,1));
                 datatable.MAT= halfMAT(permfix,ilink);
                 lme = fitlme( datatable,LMEformula);
-                for icov = 2:size(lme.Coefficients,1)               
+                for icov = 1:size(lme.Coefficients,1)               
                     eval(['TrandCOV',num2str(icov),'(',num2str(ilink),',',num2str(iperm),')=lme.Coefficients{',num2str(icov),',4};']);
 
                 end
               end         
               end
          toc   
-          for icov = 2:size(lme.Coefficients,1)   
+          for icov = 1:size(lme.Coefficients,1)   
             eval(['save(''',dir1,'\TrandCOV',num2str(icov),'.mat'',''TrandCOV',num2str(icov),''')']);
           end 
 
@@ -3965,6 +4054,9 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
 end
 disp('Visualize the results using: GUI_LookMatrices')
 out='Stat tests';
+
+matlabbatch{1}.spm.tools.nirsHSJ.M_Connectivity.E_statmatrix = job;
+save(fullfile(dir1,'Batch_stat.mat'),'matlabbatch')
 
 function [fdr, q, pi0, rs] = mafdr(p, varargin)
 %MAFDR estimates false discovery rates (FDR) of multiple-hypothesis testing.

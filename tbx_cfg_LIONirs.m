@@ -1511,6 +1511,26 @@ function vout = nirs_cfg_vout_detrend(job)
     vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
 end
 
+
+
+
+E_prewhitening = cfg_exbranch;
+E_prewhitening.name = 'PreWhitening';
+E_prewhitening.tag  = 'E_prewhitening';
+E_prewhitening.val  = {NIRSmat DelPreviousData };
+E_prewhitening.prog = @nirs_run_E_prewhitening;
+E_prewhitening.vout = @nirs_cfg_vout_prewhitening;
+E_prewhitening.help = {'Use Prewhitening see ref: , TOBE TESTED RAE'};
+
+
+function vout = nirs_cfg_vout_prewhitening(job)
+    vout = cfg_dep;                    
+    vout.sname      = 'NIRS.mat';       
+    vout.src_output = substruct('.','NIRSmat'); 
+    vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
+end
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Module 3e Preprocessing ODtoHbOHbR
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -4355,7 +4375,7 @@ M_Segment.help   = {'These modules segment or combine data.'};
 M_preprocessing        = cfg_choice; 
 M_preprocessing.name   = 'Preprocessing NIRS data';
 M_preprocessing.tag    = 'M_preprocessing'; 
-M_preprocessing.values = {E_artefactdetection E_chcardiaccontrol E_normalization E_filter ODtoHbOHbR  E_detrend E_average E_nullifybad}; %preprocess enlever fast preprocessing JT
+M_preprocessing.values = {E_artefactdetection E_chcardiaccontrol E_normalization E_filter E_prewhitening ODtoHbOHbR  E_detrend E_average E_nullifybad}; %preprocess enlever fast preprocessing JT
 M_preprocessing.help   = {'These modules apply basic operations on fNIRS data'};
 
 

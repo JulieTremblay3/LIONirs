@@ -64,7 +64,7 @@ for izone = 1:numel(DATA{id}.zone.plotLst)
             idzone =[idzone, 0];
         end
     end
-    idlabelall = [idlabelall, {[DATA{id}.zone.label{izone}]}];
+    idlabelall = [idlabelall, {[deblank(DATA{id}.zone.label{izone})]}];
 end
 set(handles.listbox_zone,'string',idlabelall);
 %FIN
@@ -76,10 +76,11 @@ if get(handles.popupmenu_view,'value')==1%view zone
     idlabel=[];
     idzone =[];
     izonebelong = [];
+  
     for ilistzone = 1:numel(listok)
         for izone = 1:numel(DATA{id}.zone.plotLst)
             chzone = DATA{id}.zone.plotLst{izone};
-            labelzone = DATA{id}.zone.label{izone};
+            labelzone = deblank(DATA{id}.zone.label{izone});
             x = strmatch({labelzone} , {listok{ilistzone}}, 'exact');
             if ~isempty(x)
 %                 for ichzone = 1:numel(chzone)
@@ -102,6 +103,7 @@ if get(handles.popupmenu_view,'value')==1%view zone
             end
         end
     end
+  
     idline = [find(idzone)-0.5,numel(idzone)+0.5];
    
     %AFFICHAGE THRESHOLD 

@@ -140,13 +140,13 @@ for isubject=2:size(info,1)
     if strcmp(tmp(end-2:end),'mat')
         try
             MAT = load(fullfile(info{isubject,1}, [info{isubject,2}]));
-            disp(['Load ' ,fullfile(info{isubject,1}, info{isubject,2})]);
+            disp(['Load ' ,fullfile(info{isubject,1}, info{isubject,2}),'.mat G',num2str(info{isubject,4})]);
             if isfield(MAT,'ZoneList')
                 DATA{id}.ZoneList = MAT.ZoneList;
                 DATA{id}.MAT = MAT.meancorr;
             end
         catch
-            disp(['ERROR loading' ,fullfile(info{isubject,1}, info{isubject,2})]);
+            disp(['ERROR loading' ,fullfile(info{isubject,1}, info{isubject,2}),'.mat G',num2str(info{isubject,4})]);
             DATA{id}.MAT = nan(size(DATA{1,1}.MAT));
             DATA{id}.ZoneList  = DATA{1,1}.ZoneList;
         end
@@ -241,7 +241,7 @@ for igroupe = 0:max(groupeall)
        for igoodforzone=1:numel(idsubject)
               if isfield(DATA{1,idsubject(igoodforzone)},'zone')
                  idlabelall= DATA{idsubject(igoodforzone)}.zone.label; %zone premier sujet du groupe           
-                 idmod = idsubject(igoodforzone);
+                 idmod = idsubject(igoodforzone);               
               end       
        end
        catch

@@ -294,7 +294,7 @@ cfg.correctm         = 'cluster';
 cfg.clusterstatistic = 'maxsum';
 cfg.clusteralpha     = clustercritval;
 cfg.clustercritval   = clustercritval;
-cfg.minnbchan        = str2num(minnbchan);      %nb element significatif conjoins pour le cluster + haut car beaucoup de canaux
+cfg.minnbchan        = str2num(minnbchan);      %nb element significatif conjoints pour le cluster + haut car beaucoup de canaux
 try
 [stat, cfg] = clusterstat(cfg,statrand, statobs); 
 catch 

@@ -90,7 +90,7 @@ for izone = 1:numel( DATA{id}.zone.plotLst)
             idzone =[idzone, 0];
         end
     end
-    idlabelall = [idlabelall, {[ DATA{id}.zone.label{izone}]}];
+    idlabelall = [idlabelall, {deblank([ DATA{id}.zone.label{izone}])}];
 end
    try
     listok = listselected;
@@ -104,7 +104,7 @@ end
     for ilistzone = 1:numel(listok)
     for izone = 1:numel(DATA{id}.zone.plotLst)
         chzone = DATA{id}.zone.plotLst{izone};
-        labelzone = DATA{id}.zone.label{izone};
+        labelzone = deblank(DATA{id}.zone.label{izone});
          x = strmatch({labelzone} , {listok{ilistzone}}, 'exact');
          if ~isempty(x)
 %             for ichzone = 1:numel(chzone)
