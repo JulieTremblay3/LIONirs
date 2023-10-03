@@ -415,9 +415,11 @@ elseif isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     end
     
 
-    
+    try
     if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
         copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
+    end
+    catch
     end
     %  dir1 = job.e_statmatrixPath{1};
     try
@@ -657,9 +659,11 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
     catch
         disp(['File : ', file ' could not be create'])
     end
-    
+    try
     if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
         copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
+    end
+    catch
     end
     %  dir1 = job.e_statmatrixPath{1};
     try
@@ -988,7 +992,10 @@ elseif isfield(job.c_statmatrix,'b_PearsonCorr_Mat')
             infonew = [infonew;new];
         end
     end
+    try
     copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
+    catch
+    end
     if ismac
         % Code to run on Mac platform problem with xlswrite
         [filepath,name,ext] = fileparts(xlslistfile);
@@ -1478,7 +1485,7 @@ elseif isfield(job.c_statmatrix,'b_LM_Mat')
                 
                     
                     
-     LMEformula = job.c_statmatrix.b_LM_Mat.b_LME_formula;
+     LMEformula = deblank(job.c_statmatrix.b_LM_Mat.b_LME_formula);
      fprintf('%s',['RUN LM : ', LMEformula, ' link:'])
    
      for ilink=1:numel(idhalf);
@@ -1488,16 +1495,40 @@ elseif isfield(job.c_statmatrix,'b_LM_Mat')
             end
             datatable.MAT= halfMAT(:,ilink);
           %  LMEformula = 'AGENIRS_m~MAT+(1|ID)'
+          try
             lme = fitlm( datatable,LMEformula); 
+          catch
+                  disp(['Verify LME formula ', LMEformula, ' and datatable Variable'])
+                disp(datatable.Properties.VariableNames)
+            end
+              eval(['r2','(',num2str(ilink),')=' ,'lme.Rsquared.Ordinary;'])
+              eval(['N','(',num2str(ilink),')=' ,' lme.NumObservations; '])
+            
             for icov = 1:size(lme.Coefficients,1)               
                 eval(['TCOV',num2str(icov),'(',num2str(ilink),')=lme.Coefficients{',num2str(icov),',3};']);
                 eval(['ECOV',num2str(icov),'(',num2str(ilink),')=lme.Coefficients{',num2str(icov),',1};']);
                 eval(['pCOV',num2str(icov),'(',num2str(ilink),')=lme.Coefficients{',num2str(icov),',4};']);
             end
                   
-     end
+     end 
   
-
+                                 file = ['Nobservation.mat']
+                                 meancorr = zeros(size(MATall,2),size(MATall,2));
+                                 eval(['meancorr(idhalf) =','N;']);
+                                 meancorr = meancorr +flipud(rot90(meancorr ));                    
+                                disp(['Save file: ', fullfile(dir1,[file])]);
+                                save(fullfile(dir1,[file]),'ZoneList','meancorr');
+                                new = [{dir1},{file}, {ZONEid},{0}];
+                                infonew = [infonew;new];                        
+                          
+                                   file = ['R2.mat']
+                                 meancorr = zeros(size(MATall,2),size(MATall,2));
+                                 eval(['meancorr(idhalf) =','r2']);
+                                 meancorr = meancorr +flipud(rot90(meancorr ));                    
+                                disp(['Save file: ', fullfile(dir1,[file])]);
+                                save(fullfile(dir1,[file]),'ZoneList','meancorr');
+                                new = [{dir1},{file}, {ZONEid},{0}];
+                                infonew = [infonew;new];      
      
          % WRITE Tval in file 
                             for icov = 2:size(lme.Coefficients,1) 
@@ -1705,29 +1736,29 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
      datatable= readtable(xlslistfile) 
      halfMAT = MATall(:,idhalf);
      LMEformula = job.c_statmatrix.b_LME_Mat.b_LME_formula;
-    try %load precomputed to speed up 
-         datatable.MAT= halfMAT(:,1);
-         lme = fitlme( datatable,LMEformula); 
-         for icov = 1:size(lme.Coefficients,1)           
-               file = ['TCOV',num2str(icov),'_', lme.Coefficients{icov,1},'.mat'];
-               filename = fullfile(dir1,file);
-               eval(['load(''', filename,''')']);
-         end
-         disp('load precomputed tval')
-    catch
+  %  try %load precomputed to speed up not keep as standard way of working
+%          datatable.MAT= halfMAT(:,1);
+%          lme = fitlme( datatable,LMEformula); 
+%          for icov = 1:size(lme.Coefficients,1)           
+%                file = ['TCOV',num2str(icov),'_', lme.Coefficients{icov,1},'.mat'];
+%                filename = fullfile(dir1,file);
+%                eval(['load(''', filename,''')']);
+%          end
+%          disp('load precomputed tval')
+   % catch
         
     
      
      fprintf('%s',['RUN LME : ', LMEformula, ' link:'])
-     for ilink=1:numel(idhalf);
+     for ilink=1:numel(idhalf); 
          fprintf('%d,',ilink)
              if mod(ilink,30)==0 
                 fprintf('\n ');
             end
             datatable.MAT= halfMAT(:,ilink); 
-            try
+            try 
                   lme = fitlme( datatable,LMEformula); 
-            catch
+            catch 
                 disp(['Verify LME formula ', LMEformula, ' and datatable Variable'])
                 disp(datatable.Properties.VariableNames)
             end
@@ -1798,7 +1829,7 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
                 writetxtfile(fullfile(dir1,['lme', 'model', '.xlsx']),infonew)
                 disp(['Result .xlsx file saved ' fullfile(dir1,['lme', LMEformula, '.xlsx'])]);
             end
-        end
+      %  end
 if isfield(job.c_statmatrix.b_LME_Mat.c_statpermutation,'b_permutation')
     try
             nperm = str2num(job.c_statmatrix.b_LME_Mat.c_statpermutation.b_permutation.e_npermutation);          

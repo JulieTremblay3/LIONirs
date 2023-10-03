@@ -1523,7 +1523,7 @@ E_prewhitening.vout = @nirs_cfg_vout_prewhitening;
 E_prewhitening.help = {'Use Prewhitening see ref: , TOBE TESTED RAE'};
 
 
-function vout = nirs_cfg_vout_prewhitening(job)
+function vout = nirs_cfg_vout_prewhitening(job);
     vout = cfg_dep;                    
     vout.sname      = 'NIRS.mat';       
     vout.src_output = substruct('.','NIRSmat'); 
