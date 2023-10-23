@@ -337,7 +337,7 @@ for i=1:length(adjacencyMatrix)
    edge(i).Color = [0 0 0];
 end 
 
-
+ lstch = []
 
 [row,col,v] = find(adjacencyMatrix);
 if isempty(row)
@@ -354,7 +354,7 @@ end
 %     iddouble= find([col==row(i)&row==col(i)]);
 %        iddoublelist = [iddoublelist,iddouble];
 % end
- 
+
 for iorder = 1:length(idchrono)
        i = idchrono(iorder);
        max(idlist);
@@ -369,11 +369,14 @@ for iorder = 1:length(idchrono)
            u = [cos(t(row(i)));sin(t(row(i)))];
             v = [cos(t(col(i)));sin(t(col(i)))];            
                LINKNAME =  ['(i,j)=(',num2str(idlist(row(i))),',',num2str(idlist(col(i))),')=(',List(idlist(row(i)),:),',',List(idlist(col(i)),:) ,')', '=', num2str(MAT(idlist(row(i)),idlist(col(i))))];
+
          if numel(idlist) == numel(idlabel)
              tmp = idlabel{row(i)};
              tmp2 = idlabel{col(i)} ;
              LINKNAME = [LINKNAME,' (' tmp(1:end-4),',',tmp2(1:end-4),')'];
          end
+        lstch = [lstch; idlist(row(i)),idlist(col(i))];
+
                h =  line(...
               [u(1);v(1)],...
               [u(2);v(2)],...
@@ -409,6 +412,7 @@ for iorder = 1:length(idchrono)
              tmp2 = idlabel{row(i)} ;
              LINKNAME = [LINKNAME,' (' tmp(1:end-4),',',tmp2(1:end-4),')'];
      end
+      lstch = [lstch; idlist(row(i)),idlist(col(i))];
    if ~isnan(newcolor)
         h = line( r*cos(theta)+x0,...
                   r*sin(theta)+y0,...
@@ -426,3 +430,4 @@ for iorder = 1:length(idchrono)
        xlim = ([- 1 1]);
        ylim = ([- 1 1]);
 end
+1

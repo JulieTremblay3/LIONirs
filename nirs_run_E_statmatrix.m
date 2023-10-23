@@ -1030,8 +1030,11 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
         ycol = 0;
         for icol=1:size(info,2)
             if ~isnan(info{1,icol})
+                try
                 if strcmp(strtrim(upper(deblank(info{1,icol}))), strtrim(upper(Pearsony)));
                     ycol = icol;
+                end
+                catch
                 end
             end
         end
