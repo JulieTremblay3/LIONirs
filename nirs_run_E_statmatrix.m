@@ -555,7 +555,7 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
                 end
                 if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
                     for inegcluster = 1:numel(stat.negclusters)
-                        file = [name,labelnode,num2str(nperm),' negCluster', num2str(iposcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
+                        file = [name,labelnode,num2str(nperm),' negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
                         matcorr = zeros(size(MATall,2),size(MATall,2));
                         matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
                         matcorr = matcorr +flipud(rot90(matcorr));
@@ -565,7 +565,7 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
                         new = [{dir1},{file}, {ZONEid},{0} ];
                         infonew = [infonew;new];
                         
-                        file = [name,labelnode,num2str(nperm),' negCluster tval', num2str(iposcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
+                        file = [name,labelnode,num2str(nperm),' negCluster tval', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
                         matcorr(idhalf)=squeeze(tval(:)).*(stat.negclusterslabelmat==inegcluster);
                         matcorr = matcorr +flipud(rot90(matcorr));
                         meancorr = matcorr;    
@@ -1249,8 +1249,10 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
     new = [{dir1},{file}, {ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
     infonew = [infonew;new];
-    
+    try
     copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
+    catch
+    end
     if ismac
         % Code to run on Mac platform problem with xlswrite
         [filepath,name,ext] = fileparts(xlslistfile);
@@ -1739,16 +1741,18 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
      datatable= readtable(xlslistfile) 
      halfMAT = MATall(:,idhalf);
      LMEformula = job.c_statmatrix.b_LME_Mat.b_LME_formula;
-  %  try %load precomputed to speed up not keep as standard way of working
-%          datatable.MAT= halfMAT(:,1);
-%          lme = fitlme( datatable,LMEformula); 
-%          for icov = 1:size(lme.Coefficients,1)           
-%                file = ['TCOV',num2str(icov),'_', lme.Coefficients{icov,1},'.mat'];
-%                filename = fullfile(dir1,file);
-%                eval(['load(''', filename,''')']);
-%          end
-%          disp('load precomputed tval')
-   % catch
+   try %load precomputed to speed up not keep as standard way of working
+         datatable.MAT= halfMAT(:,1);
+         lme = fitlme( datatable,LMEformula); 
+         for icov = 1:size(lme.Coefficients,1)           
+               file = ['TCOV',num2str(icov),'_', strtrim(lme.Coefficients{icov,1}),'.mat'];
+               filename = fullfile(dir1,file);
+               eval(['load(''', filename,''')']);
+                   halfMATtemp = meancorr(idhalf);
+               eval(['TCOV',num2str(icov),' = halfMATtemp'])
+         end
+         disp('load precomputed tval')
+   catch 
         
     
      
@@ -1832,7 +1836,7 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
                 writetxtfile(fullfile(dir1,['lme', 'model', '.xlsx']),infonew)
                 disp(['Result .xlsx file saved ' fullfile(dir1,['lme', LMEformula, '.xlsx'])]);
             end
-      %  end
+end %use precomputed value to speed up test
 if isfield(job.c_statmatrix.b_LME_Mat.c_statpermutation,'b_permutation')
     try
             nperm = str2num(job.c_statmatrix.b_LME_Mat.c_statpermutation.b_permutation.e_npermutation);          
@@ -1868,102 +1872,98 @@ if isfield(job.c_statmatrix.b_LME_Mat.c_statpermutation,'b_permutation')
             eval(['save(''',dir1,'\TrandCOV',num2str(icov),'.mat'',''TrandCOV',num2str(icov),''')']);
           end 
 
-    end
-    
-
-         [fecdf,xecdf] = ecdf(TrandCOV3(:));
+    end 
+      infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
+    for icov = 1:size(lme.Coefficients,1)
+        eval(['[fecdf,xecdf] = ecdf(TrandCOV', num2str(icov),'(:));']);
         clustercritical=xecdf(sum(fecdf<(1-alpha_threshold)));
         disp(['critical for clustering p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
-            if isfield(job.c_statmatrix.b_LME_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting,'b_MCT_ClusterBased')
-          
-                 statobs = TCOV3';
-                 if nperm <= size(TrandCOV3,2)
-                    statrand =TrandCOV3(:,1:nperm);
-                 else
-                    nbrepeted = ceil( nperm/size(TrandCOV3,2))
-                    F_rand =  repmat(TrandCOV3,1,nbrepeted );
-                    statrand =TrandCOV3(:,1:nperm);
-                    tmp = randperm(numel(statrand));
-                    statrand(tmp) = statrand;
-                 end
-                 neighbourdist = job.c_statmatrix.b_LME_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_neighbourdist;
-                 minnbchan = job.c_statmatrix.b_LME_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_minnbchan;
-                 disp(['critical for clustering p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
-
-                 [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, neighbourdist,clustercritical, statobs, statrand,  minnbchan );
-               %  [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, 'distance',clustercritical, statobs, statrand );
-                 save(fullfile(dir1,'FiedTrip_LMECluster_stat.mat'),'stat')
-                 disp(['Save fieldtrip cluster stat ', fullfile(dir1,'FiedTrip_LMECluster_stat.mat') ])
-                 infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
-%                  figure
-% hist(stat.posdistribution)
-           if isfield(stat,'posclusterslabelmat')
-                    for iposcluster = 1:numel(stat.posclusters)
-                        file = [name,labelnode,num2str(nperm),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                        matcorr = zeros(size(MATall,2),size(MATall,2));
-                        matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                        disp(['Save: ', fullfile(dir1,[file])]);
-                        new = [{dir1},{file}, {ZONEid},{0} ];
-                        infonew = [infonew;new];
-                        
-                    
-                            %WRITE beta and cluster in file 
-                            for icov = 3
-                                file = ['Tval','_','posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                                 meancorr = zeros(size(MATall,2),size(MATall,2));
-                                 eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
-                                 meancorr = meancorr +flipud(rot90(meancorr ));
-                                 matsig = zeros(size(MATall,2),size(MATall,2));
-                                 matsig(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                                 matsig = matsig +flipud(rot90(matsig));
-                                meancorr =  meancorr.* double(matsig);                         
-                                disp(['Save file: ', fullfile(dir1,[file])]);
-                                save(fullfile(dir1,[file]),'ZoneList','meancorr');
-                                new = [{dir1},{file}, {ZONEid},{0}];
-                                infonew = [infonew;new];                        
-                            end
-                        end
-                   
-                else
-                    disp('No positive cluster found')
-                end
-                if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
-                    for inegcluster = 1:numel(stat.negclusters)
-                        file = [name,labelnode,num2str(nperm),' negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
-                        matcorr = zeros(size(MATall,2),size(MATall,2));
-                        matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                        disp(['Save: ', fullfile(dir1,[file])]);
-                        new = [{dir1},{file}, {ZONEid},{0} ];
-                        infonew = [infonew;new];
-                        
-                                    %WRITE beta and cluster in file 
-                            for icov = 3
-                                file = ['Tval','negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat']
-                                 meancorr = zeros(size(MATall,2),size(MATall,2));
-                                 eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
-                                 meancorr = meancorr +flipud(rot90(meancorr ));
-                                 matsig = zeros(size(MATall,2),size(MATall,2));
-                                 matsig(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                                 matsig = matsig +flipud(rot90(matsig));
-                                meancorr =  meancorr.* double(matsig);                         
-                                disp(['Save file: ', fullfile(dir1,[file])]);
-                                save(fullfile(dir1,[file]),'ZoneList','meancorr');
-                                new = [{dir1},{file}, {ZONEid},{0}];
-                                infonew = [infonew;new];                        
-                            end
-                        
-                    end
-                else
-                    disp('No negative cluster found')
-                end       
-
+        if isfield(job.c_statmatrix.b_LME_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting,'b_MCT_ClusterBased')
+            
+            eval(['statobs = TCOV', num2str(icov),';']);
+            if nperm <= size(TrandCOV2,2)
+                eval(['statrand = TrandCOV', num2str(icov),'(:,1:nperm);']);
+            else
+                eval(['nbrepeted = ceil( nperm/size(TrandCOV',num2str(icov),',2));']);
+                eval(['F_rand =  repmat(TrandCOV', num2str(icov),',1,nbrepeted );']);
+                eval(['statrand =TrandCOV', num2str(icov),'(:,1:nperm);']);
+                %                     nbrepeted = ceil( nperm/size(TrandCOV2,2))
+                %                     F_rand =  repmat(TrandCOV2,1,nbrepeted );
+                %                     statrand =TrandCOV2(:,1:nperm);
+                tmp = randperm(numel(statrand));
+                statrand(tmp) = statrand;
             end
+            neighbourdist = job.c_statmatrix.b_LME_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_neighbourdist;
+            minnbchan = job.c_statmatrix.b_LME_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_minnbchan;
+            disp(['critical for clustering p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
+            
+            [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, neighbourdist,clustercritical, statobs, statrand,  minnbchan );
+            %  [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, 'distance',clustercritical, statobs, statrand );
+            save(fullfile(dir1,'FiedTrip_LMECluster_stat.mat'),'stat')
+            disp(['Save fieldtrip cluster stat ', fullfile(dir1,'FiedTrip_LMECluster_stat.mat') ])
+          
+            %                  figure
+            % hist(stat.posdistribution)
+            if isfield(stat,'posclusterslabelmat')
+                for iposcluster = 1:numel(stat.posclusters)
+                    file = [name,labelnode,num2str(nperm),'COV', num2str(icov), 'posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
+                    matcorr = zeros(size(MATall,2),size(MATall,2));
+                    matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
+                    matcorr = matcorr +flipud(rot90(matcorr));
+                    meancorr = matcorr;
+                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    disp(['Save: ', fullfile(dir1,[file])]);
+                    new = [{dir1},{file}, {ZONEid},{0} ];
+                    infonew = [infonew;new];
+
+                    %WRITE beta and cluster in file
+                    file = ['Tval','COV', num2str(icov),'_','posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
+                    meancorr = zeros(size(MATall,2),size(MATall,2));
+                    eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
+                    meancorr = meancorr +flipud(rot90(meancorr ));
+                    matsig = zeros(size(MATall,2),size(MATall,2));
+                    matsig(idhalf)=(stat.posclusterslabelmat==iposcluster);
+                    matsig = matsig +flipud(rot90(matsig));
+                    meancorr =  meancorr.* double(matsig);
+                    disp(['Save file: ', fullfile(dir1,[file])]);
+                    save(fullfile(dir1,[file]),'ZoneList','meancorr');
+                    new = [{dir1},{file}, {ZONEid},{0}];
+                    infonew = [infonew;new];
+                end
+                
+            else
+                disp('No positive cluster found')
+            end
+            if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
+                for inegcluster = 1:numel(stat.negclusters)
+                    file = [name,labelnode,num2str(nperm),'COV', num2str(icov),' negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
+                    matcorr = zeros(size(MATall,2),size(MATall,2));
+                    matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
+                    matcorr = matcorr +flipud(rot90(matcorr));
+                    meancorr = matcorr;
+                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    disp(['Save: ', fullfile(dir1,[file])]);
+                    new = [{dir1},{file}, {ZONEid},{0} ];
+                    infonew = [infonew;new];             
+                    %WRITE beta and cluster in file
+                    file =  ['Tval','COV',num2str(icov),'negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat']
+                    meancorr = zeros(size(MATall,2),size(MATall,2));
+                    eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
+                    meancorr = meancorr +flipud(rot90(meancorr ));
+                    matsig = zeros(size(MATall,2),size(MATall,2));
+                    matsig(idhalf)=(stat.negclusterslabelmat==inegcluster);
+                    matsig = matsig +flipud(rot90(matsig));
+                    meancorr =  meancorr.* double(matsig);
+                    disp(['Save file: ', fullfile(dir1,[file])]);
+                    save(fullfile(dir1,[file]),'ZoneList','meancorr');
+                    new = [{dir1},{file}, {ZONEid},{0}];
+                    infonew = [infonew;new];
+                end
+            else
+                disp('No negative cluster found')
+            end
+        end
+    end
                 [filepath,name,ext] = fileparts(xlslistfile);
         try
             xlswrite(fullfile(dir1,['CLUSTER.xlsx']),infonew);

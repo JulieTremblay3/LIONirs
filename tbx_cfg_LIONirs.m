@@ -1523,6 +1523,7 @@ E_prewhitening.vout = @nirs_cfg_vout_prewhitening;
 E_prewhitening.help = {'Use Prewhitening see ref: , TOBE TESTED RAE'};
 
 
+
 function vout = nirs_cfg_vout_prewhitening(job);
     vout = cfg_dep;                    
     vout.sname      = 'NIRS.mat';       
@@ -2896,9 +2897,9 @@ f_MCT_ZoneBased.help   = {'The cluster need the distance between channel to defi
     'The zone is use to define channel position and to define a subset of channel if necessary.',...
     'Zone must be define in the display GUI or a zone with all channel is automaticly save at the data import step Global.zone'};
 
-%THIS USED in component 
+%THIS USED in component stat
 
-e_neighbourdist         =  cfg_entry;
+e_neighbourdist         =  cfg_entry; %component stat
 e_neighbourdist.name    = 'Neighbor distance';
 e_neighbourdist.tag     = 'e_neighbourdist';       
 e_neighbourdist.strtype = 's';
@@ -3949,12 +3950,12 @@ e_minnbchan.num     = [0 inf];
 e_minnbchan.val     = {'4'};
 e_minnbchan.help    = { 'Minnbchan number is a parameter to define minimal number of commun neighbord to be include in the neighboring.' };
 
-e_neighbourdist         =  cfg_entry;
+e_neighbourdist         =  cfg_entry; %use for matrix stat
 e_neighbourdist.name    = 'Neighbor';
 e_neighbourdist.tag     = 'e_neighbourdist';       
 e_neighbourdist.strtype = 's';
 e_neighbourdist.num     = [0 inf];
-e_neighbourdist.val     = {'link'};
+e_neighbourdist.val     = {'3'};
 e_neighbourdist.help    = {'Define how neighbor will be define:',...
     'Write ''link'' to consider optode with commun link together.',...
     'Write a number such as ''5'' to define the distance between optode to be include in a neighboring to define a cluster.',... 

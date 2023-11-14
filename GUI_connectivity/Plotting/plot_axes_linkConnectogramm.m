@@ -38,6 +38,9 @@ end
        %  [num,txt,raw] = xlsread(fileorderconnectogramme);
            [num,txt,rawzonecolor] = xlsread(fileorderconnectogramme);
            listselected= rawzonecolor(2:end,1);
+
+    
+           
     elseif 0  %just list without color    
         fid = fopen( fileorderconnectogramme,'r');
         id = 1;
@@ -91,6 +94,7 @@ for izone = 1:numel( DATA{id}.zone.plotLst)
         end
     end
     idlabelall = [idlabelall, {deblank([ DATA{id}.zone.label{izone}])}];
+ 
 end
    try
     listok = listselected;
@@ -131,8 +135,16 @@ end
 %FIN
 
  
+               %raw zone color need to be reorganised to reflet zone actual order. 
 
-
+%REplace line
+% newrawzonecolor = rawzonecolor;
+% newrawzonecolor(1, 2:size(rawzonecolor,1))=rawzonecolor(idzone(find(idzone))+1,1)  %LABEL zone order
+% newrawzonecolor(2:size(rawzonecolor,1),1) = rawzonecolor(1,idzone(find(idzone))+1) %LABEL zone order
+% newrawzonecolor(2:size(rawzonecolor,1),2:size(rawzonecolor,1)) = rawzonecolor(idzone(find(idzone))+1,2:size(rawzonecolor,1));
+% %Replace col
+% newrawzonecolor(2:size(rawzonecolor,1),2:size(rawzonecolor,1)) = newrawzonecolor(2:size(rawzonecolor,1),idzone(find(idzone))+1);
+% rawzonecolor=newrawzonecolor; 
 % Create custom colormap
 if get(handles.radio_negativemap,'value')
     MAT = -MAT;
@@ -169,11 +181,12 @@ elseif get(handles.popup_ConnectogramColor,'value')==2 %jet colormap mask/color 
         end
     end
      colorMatrix = colorMatrix(idlist,idlist);
-     
+        % idlabelall(idzone(find(idzone)))
      %use definition xls color to find all not define ROI combinaision
     colorMatrixmask= ones(numel(idlist));
     idMap = 1;
     colorMap = zeros((size(rawzonecolor,1)-1)^2,3) ;
+    actualzonelist = idzone(find(idzone))
     for i=2:size(rawzonecolor,1)
        for j=2:size(rawzonecolor,1)
            try
@@ -181,8 +194,8 @@ elseif get(handles.popup_ConnectogramColor,'value')==2 %jet colormap mask/color 
            catch
                colorMap(idMap,:) = nan;
            end
-        i_id = find(idzonecolor==(i-1));
-        j_id = find(idzonecolor==(j-1));
+        i_id = find(idzonecolor==actualzonelist(i-1));
+        j_id = find(idzonecolor==actualzonelist(j-1));
         if isnan(colorMap(idMap,:))
             colorMatrix(i_id,j_id) = nan;
         end
@@ -204,6 +217,7 @@ elseif get(handles.popup_ConnectogramColor,'value')==3   %color by zone mask/col
     colorMatrix= ones(numel(idlist));
     colorMap = zeros((size(rawzonecolor,1)-1)^2,3); %-(size(rawzonecolor,1)-1)
     idMap = 1;
+    actualzonelist = idzone(find(idzone))
     for i=2:size(rawzonecolor,1)
        for j=2:size(rawzonecolor,1)
            try
@@ -211,8 +225,10 @@ elseif get(handles.popup_ConnectogramColor,'value')==3   %color by zone mask/col
            catch
                colorMap(idMap,:) = nan;
            end
-        i_id = find(idzonecolor==(i-1));
-        j_id = find(idzonecolor==(j-1));
+                   i_id = find(idzonecolor==actualzonelist(i-1));
+        j_id = find(idzonecolor==actualzonelist(j-1));
+%         i_id = find(idzonecolor==(i-1));
+%         j_id = find(idzonecolor==(j-1));
         colorMatrix(i_id,j_id)=idMap;
         idMap = idMap+1;
         end
@@ -427,7 +443,8 @@ for iorder = 1:length(idchrono)
      end
    end
        end
+       
        xlim = ([- 1 1]);
        ylim = ([- 1 1]);
 end
-1
+disp(lstch )
