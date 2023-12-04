@@ -1,23 +1,16 @@
 function [stat neiglinkmat]= FindClusterBasedPermutationInMatrix(chanpos,neighbourdist,clustercritval, statobs, statrand, minnbchan  )
-% Description: run clusterstat from fieldtrip
-% input: 
+% Description: FindClusterBasedPermutationInMatrix
+% define the neighboring rules to form a cluster in the case of a matrix 
+% use clusterstat function to correct from multiple comparaison in the
+% fieldtrip
 % chanpos: channel position to define neighbour
-%
-%
-%
-
-% load('chanpos.mat')
-% load('statobs.mat');
-% load('statrand.mat');
+% neighbourdist: Distance to be consider a neighbour
+% clustercritval: Threshold to be significant
+% statobs: stat observe
+% statrand: stat random
 
 
-% load('DATA.mat')
-% load('MATall.mat')
-% load('groupeall.mat')
 
-% chanpos         %nbelel x position en coordonnee xyz
-% label           %nele x 1 cell name of the ele
-% distance        %geodesic distance for neighbours match unit with x,y,z 
 if isempty(chanpos)
 %     load('C:\data\EEGClinique\Script_Janie\chanpos.mat')
 %    % neighbourdist='150';
@@ -31,10 +24,6 @@ if strcmp(neighbourdist,'all')
    neiglinkmat(:,:)=ones(numel(statobs));  
    disp(['Neighborgs use all link'])
 elseif strcmp(neighbourdist,'link')
-   %debut neiglinkmat
-%     neighbourdist = str2num(neighbourdist);  
-%     neighbours = compneighbstructfromgradelec(chanpos,listelectrode,neighbourdist);
-   % neighbours = compneighbstructfromgradelec(chanpos,listelectrode,0);
     id = 1;
     nele = numel(listelectrode);
     matid = zeros(nele,nele);
@@ -144,33 +133,7 @@ else %gere les combinaison commune
      id = 1;
     nele = numel(listelectrode);
     matid = zeros(nele,nele);
-    if 0 %wrong order debug juillet 2023
-        for ielex=1:nele
-            ielex;
-            ieley = 1;
-            while ieley < ielex 
-                option{id}.ele1 =  listelectrode{ielex};
-                option{id}.ele2 =  listelectrode{ieley};
-                option{id}.matposition = [ielex,ieley];      
-                matid(ielex,ieley)=id;
-                neiglink(id).label1 = [listelectrode{ielex}];
-                neiglink(id).label2 =  [listelectrode{ieley}];
-                idele1(id) = ielex;
-                idele2(id) = ieley;
-                label1{id} = listelectrode{ielex};
-                label2{id} = listelectrode{ieley};   
-                 neiglink(id).neighblabel1 = [neighbours(ielex).neighblabel];
-                neiglink(id).neighblabel2 =   [neighbours(ieley).neighblabel];
-                neiglink(id).ideleneigh1 =[neighbours(ielex).idneigh];
-                neiglink(id).ideleneigh2=[neighbours(ieley).idneigh];
-
-    %             [seln] = match_str(listelectrode, neiglink(id).neighblabel);
-    %             neiglink(id).neigiele1 = seln;
-               ieley = ieley + 1;
-                id = id + 1;
-            end
-        end  
-    else
+   
          id = 1;
         for ieley=1:nele                 
               for  ielex=(ieley+1):nele
@@ -190,7 +153,7 @@ else %gere les combinaison commune
                 neiglink(id).ideleneigh2=[neighbours(ieley).idneigh];
                id = id + 1;
              end
-        end
+        
     end
     
     
@@ -270,8 +233,8 @@ else %gere les combinaison commune
 end  
    
 % 
-figure;
-imagesc(neiglinkmat);
+% figure;
+% imagesc(neiglinkmat);
 % title(['Neighbor definition: ',neighbourdist ])
 %  matcorr = zeros(83,83);
 %                     matcorr(idhalf)=  neiglinkmat(:,329); %idhalf ;

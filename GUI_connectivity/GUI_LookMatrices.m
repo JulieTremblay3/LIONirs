@@ -248,8 +248,12 @@ for igroupe = 0:max(groupeall)
            1
        end
   
-  
+  try
    MATAVGALL = zeros(numel(idlabelall),numel(idlabelall),numel(idsubject));
+  catch
+      disp(['Please verify the zone file :',  fullfile(info{isubject,1}, info{isubject,3})]);
+       MATAVGALL = zeros(numel(idlabelall),numel(idlabelall),numel(idsubject));
+  end
    for isubject = 1:numel(idsubject)
         try
        ML = DATA{idsubject(isubject)}.zone.ml;       

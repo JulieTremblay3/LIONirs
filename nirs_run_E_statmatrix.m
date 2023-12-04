@@ -1,12 +1,12 @@
 function out = nirs_run_E_statmatrix(job)
-     
+
 xlslistfile = job.f_matrix{1};
 [~,~,ext] =fileparts(xlslistfile);
 try
     if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
         try
             [raw, txt, info]=xlsread(xlslistfile);
-        catch 
+        catch
             disp(['Error could not read file: ',xlslistfile]);
             
             disp(['Verify the file location or if the file is already open']);
@@ -15,7 +15,7 @@ try
         [num, txt, info] = readtxtfile_asxlsread(xlslistfile);
     end
 catch
-    disp(['Error could not read file: ',xlslistfile]); 
+    disp(['Error could not read file: ',xlslistfile]);
     disp(['Verify the file location or if the file is already open']);
     return
 end
@@ -101,9 +101,9 @@ for isubject=2:size(info,1)
             end
         end
         
-      
+        
         DATA{id}.System = 'ISS';
-     
+        
         
         load(fullfile(info{isubject,1}, info{isubject,3}),'-mat');
         names = fieldnames(zone);
@@ -118,8 +118,8 @@ for isubject=2:size(info,1)
         disp(em.identifier)
         disp(em.message)
         groupeall = [groupeall; info{isubject,4}];
-    end 
-end 
+    end
+end
 %end %load already existing export
 alpha_threshold = job.e_statcomponent_alpha;
 if job.m_nodeunit==1 %channel mode
@@ -137,17 +137,17 @@ if job.m_nodeunit==1 %channel mode
     ZoneList =  DATA{end}.ZoneList;
     labelnode = 'c';
 elseif  job.m_nodeunit==2 %use by zone
-   
+    
     MATall =zeros(numel(DATA),numel(DATA{id}.zone.label),numel(DATA{id}.zone.label));
     for isubject = 1:numel(groupeall)
         try
             List = DATA{isubject}.ZoneList;
             name = List{1};
-             if strcmp(name(1:2),'D0')
-                 DATA{isubject}.System = 'NIRx';
-             else
-                 DATA{isubject}.System = 'ISS';
-             end
+            if strcmp(name(1:2),'D0')
+                DATA{isubject}.System = 'NIRx';
+            else
+                DATA{isubject}.System = 'ISS';
+            end
             for izone = 1:numel(DATA{isubject}.zone.label)
                 ML = DATA{isubject}.zone.ml;
                 DATA{isubject}.zone.plotLst;
@@ -156,37 +156,37 @@ elseif  job.m_nodeunit==2 %use by zone
                 chzone = DATA{isubject}.zone.plotLst{izone};
                 for ichzone = 1:numel(chzone);
                     ich = chzone(ichzone);
-                     switch DATA{isubject}.System
+                    switch DATA{isubject}.System
                         case 'ISS Imagent'
                             strDet = SDDet2strboxy_ISS(ML(ich,2));
                             strSrs = SDPairs2strboxy_ISS(ML(ich,1));
                             idch = strmatch([strDet, ' ',strSrs ],List,'exact');
-                       case 'NIRx'
+                        case 'NIRx'
                             strDet = SDDet2strboxy(ML(ich,2));
                             strSrs = SDPairs2strboxy(ML(ich,1));
-                            idch = strmatch([strDet, ' ',strSrs ],List,'exact');  
-                        end
+                            idch = strmatch([strDet, ' ',strSrs ],List,'exact');
+                    end
                     idliststr =[idliststr,{[strDet, ' ',strSrs ]}];
                     idlisti = [idlisti, idch];
                 end
-             
+                
                 for jzone = 1:numel(DATA{isubject}.zone.label)
                     idliststr =  [];
                     idlistj = [];
                     chzone = DATA{isubject}.zone.plotLst{jzone};
                     for ichzone = 1:numel(chzone);
                         ich = chzone(ichzone);
-                            switch DATA{isubject}.System
-                        case 'ISS Imagent'
-                            strDet = SDDet2strboxy_ISS(ML(ich,2));
-                            strSrs = SDPairs2strboxy_ISS(ML(ich,1));
-                            idch = strmatch([strDet, ' ',strSrs ],List,'exact');
-                       case 'NIRx'
-                            strDet = SDDet2strboxy(ML(ich,2));
-                            strSrs = SDPairs2strboxy(ML(ich,1));
-                            idch = strmatch([strDet, ' ',strSrs ],List,'exact');  
+                        switch DATA{isubject}.System
+                            case 'ISS Imagent'
+                                strDet = SDDet2strboxy_ISS(ML(ich,2));
+                                strSrs = SDPairs2strboxy_ISS(ML(ich,1));
+                                idch = strmatch([strDet, ' ',strSrs ],List,'exact');
+                            case 'NIRx'
+                                strDet = SDDet2strboxy(ML(ich,2));
+                                strSrs = SDPairs2strboxy(ML(ich,1));
+                                idch = strmatch([strDet, ' ',strSrs ],List,'exact');
                         end
-                    idliststr =[idliststr,{[strDet, ' ',strSrs ]}];
+                        idliststr =[idliststr,{[strDet, ' ',strSrs ]}];
                         idlistj = [idlistj, idch];
                     end
                     matROI = DATA{isubject}.MAT(idlisti,idlistj);
@@ -239,18 +239,18 @@ elseif  job.m_nodeunit==2 %use by zone
     ZONEid = ['avg', info{isubject,3}];
 end
 
-matid = zeros(size(MATall,2),size(MATall,2)); 
- id =1;
+matid = zeros(size(MATall,2),size(MATall,2));
+id =1;
 for ielex=1:size(MATall,2)
-    ielex; 
+    ielex;
     ieley = 1;
     while ieley < ielex
-        matid(ielex,ieley)=id; 
+        matid(ielex,ieley)=id;
         ieley = ieley + 1;
         id = id + 1;
     end
 end
-idhalf = find(matid); 
+idhalf = find(matid);
 matid(idhalf);
 %  get relevant indice to use only pertinent half matrix without
 %  diagonal in the permutation to reduce the number of computation
@@ -273,13 +273,13 @@ try
         SDsrsL =str2num(SrsL(3:end));
         idml = find(DATA{sujet}.zone.ml(:,1)==  SDsrsL & DATA{sujet}.zone.ml(:,2)==  SDdetL & DATA{sujet}.zone.ml(:,4)== 1);
         if ~isempty(idml)
-        chanpos(id,:) =  DATA{1}.zone.pos(idml,1:3);
+            chanpos(id,:) =  DATA{1}.zone.pos(idml,1:3);
         end
     end
 catch
-   disp('Multiple comparaison cluster could not find channel position, use all cluster')
+    disp('Multiple comparaison cluster could not find channel position, use all cluster')
 end
- 
+
 [filepath,name,ext] = fileparts(xlslistfile);
 if  isfield(job.c_statmatrix,'m_export_matrix')
     if job.c_statmatrix.m_export_matrix == 1
@@ -287,15 +287,15 @@ if  isfield(job.c_statmatrix,'m_export_matrix')
         save(fullfile(dir1,'Exportmatrice.mat'),'MATall','info','ZoneList', '-mat')
         disp(['Save export: ', fullfile(dir1,'Exportmatrice.mat')])
         save(fullfile(dir1,'WORKSPACE.mat'))
-    else 
+    else
         disp('xls export not available yet')
     end
 elseif isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     AllC = [];
     id =1;
-     %Use one or more specific groupe
+    %Use one or more specific groupe
     GRname = ['GR',num2str(job.c_statmatrix.b_TtestOneSamplematrix.e_TtestOneSampleGR),' '];
-   
+    
     idG1 = find(  sum(groupeall==job.c_statmatrix.b_TtestOneSamplematrix.e_TtestOneSampleGR,2));
     MATallG1 = MATall( idG1,:,:);
     meanall = squeeze(nanmean( MATallG1,1));
@@ -347,7 +347,7 @@ elseif isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
-    infonew = [infonew;new]; 
+    infonew = [infonew;new];
     file = [name,labelnode,GRname, 'OneSampleTtest meanp',num2str(alpha_threshold),'.mat'];
     matcorr = [];
     meancorr = meanall.*double(pval<alpha_threshold);
@@ -359,7 +359,7 @@ elseif isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     %find fdr
     try
         [FDR,Q] = mafdr(pval(:));
-        Q = reshape(Q,size(pval));        
+        Q = reshape(Q,size(pval));
         file = [name,labelnode,GRname, 'OneSampleTtest meanFDR',num2str(alpha_threshold),'.mat'];
         matcorr =  [];
         meancorr = meanall.*double(Q<alpha_threshold);
@@ -401,7 +401,7 @@ elseif isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
         disp(['File : ', file ' could not be create'])
     end
     
-
+    
     try
         file = [name,labelnode,GRname,'OneSampleTtest N.mat'];
         matcorr = [];
@@ -414,11 +414,11 @@ elseif isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
         disp(['File : ', file ' could not be create'])
     end
     
-
+    
     try
-    if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
-        copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
-    end
+        if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
+            copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
+        end
     catch
     end
     %  dir1 = job.e_statmatrixPath{1};
@@ -439,11 +439,11 @@ elseif isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     catch
         disp(['Error could not save .xlsx file: ' fullfile(dir1,[name,labelnode,GRname 'SimpleTtest.xlsx'])]);
     end
-elseif isfield(job.c_statmatrix,'b_UnpairedTtest')  
+elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
     dir1 = job.e_statmatrixPath{1};
     if ~isdir(dir1)
         mkdir(dir1);
-    end    
+    end
     %WRITE IN A NEW FILE
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
     GRname = ['GR ',num2str(job.c_statmatrix.b_UnpairedTtest.e_TtestOneSampleGR),' vs ',num2str(job.c_statmatrix.b_UnpairedTtest.e_TtestOneSampleGR2),' '];
@@ -451,28 +451,28 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
     g2 = find(sum(groupeall==job.c_statmatrix.b_UnpairedTtest.e_TtestOneSampleGR2,2));
     iduse = [g1;g2];
     halfMAT = MATall(:,idhalf);
-   
+    
     
     if isfield(job.c_statmatrix.b_UnpairedTtest.c_statpermutation,'b_Nopermutation')
-         for ilink = 1:size(halfMAT,2)
+        for ilink = 1:size(halfMAT,2)
             [h,p,ci,stats] = ttest2(halfMAT(g1,ilink), halfMAT(g2,ilink));
-             pval(:,ilink) = p;   
-             tval(:,ilink) = stats.tstat;
-             try; cohend(:,ilink)=computeCohen_d(halfMAT(g1,ilink), halfMAT(g2,ilink),'independent');catch;end
+            pval(:,ilink) = p;
+            tval(:,ilink) = stats.tstat;
+            try; cohend(:,ilink)=computeCohen_d(halfMAT(g1,ilink), halfMAT(g2,ilink),'independent');catch;end
             
-         end         
+        end
     elseif isfield(job.c_statmatrix.b_UnpairedTtest.c_statpermutation,'b_permutation')
-         halfMAT = MATall(:,idhalf);
-          g1 = find(sum(groupeall==job.c_statmatrix.b_UnpairedTtest.e_TtestOneSampleGR,2));
-          g2 = find(sum(groupeall==job.c_statmatrix.b_UnpairedTtest.e_TtestOneSampleGR2,2));
-          iduse = [g1;g2];
-         nperm = str2num(job.c_statmatrix.b_UnpairedTtest.c_statpermutation.b_permutation.e_npermutation);
-         for iperm=1:nperm
+        halfMAT = MATall(:,idhalf);
+        g1 = find(sum(groupeall==job.c_statmatrix.b_UnpairedTtest.e_TtestOneSampleGR,2));
+        g2 = find(sum(groupeall==job.c_statmatrix.b_UnpairedTtest.e_TtestOneSampleGR2,2));
+        iduse = [g1;g2];
+        nperm = str2num(job.c_statmatrix.b_UnpairedTtest.c_statpermutation.b_permutation.e_npermutation);
+        for iperm=1:nperm
             permfix(iperm,:) =  randperm(numel(iduse));
         end
         disp(['Running ', num2str(nperm),' permutations on ', num2str(size(halfMAT,2)),' link :'])
         %loopslow to be improve
-           for ilink = 1:size(halfMAT,2)            
+        for ilink = 1:size(halfMAT,2)
             fprintf('%s ',num2str(ilink));
             if mod(ilink,30)==0
                 fprintf('\n ');
@@ -480,42 +480,42 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
             try
                 Yval = halfMAT(iduse,ilink);
                 [h,p,ci,stats] = ttest2(halfMAT(g1,ilink), halfMAT(g2,ilink));
-                pval(:,ilink) = p;                               
-                tval(:,ilink) = stats.tstat;      
+                pval(:,ilink) = p;
+                tval(:,ilink) = stats.tstat;
                 try; cohend(:,ilink)=computeCohen_d(halfMAT(g1,ilink), halfMAT(g2,ilink),'independent');catch;end
-
+                
                 for idperm=1:nperm
                     Yval = halfMAT( iduse,ilink);
                     GR = permfix(idperm,:);
-                   [h,p,ci,stats] = ttest2(Yval(GR(1:numel(g1))), Yval(GR((numel(g1)+1):end)));
-                   tvalperm(:,idperm,ilink) =stats.tstat;
+                    [h,p,ci,stats] = ttest2(Yval(GR(1:numel(g1))), Yval(GR((numel(g1)+1):end)));
+                    tvalperm(:,idperm,ilink) =stats.tstat;
                 end
             catch
                 fprintf('error link ');
             end
-           end
-       
+        end
+        
         t_dist_all =  tvalperm ;
         [fecdf,xecdf] = ecdf(t_dist_all(:));
         clustercritical=xecdf(sum(fecdf<(1-alpha_threshold)));
         disp(['critical for clustering p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
-         %  figure;hist(t_dist_all(:),1000)
-               if isfield(job.c_statmatrix.b_UnpairedTtest.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting,'b_MCT_ClusterBased')
-                statrand = permute(tvalperm(1,:,:), [3 2 1]);
-                statobs = permute(tval(1,:),[2,1]);
-                 tmp = randperm(numel(statrand));
-                 statrand =reshape(statrand(tmp),size(statrand,1),size(statrand,2));
-                  minnbchan = job.c_statmatrix.b_UnpairedTtest.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_minnbchan;
-                 neighbourdist = job.c_statmatrix.b_UnpairedTtest.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_neighbourdist;
-                 disp(['critical for clustering p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
-                 [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, neighbourdist,clustercritical, statobs, statrand ,  minnbchan );
-               %  [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, 'distance',clustercritical, statobs, statrand );
-                 save(fullfile(dir1,'Unpairedttest_stat.mat'),'stat')
-                 disp(['Save cluster', fullfile(dir1,'Unpairedttest_stat.mat') ])
-                
-                %View link for neighbor
-                if 0
-                    for ilink=1:300
+        %  figure;hist(t_dist_all(:),1000)
+        if isfield(job.c_statmatrix.b_UnpairedTtest.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting,'b_MCT_ClusterBased')
+            statrand = permute(tvalperm(1,:,:), [3 2 1]);
+            statobs = permute(tval(1,:),[2,1]);
+            tmp = randperm(numel(statrand));
+            statrand =reshape(statrand(tmp),size(statrand,1),size(statrand,2));
+            minnbchan = job.c_statmatrix.b_UnpairedTtest.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_minnbchan;
+            neighbourdist = job.c_statmatrix.b_UnpairedTtest.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_neighbourdist;
+            disp(['critical for clustering p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
+            [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, neighbourdist,clustercritical, statobs, statrand ,  minnbchan );
+            %  [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, 'distance',clustercritical, statobs, statrand );
+            save(fullfile(dir1,'Unpairedttest_stat.mat'),'stat')
+            disp(['Save cluster', fullfile(dir1,'Unpairedttest_stat.mat') ])
+            
+            %View link for neighbor
+            if 0
+                for ilink=1:300
                     file = [name,labelnode,num2str(nperm),' neiglink',num2str(ilink),'.mat'];
                     matcorr = zeros(size(MATall,2),size(MATall,2));
                     matcorr(idhalf)=matneig(:,ilink);
@@ -525,68 +525,68 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
                     disp(['Save: ', fullfile(dir1,[file])]);
                     new = [{dir1},{file}, {ZONEid},{0} ];
                     infonew = [infonew;new];
-                    end
                 end
-                
-                if isfield(stat,'posclusterslabelmat')
-                    for iposcluster = 1:numel(stat.posclusters)
-                        file = [name,labelnode,num2str(nperm),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                        matcorr = zeros(size(MATall,2),size(MATall,2));
-                        matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                        disp(['Save: ', fullfile(dir1,[file])]);
-                        new = [{dir1},{file}, {ZONEid},{0} ];
-                        infonew = [infonew;new];
-                        
-                        file = [name,labelnode,num2str(nperm),' posCluster tval', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                        matcorr(idhalf)=squeeze(tval(:)).*(stat.posclusterslabelmat==iposcluster);;
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;    
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                        disp(['Save: ', fullfile(dir1,[file])]);
-                        new = [{dir1},{file}, {ZONEid},{1} ];
-                        infonew = [infonew;new];
-                        
-                    end
-                else
-                    disp('No positive cluster found')
+            end
+            
+            if isfield(stat,'posclusterslabelmat')
+                for iposcluster = 1:numel(stat.posclusters)
+                    file = [name,labelnode,num2str(nperm),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
+                    matcorr = zeros(size(MATall,2),size(MATall,2));
+                    matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
+                    matcorr = matcorr +flipud(rot90(matcorr));
+                    meancorr = matcorr;
+                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    disp(['Save: ', fullfile(dir1,[file])]);
+                    new = [{dir1},{file}, {ZONEid},{0} ];
+                    infonew = [infonew;new];
+                    
+                    file = [name,labelnode,num2str(nperm),' posCluster tval', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
+                    matcorr(idhalf)=squeeze(tval(:)).*(stat.posclusterslabelmat==iposcluster);;
+                    matcorr = matcorr +flipud(rot90(matcorr));
+                    meancorr = matcorr;
+                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    disp(['Save: ', fullfile(dir1,[file])]);
+                    new = [{dir1},{file}, {ZONEid},{1} ];
+                    infonew = [infonew;new];
+                    
                 end
-                if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
-                    for inegcluster = 1:numel(stat.negclusters)
-                        file = [name,labelnode,num2str(nperm),' negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
-                        matcorr = zeros(size(MATall,2),size(MATall,2));
-                        matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                        disp(['Save: ', fullfile(dir1,[file])]);
-                        new = [{dir1},{file}, {ZONEid},{0} ];
-                        infonew = [infonew;new];
-                        
-                        file = [name,labelnode,num2str(nperm),' negCluster tval', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
-                        matcorr(idhalf)=squeeze(tval(:)).*(stat.negclusterslabelmat==inegcluster);
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;    
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                        disp(['Save: ', fullfile(dir1,[file])]);
-                        new = [{dir1},{file}, {ZONEid},{1} ];
-                        infonew = [infonew;new];
-                    end
-                else
-                    disp('No negative cluster found')
-                end       
-
-               end 
-    end 
-
-    try %optionnal cohend 
+            else
+                disp('No positive cluster found')
+            end
+            if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
+                for inegcluster = 1:numel(stat.negclusters)
+                    file = [name,labelnode,num2str(nperm),' negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
+                    matcorr = zeros(size(MATall,2),size(MATall,2));
+                    matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
+                    matcorr = matcorr +flipud(rot90(matcorr));
+                    meancorr = matcorr;
+                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    disp(['Save: ', fullfile(dir1,[file])]);
+                    new = [{dir1},{file}, {ZONEid},{0} ];
+                    infonew = [infonew;new];
+                    
+                    file = [name,labelnode,num2str(nperm),' negCluster tval', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
+                    matcorr(idhalf)=squeeze(tval(:)).*(stat.negclusterslabelmat==inegcluster);
+                    matcorr = matcorr +flipud(rot90(matcorr));
+                    meancorr = matcorr;
+                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    disp(['Save: ', fullfile(dir1,[file])]);
+                    new = [{dir1},{file}, {ZONEid},{1} ];
+                    infonew = [infonew;new];
+                end
+            else
+                disp('No negative cluster found')
+            end
+            
+        end
+    end
+    
+    try %optionnal cohend
         file = [name,labelnode,'Cohend_TPositive','.mat'];
         matcorr = zeros(size(MATall,2),size(MATall,2));
         matcorr(idhalf)=squeeze(cohend(:)).*squeeze(tval(:)>0);
         matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;    
+        meancorr = matcorr;
         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{1} ];
@@ -595,7 +595,7 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
         matcorr = zeros(size(MATall,2),size(MATall,2));
         matcorr(idhalf)=squeeze(cohend(:)).*squeeze(tval(:)<0);;
         matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;    
+        meancorr = matcorr;
         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{1} ];
@@ -604,7 +604,7 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
         matcorr = zeros(size(MATall,2),size(MATall,2));
         matcorr(idhalf)=squeeze(cohend(:));
         matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;    
+        meancorr = matcorr;
         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{1} ];
@@ -619,14 +619,14 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
         disp(['Add the fonction in matlab path: addpath(''',pathname, '\External\computeCohen_d'')'])
         disp('And verify if Fisher transform is not apply twice, data must be real')
     end
-
     
-     try
+    
+    try
         file = [name,labelnode,'UnpairedTtest tval','.mat'];
         matcorr = zeros(size(MATall,2),size(MATall,2));
         matcorr(idhalf)=squeeze(tval(:));
         matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;    
+        meancorr = matcorr;
         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{1} ];
@@ -643,15 +643,15 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
         infonew = [infonew;new];
     catch
         disp(['File : ', file ' could not be create'])
-     end
-
-      try
+    end
+    
+    try
         file = [name,labelnode,'UnpairedTtest 1-pval','.mat'];
         matcorr = zeros(size(MATall,2),size(MATall,2));
         matcorr(idhalf)=squeeze(1-pval(:));
         matcorr = matcorr +flipud(rot90(matcorr));
         meancorr = matcorr;
-    
+        
         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{1} ];
@@ -660,9 +660,9 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
         disp(['File : ', file ' could not be create'])
     end
     try
-    if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
-        copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
-    end
+        if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
+            copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
+        end
     catch
     end
     %  dir1 = job.e_statmatrixPath{1};
@@ -759,18 +759,18 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
                         tmppb1(idnan)=[];
                     end
                     %if Toij(i,j)==0
-                        [FSupSup,FSupDeriv,FSupTime,pij,tij] = TestPermut2Grupos(ESTAD,INDEP,tmpcb1,tmppb1,NPERM);
-                        %apply symetric
-                        ncb1(i,j) = numel(tmpcb1);
-                        npb1(i,j) = numel(tmppb1);
-                        FUniv(i,j) = pij;
-                     %   Toij(i,j) = tij;
-                        ncb1(j,i) = numel(tmpcb1);
-                        npb1(j,i) = numel(tmppb1);
-                        FUniv(j,i) = pij;
-                      %  Toij(j,i) = tij;
-                        
-                   % end
+                    [FSupSup,FSupDeriv,FSupTime,pij,tij] = TestPermut2Grupos(ESTAD,INDEP,tmpcb1,tmppb1,NPERM);
+                    %apply symetric
+                    ncb1(i,j) = numel(tmpcb1);
+                    npb1(i,j) = numel(tmppb1);
+                    FUniv(i,j) = pij;
+                    %   Toij(i,j) = tij;
+                    ncb1(j,i) = numel(tmpcb1);
+                    npb1(j,i) = numel(tmppb1);
+                    FUniv(j,i) = pij;
+                    %  Toij(j,i) = tij;
+                    
+                    % end
                 end
             end
         else
@@ -786,7 +786,7 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
     dir1 = job.e_statmatrixPath{1};
     if ~isdir(dir1)
         mkdir(dir1);
-    end    
+    end
     
     %WRITE IN A NEW FILE
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
@@ -993,7 +993,7 @@ elseif isfield(job.c_statmatrix,'b_PearsonCorr_Mat')
         end
     end
     try
-    copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
+        copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
     catch
     end
     if ismac
@@ -1031,9 +1031,9 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
         for icol=1:size(info,2)
             if ~isnan(info{1,icol})
                 try
-                if strcmp(strtrim(upper(deblank(info{1,icol}))), strtrim(upper(Pearsony)));
-                    ycol = icol;
-                end
+                    if strcmp(strtrim(upper(deblank(info{1,icol}))), strtrim(upper(Pearsony)));
+                        ycol = icol;
+                    end
                 catch
                 end
             end
@@ -1059,7 +1059,7 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
     
     
     
-
+    
     mat_n_used = zeros(size(MATall,2));
     if strcmp(strtrim(upper(job.c_statmatrix.b_GLM_Mat.e_GLMGR)),'ALL');
         subjecttoapply = 1:numel(groupeall);
@@ -1068,224 +1068,224 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
         subjecttoapply = find(sum(groupeall==gruse,2));
     end
     if isfield(job.c_statmatrix.b_GLM_Mat.c_statpermutation,'b_Nopermutation')
-            for icov = 1:numel(covariableall)
-                eval(['bCOV',num2str(icov),' = zeros(size(MATall,2),size(MATall,2));']);
-                eval(['bCOV',num2str(icov),'sig = zeros(size(MATall,2),size(MATall,2));']);
-            end
-    for i=1:size(MATall,2)
-        for j=1:size(MATall,2)
-            iduse = find(sum(~isnan(score(subjecttoapply,:)),2)==size(score,2)& ~isnan(MATall(subjecttoapply,i,j)));
-            mat_n_used(i,j) = numel(iduse);
-            X = score(subjecttoapply(iduse),:);
-            y = MATall(subjecttoapply(iduse),i,j);
-    
-            if ~isempty(iduse)
-                %R2 statistic, the F-statistic and its p-value, and an estimate of the error variance.
-                try
-                    [b,bint,r,rint,stats] = regress(y,X);
-                    [bp,bintp,rp,rintp,statsp] = regress(y,X(:,[1,3:end]));
-                catch
-                    b(:) = nan;
-                    stats(:) =  nan;
+        for icov = 1:numel(covariableall)
+            eval(['bCOV',num2str(icov),' = zeros(size(MATall,2),size(MATall,2));']);
+            eval(['bCOV',num2str(icov),'sig = zeros(size(MATall,2),size(MATall,2));']);
+        end
+        for i=1:size(MATall,2)
+            for j=1:size(MATall,2)
+                iduse = find(sum(~isnan(score(subjecttoapply,:)),2)==size(score,2)& ~isnan(MATall(subjecttoapply,i,j)));
+                mat_n_used(i,j) = numel(iduse);
+                X = score(subjecttoapply(iduse),:);
+                y = MATall(subjecttoapply(iduse),i,j);
+                
+                if ~isempty(iduse)
+                    %R2 statistic, the F-statistic and its p-value, and an estimate of the error variance.
+                    try
+                        [b,bint,r,rint,stats] = regress(y,X);
+                        [bp,bintp,rp,rintp,statsp] = regress(y,X(:,[1,3:end]));
+                    catch
+                        b(:) = nan;
+                        stats(:) =  nan;
+                        
+                    end
+                    try
+                        R2inc(i,j) = stats(1)-statsp(1);
+                        %f2(i,j) = R2inc(i,j)./(1-R2inc(i,j)); %SPSS version Semi partial F
+                        f2(i,j) = R2inc(i,j)./(1-stats(1)); %COHEN partial F
+                    catch
+                    end
+                    try
+                        for icov = 1:numel(covariableall)
+                            eval(['bCOV',num2str(icov),'(',num2str(i),',',num2str(j),')=',num2str(b(icov)),';']);
+                        end
+                        eval(['r2','(',num2str(i),',',num2str(j),')=',num2str(stats(1)),';']);
+                        eval(['F','(',num2str(i),',',num2str(j),')=',num2str(stats(2)),';']);
+                        eval(['pval','(',num2str(i),',',num2str(j),')=',num2str(stats(3)),';']);
+                        eval(['RMSerr','(',num2str(i),',',num2str(j),')=',num2str(sqrt(stats(4))),';']);
+                    catch
+                        1;
+                    end
+                    if stats(3)<alpha_threshold
+                        for icov = 1:numel(covariableall)
+                            eval(['bCOV',num2str(icov),'sig(',num2str(i),',',num2str(j),')=',num2str(b(icov)),';']);
+                        end
+                    end
                     
-                end
-                try
-                    R2inc(i,j) = stats(1)-statsp(1);
-                    %f2(i,j) = R2inc(i,j)./(1-R2inc(i,j)); %SPSS version Semi partial F
-                    f2(i,j) = R2inc(i,j)./(1-stats(1)); %COHEN partial F
-                catch
-                end
-                try
-                    for icov = 1:numel(covariableall)
-                        eval(['bCOV',num2str(icov),'(',num2str(i),',',num2str(j),')=',num2str(b(icov)),';']);
-                    end
-                    eval(['r2','(',num2str(i),',',num2str(j),')=',num2str(stats(1)),';']);
-                    eval(['F','(',num2str(i),',',num2str(j),')=',num2str(stats(2)),';']);
-                    eval(['pval','(',num2str(i),',',num2str(j),')=',num2str(stats(3)),';']);
-                    eval(['RMSerr','(',num2str(i),',',num2str(j),')=',num2str(sqrt(stats(4))),';']);
-                catch
-                    1;
-                end
-                if stats(3)<alpha_threshold
-                    for icov = 1:numel(covariableall)
-                        eval(['bCOV',num2str(icov),'sig(',num2str(i),',',num2str(j),')=',num2str(b(icov)),';']);
-                    end
-                end
-                
-                
-            end
-        end
-    end
-
- 
-    1
-    %check Frand
-    if 1 %save residual covariable substracted
-        infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}, covariableall];
-        idcov2substract = 0;
-        for id=1:numel(covariableall);
-            if strcmp(covariableall{id},strtrim(job.c_statmatrix.b_GLM_Mat.b_substractidCovariable_Mat ));
-                idcov2substract = id; %indice de la covariable a soustraire, dans l'ordre d'entrée
-            end
-        end
-        if idcov2substract;
-            residual = nan(size(MATall));
-            residualsig = nan(size(MATall));
-            for i=1:size(MATall,2);
-                for j=1:size(MATall,2);
-                    iduse = find(sum(~isnan(score),2)==size(score,2)& ~isnan(MATall(:,i,j)));
-                    X = score(iduse,:);
-                    residual(iduse,i,j) = MATall(iduse,i,j) - eval(['bCOV',num2str(idcov2substract),'(i,j)'])*X(:,idcov2substract);
-                    residualsig(iduse,i,j) = MATall(iduse,i,j) - eval(['bCOV',num2str(idcov2substract),'sig(i,j)'])*X(:,idcov2substract);
                     
                 end
             end
-            disp([upper(job.c_statmatrix.b_GLM_Mat.e_GLMGR), ' group where used for the regression n=',num2str(numel(subjecttoapply))])
-            for isubject = 1:numel(subjecttoapply)
-                matcorr = squeeze(residual(subjecttoapply(isubject),:,:));
-                meancorr = squeeze(residual(subjecttoapply(isubject),:,:));
-                file = ['res ' covariableall{idcov2substract}, info{subjecttoapply(isubject)+1,2}];
-                save(fullfile(info{subjecttoapply(isubject)+1,1},file),'ZoneList','matcorr','meancorr');
-                new = [info{subjecttoapply(isubject)+1,1},{file}, {ZONEid},{1}, num2cell(score(subjecttoapply(isubject),:))  ];
-                infonew = [infonew;new];
-                disp( ['Save residual: ', fullfile(info{subjecttoapply(isubject)+1,1},file)])
-            end
-        else
+        end
+        
+        
+        1
+        %check Frand
+        if 1 %save residual covariable substracted
             infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}, covariableall];
-            for isubject = 1:numel(subjecttoapply)
-                file = [info{subjecttoapply(isubject)+1,2}];
-                new = [info{subjecttoapply(isubject)+1,1},{file}, {ZONEid},{1}, num2cell(score(subjecttoapply(isubject),:)) ];
-                infonew = [infonew;new];
+            idcov2substract = 0;
+            for id=1:numel(covariableall);
+                if strcmp(covariableall{id},strtrim(job.c_statmatrix.b_GLM_Mat.b_substractidCovariable_Mat ));
+                    idcov2substract = id; %indice de la covariable a soustraire, dans l'ordre d'entrée
+                end
             end
-            disp(['No subtracting residual ']);
+            if idcov2substract;
+                residual = nan(size(MATall));
+                residualsig = nan(size(MATall));
+                for i=1:size(MATall,2);
+                    for j=1:size(MATall,2);
+                        iduse = find(sum(~isnan(score),2)==size(score,2)& ~isnan(MATall(:,i,j)));
+                        X = score(iduse,:);
+                        residual(iduse,i,j) = MATall(iduse,i,j) - eval(['bCOV',num2str(idcov2substract),'(i,j)'])*X(:,idcov2substract);
+                        residualsig(iduse,i,j) = MATall(iduse,i,j) - eval(['bCOV',num2str(idcov2substract),'sig(i,j)'])*X(:,idcov2substract);
+                        
+                    end
+                end
+                disp([upper(job.c_statmatrix.b_GLM_Mat.e_GLMGR), ' group where used for the regression n=',num2str(numel(subjecttoapply))])
+                for isubject = 1:numel(subjecttoapply)
+                    matcorr = squeeze(residual(subjecttoapply(isubject),:,:));
+                    meancorr = squeeze(residual(subjecttoapply(isubject),:,:));
+                    file = ['res ' covariableall{idcov2substract}, info{subjecttoapply(isubject)+1,2}];
+                    save(fullfile(info{subjecttoapply(isubject)+1,1},file),'ZoneList','matcorr','meancorr');
+                    new = [info{subjecttoapply(isubject)+1,1},{file}, {ZONEid},{1}, num2cell(score(subjecttoapply(isubject),:))  ];
+                    infonew = [infonew;new];
+                    disp( ['Save residual: ', fullfile(info{subjecttoapply(isubject)+1,1},file)])
+                end
+            else
+                infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}, covariableall];
+                for isubject = 1:numel(subjecttoapply)
+                    file = [info{subjecttoapply(isubject)+1,2}];
+                    new = [info{subjecttoapply(isubject)+1,1},{file}, {ZONEid},{1}, num2cell(score(subjecttoapply(isubject),:)) ];
+                    infonew = [infonew;new];
+                end
+                disp(['No subtracting residual ']);
+            end
         end
-    end
-    
-    %WRITE IN A NEW FILE
-    for icov = 1:numel(covariableall)
-        file = ['Beta',name,'_',covariableall{icov},'.mat'];
-        eval(['matcorr =','bCOV',num2str(icov),';']);
-        eval(['meancorr =','bCOV',num2str(icov),';']);
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-        new = [{dir1},{file}, {ZONEid},{0}, num2cell(zeros(1,numel(covariableall)))];
-        infonew = [infonew;new];
-        file = ['Beta',name,'_',covariableall{icov},'p',num2str(alpha_threshold),'.mat'];
-        eval(['matcorr =','bCOV',num2str(icov),'sig;']);
-        eval(['meancorr =','bCOV',num2str(icov),'sig;']);
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-        new = [{dir1},{file}, {ZONEid},{0}, num2cell(zeros(1,numel(covariableall)))];
-        infonew = [infonew;new];
-    end
-    
-    try
-    file = ['R2_cov=',covariablestring];
-    matcorr =r2; 
-    meancorr =matcorr;
-    save(fullfile(dir1,file),'ZoneList','matcorr','meancorr');
-    new = [{dir1},{file},{ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
-    infonew = [infonew;new];
-    disp( ['Save R2: ', fullfile(info{isubject,1},file)])
-    catch
-    end
-    
-    file = ['F stat_cov=',covariablestring];
-    matcorr =F;
-    meancorr =matcorr;
-    save(fullfile(dir1,file),'ZoneList','matcorr','meancorr');
-    new = [{dir1},{file},{ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
-    infonew = [infonew;new];
-    disp( ['Save Fstat: ', fullfile(info{isubject,1},file)])
-    
-    file = ['1-pval_cov=',covariablestring];
-    matcorr =1-pval;
-    meancorr =matcorr;
-    save(fullfile(dir1,file),'ZoneList','matcorr','meancorr');
-    new = [{dir1},{file},{ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
-    infonew = [infonew;new];
-    disp( ['Save 1-pval: ', fullfile(info{isubject,1},file)])
-    
-    file = ['RMSerr_cov=',covariablestring];
-    matcorr =RMSerr;
-    meancorr =matcorr;
-    save(fullfile(dir1,file),'ZoneList','matcorr','meancorr');
-    new = [{dir1},{file}, {ZONEid},{0} ,num2cell(zeros(1,numel(covariableall)))];
-    infonew = [infonew;new];
-    disp( ['Save Root Mean Square Error: ',fullfile(info{isubject,1},file)])
-    
-    file = ['n',name];
-    matcorr = mat_n_used;
-    meancorr = mat_n_used;
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-    new = [{dir1},{file}, {ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
-    infonew = [infonew;new];
-    
-    file = ['f2',name];
-    matcorr = f2;
-    meancorr = f2;
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-    new = [{dir1},{file}, {ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
-    infonew = [infonew;new];
-    
-    
-    file = ['f2BetaPosive',name];
-    matcorr = f2.*double(bCOV2>0);
-    meancorr = f2.*double(bCOV2>0);
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-    new = [{dir1},{file}, {ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
-    infonew = [infonew;new];
-    
-    
-    file = ['f2BetaNegative',name];
-    matcorr = f2.*double(bCOV2<0);
-    meancorr = f2.*double(bCOV2<0);
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-    new = [{dir1},{file}, {ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
-    infonew = [infonew;new];
-    
-    
-    file = ['R2inc',name];
-    matcorr = R2inc;
-    meancorr = R2inc;
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-    new = [{dir1},{file}, {ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
-    infonew = [infonew;new];
-    try
-    copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
-    catch
-    end
-    if ismac
-        % Code to run on Mac platform problem with xlswrite
-        [filepath,name,ext] = fileparts(xlslistfile);
-        writetxtfile(fullfile(dir1,['GLM.txt']),infonew);
-        disp(['Result .txt file saved: ' fullfile(dir1,['GLM.txt'])]);
-    else
-        [filepath,name,ext] = fileparts(xlslistfile);
+        
+        %WRITE IN A NEW FILE
+        for icov = 1:numel(covariableall)
+            file = ['Beta',name,'_',covariableall{icov},'.mat'];
+            eval(['matcorr =','bCOV',num2str(icov),';']);
+            eval(['meancorr =','bCOV',num2str(icov),';']);
+            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+            new = [{dir1},{file}, {ZONEid},{0}, num2cell(zeros(1,numel(covariableall)))];
+            infonew = [infonew;new];
+            file = ['Beta',name,'_',covariableall{icov},'p',num2str(alpha_threshold),'.mat'];
+            eval(['matcorr =','bCOV',num2str(icov),'sig;']);
+            eval(['meancorr =','bCOV',num2str(icov),'sig;']);
+            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+            new = [{dir1},{file}, {ZONEid},{0}, num2cell(zeros(1,numel(covariableall)))];
+            infonew = [infonew;new];
+        end
+        
         try
-            xlswrite(fullfile(dir1,['GLM.xlsx']),infonew);
-            disp(['Result .xlsx file saved ' fullfile(dir1,['GLM.xlsx'])]);
+            file = ['R2_cov=',covariablestring];
+            matcorr =r2;
+            meancorr =matcorr;
+            save(fullfile(dir1,file),'ZoneList','matcorr','meancorr');
+            new = [{dir1},{file},{ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
+            infonew = [infonew;new];
+            disp( ['Save R2: ', fullfile(info{isubject,1},file)])
         catch
+        end
+        
+        file = ['F stat_cov=',covariablestring];
+        matcorr =F;
+        meancorr =matcorr;
+        save(fullfile(dir1,file),'ZoneList','matcorr','meancorr');
+        new = [{dir1},{file},{ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
+        infonew = [infonew;new];
+        disp( ['Save Fstat: ', fullfile(info{isubject,1},file)])
+        
+        file = ['1-pval_cov=',covariablestring];
+        matcorr =1-pval;
+        meancorr =matcorr;
+        save(fullfile(dir1,file),'ZoneList','matcorr','meancorr');
+        new = [{dir1},{file},{ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
+        infonew = [infonew;new];
+        disp( ['Save 1-pval: ', fullfile(info{isubject,1},file)])
+        
+        file = ['RMSerr_cov=',covariablestring];
+        matcorr =RMSerr;
+        meancorr =matcorr;
+        save(fullfile(dir1,file),'ZoneList','matcorr','meancorr');
+        new = [{dir1},{file}, {ZONEid},{0} ,num2cell(zeros(1,numel(covariableall)))];
+        infonew = [infonew;new];
+        disp( ['Save Root Mean Square Error: ',fullfile(info{isubject,1},file)])
+        
+        file = ['n',name];
+        matcorr = mat_n_used;
+        meancorr = mat_n_used;
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        new = [{dir1},{file}, {ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
+        infonew = [infonew;new];
+        
+        file = ['f2',name];
+        matcorr = f2;
+        meancorr = f2;
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        new = [{dir1},{file}, {ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
+        infonew = [infonew;new];
+        
+        
+        file = ['f2BetaPosive',name];
+        matcorr = f2.*double(bCOV2>0);
+        meancorr = f2.*double(bCOV2>0);
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        new = [{dir1},{file}, {ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
+        infonew = [infonew;new];
+        
+        
+        file = ['f2BetaNegative',name];
+        matcorr = f2.*double(bCOV2<0);
+        meancorr = f2.*double(bCOV2<0);
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        new = [{dir1},{file}, {ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
+        infonew = [infonew;new];
+        
+        
+        file = ['R2inc',name];
+        matcorr = R2inc;
+        meancorr = R2inc;
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        new = [{dir1},{file}, {ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
+        infonew = [infonew;new];
+        try
+            copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
+        catch
+        end
+        if ismac
+            % Code to run on Mac platform problem with xlswrite
+            [filepath,name,ext] = fileparts(xlslistfile);
             writetxtfile(fullfile(dir1,['GLM.txt']),infonew);
             disp(['Result .txt file saved: ' fullfile(dir1,['GLM.txt'])]);
-        end
-    end
-       elseif isfield(job.c_statmatrix.b_GLM_Mat.c_statpermutation,'b_permutation')
-        'WARNING NO TESTED !'
-            
-          halfMAT = MATall(:,idhalf);
-           for icov = 1:numel(covariableall)
-                eval(['bCOV',num2str(icov),' = zeros(1,size(halfMAT,2));']);
-                eval(['bCOV',num2str(icov),'sig = zeros(1,size(halfMAT,2));']);
+        else
+            [filepath,name,ext] = fileparts(xlslistfile);
+            try
+                xlswrite(fullfile(dir1,['GLM.xlsx']),infonew);
+                disp(['Result .xlsx file saved ' fullfile(dir1,['GLM.xlsx'])]);
+            catch
+                writetxtfile(fullfile(dir1,['GLM.txt']),infonew);
+                disp(['Result .txt file saved: ' fullfile(dir1,['GLM.txt'])]);
             end
-          for ilink = 1:size(halfMAT,2) % ici
-             fprintf('%s ',num2str(ilink));
-             if mod(ilink,30)==0
+        end
+    elseif isfield(job.c_statmatrix.b_GLM_Mat.c_statpermutation,'b_permutation')
+        'WARNING NO TESTED !'
+        
+        halfMAT = MATall(:,idhalf);
+        for icov = 1:numel(covariableall)
+            eval(['bCOV',num2str(icov),' = zeros(1,size(halfMAT,2));']);
+            eval(['bCOV',num2str(icov),'sig = zeros(1,size(halfMAT,2));']);
+        end
+        for ilink = 1:size(halfMAT,2) % ici
+            fprintf('%s ',num2str(ilink));
+            if mod(ilink,30)==0
                 fprintf('\n ');
-             end
-             iduse = find(sum(~isnan(score(subjecttoapply,:)),2)==size(score,2)& ~isnan(halfMAT(subjecttoapply,ilink)));
-
+            end
+            iduse = find(sum(~isnan(score(subjecttoapply,:)),2)==size(score,2)& ~isnan(halfMAT(subjecttoapply,ilink)));
+            
             X = score(subjecttoapply(iduse),:);
             y =  halfMAT(subjecttoapply(iduse),ilink);
-    
+            
             if ~isempty(iduse)
                 %R2 statistic, the F-statistic and its p-value, and an estimate of the error variance.
                 try
@@ -1317,596 +1317,89 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
                     for icov = 1:numel(covariableall)
                         eval(['bCOV',num2str(icov),'sig(',num2str(ilink),')=',num2str(b(icov)),';']);
                     end
-                end 
+                end
             end
             
-          end
-         
-       
-          
-
-          try
-            nperm = str2num(job.c_statmatrix.b_GLM_Mat.c_statpermutation.b_permutation.e_npermutation);          
-            load(fullfile(dir1,'FPermutation.mat')) 
-            disp(['Previous computed permutation ', fullfile(dir1,'FPermutation.mat '), num2str(size(F_rand,1)), ' link x ',  num2str(size(F_rand,2)),' permutations',... 
-            'were open successfully if you wish to compute it again delete the file'])
-          catch
-              tic 
-          for ilink =1:size(halfMAT,2) %PERMUTATION F TEST           
-          for iperm=1:nperm         
-           fprintf('%s ',num2str(ilink));
-             if mod(ilink,30)==0
-                fprintf('\n ');
-             end
-             iduse = find(sum(~isnan(score(subjecttoapply,:)),2)==size(score,2)& ~isnan(halfMAT(subjecttoapply,ilink)));
-              permfix =  randperm(numel(iduse)); 
-            X = score(subjecttoapply(iduse),:);
-            y =  halfMAT(subjecttoapply(iduse(permfix)),ilink);
-    
-            if ~isempty(iduse)
-                %R2 statistic, the F-statistic and its p-value, and an estimate of the error variance.
-                try
-                    [b,bint,r,rint,stats] = regress(y,X);
-                    [bp,bintp,rp,rintp,statsp] = regress(y,X(:,[1,3:end]));
-                catch
-                    b(:) = nan;
-                    stats(:) =  nan;
-                end
-                try                
-                    eval(['F_rand','(',num2str(ilink),',',num2str(iperm),')=',num2str(stats(2)),';']);
-                catch
-                  
+        end
+        
+        
+        
+        
+        try
+            nperm = str2num(job.c_statmatrix.b_GLM_Mat.c_statpermutation.b_permutation.e_npermutation);
+            load(fullfile(dir1,'FPermutation.mat'))
+            disp(['Previous computed permutation ', fullfile(dir1,'FPermutation.mat '), num2str(size(F_rand,1)), ' link x ',  num2str(size(F_rand,2)),' permutations',...
+                'were open successfully if you wish to compute it again delete the file'])
+        catch
+            tic
+            for ilink =1:size(halfMAT,2) %PERMUTATION F TEST
+                for iperm=1:nperm
+                    fprintf('%s ',num2str(ilink));
+                    if mod(ilink,30)==0
+                        fprintf('\n ');
+                    end
+                    iduse = find(sum(~isnan(score(subjecttoapply,:)),2)==size(score,2)& ~isnan(halfMAT(subjecttoapply,ilink)));
+                    permfix =  randperm(numel(iduse));
+                    X = score(subjecttoapply(iduse),:);
+                    y =  halfMAT(subjecttoapply(iduse(permfix)),ilink);
+                    
+                    if ~isempty(iduse)
+                        %R2 statistic, the F-statistic and its p-value, and an estimate of the error variance.
+                        try
+                            [b,bint,r,rint,stats] = regress(y,X);
+                            [bp,bintp,rp,rintp,statsp] = regress(y,X(:,[1,3:end]));
+                        catch
+                            b(:) = nan;
+                            stats(:) =  nan;
+                        end
+                        try
+                            eval(['F_rand','(',num2str(ilink),',',num2str(iperm),')=',num2str(stats(2)),';']);
+                        catch
+                            
+                        end
+                    end
                 end
             end
-         end
-          end
-          toc                   
-          save(fullfile(dir1,'FPermutation.mat'), 'F_rand')
-          end
-   
+            toc
+            save(fullfile(dir1,'FPermutation.mat'), 'F_rand')
+        end
+        
         [fecdf,xecdf] = ecdf(F_rand(:));
         clustercritical=xecdf(sum(fecdf<(1-alpha_threshold)));
         disp(['critical for clustering p=', num2str(alpha_threshold),' F=',num2str(clustercritical)])
-            if isfield(job.c_statmatrix.b_GLM_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting,'b_MCT_ClusterBased')
-
-                  statobs = F';
-       
-                 if nperm <= size(F_rand,2)
-                    statrand =F_rand(:,1:nperm);
-                 else
-                    nbrepeted = ceil( nperm/size(F_rand,2))
-                    F_rand =  repmat(F_rand,1,nbrepeted );
-                    statrand =F_rand(:,1:nperm);
-                    tmp = randperm(numel(statrand));
-                    statrand(tmp) = statrand;
-                 end
-                 if 0
-                    fileMean = 'C:\NIRx-actiCHAMP_Analysed\ELAN\Resting2021\Matrices\Stat\0mOneSample_ttest\_OHBM_MatriceCOH_Elan_BAYLEY_REVIEWmai2023cGR1 OneSampleTtest mean.mat'
-                    load(fileMean)
-                    MeanAmp = meancorr
-                   statobs = F' .*double(MeanAmp(idhalf)>0); 
-                   disp('Mask positive Pearson before cluster')
-                   statrand =statrand(:,:).*(double(MeanAmp(idhalf)>0)*ones(1,nperm));
-                 end
-                 neighbourdist = job.c_statmatrix.b_GLM_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_neighbourdist;
-                 minnbchan = job.c_statmatrix.b_GLM_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_minnbchan;
-                 disp(['critical for clustering p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
-                 [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, neighbourdist,clustercritical, statobs, statrand,  minnbchan );           
-                 save(fullfile(dir1,'GLM_stat.mat'),'stat')
-                 disp(['Save cluster', fullfile(dir1,'GLM_stat.mat') ])
-                 infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
-%                  figure
-% hist(stat.posdistribution)
-           if isfield(stat,'posclusterslabelmat')
-                    for iposcluster = 1:numel(stat.posclusters)
-                        file = [name,labelnode,num2str(nperm),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                        matcorr = zeros(size(MATall,2),size(MATall,2));
-                        matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                        disp(['Save: ', fullfile(dir1,[file])]);
-                        new = [{dir1},{file}, {ZONEid},{0} ];
-                        infonew = [infonew;new];
-                        
-                    
-                            %WRITE beta and cluster in file 
-                            for icov = 1:numel(covariableall)
-                                file = ['Beta','_',covariableall{icov},'posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                                 meancorr = zeros(size(MATall,2),size(MATall,2));
-                                 eval(['meancorr(idhalf) =','bCOV',num2str(icov),';']);
-                                 meancorr = meancorr +flipud(rot90(meancorr ));
-                                 matsig = zeros(size(MATall,2),size(MATall,2));
-                                 matsig(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                                 matsig = matsig +flipud(rot90(matsig));
-                                meancorr =  meancorr.* double(matsig);                         
-                                disp(['Save file: ', fullfile(dir1,[file])]);
-                                save(fullfile(dir1,[file]),'ZoneList','meancorr');
-                                new = [{dir1},{file}, {ZONEid},{0}];
-                                infonew = [infonew;new];                        
-                            end
-                        end
-                   
-                else
-                    disp('No positive cluster found')
-                end
-                if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
-                    for inegcluster = 1:numel(stat.negclusters)
-                        file = [name,labelnode,num2str(nperm),' negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
-                        matcorr = zeros(size(MATall,2),size(MATall,2));
-                        matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                        disp(['Save: ', fullfile(dir1,[file])]);
-                        new = [{dir1},{file}, {ZONEid},{0} ];
-                        infonew = [infonew;new];
-                        
-                                    %WRITE beta and cluster in file 
-                            for icov = 1:numel(covariableall)
-                                file = ['Beta','_',covariableall{icov},'negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat']
-                                 meancorr = zeros(size(MATall,2),size(MATall,2));
-                                 eval(['meancorr(idhalf) =','bCOV',num2str(icov),';']);
-                                 meancorr = meancorr +flipud(rot90(meancorr ));
-                                 matsig = zeros(size(MATall,2),size(MATall,2));
-                                 matsig(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                                 matsig = matsig +flipud(rot90(matsig));
-                                meancorr =  meancorr.* double(matsig);                         
-                                disp(['Save file: ', fullfile(dir1,[file])]);
-                                save(fullfile(dir1,[file]),'ZoneList','meancorr');
-                                new = [{dir1},{file}, {ZONEid},{0}];
-                                infonew = [infonew;new];                        
-                            end
-                        
-                    end
-                else
-                    disp('No negative cluster found')
-                end       
-
-            end
-                [filepath,name,ext] = fileparts(xlslistfile);
-        try
-            xlswrite(fullfile(dir1,['CLUSTER.xlsx']),infonew);
-            disp(['Result .xlsx file saved ' fullfile(dir1,['CLUSTER.xlsx'])]);
-        catch
-            writetxtfile(fullfile(dir1,['CLUSTER.xlsx']),infonew);
-            disp(['Result .xlsx file saved ' fullfile(dir1,['CLUSTER.xlsx'])]);
-        end
-          
-    end
-elseif isfield(job.c_statmatrix,'b_LM_Mat') 
-     disp('Not tested GENERIC USE LM')
-
-    dir1 = job.e_statmatrixPath{1};   
-    infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
-     datatable= readtable(xlslistfile)
-     halfMAT = MATall(:,idhalf);
-     %verify transfert 
-%      tmp = squeeze(MATall(1,:,:)); 
-%      halfMAT1 = MATall(1,idhalf);
-%       matcorr = zeros(size(MATall,2),size(MATall,2));
-%       matcorr(idhalf)=halfMAT1;
-%       matcorr = matcorr +flipud(rot90(matcorr));
-                
-                    
-                    
-     LMEformula = deblank(job.c_statmatrix.b_LM_Mat.b_LME_formula);
-     fprintf('%s',['RUN LM : ', LMEformula, ' link:'])
-   
-     for ilink=1:numel(idhalf);
-         fprintf('%d,',ilink)
-             if mod(ilink,30)==0 
-                fprintf('\n ');
-            end
-            datatable.MAT= halfMAT(:,ilink);
-          %  LMEformula = 'AGENIRS_m~MAT+(1|ID)'
-          try
-            lme = fitlm( datatable,LMEformula); 
-          catch
-                  disp(['Verify LME formula ', LMEformula, ' and datatable Variable'])
-                disp(datatable.Properties.VariableNames)
-            end
-              eval(['r2','(',num2str(ilink),')=' ,'lme.Rsquared.Ordinary;'])
-              eval(['N','(',num2str(ilink),')=' ,' lme.NumObservations; '])
+        if isfield(job.c_statmatrix.b_GLM_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting,'b_MCT_ClusterBased')
             
-            for icov = 1:size(lme.Coefficients,1)               
-                eval(['TCOV',num2str(icov),'(',num2str(ilink),')=lme.Coefficients{',num2str(icov),',3};']);
-                eval(['ECOV',num2str(icov),'(',num2str(ilink),')=lme.Coefficients{',num2str(icov),',1};']);
-                eval(['pCOV',num2str(icov),'(',num2str(ilink),')=lme.Coefficients{',num2str(icov),',4};']);
-            end
-                  
-     end 
-  
-                                 file = ['Nobservation.mat']
-                                 meancorr = zeros(size(MATall,2),size(MATall,2));
-                                 eval(['meancorr(idhalf) =','N;']);
-                                 meancorr = meancorr +flipud(rot90(meancorr ));                    
-                                disp(['Save file: ', fullfile(dir1,[file])]);
-                                save(fullfile(dir1,[file]),'ZoneList','meancorr');
-                                new = [{dir1},{file}, {ZONEid},{0}];
-                                infonew = [infonew;new];                        
-                          
-                                   file = ['R2.mat']
-                                 meancorr = zeros(size(MATall,2),size(MATall,2));
-                                 eval(['meancorr(idhalf) =','r2']);
-                                 meancorr = meancorr +flipud(rot90(meancorr ));                    
-                                disp(['Save file: ', fullfile(dir1,[file])]);
-                                save(fullfile(dir1,[file]),'ZoneList','meancorr');
-                                new = [{dir1},{file}, {ZONEid},{0}];
-                                infonew = [infonew;new];      
-     
-         % WRITE Tval in file 
-                            for icov = 2:size(lme.Coefficients,1) 
-                                file = ['TCOV',num2str(icov),'_', lme.CoefficientNames{icov},'.mat']
-                                 meancorr = zeros(size(MATall,2),size(MATall,2));
-                                 eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
-                                 meancorr = meancorr +flipud(rot90(meancorr ));
-                                 matsig = zeros(size(MATall,2),size(MATall,2));
-                                 eval(['matsig(idhalf) =','pCOV',num2str(icov),';'])                          
-                                 matsig = matsig +flipud(rot90(matsig));
-                                meancorr =  meancorr.* double(matsig<alpha_threshold);                         
-                                disp(['Save file: ', fullfile(dir1,[file])]);
-                                save(fullfile(dir1,[file]),'ZoneList','meancorr');
-                                new = [{dir1},{file}, {ZONEid},{0}];
-                                infonew = [infonew;new];                        
-                            end
-                               for icov = 2:size(lme.Coefficients,1) 
-                                file = ['ECOV',num2str(icov),'_', lme.CoefficientNames{icov},'.mat']
-                                 meancorr = zeros(size(MATall,2),size(MATall,2));
-                                 eval(['meancorr(idhalf) =','ECOV',num2str(icov),';']);
-                                 meancorr = meancorr +flipud(rot90(meancorr ));
-                                 matsig = zeros(size(MATall,2),size(MATall,2));
-                                 eval(['matsig(idhalf) =','pCOV',num2str(icov),';'])                          
-                                 matsig = matsig +flipud(rot90(matsig));
-                                meancorr =  meancorr.* double(matsig<alpha_threshold);                         
-                                disp(['Save file: ', fullfile(dir1,[file])]);
-                                save(fullfile(dir1,[file]),'ZoneList','meancorr');
-                                new = [{dir1},{file}, {ZONEid},{0}];
-                                infonew = [infonew;new];                        
-                            end
-         	try
-                xlswrite(fullfile(dir1,['lm', LMEformula, '.xlsx']),infonew);
-                disp(['Result .xlsx file saved ' fullfile(dir1,['lm', LMEformula, '.xlsx'])]);
-            catch
-                writetxtfile(fullfile(dir1,['lm', LMEformula, '.xlsx']),infonew)
-                 disp(['Result .xlsx file saved ' fullfile(dir1,['lm', LMEformula, '.xlsx'])]);
-            end
-if isfield(job.c_statmatrix.b_LM_Mat.c_statpermutation,'b_permutation')
-    try 
-            nperm = str2num(job.c_statmatrix.b_LM_Mat.c_statpermutation.b_permutation.e_npermutation);          
-            for icov = 2
-                eval(['load(''',dir1,'\TrandCOV',num2str(icov),'.mat'')']);
-            end
-            disp(['Previous computed permutation ',... 
-            'were open successfully => delete the file if you wish to compute it again '])
-     catch
-          tic              
-              for ilink =1:size(halfMAT,2) %PERMUTATION F TEST           
-              for iperm=1:nperm         
-               fprintf('%s ',num2str(ilink));
-                 if mod(ilink,30)==0
-                    fprintf('\n ');
-                 end
-
-                 fprintf('%d,',ilink);
-                 if mod(ilink,30)==0
-                    fprintf('\n ');
-                 end
-                 permfix =  randperm(size(halfMAT,1));
-                datatable.MAT= halfMAT(permfix,ilink);
-                lme = fitlm( datatable,LMEformula);
-                for icov = 2:size(lme.Coefficients,1)               
-                    eval(['TrandCOV',num2str(icov),'(',num2str(ilink),',',num2str(iperm),')=lme.Coefficients{',num2str(icov),',3};']);
-
-                end
-              end         
-              end
-         toc   
-          for icov = 2:size(lme.Coefficients,1)   
-            eval(['save(''',dir1,'\TrandCOV',num2str(icov),'.mat'',''TrandCOV',num2str(icov),''')']);
-          end 
-
-    end
-    
- 
-         [fecdf,xecdf] = ecdf(TrandCOV3(:));
-        clustercritical=xecdf(sum(fecdf<(1-alpha_threshold)));
-            %clustercritical=xecdf(sum(fecdf<(1-0.01)))
-        disp(['critical for clustering p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
-            if isfield(job.c_statmatrix.b_LM_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting,'b_MCT_ClusterBased')
-          
-                 statobs = TCOV2';
-                 if nperm <= size(TrandCOV3,2)
-                    statrand =TrandCOV3(:,1:nperm);
-                 else
-                    nbrepeted = ceil( nperm/size(TrandCOV3,2))
-                    F_rand =  repmat(TrandCOV3,1,nbrepeted );
-                    statrand =TrandCOV3(:,1:nperm);
-                    tmp = randperm(numel(statrand));
-                    statrand(tmp) = statrand;
-                 end
-                 neighbourdist = job.c_statmatrix.b_LM_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_neighbourdist;
-                 minnbchan = job.c_statmatrix.b_LM_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_minnbchan;
-                 disp(['critical for clustering p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
-                 disp(['Neighbor distance ', neighbourdist])
-                 disp(['Minimal commun neighbor ', minnbchan])
-              
-                 [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos,neighbourdist,clustercritical, statobs, statrand,  minnbchan );
-%                     [statsig, matneig] = FindClusterBasedPermutationInMatrix(chanpos, 'sig',clustercritical, statobs, -statrand,  minnbchan );
-% 
-%          figure;hist(statrand(:))
-          
-              
-                 save(fullfile(dir1,'FiedTrip_LMCluster_stat.mat'),'stat')
-                 disp(['Save fieldtrip cluster stat ', fullfile(dir1,'FiedTrip_LMCluster_stat',neighbourdist,'_',minnbchan,'.mat') ])
-                 infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
-%                  
-%                  idcheck = [1,60,329, 300,3000,1500]
-%                  for icheck=1:numel(idcheck)
-%                    file = [name,labelnode,num2str(nperm),' neighbor',num2str(idcheck(icheck)),'.mat'];
-%                    matcorr = zeros(size(MATall,2),size(MATall,2));
-%                     matcorr(idhalf)=matneig(:,idcheck(icheck));
-%                     matcorr = matcorr +flipud(rot90(matcorr));
-%                     meancorr = matcorr;
-%                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-%                       new = [{dir1},{file}, {ZONEid},{0} ];
-%                         infonew = [infonew;new];
-%                  end
-%                  
-                 figure
-                hist(stat.posdistribution)
-           if isfield(stat,'posclusterslabelmat')
-                    for iposcluster = 1:numel(stat.posclusters)
-                        file = [name,labelnode,num2str(nperm),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                        matcorr = zeros(size(MATall,2),size(MATall,2));
-                        matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                        disp(['Save: ', fullfile(dir1,[file])]);
-                        new = [{dir1},{file}, {ZONEid},{0} ];
-                        infonew = [infonew;new];
-                        
-                    
-                            %WRITE beta and cluster in file 
-                            for icov = 2
-                                file = ['Tval','_','posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                                 meancorr = zeros(size(MATall,2),size(MATall,2));
-                                 eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
-                                 meancorr = meancorr +flipud(rot90(meancorr ));
-                                 matsig = zeros(size(MATall,2),size(MATall,2));
-                                 matsig(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                                 matsig = matsig +flipud(rot90(matsig));
-                                meancorr =  meancorr.* double(matsig);                         
-                                disp(['Save file: ', fullfile(dir1,[file])]);
-                                save(fullfile(dir1,[file]),'ZoneList','meancorr');
-                                new = [{dir1},{file}, {ZONEid},{0}];
-                                infonew = [infonew;new];                        
-                            end
-                        end
-                   
-                else
-                    disp('No positive cluster found')
-                end
-                if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
-                    for inegcluster = 1:numel(stat.negclusters)
-                        file = [name,labelnode,num2str(nperm),' negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
-                        matcorr = zeros(size(MATall,2),size(MATall,2));
-                        matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                        disp(['Save: ', fullfile(dir1,[file])]);
-                        new = [{dir1},{file}, {ZONEid},{0} ];
-                        infonew = [infonew;new];
-                        
-                                    %WRITE beta and cluster in file 
-                            for icov = 2
-                                file = ['Tval','negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat']
-                                 meancorr = zeros(size(MATall,2),size(MATall,2));
-                                 eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
-                                 meancorr = meancorr +flipud(rot90(meancorr ));
-                                 matsig = zeros(size(MATall,2),size(MATall,2));
-                                 matsig(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                                 matsig = matsig +flipud(rot90(matsig));
-                                meancorr =  meancorr.* double(matsig);                         
-                                disp(['Save file: ', fullfile(dir1,[file])]);
-                                save(fullfile(dir1,[file]),'ZoneList','meancorr');
-                                new = [{dir1},{file}, {ZONEid},{0}];
-                                infonew = [infonew;new];                         
-                            end
-                        
-                    end
-                else
-                    disp('No negative cluster found')
-                end       
-
-            end
-                [filepath,name,ext] = fileparts(xlslistfile);
-        try
-            xlswrite(fullfile(dir1,['CLUSTER',neighbourdist,'_',minnbchan,'_',num2str(alpha_threshold),' .xlsx']),infonew);
-            disp(['Result .xlsx file saved ' fullfile(dir1,['CLUSTER',neighbourdist,'_',minnbchan,'_',num2str(alpha_threshold),'.xlsx'])]);
-        catch
-            writetxtfile(fullfile(dir1,['CLUSTER',neighbourdist,'_',minnbchan,'_',num2str(alpha_threshold),'.xlsx']),infonew);
-            disp(['Result .xlsx file saved ' fullfile(dir1,['CLUSTER',neighbourdist,'_',minnbchan,'_',num2str(alpha_threshold),'.xlsx'])]);
-        end
-end
-%              
-     
-  
-elseif isfield(job.c_statmatrix,'b_LME_Mat') 
-    disp('Warning function LME in developpement')
-      dir1 = job.e_statmatrixPath{1};   
-    infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
-     datatable= readtable(xlslistfile) 
-     halfMAT = MATall(:,idhalf);
-     LMEformula = job.c_statmatrix.b_LME_Mat.b_LME_formula;
-   try %load precomputed to speed up not keep as standard way of working
-         datatable.MAT= halfMAT(:,1);
-         lme = fitlme( datatable,LMEformula); 
-         for icov = 1:size(lme.Coefficients,1)           
-               file = ['TCOV',num2str(icov),'_', strtrim(lme.Coefficients{icov,1}),'.mat'];
-               filename = fullfile(dir1,file);
-               eval(['load(''', filename,''')']);
-                   halfMATtemp = meancorr(idhalf);
-               eval(['TCOV',num2str(icov),' = halfMATtemp'])
-         end
-         disp('load precomputed tval')
-   catch 
-        
-    
-     
-     fprintf('%s',['RUN LME : ', LMEformula, ' link:'])
-     for ilink=1:numel(idhalf); 
-         fprintf('%d,',ilink)
-             if mod(ilink,30)==0 
-                fprintf('\n ');
-            end
-            datatable.MAT= halfMAT(:,ilink); 
-            try 
-                  lme = fitlme( datatable,LMEformula); 
-            catch 
-                disp(['Verify LME formula ', LMEformula, ' and datatable Variable'])
-                disp(datatable.Properties.VariableNames)
-            end
-            eval(['R2ord(',num2str(ilink),')=lme.Rsquared.Ordinary;']);
-            eval(['R2adj(',num2str(ilink),')=lme.Rsquared.Adjusted;']);
-            for icov = 1:size(lme.Coefficients,1)              
-                eval(['TCOV',num2str(icov),'(',num2str(ilink),')=lme.Coefficients{',num2str(icov),',4};']);
-                eval(['ECOV',num2str(icov),'(',num2str(ilink),')=lme.Coefficients{',num2str(icov),',2};']);
-                eval(['pCOV',num2str(icov),'(',num2str(ilink),')=lme.Coefficients{',num2str(icov),',6};']);
-            end
-                  
-     end
-     1 
-     
-         % WRITE result in file 
-                        
-                                file = ['R2Ordinary.mat'];
-                                 meancorr = zeros(size(MATall,2),size(MATall,2));
-                                eval(['meancorr(idhalf) =','R2ord;']);
-                                 meancorr = meancorr +flipud(rot90(meancorr ));                                                    
-                                disp(['Save file: ', fullfile(dir1,[file])]);
-                                save(fullfile(dir1,[file]),'ZoneList','meancorr');
-                                new = [{dir1},{file}, {ZONEid},{0}];
-                                infonew = [infonew;new];                        
-                             
-                                 file = ['R2Ajusted.mat'];
-                                 meancorr = zeros(size(MATall,2),size(MATall,2));
-                                eval(['meancorr(idhalf) =','R2adj;']);
-                                 meancorr = meancorr +flipud(rot90(meancorr ));                                                    
-                                disp(['Save file: ', fullfile(dir1,[file])]);
-                                save(fullfile(dir1,[file]),'ZoneList','meancorr');
-                                new = [{dir1},{file}, {ZONEid},{0}];
-                                infonew = [infonew;new];   
-         
-                            for icov = 1:size(lme.Coefficients,1) 
-                                file = ['TCOV',num2str(icov),'_', lme.Coefficients{icov,1},'.mat'];
-                                 meancorr = zeros(size(MATall,2),size(MATall,2));
-                                 eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
-                                 meancorr = meancorr +flipud(rot90(meancorr ));
-                                 matsig = zeros(size(MATall,2),size(MATall,2));
-                                 eval(['matsig(idhalf) =','pCOV',num2str(icov),';'])                          
-                                 matsig = matsig +flipud(rot90(matsig));
-                                meancorr =  meancorr.* double(matsig<0.05);                         
-                                disp(['Save file: ', fullfile(dir1,[file])]);
-                                save(fullfile(dir1,[file]),'ZoneList','meancorr');
-                                new = [{dir1},{file}, {ZONEid},{0}];
-                                infonew = [infonew;new];                        
-                            end
-                               for icov = 1:size(lme.Coefficients,1) 
-                                file = ['ECOV',num2str(icov),'_', lme.Coefficients{icov,1},'.mat'];
-                                 meancorr = zeros(size(MATall,2),size(MATall,2));
-                                 eval(['meancorr(idhalf) =','ECOV',num2str(icov),';']);
-                                 meancorr = meancorr +flipud(rot90(meancorr ));
-                                 matsig = zeros(size(MATall,2),size(MATall,2));
-                                 eval(['matsig(idhalf) =','pCOV',num2str(icov),';'])                          
-                                 matsig = matsig +flipud(rot90(matsig));
-                                meancorr =  meancorr.* double(matsig<0.05);                         
-                                disp(['Save file: ', fullfile(dir1,[file])]);
-                                save(fullfile(dir1,[file]),'ZoneList','meancorr');
-                                new = [{dir1},{file}, {ZONEid},{0}];
-                                infonew = [infonew;new];                        
-                            end
-         	try
-         
-                xlswrite(fullfile(dir1,['lme', 'model', '.xlsx']),infonew);
-                disp(['Result .xlsx file saved ' fullfile(dir1,['lme', LMEformula, '.xlsx'])]);
-            catch
-                writetxtfile(fullfile(dir1,['lme', 'model', '.xlsx']),infonew)
-                disp(['Result .xlsx file saved ' fullfile(dir1,['lme', LMEformula, '.xlsx'])]);
-            end
-end %use precomputed value to speed up test
-if isfield(job.c_statmatrix.b_LME_Mat.c_statpermutation,'b_permutation')
-    try
-            nperm = str2num(job.c_statmatrix.b_LME_Mat.c_statpermutation.b_permutation.e_npermutation);          
-            for icov = 1:size(lme.Coefficients,1)   
-                eval(['load(''',dir1,'\TrandCOV',num2str(icov),'.mat'')']);
-            end
-            disp(['Previous computed permutation ',... 
-            'were open successfully => delete the file if you wish to compute it again '])
-     catch
-          tic              
-              for ilink =1:size(halfMAT,2) %PERMUTATION F TEST           
-              for iperm=1:nperm         
-               fprintf('%s ',num2str(ilink));
-                 if mod(ilink,30)==0
-                    fprintf('\n ');
-                 end
-
-                 fprintf('%d,',ilink);
-                 if mod(ilink,30)==0
-                    fprintf('\n ');
-                 end
-                 permfix =  randperm(size(halfMAT,1));
-                datatable.MAT= halfMAT(permfix,ilink);
-                lme = fitlme( datatable,LMEformula);
-                for icov = 1:size(lme.Coefficients,1)               
-                    eval(['TrandCOV',num2str(icov),'(',num2str(ilink),',',num2str(iperm),')=lme.Coefficients{',num2str(icov),',4};']);
-
-                end
-              end         
-              end
-         toc   
-          for icov = 1:size(lme.Coefficients,1)   
-            eval(['save(''',dir1,'\TrandCOV',num2str(icov),'.mat'',''TrandCOV',num2str(icov),''')']);
-          end 
-
-    end 
-      infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
-    for icov = 1:size(lme.Coefficients,1)
-        eval(['[fecdf,xecdf] = ecdf(TrandCOV', num2str(icov),'(:));']);
-        clustercritical=xecdf(sum(fecdf<(1-alpha_threshold)));
-        disp(['critical for clustering p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
-        if isfield(job.c_statmatrix.b_LME_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting,'b_MCT_ClusterBased')
+            statobs = F';
             
-            eval(['statobs = TCOV', num2str(icov),';']);
-            if nperm <= size(TrandCOV2,2)
-                eval(['statrand = TrandCOV', num2str(icov),'(:,1:nperm);']);
+            if nperm <= size(F_rand,2)
+                statrand =F_rand(:,1:nperm);
             else
-                eval(['nbrepeted = ceil( nperm/size(TrandCOV',num2str(icov),',2));']);
-                eval(['F_rand =  repmat(TrandCOV', num2str(icov),',1,nbrepeted );']);
-                eval(['statrand =TrandCOV', num2str(icov),'(:,1:nperm);']);
-                %                     nbrepeted = ceil( nperm/size(TrandCOV2,2))
-                %                     F_rand =  repmat(TrandCOV2,1,nbrepeted );
-                %                     statrand =TrandCOV2(:,1:nperm);
+                nbrepeted = ceil( nperm/size(F_rand,2))
+                F_rand =  repmat(F_rand,1,nbrepeted );
+                statrand =F_rand(:,1:nperm);
                 tmp = randperm(numel(statrand));
                 statrand(tmp) = statrand;
             end
-            neighbourdist = job.c_statmatrix.b_LME_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_neighbourdist;
-            minnbchan = job.c_statmatrix.b_LME_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_minnbchan;
+            if 0
+                fileMean = 'C:\NIRx-actiCHAMP_Analysed\ELAN\Resting2021\Matrices\Stat\0mOneSample_ttest\_OHBM_MatriceCOH_Elan_BAYLEY_REVIEWmai2023cGR1 OneSampleTtest mean.mat'
+                load(fileMean)
+                MeanAmp = meancorr
+                statobs = F' .*double(MeanAmp(idhalf)>0);
+                disp('Mask positive Pearson before cluster')
+                statrand =statrand(:,:).*(double(MeanAmp(idhalf)>0)*ones(1,nperm));
+            end
+            neighbourdist = job.c_statmatrix.b_GLM_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_neighbourdist;
+            minnbchan = job.c_statmatrix.b_GLM_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_minnbchan;
             disp(['critical for clustering p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
-            
             [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, neighbourdist,clustercritical, statobs, statrand,  minnbchan );
-            %  [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, 'distance',clustercritical, statobs, statrand );
-            save(fullfile(dir1,'FiedTrip_LMECluster_stat.mat'),'stat')
-            disp(['Save fieldtrip cluster stat ', fullfile(dir1,'FiedTrip_LMECluster_stat.mat') ])
-          
+            save(fullfile(dir1,'GLM_stat.mat'),'stat')
+            disp(['Save cluster', fullfile(dir1,'GLM_stat.mat') ])
+            infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
             %                  figure
             % hist(stat.posdistribution)
             if isfield(stat,'posclusterslabelmat')
                 for iposcluster = 1:numel(stat.posclusters)
-                    file = [name,labelnode,num2str(nperm),'COV', num2str(icov), 'posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
+                    file = [name,labelnode,num2str(nperm),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
                     matcorr = zeros(size(MATall,2),size(MATall,2));
                     matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
                     matcorr = matcorr +flipud(rot90(matcorr));
@@ -1915,20 +1408,23 @@ if isfield(job.c_statmatrix.b_LME_Mat.c_statpermutation,'b_permutation')
                     disp(['Save: ', fullfile(dir1,[file])]);
                     new = [{dir1},{file}, {ZONEid},{0} ];
                     infonew = [infonew;new];
-
+                    
+                    
                     %WRITE beta and cluster in file
-                    file = ['Tval','COV', num2str(icov),'_','posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                    meancorr = zeros(size(MATall,2),size(MATall,2));
-                    eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
-                    meancorr = meancorr +flipud(rot90(meancorr ));
-                    matsig = zeros(size(MATall,2),size(MATall,2));
-                    matsig(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                    matsig = matsig +flipud(rot90(matsig));
-                    meancorr =  meancorr.* double(matsig);
-                    disp(['Save file: ', fullfile(dir1,[file])]);
-                    save(fullfile(dir1,[file]),'ZoneList','meancorr');
-                    new = [{dir1},{file}, {ZONEid},{0}];
-                    infonew = [infonew;new];
+                    for icov = 1:numel(covariableall)
+                        file = ['Beta','_',covariableall{icov},'posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
+                        meancorr = zeros(size(MATall,2),size(MATall,2));
+                        eval(['meancorr(idhalf) =','bCOV',num2str(icov),';']);
+                        meancorr = meancorr +flipud(rot90(meancorr ));
+                        matsig = zeros(size(MATall,2),size(MATall,2));
+                        matsig(idhalf)=(stat.posclusterslabelmat==iposcluster);
+                        matsig = matsig +flipud(rot90(matsig));
+                        meancorr =  meancorr.* double(matsig);
+                        disp(['Save file: ', fullfile(dir1,[file])]);
+                        save(fullfile(dir1,[file]),'ZoneList','meancorr');
+                        new = [{dir1},{file}, {ZONEid},{0}];
+                        infonew = [infonew;new];
+                    end
                 end
                 
             else
@@ -1936,7 +1432,7 @@ if isfield(job.c_statmatrix.b_LME_Mat.c_statpermutation,'b_permutation')
             end
             if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
                 for inegcluster = 1:numel(stat.negclusters)
-                    file = [name,labelnode,num2str(nperm),'COV', num2str(icov),' negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
+                    file = [name,labelnode,num2str(nperm),' negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
                     matcorr = zeros(size(MATall,2),size(MATall,2));
                     matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
                     matcorr = matcorr +flipud(rot90(matcorr));
@@ -1944,27 +1440,31 @@ if isfield(job.c_statmatrix.b_LME_Mat.c_statpermutation,'b_permutation')
                     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
                     disp(['Save: ', fullfile(dir1,[file])]);
                     new = [{dir1},{file}, {ZONEid},{0} ];
-                    infonew = [infonew;new];             
-                    %WRITE beta and cluster in file
-                    file =  ['Tval','COV',num2str(icov),'negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat']
-                    meancorr = zeros(size(MATall,2),size(MATall,2));
-                    eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
-                    meancorr = meancorr +flipud(rot90(meancorr ));
-                    matsig = zeros(size(MATall,2),size(MATall,2));
-                    matsig(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                    matsig = matsig +flipud(rot90(matsig));
-                    meancorr =  meancorr.* double(matsig);
-                    disp(['Save file: ', fullfile(dir1,[file])]);
-                    save(fullfile(dir1,[file]),'ZoneList','meancorr');
-                    new = [{dir1},{file}, {ZONEid},{0}];
                     infonew = [infonew;new];
+                    
+                    %WRITE beta and cluster in file
+                    for icov = 1:numel(covariableall)
+                        file = ['Beta','_',covariableall{icov},'negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat']
+                        meancorr = zeros(size(MATall,2),size(MATall,2));
+                        eval(['meancorr(idhalf) =','bCOV',num2str(icov),';']);
+                        meancorr = meancorr +flipud(rot90(meancorr ));
+                        matsig = zeros(size(MATall,2),size(MATall,2));
+                        matsig(idhalf)=(stat.negclusterslabelmat==inegcluster);
+                        matsig = matsig +flipud(rot90(matsig));
+                        meancorr =  meancorr.* double(matsig);
+                        disp(['Save file: ', fullfile(dir1,[file])]);
+                        save(fullfile(dir1,[file]),'ZoneList','meancorr');
+                        new = [{dir1},{file}, {ZONEid},{0}];
+                        infonew = [infonew;new];
+                    end
+                    
                 end
             else
                 disp('No negative cluster found')
             end
+            
         end
-    end
-                [filepath,name,ext] = fileparts(xlslistfile);
+        [filepath,name,ext] = fileparts(xlslistfile);
         try
             xlswrite(fullfile(dir1,['CLUSTER.xlsx']),infonew);
             disp(['Result .xlsx file saved ' fullfile(dir1,['CLUSTER.xlsx'])]);
@@ -1972,8 +1472,571 @@ if isfield(job.c_statmatrix.b_LME_Mat.c_statpermutation,'b_permutation')
             writetxtfile(fullfile(dir1,['CLUSTER.xlsx']),infonew);
             disp(['Result .xlsx file saved ' fullfile(dir1,['CLUSTER.xlsx'])]);
         end
-end
-%                             
+        
+    end
+elseif isfield(job.c_statmatrix,'b_LM_Mat')
+    disp('Not tested GENERIC USE LM')
+    
+    dir1 = job.e_statmatrixPath{1};
+    infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
+    datatable= readtable(xlslistfile)
+    halfMAT = MATall(:,idhalf);
+    %verify transfert
+    %      tmp = squeeze(MATall(1,:,:));
+    %      halfMAT1 = MATall(1,idhalf);
+    %       matcorr = zeros(size(MATall,2),size(MATall,2));
+    %       matcorr(idhalf)=halfMAT1;
+    %       matcorr = matcorr +flipud(rot90(matcorr));
+    LMformula = deblank(job.c_statmatrix.b_LM_Mat.b_LME_formula);
+    fprintf('%s',['RUN LM : ', LMformula, ' link:'])
+    try %load precomputed to speed up not keep as standard way of working
+        datatable.MAT= halfMAT(:,1);
+        lm = fitlm( datatable,LMformula);
+        for icov = 1:size(lm.Coefficients,1)
+            file = ['TCOV',num2str(icov),'_', strtrim(lm.CoefficientNames{1,icov}),'.mat'];
+            filename = fullfile(dir1,file);
+            eval(['load(''', filename,''')']);
+            halfMATtemp = meancorr(idhalf);
+            eval(['TCOV',num2str(icov),' = halfMATtemp']);
+        end
+        disp('load precomputed tval')
+    catch
+        
+        for ilink=1:numel(idhalf);
+            fprintf('%d,',ilink)
+            if mod(ilink,30)==0
+                fprintf('\n ');
+            end
+            datatable.MAT= halfMAT(:,ilink);
+            %  LMEformula = 'AGENIRS_m~MAT+(1|ID)'
+            try
+                lm = fitlm( datatable,LMformula);
+            catch
+                disp(['Verify LM formula ', LMformula, ' and datatable Variable'])
+                disp(datatable.Properties.VariableNames)
+            end
+            eval(['r2','(',num2str(ilink),')=' ,'lm.Rsquared.Ordinary;'])
+            eval(['N','(',num2str(ilink),')=' ,' lm.NumObservations; '])
+            
+            for icov = 1:size(lm.Coefficients,1)
+                eval(['TCOV',num2str(icov),'(',num2str(ilink),')=lm.Coefficients{',num2str(icov),',3};']);
+                eval(['ECOV',num2str(icov),'(',num2str(ilink),')=lm.Coefficients{',num2str(icov),',1};']);
+                eval(['pCOV',num2str(icov),'(',num2str(ilink),')=lm.Coefficients{',num2str(icov),',4};']);
+            end
+            
+        end
+        
+        file = ['Nobservation.mat']
+        meancorr = zeros(size(MATall,2),size(MATall,2));
+        eval(['meancorr(idhalf) =','N;']);
+        meancorr = meancorr +flipud(rot90(meancorr ));
+        disp(['Save file: ', fullfile(dir1,[file])]);
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
+        new = [{dir1},{file}, {ZONEid},{0}];
+        infonew = [infonew;new];
+        
+        file = ['R2.mat']
+        meancorr = zeros(size(MATall,2),size(MATall,2));
+        eval(['meancorr(idhalf) =','r2']);
+        meancorr = meancorr +flipud(rot90(meancorr ));
+        disp(['Save file: ', fullfile(dir1,[file])]);
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
+        new = [{dir1},{file}, {ZONEid},{0}];
+        infonew = [infonew;new];
+        
+        % WRITE Tval in file
+        for icov = 1:size(lm.Coefficients,1)
+            file = ['TCOV',num2str(icov),'_', lm.CoefficientNames{1,icov},'.mat']
+            meancorr = zeros(size(MATall,2),size(MATall,2));
+            eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
+            meancorr = meancorr +flipud(rot90(meancorr ));
+            matsig = zeros(size(MATall,2),size(MATall,2));
+            eval(['matsig(idhalf) =','pCOV',num2str(icov),';'])
+            matsig = matsig +flipud(rot90(matsig));
+            meancorr =  meancorr.* double(matsig<alpha_threshold);
+            disp(['Save file: ', fullfile(dir1,[file])]);
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
+            new = [{dir1},{file}, {ZONEid},{0}];
+            infonew = [infonew;new];
+        end
+        
+        for icov = 1:size(lm.Coefficients,1)
+            file = ['ECOV',num2str(icov),'_', lm.CoefficientNames{1,icov},'.mat']
+            meancorr = zeros(size(MATall,2),size(MATall,2));
+            eval(['meancorr(idhalf) =','ECOV',num2str(icov),';']);
+            meancorr = meancorr +flipud(rot90(meancorr ));
+            matsig = zeros(size(MATall,2),size(MATall,2));
+            eval(['matsig(idhalf) =','pCOV',num2str(icov),';'])
+            matsig = matsig +flipud(rot90(matsig));
+            meancorr =  meancorr.* double(matsig<alpha_threshold);
+            disp(['Save file: ', fullfile(dir1,[file])]);
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
+            new = [{dir1},{file}, {ZONEid},{0}];
+            infonew = [infonew;new];
+        end
+        try
+            xlswrite(fullfile(dir1,['lm', LMformula, '.xlsx']),infonew);
+            disp(['Result .xlsx file saved ' fullfile(dir1,['lm', LMformula, '.xlsx'])]);
+        catch
+            writetxtfile(fullfile(dir1,['lm', LMformula, '.xlsx']),infonew)
+            disp(['Result .xlsx file saved ' fullfile(dir1,['lm', LMformula, '.xlsx'])]);
+        end
+    end
+    if isfield(job.c_statmatrix.b_LM_Mat.c_statpermutation,'b_permutation')
+        try
+            nperm = str2num(job.c_statmatrix.b_LM_Mat.c_statpermutation.b_permutation.e_npermutation);
+            for icov = 1:size(lm.Coefficients,1)
+                eval(['load(''',dir1,'\TrandCOV',num2str(icov),'.mat'')']);
+            end
+            disp(['Previous computed permutation ',...
+                'were open successfully => delete the file if you wish to compute it again '])
+        catch
+            tic
+            for ilink =1:size(halfMAT,2) %PERMUTATION F TEST
+                for iperm=1:nperm
+                    fprintf('%s ',num2str(ilink));
+                    if mod(ilink,30)==0
+                        fprintf('\n ');
+                    end
+                    
+                    fprintf('%d,',ilink);
+                    if mod(ilink,30)==0
+                        fprintf('\n ');
+                    end
+                    permfix =  randperm(size(halfMAT,1));
+                    datatable.MAT= halfMAT(permfix,ilink);
+                    lme = fitlm( datatable,LMformula);
+                    for icov = 1:size(lm.Coefficients,1)
+                        eval(['TrandCOV',num2str(icov),'(',num2str(ilink),',',num2str(iperm),')=lm.Coefficients{',num2str(icov),',3};']);
+                        
+                    end
+                end
+            end
+            toc
+            for icov = 1:size(lme.Coefficients,1)
+                eval(['save(''',dir1,'\TrandCOV',num2str(icov),'.mat'',''TrandCOV',num2str(icov),''')']);
+            end
+            
+        end
+        
+          infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
+        if isfield(job.c_statmatrix.b_LM_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting,'b_MCT_ClusterBased')
+            for icov = 1:size(lm.Coefficients,1)
+                eval(['[fecdf,xecdf] = ecdf(TrandCOV',num2str(icov),'(:));']);
+                clustercritical=xecdf(sum(fecdf<(1-alpha_threshold)));
+                %clustercritical=xecdf(sum(fecdf<(1-0.01)))
+                disp(['critical for clustering cov: ' , lm.CoefficientNames{1,icov},' p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
+                try
+                    nperm = str2num(job.c_statmatrix.b_LME_Mat.c_statpermutation.b_permutation.e_npermutation);
+                    for icov = 1:size(lme.Coefficients,1)
+                        eval(['load(''',dir1,'\TrandCOV',num2str(icov),'.mat'')']);
+                    end
+                    disp(['Previous computed permutation ',...
+                        'were open successfully => delete the file if you wish to compute it again '])
+                catch
+                end
+                %statobs = TCOV2';
+                eval(['statobs = TCOV',num2str(icov),';']);
+                eval(['TrandCOV = TrandCOV',num2str(icov),';']);
+                                 if nperm <= size(TrandCOV,2)
+                                    statrand =TrandCOV(:,1:nperm);
+                                 else
+                                    nbrepeted = ceil( nperm/size(TrandCOV,2))
+                                    F_rand =  repmat(TrandCOV,1,nbrepeted );
+                                    statrand =TrandCOV(:,1:nperm);
+                                    tmp = randperm(numel(statrand));
+                                    statrand(tmp) = statrand;
+                                 end
+                neighbourdist = job.c_statmatrix.b_LM_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_neighbourdist;
+                minnbchan = job.c_statmatrix.b_LM_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_minnbchan;
+                disp(['critical for clustering p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
+                disp(['Neighbor distance ', neighbourdist])
+                disp(['Minimal commun neighbor ', minnbchan])
+                
+                [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos,neighbourdist,clustercritical, statobs, statrand,  minnbchan );
+                %                     [statsig, matneig] = FindClusterBasedPermutationInMatrix(chanpos, 'sig',clustercritical, statobs, -statrand,  minnbchan );
+                %
+                %          figure;hist(statrand(:))
+                 
+                
+                save(fullfile(dir1,'FiedTrip_LMCluster_stat.mat'),'stat')
+                disp(['Save fieldtrip cluster stat ', fullfile(dir1,'FiedTrip_LMCluster_stat',neighbourdist,'_',minnbchan,'.mat') ])
+              
+                
+                if isfield(stat,'posclusterslabelmat')
+                    for iposcluster = 1:numel(stat.posclusters)
+                        file = [name,labelnode,num2str(nperm),'COV', num2str(icov),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
+                        matcorr = zeros(size(MATall,2),size(MATall,2));
+                        matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
+                        matcorr = matcorr +flipud(rot90(matcorr));
+                        meancorr = matcorr;
+                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                        disp(['Save: ', fullfile(dir1,[file])]);
+                        new = [{dir1},{file}, {ZONEid},{0} ];
+                        infonew = [infonew;new];
+                        
+                        
+                        %WRITE beta and cluster in file
+                  
+                            file = ['Tval','COV', num2str(icov),'_','posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
+                            meancorr = zeros(size(MATall,2),size(MATall,2));
+                            eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
+                            meancorr = meancorr +flipud(rot90(meancorr ));
+                            matsig = zeros(size(MATall,2),size(MATall,2));
+                            matsig(idhalf)=(stat.posclusterslabelmat==iposcluster);
+                            matsig = matsig +flipud(rot90(matsig));
+                            meancorr =  meancorr.* double(matsig);
+                            disp(['Save file: ', fullfile(dir1,[file])]);
+                            save(fullfile(dir1,[file]),'ZoneList','meancorr');
+                            new = [{dir1},{file}, {ZONEid},{0}];
+                            infonew = [infonew;new];
+                     
+                    end
+                    
+                else
+                    disp('No positive cluster found')
+                end
+                if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
+                    for inegcluster = 1:numel(stat.negclusters)
+                        file = [name,labelnode,num2str(nperm),'COV', num2str(icov),' negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
+                        matcorr = zeros(size(MATall,2),size(MATall,2));
+                        matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
+                        matcorr = matcorr +flipud(rot90(matcorr));
+                        meancorr = matcorr;
+                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                        disp(['Save: ', fullfile(dir1,[file])]);
+                        new = [{dir1},{file}, {ZONEid},{0} ];
+                        infonew = [infonew;new];
+                        
+                        %WRITE beta and cluster in file
+                        file = ['Tval','COV', num2str(icov),'negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat']
+                        meancorr = zeros(size(MATall,2),size(MATall,2));
+                        eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
+                        meancorr = meancorr +flipud(rot90(meancorr ));
+                        matsig = zeros(size(MATall,2),size(MATall,2));
+                        matsig(idhalf)=(stat.negclusterslabelmat==inegcluster);
+                        matsig = matsig +flipud(rot90(matsig));
+                        meancorr =  meancorr.* double(matsig);
+                        disp(['Save file: ', fullfile(dir1,[file])]);
+                        save(fullfile(dir1,[file]),'ZoneList','meancorr');
+                        new = [{dir1},{file}, {ZONEid},{0}];
+                        infonew = [infonew;new];
+                        
+                        
+                    end
+                else
+                    disp('No negative cluster found')
+                end
+            end
+        end
+        [filepath,name,ext] = fileparts(xlslistfile);
+        try
+            xlswrite(fullfile(dir1,['CLUSTER',neighbourdist,'_',minnbchan,'_',num2str(alpha_threshold),' .xlsx']),infonew);
+            disp(['Result .xlsx file saved ' fullfile(dir1,['CLUSTER',neighbourdist,'_',minnbchan,'_',num2str(alpha_threshold),'.xlsx'])]);
+        catch
+            writetxtfile(fullfile(dir1,['CLUSTER',neighbourdist,'_',minnbchan,'_',num2str(alpha_threshold),'.xlsx']),infonew);
+            disp(['Result .xlsx file saved ' fullfile(dir1,['CLUSTER',neighbourdist,'_',minnbchan,'_',num2str(alpha_threshold),'.xlsx'])]);
+        end
+    end
+    %
+    
+    
+elseif isfield(job.c_statmatrix,'b_LME_Mat')
+    disp('Warning function LME in developpement')
+    dir1 = job.e_statmatrixPath{1};
+    infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
+    datatable= readtable(xlslistfile)
+    halfMAT = MATall(:,idhalf);
+    LMEformula = job.c_statmatrix.b_LME_Mat.b_LME_formula;
+    try %load precomputed to speed up not keep as standard way of working
+        datatable.MAT= halfMAT(:,1);
+        lme = fitlme( datatable,LMEformula);
+        for icov = 1:size(lme.Coefficients,1)
+            file = ['TCOV',num2str(icov),'_', strtrim(lme.Coefficients{icov,1}),'.mat'];
+            filename = fullfile(dir1,file);
+            eval(['load(''', filename,''')']);
+            halfMATtemp = meancorr(idhalf);
+            eval(['TCOV',num2str(icov),' = halfMATtemp'])
+        end
+        disp('load precomputed tval')
+    catch
+        
+        
+        
+        fprintf('%s',['RUN LME : ', LMEformula, ' link:'])
+        for ilink=1:numel(idhalf);
+            fprintf('%d,',ilink)
+            if mod(ilink,30)==0
+                fprintf('\n ');
+            end
+            datatable.MAT= halfMAT(:,ilink);
+            try
+                lme = fitlme( datatable,LMEformula); 
+            catch
+                disp(['Verify LME formula ', LMEformula, ' and datatable Variable'])
+                disp(datatable.Properties.VariableNames)
+            end
+            eval(['R2ord(',num2str(ilink),')=lme.Rsquared.Ordinary;']);
+            eval(['R2adj(',num2str(ilink),')=lme.Rsquared.Adjusted;']);
+            for icov = 1:size(lme.Coefficients,1)
+                eval(['TCOV',num2str(icov),'(',num2str(ilink),')=lme.Coefficients{',num2str(icov),',4};']);
+                eval(['ECOV',num2str(icov),'(',num2str(ilink),')=lme.Coefficients{',num2str(icov),',2};']);
+                eval(['pCOV',num2str(icov),'(',num2str(ilink),')=lme.Coefficients{',num2str(icov),',6};']);
+            end
+             [beta,betanames,stats] =  fixedEffects(lme);
+            [B,Bnames,statsrandom] = randomEffects(lme);
+           % Group	Grouping variable associated with the random effect
+           % Level	Level within the grouping variable corresponding to the random effect
+            % Name	Name of the random-effect coefficient
+            % Estimate	Best linear unbiased predictor (BLUP) of random effect
+            % SEPred	Standard error of the estimate (BLUP minus random effect)
+            % tStat	t-statistic for a test that the random effect is zero
+            % DF	Estimated degrees of freedom for the t-statistic
+            % pValue	p-value for the t-statistic
+            % Lower	Lower limit of a 95% confidence interval for the random effect
+            % Upper
+            for irand = 1:size(statsrandom,1)     
+                eval(['TRand(',num2str(irand),',',num2str(ilink),')=statsrandom{',num2str(irand),',6};']);
+                eval(['ERand(',num2str(irand),',',num2str(ilink),')=statsrandom{',num2str(irand),',4};']);
+                eval(['pRand(',num2str(irand),',',num2str(ilink),')=statsrandom{',num2str(irand),',8};']);
+           
+            end
+                
+        end
+        1
+         
+        % WRITE result in file
+        
+        file = ['R2Ordinary.mat'];
+        meancorr = zeros(size(MATall,2),size(MATall,2));
+        eval(['meancorr(idhalf) =','R2ord;']);
+        meancorr = meancorr +flipud(rot90(meancorr ));
+        disp(['Save file: ', fullfile(dir1,[file])]);
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
+        new = [{dir1},{file}, {ZONEid},{0}];
+        infonew = [infonew;new]; 
+        
+        file = ['R2Ajusted.mat'];
+        meancorr = zeros(size(MATall,2),size(MATall,2));
+        eval(['meancorr(idhalf) =','R2adj;']);
+        meancorr = meancorr +flipud(rot90(meancorr ));
+        disp(['Save file: ', fullfile(dir1,[file])]);
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
+        new = [{dir1},{file}, {ZONEid},{0}];
+        infonew = [infonew;new];
+        
+        for icov = 1:size(lme.Coefficients,1)
+            file = ['TCOV',num2str(icov),'_', lme.Coefficients{icov,1},'.mat'];
+            meancorr = zeros(size(MATall,2),size(MATall,2));
+            eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
+            meancorr = meancorr +flipud(rot90(meancorr ));
+            matsig = zeros(size(MATall,2),size(MATall,2));
+            eval(['matsig(idhalf) =','pCOV',num2str(icov),';'])
+            matsig = matsig +flipud(rot90(matsig));
+            meancorr =  meancorr.* double(matsig<alpha_threshold);
+            disp(['Save file: ', fullfile(dir1,[file])]);
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
+            new = [{dir1},{file}, {ZONEid},{0}];
+            infonew = [infonew;new];
+        end
+        
+        
+        
+         for icov = 1:size(lme.Coefficients,1)
+            file = ['ECOV',num2str(icov),'_', lme.Coefficients{icov,1},'.mat'];
+            meancorr = zeros(size(MATall,2),size(MATall,2));
+            eval(['meancorr(idhalf) =','ECOV',num2str(icov),';']);
+            meancorr = meancorr +flipud(rot90(meancorr ));
+            matsig = zeros(size(MATall,2),size(MATall,2));
+            eval(['matsig(idhalf) =','pCOV',num2str(icov),';'])
+            matsig = matsig +flipud(rot90(matsig));
+            meancorr =  meancorr.* double(matsig<alpha_threshold);
+            disp(['Save file: ', fullfile(dir1,[file])]);
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
+            new = [{dir1},{file}, {ZONEid},{0}];
+            infonew = [infonew;new];
+         end
+         
+        
+         for irand = 1:size(statsrandom,1)    
+              %save random effect Tval 
+            file = ['Trand ', statsrandom{irand,1}, statsrandom{irand,2},statsrandom{irand,3},'.mat'];
+            meancorr = zeros(size(MATall,2),size(MATall,2));
+            eval(['meancorr(idhalf) =','TRand(',num2str(irand),',:);']);
+            meancorr = meancorr +flipud(rot90(meancorr ));
+            matsig = zeros(size(MATall,2),size(MATall,2));            
+            eval(['matsig(idhalf) =','pRand(',num2str(irand),',:);']);
+            matsig = matsig +flipud(rot90(matsig));
+            meancorr =  meancorr.* double(matsig<alpha_threshold);
+            disp(['Save file: ', fullfile(dir1,[file])]);
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
+            new = [{dir1},{file}, {ZONEid},{0}];
+            infonew = [infonew;new];
+       
+        
+         %save random effect results Estimate
+             
+            file = ['Erand ', statsrandom{irand,1}, statsrandom{irand,2},statsrandom{irand,3},'.mat'];
+            meancorr = zeros(size(MATall,2),size(MATall,2));
+            eval(['meancorr(idhalf) =','ERand(',num2str(irand),',:);']);
+            meancorr = meancorr +flipud(rot90(meancorr ));
+            matsig = zeros(size(MATall,2),size(MATall,2));            
+            eval(['matsig(idhalf) =','pRand(',num2str(irand),',:);']);
+            matsig = matsig +flipud(rot90(matsig));
+            meancorr =  meancorr.* double(matsig<alpha_threshold);
+            disp(['Save file: ', fullfile(dir1,[file])]);
+            save(fullfile(dir1,[file]),'ZoneList','meancorr'); 
+            new = [{dir1},{file}, {ZONEid},{0}];
+            infonew = [infonew;new];
+        end
+         
+        
+        try
+            
+            xlswrite(fullfile(dir1,['lme', 'model', '.xlsx']),infonew);
+            disp(['Result .xlsx file saved ' fullfile(dir1,['lme', LMEformula, '.xlsx'])]);
+        catch
+            writetxtfile(fullfile(dir1,['lme', 'model', '.xlsx']),infonew)
+            disp(['Result .xlsx file saved ' fullfile(dir1,['lme', LMEformula, '.xlsx'])]);
+        end
+    end %use precomputed value to speed up test
+    if isfield(job.c_statmatrix.b_LME_Mat.c_statpermutation,'b_permutation')
+        try
+            nperm = str2num(job.c_statmatrix.b_LME_Mat.c_statpermutation.b_permutation.e_npermutation);
+            for icov = 1:size(lme.Coefficients,1)
+                eval(['load(''',dir1,'\TrandCOV',num2str(icov),'.mat'')']);
+            end
+            disp(['Previous computed permutation ',...
+                'were open successfully => delete the file if you wish to compute it again '])
+        catch
+            tic
+            for ilink =1:size(halfMAT,2) %PERMUTATION F TEST
+                for iperm=1:nperm
+                    fprintf('%s ',num2str(ilink));
+                    if mod(ilink,30)==0
+                        fprintf('\n ');
+                    end
+                    
+                    fprintf('%d,',ilink);
+                    if mod(ilink,30)==0
+                        fprintf('\n ');
+                    end
+                    permfix =  randperm(size(halfMAT,1));
+                    datatable.MAT= halfMAT(permfix,ilink);
+                    lme = fitlme( datatable,LMEformula);
+                    for icov = 1:size(lme.Coefficients,1)
+                        eval(['TrandCOV',num2str(icov),'(',num2str(ilink),',',num2str(iperm),')=lme.Coefficients{',num2str(icov),',4};']);
+                        
+                    end
+                end
+            end 
+            toc
+            for icov = 1:size(lme.Coefficients,1)
+                eval(['save(''',dir1,'\TrandCOV',num2str(icov),'.mat'',''TrandCOV',num2str(icov),''')']);
+            end
+            
+        end
+        infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
+        for icov = 1:size(lme.Coefficients,1)
+            eval(['[fecdf,xecdf] = ecdf(TrandCOV', num2str(icov),'(:));']);
+            clustercritical=xecdf(sum(fecdf<(1-alpha_threshold)));
+            disp(['critical for clustering p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
+            if isfield(job.c_statmatrix.b_LME_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting,'b_MCT_ClusterBased')
+                
+                eval(['statobs = TCOV', num2str(icov),';']);
+                if nperm <= size(TrandCOV2,2)
+                    eval(['statrand = TrandCOV', num2str(icov),'(:,1:nperm);']);
+                else
+                    eval(['nbrepeted = ceil( nperm/size(TrandCOV',num2str(icov),',2));']);
+                    eval(['F_rand =  repmat(TrandCOV', num2str(icov),',1,nbrepeted );']);
+                    eval(['statrand =TrandCOV', num2str(icov),'(:,1:nperm);']);
+                    %                     nbrepeted = ceil( nperm/size(TrandCOV2,2))
+                    %                     F_rand =  repmat(TrandCOV2,1,nbrepeted );
+                    %                     statrand =TrandCOV2(:,1:nperm);
+                    tmp = randperm(numel(statrand));
+                    statrand(tmp) = statrand;
+                end
+                neighbourdist = job.c_statmatrix.b_LME_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_neighbourdist;
+                minnbchan = job.c_statmatrix.b_LME_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_minnbchan;
+                disp(['critical for clustering p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
+                
+                [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, neighbourdist,clustercritical, statobs, statrand,  minnbchan );
+                %  [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, 'distance',clustercritical, statobs, statrand );
+                save(fullfile(dir1,'FiedTrip_LMECluster_stat.mat'),'stat')
+                disp(['Save fieldtrip cluster stat ', fullfile(dir1,'FiedTrip_LMECluster_stat.mat') ])
+                
+                %                  figure
+                % hist(stat.posdistribution)
+                if isfield(stat,'posclusterslabelmat')
+                    for iposcluster = 1:numel(stat.posclusters)
+                        file = [name,labelnode,num2str(nperm),'COV', num2str(icov), 'posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
+                        matcorr = zeros(size(MATall,2),size(MATall,2));
+                        matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
+                        matcorr = matcorr +flipud(rot90(matcorr));
+                        meancorr = matcorr;
+                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                        disp(['Save: ', fullfile(dir1,[file])]);
+                        new = [{dir1},{file}, {ZONEid},{0} ];
+                        infonew = [infonew;new];
+                        
+                        %WRITE beta and cluster in file
+                        file = ['Tval','COV', num2str(icov),'_','posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
+                        meancorr = zeros(size(MATall,2),size(MATall,2));
+                        eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
+                        meancorr = meancorr +flipud(rot90(meancorr ));
+                        matsig = zeros(size(MATall,2),size(MATall,2));
+                        matsig(idhalf)=(stat.posclusterslabelmat==iposcluster);
+                        matsig = matsig +flipud(rot90(matsig));
+                        meancorr =  meancorr.* double(matsig);
+                        disp(['Save file: ', fullfile(dir1,[file])]);
+                        save(fullfile(dir1,[file]),'ZoneList','meancorr');
+                        new = [{dir1},{file}, {ZONEid},{0}];
+                        infonew = [infonew;new];
+                    end
+                    
+                else
+                    disp('No positive cluster found')
+                end
+                if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
+                    for inegcluster = 1:numel(stat.negclusters)
+                        file = [name,labelnode,num2str(nperm),'COV', num2str(icov),' negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
+                        matcorr = zeros(size(MATall,2),size(MATall,2));
+                        matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
+                        matcorr = matcorr +flipud(rot90(matcorr));
+                        meancorr = matcorr;
+                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                        disp(['Save: ', fullfile(dir1,[file])]);
+                        new = [{dir1},{file}, {ZONEid},{0} ];
+                        infonew = [infonew;new];
+                        %WRITE beta and cluster in file
+                        file =  ['Tval','COV',num2str(icov),'negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat']
+                        meancorr = zeros(size(MATall,2),size(MATall,2));
+                        eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
+                        meancorr = meancorr +flipud(rot90(meancorr ));
+                        matsig = zeros(size(MATall,2),size(MATall,2));
+                        matsig(idhalf)=(stat.negclusterslabelmat==inegcluster);
+                        matsig = matsig +flipud(rot90(matsig));
+                        meancorr =  meancorr.* double(matsig);
+                        disp(['Save file: ', fullfile(dir1,[file])]);
+                        save(fullfile(dir1,[file]),'ZoneList','meancorr');
+                        new = [{dir1},{file}, {ZONEid},{0}];
+                        infonew = [infonew;new];
+                    end
+                else
+                    disp('No negative cluster found')
+                end
+            end
+        end
+        [filepath,name,ext] = fileparts(xlslistfile);
+        try
+            xlswrite(fullfile(dir1,['CLUSTER.xlsx']),infonew);
+            disp(['Result .xlsx file saved ' fullfile(dir1,['CLUSTER.xlsx'])]);
+        catch
+            writetxtfile(fullfile(dir1,['CLUSTER.xlsx']),infonew);
+            disp(['Result .xlsx file saved ' fullfile(dir1,['CLUSTER.xlsx'])]);
+        end
+    end
+    %
     
 elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
     AllC = [];
@@ -1987,7 +2050,7 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
     iduse = [idG1,idG2];
     
     halfMAT = MATall(:,idhalf);
-     MATallG1 =  halfMAT( idG1,:);
+    MATallG1 =  halfMAT( idG1,:);
     MATallG2 =  halfMAT( idG2,:);
     try
         matdiff = MATallG1 -  MATallG2;
@@ -2062,7 +2125,7 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
     
     [FDR,Q] = mafdr(pval(:));
     Q = reshape(Q,size(pval));
-
+    
     matcorr = zeros(size(MATall,2),size(MATall,2));
     matcorr(idhalf)=squeeze(meanall(:));
     matcorr = matcorr +flipud(rot90(matcorr));
@@ -2078,7 +2141,7 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
     matcorr = zeros(size(MATall,2),size(MATall,2));
     matcorr(idhalf) = meanall.*double(pval<alpha_threshold);
     matcorr = matcorr +flipud(rot90(matcorr));
-    meancorr = matcorr; 
+    meancorr = matcorr;
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
@@ -2087,7 +2150,7 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
     file = [name,labelnode,GRname,'PAIREDTtest meanFDR',num2str(alpha_threshold),'.mat'];
     matcorr = zeros(size(MATall,2),size(MATall,2));
     matcorr(idhalf) =  meanall.*double(Q<alpha_threshold);
-     matcorr = matcorr +flipud(rot90(matcorr));
+    matcorr = matcorr +flipud(rot90(matcorr));
     meancorr = matcorr;
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     disp(['Save: ', fullfile(dir1,[file])]);
@@ -2110,13 +2173,13 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
     file = [name,labelnode,GRname,'PAIREDTtest tvalp',num2str(alpha_threshold),'.mat'];
     matcorr = zeros(size(MATall,2),size(MATall,2));
     matcorr(idhalf) = tval.*double(pval<alpha_threshold);
-     matcorr = matcorr +flipud(rot90(matcorr));
+    matcorr = matcorr +flipud(rot90(matcorr));
     meancorr = matcorr;
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
-          
+    
     file = [name,labelnode,GRname,'PAIREDTtest tvalFDR',num2str(alpha_threshold),'.mat'];
     matcorr = zeros(size(MATall,2),size(MATall,2));
     matcorr(idhalf) =  tval.*double(Q<alpha_threshold);
@@ -2137,14 +2200,14 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     if isfield(job.c_statmatrix.b_PairedTtest.c_statpermutation,'b_permutation') %permutation here
-         iduse = [idG1;idG2];
-         nperm = str2num(job.c_statmatrix.b_PairedTtest.c_statpermutation.b_permutation.e_npermutation);
-         for iperm=1:nperm
+        iduse = [idG1;idG2];
+        nperm = str2num(job.c_statmatrix.b_PairedTtest.c_statpermutation.b_permutation.e_npermutation);
+        for iperm=1:nperm
             permfix(iperm,:) =  randperm(numel(iduse));
         end
         disp(['Running ', num2str(nperm),' permutations on ', num2str(size(halfMAT,2)),' link :'])
         %loopslow to be improve
-           for ilink = 1:size(halfMAT,2)
+        for ilink = 1:size(halfMAT,2)
             fprintf('%s ',num2str(ilink));
             if mod(ilink,30)==0
                 fprintf('\n ');
@@ -2153,87 +2216,87 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
                 idgood = find(~isnan(halfMAT(idG1,ilink))&~isnan(halfMAT(idG2,ilink)));
                 [h,p,ci,stats] = ttest(halfMAT(idG1(idgood),ilink), halfMAT(idG2(idgood),ilink));
                 try; cohend(:,ilink) = computeCohen_d(halfMAT(idG1(idgood),ilink), halfMAT(idG2(idgood),ilink), 'paired');catch; end;
-                pval(:,ilink) = p;                               
-                tval(:,ilink) = stats.tstat;       
-                for idperm=1:nperm                    
-                   GR = iduse(permfix(idperm,:));
-                   idgood = find(~isnan(halfMAT(idG1,ilink))&~isnan(halfMAT(idG2,ilink)));
-                   [h,p,ci,stats] = ttest(halfMAT(GR(idG1(idgood)),ilink), halfMAT( GR(idG2(idgood)),ilink));
-                   tvalperm(:,idperm,ilink) =stats.tstat;
-                end                
+                pval(:,ilink) = p;
+                tval(:,ilink) = stats.tstat;
+                for idperm=1:nperm
+                    GR = iduse(permfix(idperm,:));
+                    idgood = find(~isnan(halfMAT(idG1,ilink))&~isnan(halfMAT(idG2,ilink)));
+                    [h,p,ci,stats] = ttest(halfMAT(GR(idG1(idgood)),ilink), halfMAT( GR(idG2(idgood)),ilink));
+                    tvalperm(:,idperm,ilink) =stats.tstat;
+                end
             catch
                 fprintf('error link ');
             end
-           end
-           t_dist_all =  tvalperm ;
-           t_dist_all(find(isnan(tvalperm)))=[];
-           [fecdf,xecdf] = ecdf( t_dist_all);
-           clustercritical=xecdf(sum(fecdf<(1-alpha_threshold)));
-            if isfield(job.c_statmatrix.b_PairedTtest.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting,'b_MCT_ClusterBased')
-                 statrand = permute(tvalperm(1,:,:), [3 2 1]);
-                 statobs = permute(tval(1,:),[2,1]);
-                 tmp = randperm(numel(statrand));
-                 statrand =reshape(statrand(tmp),size(statrand,1),size(statrand,2));
-                 neighbourdist = job.c_statmatrix.b_PairedTtest.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_neighbourdist;
-                 minnbchan = job.c_statmatrix.b_PairedTtest.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_minnbchan;
-
-                 disp(['critical for clustering p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
-                 
-                 [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, neighbourdist,clustercritical, statobs, statrand,minnbchan );
-                  disp(['Save cluster', fullfile(dir1,'Pairedttest_stat.mat') ])
-                if isfield(stat,'posclusterslabelmat')
-                    for iposcluster = 1:numel(stat.posclusters)
-                        file = [name,labelnode,num2str(nperm),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                        matcorr = zeros(size(MATall,2),size(MATall,2));
-                        matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                        disp(['Save: ', fullfile(dir1,[file])]);
-                        new = [{dir1},{file}, {ZONEid},{0} ];
-                        infonew = [infonew;new];
-                    end
-                else
-                    disp('No positive cluster found')
+        end
+        t_dist_all =  tvalperm ;
+        t_dist_all(find(isnan(tvalperm)))=[];
+        [fecdf,xecdf] = ecdf( t_dist_all);
+        clustercritical=xecdf(sum(fecdf<(1-alpha_threshold)));
+        if isfield(job.c_statmatrix.b_PairedTtest.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting,'b_MCT_ClusterBased')
+            statrand = permute(tvalperm(1,:,:), [3 2 1]);
+            statobs = permute(tval(1,:),[2,1]);
+            tmp = randperm(numel(statrand));
+            statrand =reshape(statrand(tmp),size(statrand,1),size(statrand,2));
+            neighbourdist = job.c_statmatrix.b_PairedTtest.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_neighbourdist;
+            minnbchan = job.c_statmatrix.b_PairedTtest.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_minnbchan;
+            
+            disp(['critical for clustering p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
+            
+            [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, neighbourdist,clustercritical, statobs, statrand,minnbchan );
+            disp(['Save cluster', fullfile(dir1,'Pairedttest_stat.mat') ])
+            if isfield(stat,'posclusterslabelmat')
+                for iposcluster = 1:numel(stat.posclusters)
+                    file = [name,labelnode,num2str(nperm),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
+                    matcorr = zeros(size(MATall,2),size(MATall,2));
+                    matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
+                    matcorr = matcorr +flipud(rot90(matcorr));
+                    meancorr = matcorr;
+                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    disp(['Save: ', fullfile(dir1,[file])]);
+                    new = [{dir1},{file}, {ZONEid},{0} ];
+                    infonew = [infonew;new];
                 end
-                if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
-                    for inegcluster = 1:numel(stat.negclusters)
-                        file = [name,labelnode,num2str(nperm),' negCluster', num2str(iposcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
-                        matcorr = zeros(size(MATall,2),size(MATall,2));
-                        matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                        disp(['Save: ', fullfile(dir1,[file])]);
-                        new = [{dir1},{file}, {ZONEid},{0} ];
-                        infonew = [infonew;new];
-                    end
-                else
-                    disp('No negative cluster found')
-                end       
-
-             end
-
-             try %optionnal cohend
-                 file = [name,labelnode,'Cohend',num2str(alpha_threshold),'.mat'];
-                 matcorr = zeros(size(MATall,2),size(MATall,2));
-                 matcorr(idhalf)=squeeze(cohend(:));
-                 matcorr = matcorr +flipud(rot90(matcorr));
-                 meancorr = matcorr;
-                 save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                 disp(['Save: ', fullfile(dir1,[file])]);
-                 new = [{dir1},{file}, {ZONEid},{1} ];
-                 infonew = [infonew;new];
-                 
-             catch
-                 disp('Error computeCohen_d')
-                 disp('Cohen_d function must be install in the set path see:  Ruggero G. Bettinardi (2022). computeCohen_d(x1, x2, varargin) (https://www.mathworks.com/matlabcentral/fileexchange/62957-computecohen_d-x1-x2-varargin), MATLAB Central File Exchange. Retrieved November 16, 2022. ')
-                 p = mfilename('fullpath');
-                 [pathname,filename,ext]=fileparts(p);
-                 disp(['Add the fonction in matlab path: addpath(''',pathname, '\External\computeCohen_d'')'])
-                 disp('And verify if Fisher transform is not apply twice, data must be real')
-                 
-             end
+            else
+                disp('No positive cluster found')
+            end
+            if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
+                for inegcluster = 1:numel(stat.negclusters)
+                    file = [name,labelnode,num2str(nperm),' negCluster', num2str(iposcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
+                    matcorr = zeros(size(MATall,2),size(MATall,2));
+                    matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
+                    matcorr = matcorr +flipud(rot90(matcorr));
+                    meancorr = matcorr;
+                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    disp(['Save: ', fullfile(dir1,[file])]);
+                    new = [{dir1},{file}, {ZONEid},{0} ];
+                    infonew = [infonew;new];
+                end
+            else
+                disp('No negative cluster found')
+            end
+            
+        end
+        
+        try %optionnal cohend
+            file = [name,labelnode,'Cohend',num2str(alpha_threshold),'.mat'];
+            matcorr = zeros(size(MATall,2),size(MATall,2));
+            matcorr(idhalf)=squeeze(cohend(:));
+            matcorr = matcorr +flipud(rot90(matcorr));
+            meancorr = matcorr;
+            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+            disp(['Save: ', fullfile(dir1,[file])]);
+            new = [{dir1},{file}, {ZONEid},{1} ];
+            infonew = [infonew;new];
+            
+        catch
+            disp('Error computeCohen_d')
+            disp('Cohen_d function must be install in the set path see:  Ruggero G. Bettinardi (2022). computeCohen_d(x1, x2, varargin) (https://www.mathworks.com/matlabcentral/fileexchange/62957-computecohen_d-x1-x2-varargin), MATLAB Central File Exchange. Retrieved November 16, 2022. ')
+            p = mfilename('fullpath');
+            [pathname,filename,ext]=fileparts(p);
+            disp(['Add the fonction in matlab path: addpath(''',pathname, '\External\computeCohen_d'')'])
+            disp('And verify if Fisher transform is not apply twice, data must be real')
+            
+        end
     end
     
     if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
@@ -2312,7 +2375,7 @@ elseif isfield(job.c_statmatrix,'b_anova1_Mat')
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
     GROUPELIST = str2num(job.c_statmatrix.b_anova1_Mat.e_Anova1GR);
     %Use a specific groupe
-    iduse = find(  sum(groupeall==GROUPELIST,2)); 
+    iduse = find(  sum(groupeall==GROUPELIST,2));
     if isfield(job.c_statmatrix.b_anova1_Mat.c_statpermutation,'b_Nopermutation')
         for i= 1:size(MATall,2)
             for j = 1:size(MATall,3)
@@ -2470,14 +2533,14 @@ elseif isfield(job.c_statmatrix,'b_anova1_Mat')
             new = [{dir1},{file}, {ZONEid},{0} ];
             infonew = [infonew;new];
         catch
-             disp('Error size effect eta2')
-             disp('mes1way function must be install in the set path see:  Harald Hentschke (2022). hhentschke/measures-of-effect-size-toolbox (https://github.com/hhentschke/measures-of-effect-size-toolbox), GitHub. Retrieved November 16, 2022. ')
-                 p = mfilename('fullpath');
-                 [pathname,filename,ext]=fileparts(p);
-                 disp(['Add the fonction in matlab path: addpath(''',pathname, '\External\EffectSizeToolbox'')'])
-                 disp('And verify if Fisher transform is not apply twice, data must be real')
+            disp('Error size effect eta2')
+            disp('mes1way function must be install in the set path see:  Harald Hentschke (2022). hhentschke/measures-of-effect-size-toolbox (https://github.com/hhentschke/measures-of-effect-size-toolbox), GitHub. Retrieved November 16, 2022. ')
+            p = mfilename('fullpath');
+            [pathname,filename,ext]=fileparts(p);
+            disp(['Add the fonction in matlab path: addpath(''',pathname, '\External\EffectSizeToolbox'')'])
+            disp('And verify if Fisher transform is not apply twice, data must be real')
         end
-    elseif isfield(job.c_statmatrix.b_anova1_Mat.c_statpermutation,'b_permutation')     %not optimise in a loop for now... need to be improve when we have time   
+    elseif isfield(job.c_statmatrix.b_anova1_Mat.c_statpermutation,'b_permutation')     %not optimise in a loop for now... need to be improve when we have time
         nperm= str2num(job.c_statmatrix.b_anova1_Mat.c_statpermutation.b_permutation.e_npermutation);
         halfMAT = MATall(:,idhalf);
         f_dist = nan(nperm,numel(idhalf));
@@ -2489,95 +2552,95 @@ elseif isfield(job.c_statmatrix,'b_anova1_Mat')
         end
         disp(['Running ', num2str(nperm),' permutations on ', num2str(size(halfMAT,2)),' link :'])
         for ilink = 1:size(halfMAT,2)
-         try
-            fprintf('%s ',num2str(ilink));
-            if mod(ilink,30)==0
-                fprintf('\n ');
-            end
-            isgood = find(~isnan(halfMAT( iduse,ilink)));
-            [p,tbl,stats] = anova1((halfMAT( iduse(isgood),ilink)), groupeall(iduse(isgood)),'off');
-            fanova(ilink) =tbl{2,5};
-            panova(ilink) = p; 
-            nanova(ilink) = numel(iduse(isgood));
-            for idperm=1:nperm                
-                Yval = halfMAT(iduse(isgood),ilink);            
-                [p,tbl,stats] = anova1(Yval, groupeall(permfix(idperm,isgood)),'off');
-                f_dist(idperm,ilink) = tbl{2,5};
-            end
+            try
+                fprintf('%s ',num2str(ilink));
+                if mod(ilink,30)==0
+                    fprintf('\n ');
+                end
+                isgood = find(~isnan(halfMAT( iduse,ilink)));
+                [p,tbl,stats] = anova1((halfMAT( iduse(isgood),ilink)), groupeall(iduse(isgood)),'off');
+                fanova(ilink) =tbl{2,5};
+                panova(ilink) = p;
+                nanova(ilink) = numel(iduse(isgood));
+                for idperm=1:nperm
+                    Yval = halfMAT(iduse(isgood),ilink);
+                    [p,tbl,stats] = anova1(Yval, groupeall(permfix(idperm,isgood)),'off');
+                    f_dist(idperm,ilink) = tbl{2,5};
+                end
             catch
                 disp(['error link', num2str(ilink)])
             end
         end
         [fecdf,xecdf] = ecdf(f_dist(:));
         disp( [num2str(nperm) ' Permutation p<',num2str(alpha_threshold), ' give a marginal F value=',num2str(xecdf(sum(fecdf<(1-alpha_threshold))))])
-
+        
         %check whole distribution
-        for ilink =1:size(halfMAT,2)            
-                if sum(xecdf<=fanova(ilink))==0
-                        pperm(ilink)= 1;
-                else
-                        pperm(ilink) = 1-fecdf(sum(xecdf<=fanova(ilink)));
-                end
+        for ilink =1:size(halfMAT,2)
+            if sum(xecdf<=fanova(ilink))==0
+                pperm(ilink)= 1;
+            else
+                pperm(ilink) = 1-fecdf(sum(xecdf<=fanova(ilink)));
+            end
         end
         clustercritical=xecdf(sum(fecdf<(1-alpha_threshold)));
         if isfield(job.c_statmatrix.b_anova1_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting,'b_MCT_ClusterBased')
-                statrand = permute(f_dist, [2 1]);
-                statobs = permute(fanova,[2,1]);
-                 tmp = randperm(numel(statrand));
-                 statrand =reshape(statrand(tmp),size(statrand,1),size(statrand,2));
-                 neighbourdist = job.c_statmatrix.b_anova1_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_neighbourdist;
-                 minnbchan = job.c_statmatrix.b_anova1_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_minnbchan;
-                 disp(['critical for clustering p=', num2str(alpha_threshold),' F=',num2str(clustercritical)])
-                [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, neighbourdist,clustercritical, statobs, statrand,minnbchan);
-                disp(['Save cluster', fullfile(dir1,'Anova1_stat.mat') ])
-                
-                if isfield(stat,'posclusterslabelmat')
-                    for iposcluster = 1:numel(stat.posclusters)
-                        file = [name,labelnode,num2str(nperm),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                        matcorr = zeros(size(MATall,2),size(MATall,2));
-                        matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                        disp(['Save: ', fullfile(dir1,[file])]);
-                        new = [{dir1},{file}, {ZONEid},{0} ];
-                        infonew = [infonew;new];
-                    end
-                else
-                    disp('No positive cluster found')
+            statrand = permute(f_dist, [2 1]);
+            statobs = permute(fanova,[2,1]);
+            tmp = randperm(numel(statrand));
+            statrand =reshape(statrand(tmp),size(statrand,1),size(statrand,2));
+            neighbourdist = job.c_statmatrix.b_anova1_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_neighbourdist;
+            minnbchan = job.c_statmatrix.b_anova1_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_minnbchan;
+            disp(['critical for clustering p=', num2str(alpha_threshold),' F=',num2str(clustercritical)])
+            [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, neighbourdist,clustercritical, statobs, statrand,minnbchan);
+            disp(['Save cluster', fullfile(dir1,'Anova1_stat.mat') ])
+            
+            if isfield(stat,'posclusterslabelmat')
+                for iposcluster = 1:numel(stat.posclusters)
+                    file = [name,labelnode,num2str(nperm),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
+                    matcorr = zeros(size(MATall,2),size(MATall,2));
+                    matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
+                    matcorr = matcorr +flipud(rot90(matcorr));
+                    meancorr = matcorr;
+                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    disp(['Save: ', fullfile(dir1,[file])]);
+                    new = [{dir1},{file}, {ZONEid},{0} ];
+                    infonew = [infonew;new];
                 end
-                if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
-                    for inegcluster = 1:numel(stat.negclusters)
-                        file = [name,labelnode,num2str(nperm),' negCluster', num2str(iposcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
-                        matcorr = zeros(size(MATall,2),size(MATall,2));
-                        matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                        disp(['Save: ', fullfile(dir1,[file])]);
-                        new = [{dir1},{file}, {ZONEid},{0} ];
-                        infonew = [infonew;new];
-                    end
-                else
-                    disp('No negative cluster found')
-                end       
-
-             end
+            else
+                disp('No positive cluster found')
+            end
+            if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
+                for inegcluster = 1:numel(stat.negclusters)
+                    file = [name,labelnode,num2str(nperm),' negCluster', num2str(iposcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
+                    matcorr = zeros(size(MATall,2),size(MATall,2));
+                    matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
+                    matcorr = matcorr +flipud(rot90(matcorr));
+                    meancorr = matcorr;
+                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    disp(['Save: ', fullfile(dir1,[file])]);
+                    new = [{dir1},{file}, {ZONEid},{0} ];
+                    infonew = [infonew;new];
+                end
+            else
+                disp('No negative cluster found')
+            end
+            
+        end
         
         %equivalent tmax Lage-Castellanos, A., Martínez-Montes, E., Hernández-Cabrera, J.A., Galán, L., 2010. False discovery rate and permutation test: An evaluation in ERP data analysis. Statistics in Medicine 29, 63–74. https://doi.org/10.1002/sim.3784
         supvalue =reshape(f_dist, nperm,  size(f_dist,2));
         dist_sup = max( supvalue');
         disp( [' Max Permutation over all link p<',num2str(alpha_threshold), ' give a marginal F value=',num2str(xecdf(sum(fecdf<=(1-alpha_threshold))))])
-
+        
         [fecdf,xecdf] = ecdf( [dist_sup]);
         disp( [' Max Permutation over all link p<',num2str(alpha_threshold), ' give a marginal F value=',num2str(xecdf(sum(fecdf<=(1-alpha_threshold))))])
-        for  ilink = 1:size(halfMAT,2)                
-                    if sum(xecdf<=fanova(ilink))==0
-                        ppermmax(ilink)=1;
-                    else
-                        ppermmax(ilink) = 1-fecdf(sum(xecdf<=fanova(ilink)));
-                    end              
-           end
+        for  ilink = 1:size(halfMAT,2)
+            if sum(xecdf<=fanova(ilink))==0
+                ppermmax(ilink)=1;
+            else
+                ppermmax(ilink) = 1-fecdf(sum(xecdf<=fanova(ilink)));
+            end
+        end
         try
             [FRD,Q] = mafdr(panova(:)','LAMBDA',[0.0001:0.01:0.95]);
             Q = reshape(Q,size(panova));
@@ -3144,156 +3207,156 @@ elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
     %Use a specific groupe
     iduse = find(  sum(groupeall==GROUPELIST,2));
     
-        for i= 1:size(MATall,2)
-            for j = 1:size(MATall,3)
-                if i~=j                    
-                    if i==1&j==2 %initialized once matrice results
-                        isgood = find(~isnan(MATall( iduse,i,j)));
-                        [p,tbl,stats] = kruskalwallis((MATall( iduse(isgood),i,j)), groupeall(iduse(isgood)),'off');
-                        [c,m,h,gnames] = multcompare(stats,'display','off');
-                        diff = zeros(size(c,1),size(MATall,2),size(MATall,3) );
-                        pdiff = zeros(size(c,1),size(MATall,2),size(MATall,3) );
-                        for icomp=1:size(c,1)
-                            labelmultcompare{icomp} = [gnames{c(icomp,1)}, '-' gnames{c(icomp,2)}];
-                            labelmultcompareneg{icomp}  = [gnames{c(icomp,2)}, '-' gnames{c(icomp,1)}];
-                        end
+    for i= 1:size(MATall,2)
+        for j = 1:size(MATall,3)
+            if i~=j
+                if i==1&j==2 %initialized once matrice results
+                    isgood = find(~isnan(MATall( iduse,i,j)));
+                    [p,tbl,stats] = kruskalwallis((MATall( iduse(isgood),i,j)), groupeall(iduse(isgood)),'off');
+                    [c,m,h,gnames] = multcompare(stats,'display','off');
+                    diff = zeros(size(c,1),size(MATall,2),size(MATall,3) );
+                    pdiff = zeros(size(c,1),size(MATall,2),size(MATall,3) );
+                    for icomp=1:size(c,1)
+                        labelmultcompare{icomp} = [gnames{c(icomp,1)}, '-' gnames{c(icomp,2)}];
+                        labelmultcompareneg{icomp}  = [gnames{c(icomp,2)}, '-' gnames{c(icomp,1)}];
                     end
-                    try
-                        isgood = find(~isnan(MATall( iduse,i,j)));
-                        [p,tbl,stats] = kruskalwallis((MATall( iduse(isgood),i,j)), groupeall(iduse(isgood)),'off');
-                        [c,m,h,gnames] = multcompare(stats,'display','off');
-                        for icomp=1:size(c,1)
-                            eval(['diff(',num2str(icomp),',',num2str(i),',',num2str(j),')','=',num2str(c(icomp,4)),';']);
-                            eval(['pdiff(',num2str(icomp),',',num2str(i),',',num2str(j),')','=',num2str(c(icomp,6)),';']);
-                        end
-                        panova(i,j) = p;
-                        nanova(i,j) = numel(iduse(isgood));
-                        if p<alpha_threshold
-                            if job.m_nodeunit ==1
-                                filename = fullfile(dir1,['STATS_KruskalWallis ','GR ',num2str(GROUPELIST), ' ', ZoneList{i},' to ' ZoneList{j},' p= ',num2str(p),'.mat']);
-                                save(filename,'stats');
-                            else job.m_nodeunit ==2
-                                filename = fullfile(dir1,['STATS_KruskalWallis ','GR ',num2str(GROUPELIST), ' ', ZoneLabel{i},' to ' ZoneLabel{j},' p= ',num2str(p),'.mat']);
-                                save(filename,'stats')
-                            end
-                        end
-                    catch %if pcould not be
-                        for icomp=1:size(c,1)
-                            eval(['diff(',num2str(icomp),',',num2str(i),',',num2str(j),')','=nan;']);
-                            eval(['pdiff(',num2str(icomp),',',num2str(i),',',num2str(j),')','=','nan',';']);
-                        end
-                        panova(i,j) = 1;
-                        nanova(i,j) = numel(iduse(isgood));
-                    end
-                else
-                    panova(i,j) = nan;
                 end
+                try
+                    isgood = find(~isnan(MATall( iduse,i,j)));
+                    [p,tbl,stats] = kruskalwallis((MATall( iduse(isgood),i,j)), groupeall(iduse(isgood)),'off');
+                    [c,m,h,gnames] = multcompare(stats,'display','off');
+                    for icomp=1:size(c,1)
+                        eval(['diff(',num2str(icomp),',',num2str(i),',',num2str(j),')','=',num2str(c(icomp,4)),';']);
+                        eval(['pdiff(',num2str(icomp),',',num2str(i),',',num2str(j),')','=',num2str(c(icomp,6)),';']);
+                    end
+                    panova(i,j) = p;
+                    nanova(i,j) = numel(iduse(isgood));
+                    if p<alpha_threshold
+                        if job.m_nodeunit ==1
+                            filename = fullfile(dir1,['STATS_KruskalWallis ','GR ',num2str(GROUPELIST), ' ', ZoneList{i},' to ' ZoneList{j},' p= ',num2str(p),'.mat']);
+                            save(filename,'stats');
+                        else job.m_nodeunit ==2
+                            filename = fullfile(dir1,['STATS_KruskalWallis ','GR ',num2str(GROUPELIST), ' ', ZoneLabel{i},' to ' ZoneLabel{j},' p= ',num2str(p),'.mat']);
+                            save(filename,'stats')
+                        end
+                    end
+                catch %if pcould not be
+                    for icomp=1:size(c,1)
+                        eval(['diff(',num2str(icomp),',',num2str(i),',',num2str(j),')','=nan;']);
+                        eval(['pdiff(',num2str(icomp),',',num2str(i),',',num2str(j),')','=','nan',';']);
+                    end
+                    panova(i,j) = 1;
+                    nanova(i,j) = numel(iduse(isgood));
+                end
+            else
+                panova(i,j) = nan;
             end
         end
-        try
-            [FRD,Q] = mafdr(panova(:)','LAMBDA',[0.0001:0.01:0.95]);
-            Q = reshape(Q,size(panova));
-            %SAVE FDR
-            file = [name,labelnode,'KrustalWallisFDR Q','.mat'];
-            matcorr = double(Q);
-            meancorr = double(Q);
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
-            disp(['Save: ', fullfile(dir1,[file])]);
-            new = [{dir1},{file}, {ZONEid},{0} ];
-            infonew = [infonew;new];
-              file = [name,labelnode,'KrustalWallisFDR Q 1-Q','.mat'];
-            matcorr = double(1-Q);
-            meancorr = double(1-Q);
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
-            disp(['Save: ', fullfile(dir1,[file])]);
-            new = [{dir1},{file}, {ZONEid},{0} ];
-            infonew = [infonew;new];
-        catch
-        end
+    end
+    try
+        [FRD,Q] = mafdr(panova(:)','LAMBDA',[0.0001:0.01:0.95]);
+        Q = reshape(Q,size(panova));
+        %SAVE FDR
+        file = [name,labelnode,'KrustalWallisFDR Q','.mat'];
+        matcorr = double(Q);
+        meancorr = double(Q);
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        disp(['Save: ', fullfile(dir1,[file])]);
+        new = [{dir1},{file}, {ZONEid},{0} ];
+        infonew = [infonew;new];
+        file = [name,labelnode,'KrustalWallisFDR Q 1-Q','.mat'];
+        matcorr = double(1-Q);
+        meancorr = double(1-Q);
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        disp(['Save: ', fullfile(dir1,[file])]);
+        new = [{dir1},{file}, {ZONEid},{0} ];
+        infonew = [infonew;new];
+    catch
+    end
     
     if isfield(job.c_statmatrix.b_kruskalwallis_Mat.c_statpermutation,'b_permutation')
         % implementation max for each
         nperm= str2num(job.c_statmatrix.b_kruskalwallis_Mat.c_statpermutation.b_permutation.e_npermutation);
         halfMAT = MATall(:,idhalf);
-        chi_dist_groupe = nan(nperm,numel(idhalf));     
+        chi_dist_groupe = nan(nperm,numel(idhalf));
         for iperm=1:nperm
             permfix(iperm,:) =  randperm(numel(iduse));
         end
-         disp(['Running ', num2str(nperm),' permutations on ', num2str(size(halfMAT,2)),' link :'])
-        for ilink = 1:size(halfMAT,2)       
+        disp(['Running ', num2str(nperm),' permutations on ', num2str(size(halfMAT,2)),' link :'])
+        for ilink = 1:size(halfMAT,2)
             fprintf('%s ',num2str(ilink));
             if mod(ilink,30)==0
                 fprintf('\n ');
             end
-                        isgood = find(~isnan(MATall( iduse,ilink)));
-                        [p,tbl,stats] = kruskalwallis((halfMAT( iduse(isgood),ilink)), groupeall(iduse(isgood)),'off');
-                        chi_groupe(ilink) = tbl{2,5};
-                        for idperm=1:nperm                            
-                            isgood = find(~isnan(halfMAT( iduse(permfix(idperm,:)),ilink)));
-                            [p,tbl,stats] = kruskalwallis((halfMAT( iduse(isgood),ilink)), groupeall(iduse(isgood)),'off');
-                            chi_dist_groupe(idperm,ilink) = tbl{2,5};
-                        end
-        end       
- 
+            isgood = find(~isnan(MATall( iduse,ilink)));
+            [p,tbl,stats] = kruskalwallis((halfMAT( iduse(isgood),ilink)), groupeall(iduse(isgood)),'off');
+            chi_groupe(ilink) = tbl{2,5};
+            for idperm=1:nperm
+                isgood = find(~isnan(halfMAT( iduse(permfix(idperm,:)),ilink)));
+                [p,tbl,stats] = kruskalwallis((halfMAT( iduse(isgood),ilink)), groupeall(iduse(isgood)),'off');
+                chi_dist_groupe(idperm,ilink) = tbl{2,5};
+            end
+        end
+        
         [fecdf,xecdf] = ecdf(chi_dist_groupe(:));
         disp( [num2str(nperm) ' Permutation p<',num2str(alpha_threshold), ' give a marginal Chi value=',num2str(xecdf(sum(fecdf<(1-alpha_threshold))))])
-%figure;plot(xecdf,fecdf)
+        %figure;plot(xecdf,fecdf)
         clustercritical=xecdf(sum(fecdf<(1-alpha_threshold)));
         if isfield(job.c_statmatrix.b_kruskalwallis_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting,'b_MCT_ClusterBased')
-                statrand = permute(chi_dist_groupe,[2,1]);
-                statobs = permute(chi_groupe,[2,1]); 
-                tmp = randperm(numel(statrand));
-                statrand =reshape(statrand(tmp),size(statrand,1),size(statrand,2));
-                neighbourdist = job.c_statmatrix.b_kruskalwallis_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_neighbourdist;
-                minnbchan = job.c_statmatrix.b_kruskalwallis_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_minnbchan;
-                disp(['critical for clustering p=', num2str(alpha_threshold),' F=',num2str(clustercritical)])
-                [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, neighbourdist,clustercritical, statobs, statrand,minnbchan  );
-                save(fullfile(dir1,['KruskalWallis_Cluster stat.mat']),'stat')
-                disp(['Save cluster', fullfile(dir1,['KruskalWallis_Cluster stat.mat']) ])
-                
-                if isfield(stat,'posclusterslabelmat')
-                    for iposcluster = 1:numel(stat.posclusters)
-                        file = [name,num2str(nperm),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                        matcorr = zeros(size(MATall,2),size(MATall,2));
-                        matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
-                        disp(['Save: ', fullfile(dir1,[file])]);
-                        new = [{dir1},{file}, {ZONEid},{0} ];
-                        infonew = [infonew;new];
-                    end
-                else
-                    disp('No positive cluster found')
+            statrand = permute(chi_dist_groupe,[2,1]);
+            statobs = permute(chi_groupe,[2,1]);
+            tmp = randperm(numel(statrand));
+            statrand =reshape(statrand(tmp),size(statrand,1),size(statrand,2));
+            neighbourdist = job.c_statmatrix.b_kruskalwallis_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_neighbourdist;
+            minnbchan = job.c_statmatrix.b_kruskalwallis_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_minnbchan;
+            disp(['critical for clustering p=', num2str(alpha_threshold),' F=',num2str(clustercritical)])
+            [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, neighbourdist,clustercritical, statobs, statrand,minnbchan  );
+            save(fullfile(dir1,['KruskalWallis_Cluster stat.mat']),'stat')
+            disp(['Save cluster', fullfile(dir1,['KruskalWallis_Cluster stat.mat']) ])
+            
+            if isfield(stat,'posclusterslabelmat')
+                for iposcluster = 1:numel(stat.posclusters)
+                    file = [name,num2str(nperm),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
+                    matcorr = zeros(size(MATall,2),size(MATall,2));
+                    matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
+                    matcorr = matcorr +flipud(rot90(matcorr));
+                    meancorr = matcorr;
+                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+                    disp(['Save: ', fullfile(dir1,[file])]);
+                    new = [{dir1},{file}, {ZONEid},{0} ];
+                    infonew = [infonew;new];
                 end
-                if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
-                    for inegcluster = 1:numel(stat.negclusters)
-                        file = [name, num2str(nperm),' negCluster', num2str(iposcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
-                        matcorr = zeros(size(MATall,2),size(MATall,2));
-                        matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
-                        disp(['Save: ', fullfile(dir1,[file])]);
-                        new = [{dir1},{file}, {ZONEid},{0} ];
-                        infonew = [infonew;new];
-                    end
-                else
-                    disp('No negative cluster found')
-                end                       
+            else
+                disp('No positive cluster found')
+            end
+            if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
+                for inegcluster = 1:numel(stat.negclusters)
+                    file = [name, num2str(nperm),' negCluster', num2str(iposcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
+                    matcorr = zeros(size(MATall,2),size(MATall,2));
+                    matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
+                    matcorr = matcorr +flipud(rot90(matcorr));
+                    meancorr = matcorr;
+                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+                    disp(['Save: ', fullfile(dir1,[file])]);
+                    new = [{dir1},{file}, {ZONEid},{0} ];
+                    infonew = [infonew;new];
+                end
+            else
+                disp('No negative cluster found')
+            end
         end
-         
+        
         %check p univarite permutation distribution
-        for ilink=1:numel(chi_groupe) 
-                    if sum(xecdf<=chi_groupe(ilink))==0
-                        pperm(ilink)= 1;
-                    else
-                        pperm(ilink) = 1-fecdf(sum(xecdf<=chi_groupe(ilink)));
-                    end            
+        for ilink=1:numel(chi_groupe)
+            if sum(xecdf<=chi_groupe(ilink))==0
+                pperm(ilink)= 1;
+            else
+                pperm(ilink) = 1-fecdf(sum(xecdf<=chi_groupe(ilink)));
+            end
         end
         
         %equivalent tmax Lage-Castellanos, A., Martínez-Montes, E., Hernández-Cabrera, J.A., Galán, L., 2010. False discovery rate and permutation test: An evaluation in ERP data analysis. Statistics in Medicine 29, 63–74. https://doi.org/10.1002/sim.3784
-       supvalue =reshape(chi_dist_groupe, nperm,  size(chi_dist_groupe,2));
+        supvalue =reshape(chi_dist_groupe, nperm,  size(chi_dist_groupe,2));
         dist_sup = max( supvalue');
         %          figure;
         %            hist(dist_sup(:),100)
@@ -3306,20 +3369,20 @@ elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
                 ppermmax(ilink) = 1-fecdf(sum(xecdf<=chi_groupe(ilink)));
             end
         end
-
- 
+        
+        
         file = [name,labelnode,'KrustalWallis',num2str(nperm), 'Permp.mat'];
-         matcorr = zeros(size(MATall,2),size(MATall,2));        
-         matcorr(idhalf)=double( pperm);
-         matcorr = matcorr +flipud(rot90(matcorr));
-         meancorr = matcorr;
+        matcorr = zeros(size(MATall,2),size(MATall,2));
+        matcorr(idhalf)=double( pperm);
+        matcorr = matcorr +flipud(rot90(matcorr));
+        meancorr = matcorr;
         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
         
         file = [name,labelnode,'KrustalWallis',num2str(nperm), 'Permmaxp.mat'];
-        matcorr = zeros(size(MATall,2),size(MATall,2));        
+        matcorr = zeros(size(MATall,2),size(MATall,2));
         matcorr(idhalf)=double(ppermmax);
         matcorr = matcorr +flipud(rot90(matcorr));
         meancorr = matcorr;
@@ -3329,7 +3392,7 @@ elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
         infonew = [infonew;new];
         
         file = [name,labelnode,'KrustalWallis',num2str(nperm), 'Perm 1-p.mat'];
-        matcorr = zeros(size(MATall,2),size(MATall,2));        
+        matcorr = zeros(size(MATall,2),size(MATall,2));
         matcorr(idhalf)= double(1-pperm);
         matcorr = matcorr +flipud(rot90(matcorr));
         meancorr = matcorr;
@@ -3339,7 +3402,7 @@ elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
         infonew = [infonew;new];
         
         file = [name,labelnode,'KrustalWallis',num2str(nperm), 'Permmax 1-p.mat'];
-        matcorr = zeros(size(MATall,2),size(MATall,2));        
+        matcorr = zeros(size(MATall,2),size(MATall,2));
         matcorr(idhalf)= double( 1-ppermmax);
         matcorr = matcorr +flipud(rot90(matcorr));
         meancorr = matcorr;
@@ -3351,9 +3414,9 @@ elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
         
     end  % Fin permutation
     
-
     
-   
+    
+    
     
     
     for igr = 1:numel(GROUPELIST)
@@ -3698,12 +3761,12 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
     covariableall=[];
     covariablestring = job.c_statmatrix.b_fitMANCOVAN_Mat.b_fitMANCOVAN_Covariable;
     [token,remain] =strtok(covariablestring,',');
-    covariableall =  [covariableall,{strtrim(token)}];    
+    covariableall =  [covariableall,{strtrim(token)}];
     while ~isempty(remain)
         [token,remain] =strtok(remain,',');
         covariableall =  [covariableall,{strtrim(token)}];
     end
-     for icov = 1:numel(covariableall)     
+    for icov = 1:numel(covariableall)
         Pearsony = covariableall{icov};
         ycol = 0;
         for icol=1:size(info,2)
@@ -3745,89 +3808,89 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
     end
     
     
-   % if isfield(job.c_statmatrix.b_fitMANCOVAN_Mat.c_statpermutation,'b_Nopermutation')
-        
-        LabelSTAT = ['Groupe', covariableall];
-        for i= 1:size(MATall,2)
-            for j = 1:size(MATall,3)
-                if i~=j
-                    try
-                        iduse = find( sum(groupeall==GROUPELIST,2));
-                        Yval = MATall( iduse,i,j);
-                        GR = groupeall(iduse);
-                        CovariateX = [];
-                        for idvariable = 1:numel(covariableall)
-                            X = score(iduse,idvariable);
-                            CovariateX =  [CovariateX, X];
-                        end
-                        
-                        idok = find(~(isnan(Yval)|sum(isnan(CovariateX),2)));
-                        %F MANCOVAN Same results as spss              
-                        [ T, p,  Fanova, Panova, stats ] = mancovan( Yval( idok), GR( idok),CovariateX( idok,:));
-                        Fanoval(:,i,j) = Fanova;
-                        Panoval(:,i,j) = Panova;
-                        Banoval(:,i,j) = stats.B(2:end);
-                             
-                    catch
-                        disp('Error MANCOVAN')
-                        disp('MANCOVAN function must be install in the set path see:  William Gruner (2022). MANCOVAN (https://www.mathworks.com/matlabcentral/fileexchange/27014-mancovan), MATLAB Central File Exchange. Retrieved October 25, 2022. ')
-                        p = mfilename('fullpath');
-                        [pathname,filename,ext]=fileparts(p);
-                        disp(['Add the fonction in matlab path: addpath(''',pathname, '\External\mancovan_496'')'])
-                        disp('And verify if Fisher transform is not apply twice, data must be real')
-                        %return
+    % if isfield(job.c_statmatrix.b_fitMANCOVAN_Mat.c_statpermutation,'b_Nopermutation')
+    
+    LabelSTAT = ['Groupe', covariableall];
+    for i= 1:size(MATall,2)
+        for j = 1:size(MATall,3)
+            if i~=j
+                try
+                    iduse = find( sum(groupeall==GROUPELIST,2));
+                    Yval = MATall( iduse,i,j);
+                    GR = groupeall(iduse);
+                    CovariateX = [];
+                    for idvariable = 1:numel(covariableall)
+                        X = score(iduse,idvariable);
+                        CovariateX =  [CovariateX, X];
                     end
+                    
+                    idok = find(~(isnan(Yval)|sum(isnan(CovariateX),2)));
+                    %F MANCOVAN Same results as spss
+                    [ T, p,  Fanova, Panova, stats ] = mancovan( Yval( idok), GR( idok),CovariateX( idok,:));
+                    Fanoval(:,i,j) = Fanova;
+                    Panoval(:,i,j) = Panova;
+                    Banoval(:,i,j) = stats.B(2:end);
+                    
+                catch
+                    disp('Error MANCOVAN')
+                    disp('MANCOVAN function must be install in the set path see:  William Gruner (2022). MANCOVAN (https://www.mathworks.com/matlabcentral/fileexchange/27014-mancovan), MATLAB Central File Exchange. Retrieved October 25, 2022. ')
+                    p = mfilename('fullpath');
+                    [pathname,filename,ext]=fileparts(p);
+                    disp(['Add the fonction in matlab path: addpath(''',pathname, '\External\mancovan_496'')'])
+                    disp('And verify if Fisher transform is not apply twice, data must be real')
+                    %return
                 end
             end
         end
-        
-        
-        for icond = 1:numel(LabelSTAT)
-            file = [name,labelnode,' fanova', LabelSTAT{icond},'.mat'];
-            matcorr = squeeze(Fanoval(icond,:,:));
-            meancorr = matcorr;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
-            disp(['Save: ', fullfile(dir1,[file])]);
-            new = [{dir1},{file}, {ZONEid},{0} ];
-            infonew = [infonew;new];
-        end
-        for icond = 1:numel(LabelSTAT)
-            file = [name,labelnode,'panova 1-p', LabelSTAT{icond},'.mat'];
-            matcorr = squeeze(1-Panoval(icond,:,:));
-            meancorr = matcorr;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
-            disp(['Save: ', fullfile(dir1,[file])]);
-            new = [{dir1},{file}, {ZONEid},{0} ];
-            infonew = [infonew;new];
-        end
-        for icond = 1:numel(LabelSTAT)
-            file = [name,labelnode,'panova', LabelSTAT{icond},'.mat'];
-            matcorr = squeeze(Panoval(icond,:,:));
-            meancorr = matcorr;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
-            disp(['Save: ', fullfile(dir1,[file])]);
-            new = [{dir1},{file}, {ZONEid},{0} ];
-            infonew = [infonew;new];
-        end
-        for icond  = 1:numel(LabelSTAT)
-            file = [name,labelnode,'Beta', LabelSTAT{icond },'.mat'];
-            matcorr = squeeze(Banoval(icond ,:,:));
-            meancorr = matcorr;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
-            disp(['Save: ', fullfile(dir1,[file])]);
-            new = [{dir1},{file}, {ZONEid},{0} ];
-            infonew = [infonew;new];
-        end
-        for icond = 1:numel(LabelSTAT)
-            file = [name,labelnode,'Beta', LabelSTAT{icond },'p',num2str(alpha_threshold),'.mat'];
-            matcorr = squeeze(Banoval(icond ,:,:).*double(Panoval(icond ,:,:)<alpha_threshold));
-            meancorr = matcorr;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
-            disp(['Save: ', fullfile(dir1,[file])]);
-            new = [{dir1},{file}, {ZONEid},{0} ];
-            infonew = [infonew;new];
-        end
-        
+    end
+    
+    
+    for icond = 1:numel(LabelSTAT)
+        file = [name,labelnode,' fanova', LabelSTAT{icond},'.mat'];
+        matcorr = squeeze(Fanoval(icond,:,:));
+        meancorr = matcorr;
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        disp(['Save: ', fullfile(dir1,[file])]);
+        new = [{dir1},{file}, {ZONEid},{0} ];
+        infonew = [infonew;new];
+    end
+    for icond = 1:numel(LabelSTAT)
+        file = [name,labelnode,'panova 1-p', LabelSTAT{icond},'.mat'];
+        matcorr = squeeze(1-Panoval(icond,:,:));
+        meancorr = matcorr;
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        disp(['Save: ', fullfile(dir1,[file])]);
+        new = [{dir1},{file}, {ZONEid},{0} ];
+        infonew = [infonew;new];
+    end
+    for icond = 1:numel(LabelSTAT)
+        file = [name,labelnode,'panova', LabelSTAT{icond},'.mat'];
+        matcorr = squeeze(Panoval(icond,:,:));
+        meancorr = matcorr;
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        disp(['Save: ', fullfile(dir1,[file])]);
+        new = [{dir1},{file}, {ZONEid},{0} ];
+        infonew = [infonew;new];
+    end
+    for icond  = 1:numel(LabelSTAT)
+        file = [name,labelnode,'Beta', LabelSTAT{icond },'.mat'];
+        matcorr = squeeze(Banoval(icond ,:,:));
+        meancorr = matcorr;
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        disp(['Save: ', fullfile(dir1,[file])]);
+        new = [{dir1},{file}, {ZONEid},{0} ];
+        infonew = [infonew;new];
+    end
+    for icond = 1:numel(LabelSTAT)
+        file = [name,labelnode,'Beta', LabelSTAT{icond },'p',num2str(alpha_threshold),'.mat'];
+        matcorr = squeeze(Banoval(icond ,:,:).*double(Panoval(icond ,:,:)<alpha_threshold));
+        meancorr = matcorr;
+        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        disp(['Save: ', fullfile(dir1,[file])]);
+        new = [{dir1},{file}, {ZONEid},{0} ];
+        infonew = [infonew;new];
+    end
+    
     if isfield(job.c_statmatrix.b_fitMANCOVAN_Mat.c_statpermutation,'b_permutation')
         LabelSTAT = ['Groupe', covariableall];
         halfMAT = MATall(:,idhalf);
@@ -3877,7 +3940,7 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
                 Fanoval(:,ilink) = Fanova;
                 Panoval(:,ilink) = Panova;
                 try
-                Banoval(:,ilink) =   stats.B(2:end);
+                    Banoval(:,ilink) =   stats.B(2:end);
                 catch
                     Banoval(:,ilink)=nan;
                 end
@@ -3903,23 +3966,23 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
         f_dist_all(find(isnan(f_dist)))=[];
         [fecdf,xecdf] = ecdf( f_dist_all);
         clustercritical=xecdf(sum(fecdf<(1-alpha_threshold)));
-%         figure; 
-%         plot(xecdf,fecdf)
-%         xlabel('xecfg=valeur de F')
-%         ylabel('fecdf=F(x) cumulative distribution function')
+        %         figure;
+        %         plot(xecdf,fecdf)
+        %         xlabel('xecfg=valeur de F')
+        %         ylabel('fecdf=F(x) cumulative distribution function')
         if isfield(job.c_statmatrix.b_fitMANCOVAN_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting,'b_MCT_ClusterBased')
             for icomp = 1:size(Fanoval,1)
                 statrand = permute(f_dist(icomp,:,:), [3 2 1]);
                 statobs = permute(Fanoval(icomp,:),[2,1]);
-                 tmp = randperm(numel(statrand));
-                 statrand =reshape(statrand(tmp),size(statrand,1),size(statrand,2));
+                tmp = randperm(numel(statrand));
+                statrand =reshape(statrand(tmp),size(statrand,1),size(statrand,2));
                 %                 neighbourdist = 3;
                 %                 disp(['critical for clustering p=', num2str(alpha_threshold),' F=',num2str(clustercritical)])
                 %                 stat3 = FindClusterBasedPermutationInMatrix(chanpos, neighbourdist,clustercritical, statobs, statrand );
                 %
                 neighbourdist = job.c_statmatrix.b_fitMANCOVAN_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_neighbourdist;
                 minnbchan = job.c_statmatrix.b_fitMANCOVAN_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_minnbchan;
-
+                
                 disp(['critical for clustering p=', num2str(alpha_threshold),' F=',num2str(clustercritical)])
                 [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, neighbourdist,clustercritical, statobs, statrand,minnbchan  );
                 save(fullfile(dir1,[LabelSTAT{icomp},'stat.mat']),'stat')
@@ -3954,7 +4017,7 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
                     end
                 else
                     disp('No negative cluster found')
-                end                       
+                end
             end
         end
         
@@ -3970,17 +4033,17 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
             end
         end
         disp( [num2str(nperm) ' Permutation p<',num2str(alpha_threshold), ' give a marginal F value=',num2str(xecdf(sum(fecdf<(1-alpha_threshold))))])
-              
-        if 1 % check maxdistribution 
-           for  icond =1:size(Fanoval,1)          
-             dist_sup = squeeze(max(squeeze(f_dist(icond,:,:))'));
-             dist_sup = squeeze(max(squeeze(f_dist(icond,:,:))'));
-             [fecdf,xecdf] = ecdf( [dist_sup]);
-             disp( [ LabelSTAT{icond}, ' ' ,num2str(nperm) ' Max Permutation over all link p<',num2str(alpha_threshold), ' give a marginal F value=',num2str(xecdf(sum(fecdf<=(1-alpha_threshold))))])
-           end       
+        
+        if 1 % check maxdistribution
+            for  icond =1:size(Fanoval,1)
+                dist_sup = squeeze(max(squeeze(f_dist(icond,:,:))'));
+                dist_sup = squeeze(max(squeeze(f_dist(icond,:,:))'));
+                [fecdf,xecdf] = ecdf( [dist_sup]);
+                disp( [ LabelSTAT{icond}, ' ' ,num2str(nperm) ' Max Permutation over all link p<',num2str(alpha_threshold), ' give a marginal F value=',num2str(xecdf(sum(fecdf<=(1-alpha_threshold))))])
+            end
         end
         
-      
+        
         for icond = 1:numel(LabelSTAT)
             file = [name,labelnode,' fanova', num2str(icond), LabelSTAT{icond},'.mat'];
             matcorr = zeros(size(MATall,2),size(MATall,2));
@@ -4016,7 +4079,7 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
             new = [{dir1},{file}, {ZONEid},{0} ];
             infonew = [infonew;new];
         end
-
+        
         
         for icond= 1:numel(LabelSTAT)
             file = [name,labelnode,'panova', LabelSTAT{icond},'.mat'];
@@ -4041,7 +4104,7 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
             new = [{dir1},{file}, {ZONEid},{0} ];
             infonew = [infonew;new];
         end
-    
+        
         for icond= 1:numel(LabelSTAT)
             file = [name,labelnode,'beta',LabelSTAT{ icond},'.mat'];
             matcorr = zeros(size(MATall,2),size(MATall,2));
