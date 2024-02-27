@@ -996,12 +996,15 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
         fsNIRS = NIRS.Cf.dev.fs;
         tstart = find(tHRF<=startDtp{ievent});
         
-        if isempty(tstart)
+        if isempty(tstart) 
             tstart = 1;
         end
         tstop = find(tHRF<= stopDtp{ievent});
         tmpGLM.indt = [tstart(end),tstop(end)];%Time indice
-        tmpGLM.spar = d1(tmpGLM.indt(1):tmpGLM.indt(end),:);
+        tmpGLM.spar = d1(tmpGLM.indt(1):tmpGLM.indt(end),:); %fix weard edge offset by detrending first
+%         tmpGLM.spar = tmpGLM.spar - detrend(tmpGLM.spar);
+%         figure;plot(tmpGLM.spar)
+% figure;plot( d1(tmpGLM.indt(1):tmpGLM.indt(end),:))
         %add labelisbad
         pourcentagenoise = sum(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:)))./numel(d1(tmpGLM.indt(1):tmpGLM.indt(end),:));
         if pourcentagenoise > (job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_labelbad_threshold/100)
@@ -1153,7 +1156,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                         chlistRegressor =  chlistRegressor+ NC/2;
                         chlistApply = chlistApply + NC/2;
                     end
-                    Xmean = nanmean(tmpGLM.spar(:,chlistRegressor),2) -  nanmean(nanmean(tmpGLM.spar(:,chlistRegressor),2)); %center to zero
+                    Xmean = nanmean(tmpGLM.spar(:,chlistRegressor),2)% -  nanmean(nanmean(tmpGLM.spar(:,chlistRegressor),2)); %center to zero
                     % figure;plot(Xmean)
                     X = [Xtmp,    Xmean];
                     for ich = 1:numel(chlistApply)

@@ -3210,12 +3210,52 @@ else
     end 
     if isfield(zone,'ml')
         if numel(zone.ml) ~=  numel(DOT{currentsub}.data(cf).MeasList)
-            msgbox('error in zone concordance');return
+            msgbox('Warning: Verify zone concordance in the transfert to this new montage');
         end
-        if find(zone.ml ~=  DOT{currentsub}.data(cf).MeasList)
-            msgbox('error in zone concordance');
-            
+        newzone.label = zone.label
+        newzone.color = zone.color
+        newzone.ml = DOT{currentsub}.data(cf).MeasList
+        newzone.SD.Lambda = handles.NIRS.Cf.dev.wl;
+        newzone.SD.SrcPos = handles.NIRS.Cf.H.S.r.o.mm.p'/100; %en cm
+        newzone.SD.DetPos = handles.NIRS.Cf.H.D.r.o.mm.p'/100;
+        newzone.SD.nSrc = size(handles.NIRS.Cf.H.S.r.o.mm.p,2);
+        newzone.SD.nDet = size(handles.NIRS.Cf.H.D.r.o.mm.p,2);
+        newzone.SD.SrcAmp = ones(newzone.SD.nSrc);
+        newzone.SD.DetAmp = ones(newzone.SD.nDet);
+        for id = 1:size(  newzone.ml,1)
+            idsrc=  newzone.ml(id,1);
+            iddet=  newzone.ml(id,2);
+            SrcPos=newzone.SD.SrcPos(idsrc,:);
+            DetPos=newzone.SD.DetPos(iddet,:);
+            %position du centre du canal xyz et  distance en 4
+
+            pos(id,1) = (DetPos(1)-SrcPos(1))/2+SrcPos(1);
+            pos(id,2) = (DetPos(2)-SrcPos(2))/2+SrcPos(2);
+            pos(id,3) = (DetPos(3)-SrcPos(3))/2+SrcPos(3);
+            pos(id,4) = sqrt( (DetPos(1)-SrcPos(1))^2 + (DetPos(2)-SrcPos(2))^2+ (DetPos(3)-SrcPos(3))^2);           %'distance entre les canaux
         end
+        newzone.pos = pos;
+        %try to convert channel by channel 
+        for izone = 1:numel(zone.label)
+            plot = zone.plot{izone};
+            plotLst = zone.plotLst{izone};
+            for ichzone = 1:numel(plotLst)
+                 newplotLst(ichzone,1) = find(zone.ml(:,1)==plot(ichzone,1) & zone.ml(:,2)==plot(ichzone,2) & zone.ml(:,4)==1);
+                 newplotLst(ichzone,1) = find(newzone.ml(:,1)==plot(ichzone,1) & newzone.ml(:,2)==plot(ichzone,2) & newzone.ml(:,4)==1);
+
+%             zone.ml
+%             newzone.plot
+%             newzone.plotLst
+            end
+            newzone.plot{izone} = plot;
+            newzone.plotLst{izone} =  newplotLst;
+            clear newplotLst
+        end
+        zone = newzone;
+        %         if find(zone.ml ~=  DOT{currentsub}.data(cf).MeasList)
+%             msgbox('error in zone concordance');
+%             
+%         end
     else
         msgbox('Montage concordance could no be check');
     end

@@ -1929,7 +1929,7 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
                         
                     end
                 end
-            end 
+            end  
             toc
             for icov = 1:size(lme.Coefficients,1)
                 eval(['save(''',dir1,'\TrandCOV',num2str(icov),'.mat'',''TrandCOV',num2str(icov),''')']);
@@ -1960,7 +1960,7 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
                 minnbchan = job.c_statmatrix.b_LME_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_minnbchan;
                 disp(['critical for clustering p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
                 
-                [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, neighbourdist,clustercritical, statobs, statrand,  minnbchan );
+                [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, neighbourdist,clustercritical, statobs(:), statrand,  minnbchan );
                 %  [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, 'distance',clustercritical, statobs, statrand );
                 save(fullfile(dir1,'FiedTrip_LMECluster_stat.mat'),'stat')
                 disp(['Save fieldtrip cluster stat ', fullfile(dir1,'FiedTrip_LMECluster_stat.mat') ])

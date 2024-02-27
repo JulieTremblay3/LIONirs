@@ -198,8 +198,16 @@ try
 catch
     raw = [];
 end
-pretime = str2num(job.c_createAUXauto.b_HRFtriggeronset.e_HRFpretime);
-postime = str2num(job.c_createAUXauto.b_HRFtriggeronset.e_HRFposttime);
+if isstring(job.c_createAUXauto.b_HRFtriggeronset.e_HRFpretime)
+    pretime = str2num(job.c_createAUXauto.b_HRFtriggeronset.e_HRFpretime);
+else
+    pretime =job.c_createAUXauto.b_HRFtriggeronset.e_HRFpretime;
+end
+if isstring(job.c_createAUXauto.b_HRFtriggeronset.e_HRFposttime)
+    postime = str2num(job.c_createAUXauto.b_HRFtriggeronset.e_HRFposttime);
+else
+    postime =job.c_createAUXauto.b_HRFtriggeronset.e_HRFposttime;
+end
 if isempty(pretime)
 for istep=1:numel(NIRS.Dt.fir.pp)
     if ~isempty(strfind(NIRS.Dt.fir.pp(istep).pre,  'Normalization'))
