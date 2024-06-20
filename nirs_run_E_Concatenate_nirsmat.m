@@ -20,10 +20,12 @@ if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
 elseif strcmp(ext,'.txt')
     [data, text, rawData] = readtxtfile_asxlsread(job.f_nirsmatinfo{1});
 end
-    
+  idok = 0; 
 NIRSDtp = rawData(2:end,1);
 ListDtp = rawData(2:end,2);
 [pathoutlist, namelist, ext] = fileparts(job.f_nirsmatinfo{1});
+  fidtxt = fopen(fullfile(pathoutlist,'report.txt'),'w');fs=0;
+fprintf(fidtxt,'Nb\tFile\tsamplestart\tsamplestop\ttstart\ttstop\r\n');
 
 temp = ListDtp{1}
 if strcmp(temp(end-3:end),'zone')% USE ZONE TEMPLATE FIRST TO LOOK IN OTHER FILE    
@@ -40,16 +42,7 @@ if strcmp(temp(end-3:end),'zone')% USE ZONE TEMPLATE FIRST TO LOOK IN OTHER FILE
         NC = NIRS.Cf.H.C.N;
         fs = NIRS.Cf.dev.fs; 
         rDtp = NIRS.Dt.fir.pp(lst).p; % path for files to be processed
-        catch ME
-            if ispc
-                disp(['Verify xls definition : winopen ',job.f_nirsmatinfo{1}]);
-            else
-                disp(['Verify xls definition : ',job.f_nirsmatinfo{1}]);
-            end
-            disp(['Adjust first column NIRS.mat : ', fullfile(NIRSDtp{filenb},'NIRS.mat'), ' could not be open']);
-            rethrow(ME)
-            
-        end
+      
     if strfind(NIRS.Dt.fir.pp(lst).pre,'Epoch averaging') %do only first file %use average chok
         nmax =1; 
         
@@ -58,10 +51,19 @@ if strcmp(temp(end-3:end),'zone')% USE ZONE TEMPLATE FIRST TO LOOK IN OTHER FILE
     end
        if filenb==1
             NIRSref = NIRS;        
-            ZoneTemplate = load(fullfile(pathoutlist,ListDtp{1}),'-mat');    
+            try
+                ZoneTemplate = load(ListDtp{1},'-mat');  
+            catch
+                ZoneTemplate = load(fullfile(pathoutlist,ListDtp{1}),'-mat');    
+            end
             NCTemplate = NIRS.Cf.H.C.N;
        end
-     ZoneHoy = load(fullfile(pathoutlist,ListDtp{filenb}),'-mat');
+       try
+            ZoneHoy = load(ListDtp{filenb},'-mat');
+       catch
+            ZoneHoy = load(fullfile(pathoutlist,ListDtp{filenb}),'-mat');
+
+       end
 
      for f=1:nmax %for each bloc of the NIRS.mat file (last processing step)
          try
@@ -118,7 +120,18 @@ if strcmp(temp(end-3:end),'zone')% USE ZONE TEMPLATE FIRST TO LOOK IN OTHER FILE
             aux5 =[aux5;val ];
        end
           sizebloc  = sizebloc + size(d,2);
-      end
+     end
+       catch ME
+            if ispc
+                disp(['Verify xls definition : winopen ',job.f_nirsmatinfo{1}]);
+            else
+                disp(['Verify xls definition : ',job.f_nirsmatinfo{1}]);
+            end
+            disp(['Adjust first column NIRS.mat : ', fullfile(NIRSDtp{filenb},'NIRS.mat'), ' could not be open']);
+            %rethrow(ME)
+            
+        end 
+     
     end
         newsizebloc = size(dall,2);
         [dir1,fil1,ext1] = fileparts(rDtp{1,1});
@@ -180,7 +193,10 @@ labeltmp=[] ;
 aux5 = []; %keep as important structure built in trigger
 sizebloc = 0;
 for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat file
-    NIRS = [];            
+    NIRS = [];       
+    try
+       
+            
     load(fullfile(NIRSDtp{filenb},'NIRS.mat'));    
     lst = length(NIRS.Dt.fir.pp);
     NC = NIRS.Cf.H.C.N;
@@ -195,7 +211,11 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
         ML_new= [NIRS.Cf.H.C.id(2:3,:)',...
         ones(size(NIRS.Cf.H.C.id,2),1),...
         [ones(size(NIRS.Cf.H.C.id,2)/2,1);ones(size(NIRS.Cf.H.C.id,2)./2,1).*2]];
-        fid = fopen(fullfile(pathoutlist,ListDtp{filenb}));
+        try
+            fid = fopen(fullfile(pathoutlist,ListDtp{filenb}));
+        catch
+            fid = fopen(ListDtp{filenb});
+        end
         try
         chlist = textscan(fid, '%s%s');
         catch
@@ -263,7 +283,17 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
         NIRSref.Cf.H.prj = NIRS.Cf.H.prj;
         catch;end
      for f=1:nmax %for each bloc of the NIRS.mat file (last processing step)
+         try
         d = fopen_NIR(rDtp{f,1},NC); %Load whole bloc   
+         catch
+            jobfolderadjustment.NIRSmat = {fullfile(NIRSDtp{filenb},'NIRS.mat')};
+            jobfolderadjustment.c_MultimodalPath.b_MultimodalPath_no = struct([]);
+            outfolderadjustment = nirs_run_NIRSmatdiradjust(jobfolderadjustment)
+            load(fullfile(NIRSDtp{filenb},'NIRS.mat'));  
+             rDtp = NIRS.Dt.fir.pp(lst).p;
+             d = fopen_NIR(rDtp{f,1},NC); %Load whole bloc   
+             disp('Folder adjustement apply')
+         end
         [pathstr,name,ext]=fileparts(rDtp{f,1});
          infilevmrk = fullfile(pathstr,[name,'.vmrk']);
         infilevhdr = fullfile(pathstr,[name,'.vhdr']);
@@ -328,10 +358,23 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
             aux5 =[aux5;val ];
        end
           sizebloc  = sizebloc + size(d,2);
-         
+          
      end
+     samplestart =   size(dall,2) -  size(d,2)+1;
+     sampleend = size(dall,2);
+     idok = idok  + 1;
+      fprintf(fidtxt,'%d\t',idok);
+    catch
+        disp(['Missing file:', NIRSDtp{filenb}]);
+        linereport = ['Missing file:', NIRSDtp{filenb}];
+        samplestart = [0];
+         sampleend = [0];
+         fprintf(fidtxt,'%s\t','ND');
+    end
     
+    fprintf(fidtxt,'%s\t%6.0f\t%6.0f\t%6.2f\t%6.2f\r\n', NIRSDtp{filenb}, samplestart, sampleend, samplestart/fs, sampleend/fs);
 end
+        fclose(fidtxt);
         newsizebloc = size(dall,2);
         [dir1,fil1,ext1] = fileparts(rDtp{1,1});
         fil1 = namelist;                

@@ -452,7 +452,7 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
     iduse = [g1;g2];
     halfMAT = MATall(:,idhalf);
     
-    
+     
     if isfield(job.c_statmatrix.b_UnpairedTtest.c_statpermutation,'b_Nopermutation')
         for ilink = 1:size(halfMAT,2)
             [h,p,ci,stats] = ttest2(halfMAT(g1,ilink), halfMAT(g2,ilink));
@@ -1910,14 +1910,14 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
                 'were open successfully => delete the file if you wish to compute it again '])
         catch
             tic
-            for ilink =1:size(halfMAT,2) %PERMUTATION F TEST
+            for ilink =933:1500 %1:size(halfMAT,2) %PERMUTATION TEST 216
                 for iperm=1:nperm
                     fprintf('%s ',num2str(ilink));
                     if mod(ilink,30)==0
                         fprintf('\n ');
                     end
                     
-                    fprintf('%d,',ilink);
+                    fprintf('%d,',ilink); 
                     if mod(ilink,30)==0
                         fprintf('\n ');
                     end
@@ -1930,7 +1930,7 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
                     end
                 end
             end  
-            toc
+            toc 
             for icov = 1:size(lme.Coefficients,1)
                 eval(['save(''',dir1,'\TrandCOV',num2str(icov),'.mat'',''TrandCOV',num2str(icov),''')']);
             end

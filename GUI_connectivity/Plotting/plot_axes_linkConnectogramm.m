@@ -316,6 +316,10 @@ end
 %
 %%
 temp = linspace(-pi,pi,numel(idzonecolor)); %to avoid 0 tan
+temp1  = linspace(-pi,pi,numel(idzonecolor)); %to avoid 0 tan
+ 
+temp = linspace(-pi+0.01,pi-0.01,(numel(idzonecolor)+1))
+temp = temp - ((temp(2)-temp(1)))/2
 %CONTOUR CERCLE
 for i = 1:length(temp )-1
     defcolor = DATA{id}.zone.color(idzonecolor(i),:);

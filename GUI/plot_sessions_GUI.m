@@ -56,7 +56,11 @@ handles.output = hObject;
 try
 handles.NIRSall = varargin{1};
 handles.subjectnb = varargin{2};
+if numel(varargin)>2
 job = varargin{3};
+else
+    job.DelPreviousData = 0
+end
 set(handles.edit_nirsmat, 'String', handles.NIRSall); %Set the file pop-up menu
 %job.NIRSmat{filenb,1}
 handles.NIRSpath = handles.NIRSall;

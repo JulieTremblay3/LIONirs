@@ -76,7 +76,7 @@ for Cidx=1:NumberOfChannels
         'Ch',num2str(Cidx),'=',ChannelLabels{Cidx,1},ch_str);
 end
 try
-    infoBV;
+
     %more text
 fprintf(fid,'\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n%s\n',... %
 '[Channel User Infos]',...

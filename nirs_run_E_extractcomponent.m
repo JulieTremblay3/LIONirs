@@ -1156,7 +1156,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                         chlistRegressor =  chlistRegressor+ NC/2;
                         chlistApply = chlistApply + NC/2;
                     end
-                    Xmean = nanmean(tmpGLM.spar(:,chlistRegressor),2)% -  nanmean(nanmean(tmpGLM.spar(:,chlistRegressor),2)); %center to zero
+                    Xmean = nanmean(tmpGLM.spar(:,chlistRegressor),2);% -  nanmean(nanmean(tmpGLM.spar(:,chlistRegressor),2)); %center to zero
                     % figure;plot(Xmean)
                     X = [Xtmp,    Xmean];
                     for ich = 1:numel(chlistApply)
@@ -1332,8 +1332,26 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                                 save(fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile' );
                                 disp(['Create export: load(''', fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat'')'])]);
                           end
-                      else
+                    elseif job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.m_glmlist_autoexport_HbO==2
                           if find(iselected==Xiselected) %only beta 1
+                            A = nan(size(listHBRch,1),1);
+                            idok = find(listbad(listHBRch));
+                            A(idok,1) = topo(listHBRch(idok));
+                            save(fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile' );
+                            disp(['Create export: load(''', fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat'')'])])
+                          end
+                    elseif job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.m_glmlist_autoexport_HbO==3
+                        
+                          if find(iselected==Xiselected) %only beta 1
+                                A = nan(size(listHBOch,1),1);
+                                idok = find(listbad(listHBOch)); 
+                                A(idok,1) = topo(listHBOch(idok));
+                                save(fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile' );
+                                disp(['Create export: load(''', fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat'')'])]);
+                          end
+                        
+                        
+                         if find(iselected==Xiselected) %only beta 1
                             A = nan(size(listHBRch,1),1);
                             idok = find(listbad(listHBRch));
                             A(idok,1) = topo(listHBRch(idok));
@@ -1552,6 +1570,11 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_PARAFAC')
     end
 elseif isfield(job.c_extractcomponent,'b_extractcomponent_AVG')
     
+    %%
+    % 
+    % * ITEM1
+    % * ITEM2
+    % 
     [~,~,ext] =fileparts(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
     if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
         [pathstr, name, ext]= fileparts(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
@@ -1606,7 +1629,17 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_AVG')
             load(NIRSmat);
             NC = NIRS.Cf.H.C.N;
             fDtp = NIRS.Dt.fir.pp(end).p;
-            d = fopen_NIR(fDtp{fileDtp{ievent}},NC)';
+            try
+                 d = fopen_NIR(fDtp{fileDtp{ievent}},NC)';
+            catch
+                jobfolderadjustment.NIRSmat = {fullfile(NIRSDtp{ievent},'NIRS.mat')};
+                jobfolderadjustment.c_MultimodalPath.b_MultimodalPath_no = struct([]);
+                outfolderadjustment = nirs_run_NIRSmatdiradjust(jobfolderadjustment)
+                load(fullfile(NIRSDtp{ievent},'NIRS.mat'));  
+                fDtp = NIRS.Dt.fir.pp(end).p;
+                d = fopen_NIR(fDtp{fileDtp{ievent}},NC)';  
+                disp('Folder adjustement apply')
+            end
             listgood = 1:NC;
             tHRF = 1/NIRS.Cf.dev.fs:1/NIRS.Cf.dev.fs:size(d,1)*1/NIRS.Cf.dev.fs;
             fsNIRS = NIRS.Cf.dev.fs;
@@ -1620,18 +1653,18 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_AVG')
             tstartw = find(tHRF<=startwDtp{ievent});
             tstopw = find(tHRF<= stopwDtp{ievent});
             try 
-                load(zoneDtp{ievent},'-mat')
+                load(zoneDtp{ievent},'-mat');
                 %
             catch
                 try
-                load(fullfile(pathstr,[zoneDtp{ievent},'.zone']),'-mat')
+                load(fullfile(pathstr,[zoneDtp{ievent},'.zone']),'-mat');
                 catch
                 zone.plotLst{1} = 1;
                 end
             end
             
             Xm = zeros(size(intensnorm,1), numel(zone.plotLst));
-            AVG = zeros(NC,1 )
+            AVG = zeros(NC,1 );
             for izone = 1:numel(zone.plotLst)
                 plotLst = zone.plotLst{izone};
                 Xm(:,izone) = nanmean(intensnorm(:,plotLst),2);
@@ -1642,7 +1675,11 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_AVG')
                 %review to improve channel list
                 A = nanmean(d(tstartw(end) :tstopw(end),1:NC/2))';
                 zonelist = []
+                try
                 save(fullfile(pathoutlist,['TopoHbO',labelDtp{ievent},'event',sprintf('%03.0f',ievent),'.mat']),'A','zonelist' );
+                catch
+                    disp(['Error ',fullfile(pathoutlist,['TopoHbO',labelDtp{ievent},'event',sprintf('%03.0f',ievent),'.mat']),' could not be saved. Please verify that the output folder exists' ]);
+                end   
                 disp(['Save :', fullfile(pathoutlist,['TopoHbO',labelDtp{ievent},'event',sprintf('%03.0f',ievent),'.mat'])])
                 A = nanmean(d(tstartw(end) :tstopw(end),NC/2+1:end))';
                 save(fullfile(pathoutlist,['TopoHbR',labelDtp{ievent},'event',sprintf('%03.0f',ievent),'.mat']),'A','zonelist' );

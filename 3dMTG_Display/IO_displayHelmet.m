@@ -610,7 +610,7 @@ function displaychannel(DispHelm,PMI,DispParameter)
             else 
                 val = '';
             end
-            text(x,y,z,num2str(val),'color','black','FontSize',14);
+            text(x,y,z,sprintf('%1.2f',val),'color','black','FontSize',14);
         elseif DispParameter.dist
             text(x,y,z,d_str,'color','black','FontSize',14);
         elseif DispParameter.idnb

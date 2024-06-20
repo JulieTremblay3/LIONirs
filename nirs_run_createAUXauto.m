@@ -99,7 +99,7 @@ for ifile =1:numel(rDtp)
         HRFcurve.infoBV.DataPoints = numel(Scn);
         [pathstr, name, ext] = fileparts(filedata);
         fileoutHRFcurve = fullfile(job.c_createAUXauto.b_HRFtriggeronset.e_AUXdir{1}, [label,name,'.dat']);
-        disp(['File HRF AUX create: ', fileoutHRFcurve]);
+        disp(['File HRF AUX create: ', fileoutHRFcurve]); 
         fwrite_EEG(fileoutHRFcurve,HRFcurve,1,HRFcurve.infoBV.DataPoints );
         NIRS.Dt.AUX(idAUX).pp(1,numel(NIRS.Dt.AUX(1).pp)).p{ifile,1}=fileoutHRFcurve;
         NIRS.Dt.AUX(idAUX).pp(1,numel(NIRS.Dt.AUX(1).pp)).sync_timesec{ifile,1}=0;

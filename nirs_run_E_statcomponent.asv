@@ -10,7 +10,7 @@ catch
    disp('Uncomplete Stats components, Please Install Matlab Statistics and Machine Learning Toolbox')
    return
 end
- 
+
 
 
  if isfield(job.c_statcomponent,'b_TtestOneSample')
@@ -513,17 +513,16 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
         end
         AllCOM = [AllCOM,tmp.A(idactual)];
         info.zonelist{i-1} = tmp.zonelist;
-        zonelist = tmp.zonelist(idactual);
         else
              AllCOM = [AllCOM,tmp.A];
-             %disp('Warning be carefull to verify that the montage and channel are the same among all the experiment')
-            zonelist = [];
-        end 
+             disp('Warning be carefull to verify that the montage and channel are the same among all the experiment')
+       
+        end
      end
      
-
+     zonelist = tmp.zonelist(idactual);
      
-     A = AllCOM';
+     A = AllCOM'
      info = raw;
      save(fullfile(dir1,'databychannel.mat'), 'A', 'zonelist','info')
      disp(['Save ', fullfile(dir1,'databychannel.mat')])

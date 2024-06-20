@@ -214,7 +214,11 @@ for isubject=2:size(info,1)
       DATA{id}.System = 'ISS Imagent';
 %       DATA{id}.System = 'ISS' ;           -+*
   end
+  try
   names = fieldnames(zone);
+  catch
+      1;
+  end 
   for iname = 1:numel(names)
       try
         eval(['DATA{id}.zone.',names{iname},' =zone.',names{iname},';']);
@@ -249,10 +253,12 @@ for igroupe = 0:max(groupeall)
        end
   
   try
-   MATAVGALL = zeros(numel(idlabelall),numel(idlabelall),numel(idsubject));
+    MATAVGALL = zeros(numel(idlabelall),numel(idlabelall),numel(idsubject));
   catch
       disp(['Please verify the zone file :',  fullfile(info{isubject,1}, info{isubject,3})]);
-       MATAVGALL = zeros(numel(idlabelall),numel(idlabelall),numel(idsubject));
+      idmod = 1;
+     %  MATAVGALL = zeros(numel(idlabelall),numel(idlabelall),numel(idsubject));
+       break
   end
    for isubject = 1:numel(idsubject)
         try
@@ -416,12 +422,16 @@ for  igroupe = 0:max(groupeall)
        DATA{idnew}.zone.label =  DATA{idsubject(1)}.zone.label;
        DATA{idnew}.zone.color = DATA{idsubject(1)}.zone.color; 
        DATA{idnew}.zone.ml = DATA{idsubject(1)}.zone.ml;
+       try
        DATA{idnew}.zone.pos = DATA{idsubject(1)}.zone.pos;
+       catch
+       end
        DATA{idnew}.zone.chMAT =  DATA{idsubject(1)}.zone.plotLst;
        list_subject{idnew} =DATA{idnew}.name;
         end
         
 end%AVG groupe all
+
   clear MATall 
 
 %Update data
@@ -431,6 +441,7 @@ set(handles.popup_listsujet,'value',1);
 guidata(handles.GUI_LookMat, handles);
 updateNetAllView(handles);
 msgbox('Load Data Completed')
+
 
 % --- Executes on selection change in listbox2.
 function listbox2_Callback(hObject, eventdata, handles)

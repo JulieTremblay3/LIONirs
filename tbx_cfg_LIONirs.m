@@ -3079,7 +3079,8 @@ f_componentexportch.ufilter =  '.*';
 f_componentexportch.num     = [1 Inf];     % Number of inputs required 
 f_componentexportch.help    = {'First row: dir',...
     'Second row: component file name .mat file with each channel use for the topo',...
-    'Third row and following for factor identification for further stat'}; 
+    'Third row channelList',...
+    'Additional rows factor of identification for further stat'}; 
 
 c_StatcomponentExport        = cfg_choice;
 c_StatcomponentExport.tag     = 'c_StatcomponentExport';
@@ -3767,7 +3768,7 @@ e_widthwaveletcluster.help    = {['Width parameter morlet coefficient']};
 
 b_waveletcluster        = cfg_branch;
 b_waveletcluster.tag    = 'b_waveletcluster';
-b_waveletcluster.name   = 'Wavelet Coherence';
+b_waveletcluster.name   = 'Wavelet Coherence NOT TESTED';
 b_waveletcluster.val    = {e_startwaveletcluster,e_stopwaveletcluster,i_Freq_crossspectrum, e_widthwaveletcluster };
 b_waveletcluster.help   = {''};
 
@@ -3777,7 +3778,7 @@ I_chcorrlist_type.tag     = 'I_chcorrlist_type';
 I_chcorrlist_type.name    = 'Connectivity to use';
 I_chcorrlist_type.val     = {b_crossspectrum};
 I_chcorrlist_type.help    = {''};
-I_chcorrlist_type.values  = {b_Pearson, b_Hilbert,b_crossspectrum};%,b_Granger,b_Phase,b_waveletcluster};%,b_Hilbert,b_Granger, b_Phase, b_crossspectrum
+I_chcorrlist_type.values  = {b_Pearson, b_Hilbert,b_crossspectrum, b_waveletcluster};%,b_Granger,b_Phase,b_waveletcluster};%,b_Hilbert,b_Granger, b_Phase, b_crossspectrum
 % 
 % I_chcorrlist_type.labels = {'Pearson', 'Pearson with zscore','Hilbert phase joint probability', 'Granger','Phase ISS','Analyzer Correlation/Autocorrelation'};
 % I_chcorrlist_type.values = {1 2 3 4 5 6};

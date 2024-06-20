@@ -290,7 +290,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                         saveas(hbpm,fullfile(pathout,[filloutput,'BPM.jpg']))
                         disp(['SAVE respiration BPM:',fullfile(pathout,[filloutput,'BPM.jpg'])])
                   catch
-                      disp(['Failed to compute respiration BPM file', filename])
+                      disp(['Failed to compute respiration BPM file'])             
                   end
                 end
                 end
@@ -1053,15 +1053,16 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
 %             
             
         elseif isfield(job.I_chcorrlist_type, 'b_waveletcluster')
+            disp('WARNING NOT TESTED')
             nmax = size(d1,2);
             fs = NIRS.Cf.dev.fs;
             t = 1/fs:1/fs:(1/fs*nmax);
             tstart = str2num(job.I_chcorrlist_type.b_waveletcluster.e_startwaveletcluster);
             tstop = str2num(job.I_chcorrlist_type.b_waveletcluster.e_stopwaveletcluster);
             idwindow = find(t> tstart & t<tstop);
-            if 0
+            if 1
                 St = d1(listHBO,idwindow); %prendre segment pour wavelet
-                figure;plot(St')
+                figure;plot(t (idwindow),St')
                 
                 %from Thierry Beausoleil
                 Args.dt = t(2)-t(1);
@@ -1081,11 +1082,42 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                     if i==1
                         sinv=1./(scale');
                     end
-                    [sTFR(:,:,i)] = smoothwavelet(sinv(:,ones(1,size(TFR,2))).*abs(TFR(:,:,i)).^2,Args.dt,period,Args.Dj,scale);
+                  %  [sTFR(:,:,i)] = smoothwavelet(sinv(:,ones(1,size(TFR,2))).*abs(TFR(:,:,i)).^2,Args.dt,period,Args.Dj,scale);
                 end
                 Args.period = period;
                 Args.scale = scale;
                 Args.coix = coix;
+                %CHECK COH 
+                x =  St(10,:);
+                     y =  St(15,:);
+                     figure; subplot(2,1,2); plot(x)
+                varargout=wtc(x,y,Args)
+                figure
+                imagesc(varargout)
+                
+                
+                            id = 1;
+                for i=1:size(TFR,3)
+                    j = 1;
+                    while j<i
+                        Gxy(:,1,id) = TFR(:,1,i).*conj(TFR(:,1,j));
+                        id = id + 1;
+                        j = j+1;
+                    end
+                end
+                 i = 15; 
+                    j = 20;
+                     samplemat = 1:size(Gxy,1);
+                    in1 =  TFR(:,:,i);
+                    in1 = in1(:);
+                 in2 =  TFR(: ,:,j);
+                        in2 = in2(:);
+                        COVC1C2  = nansum(in1.*conj(in2),1);
+                        COVC1 =nansum(in1.*conj(in1),1);
+                        COVC2 =nansum(in2.*conj(in2),1);
+                        temp = abs(COVC1C2).^2 ./ (COVC1.*COVC2);
+                figure; imagesc (temp )
+                
             else
                 
                 
@@ -1198,7 +1230,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
             end
             % subplot(2,2,4);imagesc(matcorrHbR)
         end
-        if 0 %isfield(job.I_chcorrlist_type, 'b_crossspectrum')
+        if 1 %isfield(job.I_chcorrlist_type, 'b_crossspectrum')
             matcorr =zeros(numel(listHBO),numel(listHBO),size(yfft,1));
             matcorrHBR =zeros(numel(listHBR),numel(listHBR),size(yfft,1));
             
