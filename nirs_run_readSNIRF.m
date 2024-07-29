@@ -44,12 +44,16 @@ inputsnirf = job.inputSNIRF;
 
     %Create or load a .prj file
 if isfield(job.c_createImportProjectSnirf,'b_createProject')
-    LoadedStruct = Createproject_fromsnirf(inputsnirf{1});
-    SaveStruct = Create_PrjStruct( LoadedStruct );
-    [filepath,name,ext] =fileparts(inputsnirf{1});
-    save(fullfile(dirout,[name,'.prj']), 'SaveStruct');
-    prjfile = fullfile(dirout ,[name,'.prj']);
-    disp(['Create automatic 2d: ', prjfile])
+    try
+        LoadedStruct = Createproject_fromsnirf(inputsnirf{1});
+        SaveStruct = Create_PrjStruct( LoadedStruct );
+        [filepath,name,ext] =fileparts(inputsnirf{1});
+        save(fullfile(dirout,[name,'.prj']), 'SaveStruct');
+        prjfile = fullfile(dirout ,[name,'.prj']);
+        disp(['Create automatic 2d: ', prjfile])
+    catch
+         disp('Warning no optode coordinate information')
+    end
 elseif isfield(job.c_createImportProjectSnirf,'b_importProject')
     prjfile = job.c_createImportProjectSnirf.b_importProject.prjfile{1};
     LoadedStruct = load( prjfile,'-mat');
@@ -109,10 +113,14 @@ end
         aux(:,i) = snirf.aux(i).dataTimeSeries;
     end
 catch %for FRESH data format
-   FileName= inputsnirf{1}
-   Events = importdata([FileName(1:end-10),'events.tsv']);
-   DATA.s = zeros(size(DATA.d,1),1);
-   DATA.s(Events.data(:,2))=Events.data(:,1);
+    try
+    FileName= inputsnirf{1}
+    Events = importdata([FileName(1:end-10),'events.tsv']);
+    DATA.s = zeros(size(DATA.d,1),1);
+    DATA.s(Events.data(:,2))=Events.data(:,1);
+    catch
+        disp('No event imported')
+    end
 end
 
 
@@ -125,6 +133,7 @@ try
     DATA.SD.nDets = size(snirf.probe.detectorPos2D,1);
     DATA.SD.SpatialUnit = 'mm';
 catch %Ajustement for FRESH snirf data coordinate are not embended in sNIRF format use tsv optode file 
+          try
           disp('WARNING snirf format missing field adjust for FRESH project only')
           A = importdata([FileName(1:end-26),'optodes.tsv'])
           for ich=1:size(A.data,1)
@@ -144,7 +153,9 @@ catch %Ajustement for FRESH snirf data coordinate are not embended in sNIRF form
            
            DATA.SD.nSrc = size(sourcePos,1);
            DATA.SD.nDets = size(detectorPos,1);
-     
+          catch
+              disp('Warning : No optode coordinated')
+          end
 end
 
 
@@ -161,7 +172,7 @@ for i = 1:size(DATA.d,2)
     wavelength_lst = [wavelength_lst foo_w];
 end
 
-DATA.SD.MeasList(:,1) =  source_lst;
+DATA.SD.MeasList(:,1) =  source_lst; 
 DATA.SD.MeasList(:,2) =  detector_lst;
 DATA.SD.MeasList(:,3) = ones(size(DATA.d,2),1);
 DATA.SD.MeasList(:,4) = wavelength_lst;
@@ -232,7 +243,9 @@ for Idx_File=1:numel(job.inputSNIRF)
     [val,id] = sort(DATA.ml(:,4));     
     DATA.ml = DATA.ml(id,:); %Wavelenght 1 et wavelength 2
     DATA.d = DATA.d(:,id);
-    NIRS.Cf.dev.wl = DATA.SD.Lambda;
+   
+    NIRS.Cf.dev.wl = DATA.SD.Lambda; 
+
     NIRS.Cf.dev.fs = 1/(DATA.t(2)-DATA.t(1));
 
     

@@ -1,5 +1,5 @@
 function out = nirs_run_readVideo(job)
-load(job.NIRSmat{1},'-mat') 
+load(job.NIRSmat{1},'-mat')  
 for ifile=1:numel(job.Video_files)
     NIRS.Dt.Video.pp(1).p{ifile} = job.Video_files{ifile};
     disp(['Link Video: ',  job.Video_files{ifile}])
@@ -20,6 +20,16 @@ for ifile=1:numel(job.Video_files)
     if isfield(job.c_videooffset,'b_videooffset_yes')
         NIRS.Dt.Video.pp(1).offset{ifile} = job.c_videooffset.b_videooffset_yes.i_videooffset(ifile);
         disp(['Additionnal offset with reference: ', num2str(job.c_videooffset.b_videooffset_yes.i_videooffset(ifile)),' secondes']);
+    elseif isfield(job.c_videooffset    ,'b_videooffsetwithtrig_yes')
+        offset_sec = job.c_videooffset.b_videooffsetwithtrig_yes.i_videooffset(ifile);
+        disp(['Additionnal offset with reference: ', num2str(job.c_videooffset.b_videooffsetwithtrig_yes.i_videooffset(ifile)),' secondes']);
+        trig = NIRS.Dt.fir.aux5{1};
+        trigid= job.c_videooffset.b_videooffsetwithtrig_yes.i_videooffsetwithtrig   
+        id = find(trig(:,1)==trigid);     
+
+        triglag_sec = trig(id(1),2)*  1/NIRS.Cf.dev.fs;
+        NIRS.Dt.Video.pp(1).offset{ifile} =   offset_sec-triglag_sec;
+
     else        
         NIRS.Dt.Video.pp(1).offset{ifile} = 0;
     end

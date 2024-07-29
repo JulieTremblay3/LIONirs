@@ -3172,7 +3172,7 @@ function vout = nirs_cfg_vout_readEEGMarker(job)
     vout.src_output = substruct('.','NIRSmat'); 
     vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
 end
-
+ 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -3181,7 +3181,7 @@ Video_files         = cfg_files;
 Video_files.name    = 'Video files'; % The displayed name
 Video_files.tag     = 'Video_files';          
 Video_files.num     = [0 Inf];     % Number of inputs required 
-Video_files.val{1}  = {''};
+Video_files.val  = {''};
 Video_files.help    = {'Open Video or Audio files.',...
 'The issue with 32 bit codec is that it needs 32 bits Matlab version.'}; % help text displayed
 
@@ -3201,24 +3201,40 @@ b_videooffset_no.name    = 'No';
 b_videooffset_no.val     = {};
 b_videooffset_no.help    = {'The start of video is synchronized with the triggers.'}';
 
-i_videooffset_yes         = cfg_entry;
-i_videooffset_yes.name    = 'Lag(second) = Video - Ref';
-i_videooffset_yes.tag     = 'i_videooffset';       
-i_videooffset_yes.strtype = 'r';
-i_videooffset_yes.num     = [1 inf];
-i_videooffset_yes.val     = {0}; 
-i_videooffset_yes.help    = {'As an example if the in video the event occur at 5 seconds and the trig in EEG happen at 10 you should adjust the lag to -5 as AUDIO(5)- EEG(10)=LAG(-5)'};
+i_videooffset         = cfg_entry;
+i_videooffset.name    = 'Lag(second) = Video - Ref';
+i_videooffset.tag     = 'i_videooffset';       
+i_videooffset.strtype = 'r';
+i_videooffset.num     = [1 inf];
+i_videooffset.val     = {0}; 
+i_videooffset.help    = {'As an example if the in video the event occur at 5 seconds and the trig in EEG happen at 10 you should adjust the lag to -5 as AUDIO(5)- EEG(10)=LAG(-5)'};
 
 b_videooffset_yes         = cfg_branch;
 b_videooffset_yes.tag     = 'b_videooffset_yes';
 b_videooffset_yes.name    = 'Yes';
-b_videooffset_yes.val     = {i_videooffset_yes};
+b_videooffset_yes.val     = {i_videooffset};
 b_videooffset_yes.help    = {'There is a delay between the video and the trigger. If the video starts after, use a positive value, if the video starts before, use a negative value'}';
+
+i_videooffsetwithtrig         = cfg_entry;
+i_videooffsetwithtrig.name    = 'trig';
+i_videooffsetwithtrig.tag     = 'i_videooffsetwithtrig';       
+i_videooffsetwithtrig.strtype = 'r';
+i_videooffsetwithtrig.num     = [1 inf];
+i_videooffsetwithtrig.val     = {11}; 
+i_videooffsetwithtrig.help    = {'Enter the trig that mark the lag identify for the recording'};
+
+
+b_videooffsetwithtrig_yes         = cfg_branch;
+b_videooffsetwithtrig_yes.tag     = 'b_videooffsetwithtrig_yes';
+b_videooffsetwithtrig_yes.name    = 'Yes sync with a specific trigger';
+b_videooffsetwithtrig_yes.val     = {i_videooffset, i_videooffsetwithtrig };
+b_videooffsetwithtrig_yes.help    = {'There is a delay between the video and the trigger. If the video starts after, use a positive value, if the video starts before, use a negative value'}';
+
 
 c_videooffset        = cfg_choice;
 c_videooffset.tag    = 'c_videooffset';
 c_videooffset.name   = 'Offset';
-c_videooffset.values = {b_videooffset_yes, b_videooffset_no};
+c_videooffset.values = {b_videooffset_yes, b_videooffset_no,b_videooffsetwithtrig_yes};
 c_videooffset.val    = {b_videooffset_no};
 c_videooffset.help   = {'If there is lag between Video and Ref Synchronisation trigger, select ''yes''. Otherwise, select ''No''.'}';
 

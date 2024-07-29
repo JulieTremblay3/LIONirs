@@ -22,7 +22,7 @@ function varargout = plot_sessions_GUI(varargin)
 
 % Edit the above text to modify the response to help plot_sessions_GUI
 
-% Last Modified by GUIDE v2.5 25-May-2023 14:41:26
+% Last Modified by GUIDE v2.5 23-Jul-2024 11:34:26
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -8721,10 +8721,11 @@ else
     end
     %set(handles.uipanel9,'visible','off');
     %set(handles.uipanel_manuelNorm,'visible','off');
-    if (  time_stop- time_start  )>30
+    if (  time_stop- time_start  )>10;
         CreateStruct.Interpreter = 'tex';
         CreateStruct.WindowStyle = 'modal';
-        msgbox({'\fontsize{14} Please select an interval time' ; 'start and stop shorter than 30 seconds'}, '','help', CreateStruct)
+        %msgbox({'\fontsize{14} Please select an interval time' ; 'start and stop shorter than 30 seconds'}, '','help', CreateStruct)
+        text(0.2, 0.4, 'Please select an interval time start and stop shorter than 10 seconds','fontsize',14);
         return
     end
     
@@ -8767,7 +8768,7 @@ else
         [video_example,audio_example]=ReadMyAudioVideo(filenamevideo,[offset+time_start,offset+time_stop]);
         catch
             close(h)
-            winopen(filenamevideo)
+            winopen(filenamevideo) 
             return
         end
     end
@@ -10468,24 +10469,24 @@ else
         % plot(PMI{currentsub}.data.HRF.AvgC(:,chHbO))
         
         
-    if isfield(PMI{currentsub}.data(cf).HRF,'AvgStdErr')
-        for ichHBO = 1:numel(chHbO)
-            srs = SDPairs2strboxy(PMI{currentsub}.data(cf).MeasList(chHbO( ichHBO),1));
-            det = SDDet2strboxy(PMI{currentsub}.data(cf).MeasList(chHbO( ichHBO),2));
-        	AvgStdErr = PMI{currentsub}.data(cf).HRF.AvgStdErr;
-            he = errorbar(PMI{currentsub}.data(cf).HRF.tHRF, PMI{currentsub}.data.HRF.AvgC(:,chHbO( ichHBO)),AvgStdErr(:,chHbO( ichHBO)) );
-            set(he,'color',colorid);
-            set(he,'Displayname',['HbO',label,'ch',num2str(chHbR( ichHBO)),'_',srs, '_', det]);      
-        end
-        for ichHBR = 1:numel(chHbR)
-            srs = SDPairs2strboxy(PMI{currentsub}.data(cf).MeasList(chHbR( ichHBR),1));
-            det = SDDet2strboxy(PMI{currentsub}.data(cf).MeasList(chHbR( ichHBR),2));
-            AvgStdErr = PMI{currentsub}.data(cf).HRF.AvgStdErr;
-            he = errorbar(PMI{currentsub}.data(cf).HRF.tHRF, PMI{currentsub}.data.HRF.AvgC(:,chHbR( ichHBR)),AvgStdErr(:,chHbR( ichHBR)) );
-            set(he,'color',colorid);
-            set(he,'Displayname',['HbO',label,'ch',num2str(chHbR( ichHBR)),'_',srs, '_', det]);      
-        end
-    end
+    % if isfield(PMI{currentsub}.data(cf).HRF,'AvgStdErr')
+    %     for ichHBO = 1:numel(chHbO)
+    %         srs = SDPairs2strboxy(PMI{currentsub}.data(cf).MeasList(chHbO( ichHBO),1));
+    %         det = SDDet2strboxy(PMI{currentsub}.data(cf).MeasList(chHbO( ichHBO),2));
+    %     	AvgStdErr = PMI{currentsub}.data(cf).HRF.AvgStdErr;
+    %         he = errorbar(PMI{currentsub}.data(cf).HRF.tHRF, PMI{currentsub}.data.HRF.AvgC(:,chHbO( ichHBO)),AvgStdErr(:,chHbO( ichHBO)) );
+    %         set(he,'color',colorid);
+    %         set(he,'Displayname',['HbO',label,'ch',num2str(chHbR( ichHBO)),'_',srs, '_', det]);      
+    %     end
+    %     for ichHBR = 1:numel(chHbR)
+    %         srs = SDPairs2strboxy(PMI{currentsub}.data(cf).MeasList(chHbR( ichHBR),1));
+    %         det = SDDet2strboxy(PMI{currentsub}.data(cf).MeasList(chHbR( ichHBR),2));
+    %         AvgStdErr = PMI{currentsub}.data(cf).HRF.AvgStdErr;
+    %         he = errorbar(PMI{currentsub}.data(cf).HRF.tHRF, PMI{currentsub}.data.HRF.AvgC(:,chHbR( ichHBR)),AvgStdErr(:,chHbR( ichHBR)) );
+    %         set(he,'color',colorid);
+    %         set(he,'Displayname',['HbO',label,'ch',num2str(chHbR( ichHBR)),'_',srs, '_', det]);      
+    %     end
+    % end
         plot(PMI{currentsub}.data.HRF.tHRF,nanmean(PMI{currentsub}.data.HRF.AvgC(:,chHbO),2),'displayname',['HbO',label],'color',colorid,'linewidth',4);
         plot(PMI{currentsub}.data.HRF.tHRF,nanmean(PMI{currentsub}.data.HRF.AvgC(:,chHbR),2),'displayname',['HbR',label],'color',colorid,'linestyle','--','linewidth',4);
         set(gca,'fontsize',20)
@@ -12106,3 +12107,115 @@ idfile = get(handles.popupmenu_file,'value');
    set(handles.edit_time_stop,'string', num2str(window_tstop+offset));
 
 updatedisplay(handles);
+% --------------------------------------------------------------------
+function context_newcomments_Callback(hObject, eventdata, handles)
+% hObject    handle to context_newcomments (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+position = get(gca,  'CurrentPoint');
+idfile = get(handles.popupmenu_file,'value');
+try
+comments = handles.NIRS.Dt.fir.comments{idfile};
+catch
+    comments= [{['Comments']}, {['Samples']}, {['Duration']}];
+end
+
+newsample = round(handles.NIRS.Cf.dev.fs*position(1));
+defaulttrig = 'Comments';
+[defaulttrig, duration] = EnterANewComment(defaulttrig);
+
+newsample = round(handles.NIRS.Cf.dev.fs*position(1));
+duration= round(handles.NIRS.Cf.dev.fs* str2num(duration));
+
+
+handles.NIRS.Dt.fir.comments{idfile} = [comments;[{defaulttrig }, {newsample}, {duration}]];
+
+
+% for ival = 2:size(   comments,1)
+%     chartrig =  existingtrig{ival};
+%     viewtrig(ival,1) =  str2num(chartrig(1:end-4));  %first column trig value
+%     if  strcmp( chartrig(end-2:end), 'off')
+%        viewtrig(ival,2) = 0;%first column trig value
+%     else
+%         viewtrig(ival,2) = 1; %second column on or off
+%     end
+% end
+
+% %add the trig in the list if not there 
+% if isfield(handles.NIRS.Dt.fir,'aux5')
+%     handles.triggers = handles.NIRS.Dt.fir.aux5{idfile};    
+%     existingtrig =   get(handles.popupmenu8, 'String'); 
+%     unique_trig = unique(handles.triggers(:,1));
+%     %for i=1:numel(unique_trig)
+%     %for i=1:numel(unique_trig)
+%     trig_list = [];
+%     for i=1:numel(unique_trig)
+%         id = find(unique_trig(i)==viewtrig(:,1))
+%         if viewtrig(id,2)==0
+%             trig_list = [trig_list;  {[num2str(unique_trig(i)),' off']}];
+%         else            
+%             trig_list = [trig_list;  {[num2str(unique_trig(i)),'  on']}];
+%         end
+%     end
+%     set(handles.popupmenu8, 'String', trig_list);
+%     set(handles.popupmenu8, 'value', numel(trig_list));
+% 
+% end
+
+
+NIRS = handles.NIRS;
+NIRSpath = get(handles.edit_nirsmat,'string');
+subjectnb = get(handles.edit_nirsmat,'value');
+save(NIRSpath{subjectnb,1},'NIRS','-mat');
+guidata(hObject, handles);
+updatedisplay(handles)
+
+
+% --------------------------------------------------------------------
+function Context_removecomment_Callback(hObject, eventdata, handles)
+% hObject    handle to Context_removecomment (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+ commentid=get(gco,'displayname');
+ set(handles.Comment_info,'label', commentid);
+ set(handles.Comment_info,'visible', 'off');
+
+ idfile = get(handles.popupmenu_file,'value');
+comments = handles.NIRS.Dt.fir.comments{idfile};
+commentid = str2num(get(handles.Comment_info,'label'));
+handles.NIRS.Dt.fir
+
+temp= comments(commentid,:);
+set(handles.Removecomment,'label',['Remove comment: ',temp{1}, ' at ', sprintf('%2.2f',(temp{2}*1/handles.NIRS.Cf.dev.fs)) ,' duration ' ,sprintf('%2.2f',(temp{3}*1/handles.NIRS.Cf.dev.fs)),'sec'] );
+% --------------------------------------------------------------------
+function Removecomment_Callback(hObject, eventdata, handles)
+% hObject    handle to Removecomment (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+idfile = get(handles.popupmenu_file,'value');
+comments = handles.NIRS.Dt.fir.comments{idfile};
+commentid = str2num(get(handles.Comment_info,'label'));
+
+comments(commentid,:) = [];
+handles.NIRS.Dt.fir.comments{idfile} =comments;
+
+NIRS = handles.NIRS;
+NIRSpath = get(handles.edit_nirsmat,'string');
+subjectnb = get(handles.edit_nirsmat,'value');
+save(NIRSpath{subjectnb,1},'NIRS','-mat');
+guidata(hObject, handles);
+updatedisplay(handles);
+
+
+% --------------------------------------------------------------------
+function Context_infocomment_Callback(hObject, eventdata, handles)
+% hObject    handle to Context_infocomment (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function Comment_info_Callback(hObject, eventdata, handles)
+% hObject    handle to Comment_info (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
