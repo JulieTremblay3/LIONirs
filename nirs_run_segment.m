@@ -132,30 +132,49 @@ for filenb = 1:size(job.NIRSmat,1)
                  out.NIRSmat = job.NIRSmat;
                  return
              end
-                
-              switch job.pretime
-                  case 'start'
+             
+              if strfind(job.pretime,'start')
+                  
                        if numel(indstim)==1
                             pretime = indstim - 1 ;
                        else
                           disp('Warning using pretime ''start'', only one trigger are recommand for this special option, multi-segment imply equal pretime.')
                           pretime =indstim(1) - 1 ;
+                       end
+              elseif strfind(job.pretime,'Comments')
+                    job.pretime(9:end)
+                    if ~isfield(NIRS.Dt.fir,'comments')
+                        disp('Error, fields comments do not exist no segmentation')
+                        return
+                    end
+                 tmp=   NIRS.Dt.fir.comments{1}
+           
+                  findevent = strfind( tmp(:,1),strtrim(job.pretime(9:end)))
+                  for idevt=1:numel(findevent)
+                      if ~isempty(findevent{idevt})
+                            pretime = tmp{idevt,2}
                       end
-                  otherwise
+                  end
+              else %specific time 
                       pretime  = round(fs*str2num(job.pretime));
                       
               end
-              switch job.posttime
-                  case 'end'
-                      if numel(indstim)==1
+              if strcmp(job.posttime,'end')                 
+                      if numel(indstim)==1 
                            posttime = size(d,2)- indstim;
                       else
                           disp(['Verify trigger present in file : '  vmrk_path]);
                           disp('Warning using posttime ''end '', only one trigger are recommand for this special option, multi-segment imply equal posttime.');
                           posttime = size(d,2)- indstim(1);
                       end
-                  otherwise
-                      posttime = round(fs*str2num(job.posttime));
+              elseif strfind(job.posttime, 'trig')
+                  triggerend = str2num(job.posttime(5:end));
+                   idstimend= aux5(aux5(:,1) == triggerend,2)+1;
+                  posttime = (idstimend - indstim(1));
+                   disp(['Using posttime at ' job.posttime, ' at time: ', num2str(idstimend/fs) , 's find a duration segment of ', num2str(posttime),'sample']);
+                 
+              else  %specific time number with time duration in second
+                     posttime = round(fs*str2num(job.posttime));
               end
            
             if isfield(NIRS.Dt,'EEG')

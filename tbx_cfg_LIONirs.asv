@@ -136,7 +136,7 @@ age1.tag     = 'age1';
 age1.strtype = 'r';
 age1.num     = [1 Inf];
 age1.val     = {25};
-age1.help    = {'Write the subjectís age in years.',...
+age1.help    = {'Write the subject‚Äôs age in years.',...
     'Used to calculate DPF to HbO/HbR conversion (Duncan et al 1995).',...
     'Only for wavelengths of 690,830,744,807 nm.'};
 
@@ -1013,7 +1013,7 @@ m_Concatenate_Normalized.help   = {'Apply a normalization to reduce individual s
     'No normalization: does not apply any normalization. ',...
     'Min-Max Normalization: applies min max normalization fixing boundary between 0 and 1.',... 
     'Z-score Normalization: applies z-score normalization.',... 
-    'Moeller, J., 2015. A word on standardization in longitudinal studies: donít. Front Psychol 6. https://doi.org/10.3389/fpsyg.2015.01389'};
+    'Moeller, J., 2015. A word on standardization in longitudinal studies: don‚Äôt. Front Psychol 6. https://doi.org/10.3389/fpsyg.2015.01389'};
 
 E_Concatenate_nirsmat      = cfg_exbranch;
 E_Concatenate_nirsmat.name = 'Concatenate NIRS.mat (multi subject and zone)';
@@ -1085,7 +1085,7 @@ pretime.help    = {'Time to include before the trigger.',...
     'Write keyword ''start'' to go to the beginning of the raw segment.',...
     'Define as a positive value, as example 5 seconds before the onset. Unintuitively, -30 will give you 30 seconds after the trigger.',...
     'To write 0 use ''0''',...
-    'Write the keyword ''Comments evt01Start to stop the segment at the comment named evt01Start'};
+    'Write the keyword ''Comments evt01Start to stop the segment at the comment named evt01End'};
 
 posttime         = cfg_entry;
 posttime.name    = 'PostTime';
@@ -1216,7 +1216,7 @@ movingaverage_nbpoint.tag     = 'movingaverage_nbpoint';
 movingaverage_nbpoint.strtype = 'r';
 movingaverage_nbpoint.num     = [1 1];
 movingaverage_nbpoint.val     =  {1}; 
-movingaverage_nbpoint.help    = {'Defines the duration (sec) of the time interval (step) to calculate moving average M1 and M2: Xn to Xn+step. Depending on the smoothing the user wants to apply, i.e. how sensitive detection of the signalís variation should be, a higher or lower value should be indicated.'};
+movingaverage_nbpoint.help    = {'Defines the duration (sec) of the time interval (step) to calculate moving average M1 and M2: Xn to Xn+step. Depending on the smoothing the user wants to apply, i.e. how sensitive detection of the signal‚Äôs variation should be, a higher or lower value should be indicated.'};
 
 
 
@@ -1226,7 +1226,7 @@ printreportthreshold.name   = 'Print threshold report for each channel';
 printreportthreshold.labels = {'Yes','No'};
 printreportthreshold.values = {1,0};
 printreportthreshold.val    = {0}; 
-printreportthreshold.help   = {'Select if you want to save a figure that displays the threshold detection made for each channel. The figure will be saved in Ö\ArtifactDetection_Report\EachCh folder at the NIRS.mat home location.'}';
+printreportthreshold.help   = {'Select if you want to save a figure that displays the threshold detection made for each channel. The figure will be saved in ‚Ä¶\ArtifactDetection_Report\EachCh folder at the NIRS.mat home location.'}';
 
 b_meandiff         = cfg_branch;
 b_meandiff.tag     = 'b_meandiff';
@@ -1276,7 +1276,7 @@ b_corr         = cfg_branch;
 b_corr.tag     = 'b_corr';
 b_corr.name    = 'Correlation between channels for artifact interval';
 b_corr.val     = {m_corr corr_thr};
-b_corr.help    = {'Artifact detection is based on a correlation coefficient between channels. It determines the Pearsonís correlation coefficient threshold of channels to be considered as being affected by the same event. For each artifact interval that has previously been detected, channels that have a correlation equal or above the threshold with the time course of this artifact, are detected as well. This means that it asks for each artifact to find the channels showing the same signature, but have not been  detected based on the previous criteria.'}';
+b_corr.help    = {'Artifact detection is based on a correlation coefficient between channels. It determines the Pearson‚Äôs correlation coefficient threshold of channels to be considered as being affected by the same event. For each artifact interval that has previously been detected, channels that have a correlation equal or above the threshold with the time course of this artifact, are detected as well. This means that it asks for each artifact to find the channels showing the same signature, but have not been  detected based on the previous criteria.'}';
 
 m_minpourcentagebad      = cfg_menu;
 m_minpourcentagebad.tag  = 'm_minpourcentagebad';
@@ -1312,7 +1312,7 @@ E_artefactdetection.val  = {NIRSmat DelPreviousData  PrintReport b_meandiff b_mi
 E_artefactdetection.prog = @nirs_run_step_artefact_detection;
 E_artefactdetection.vout = @nirs_run_vout_step_artefact_detection;
 E_artefactdetection.help = {'Automatic artifact detection modules apply automatic artifact detection on either raw or normalized unfiltered data to detect abrupt variations, potentially related to an artifact. The user has the option to consider several criteria to improve detection.',...
-    'These four criteria are: ëArtifact detection using moving averageí; ëMinimal percentage of bad channels to be marked as artifactí; ëMinimal subintervalí; ëCorrelation between channels for artifactí.',...
+    'These four criteria are: ‚ÄòArtifact detection using moving average‚Äô; ‚ÄòMinimal percentage of bad channels to be marked as artifact‚Äô; ‚ÄòMinimal subinterval‚Äô; ‚ÄòCorrelation between channels for artifact‚Äô.',...
     'A more detailed description of each criterion is presented above.'};
 
 
@@ -1825,7 +1825,7 @@ timingfile.help    = {'Timing file.'};
 % PCA.val  = {NIRSmat DelPreviousData  timingfile};
 % PCA.prog = @nirs_run_PCA;
 % PCA.vout = @nirs_cfg_vout_PCA;
-% PCA.help = {'¿ ENLEVER Apply PCA on selected time'};
+% PCA.help = {'√Ä ENLEVER Apply PCA on selected time'};
 % 
 % function vout = nirs_cfg_vout_PCA(job)
 %     vout = cfg_dep;                    
@@ -2437,7 +2437,7 @@ b_extractcomponent_PCA        = cfg_branch;
 b_extractcomponent_PCA.tag    = 'b_extractcomponent_PCA';
 b_extractcomponent_PCA.name   = 'Identify PCA for artifact period';
 b_extractcomponent_PCA.val    = {NIRSmat,  m_extractcomponent,m_extractcomponentfigure,i_extract_pourcentagech, i_extractnoiseupto_nbPCA, i_extractnoise_nbPCA};
-b_extractcomponent_PCA.help   = {'First, identify noisy intervals using artifact detection or a manual revision. This function runs a PCA decomposition (targetPCA) on each bad interval (yellow segment in the DisplayGUI). The decomposition is performed on identified channels during a continuous bad interval. PCA decomposition sort components according to the explained variance. The component(s) explaining the highest variance during the artifactual interval is assumed to be mainly related to the artifact event. They will be stored in the component list with the label MVTPCA. We recommend using the module ëSubtract Componentsí that will subtract all the components identified with a specific label.'};
+b_extractcomponent_PCA.help   = {'First, identify noisy intervals using artifact detection or a manual revision. This function runs a PCA decomposition (targetPCA) on each bad interval (yellow segment in the DisplayGUI). The decomposition is performed on identified channels during a continuous bad interval. PCA decomposition sort components according to the explained variance. The component(s) explaining the highest variance during the artifactual interval is assumed to be mainly related to the artifact event. They will be stored in the component list with the label MVTPCA. We recommend using the module ‚ÄòSubtract Components‚Äô that will subtract all the components identified with a specific label.'};
 
 f_extractcomponent_physzone         = cfg_files;
 f_extractcomponent_physzone.name    = 'Enter Regressor zone'; 
@@ -2673,7 +2673,7 @@ b_extractnoise_PARAFAC          = cfg_branch;
 b_extractnoise_PARAFAC.tag      = 'b_extractnoise_PARAFAC';
 b_extractnoise_PARAFAC.name     = 'Identify PARAFAC for artifact period';
 b_extractnoise_PARAFAC.val      = {NIRSmat,  i_extractnoise_labelPARAFAC,m_extractcomponentfigure,i_extract_pourcentagech,i_extractnoise_nbPARAFAC};
-b_extractnoise_PARAFAC.help     = {'First, identify noisy intervals. This function runs a PARAFAC decomposition on each pre-identified bad intervals (yellow segment in the DisplayGUI). The decomposition is performed on the noisy channel during this interval as a Target PARAFAC. The decomposition explaining the most of variance in the data will save as the one representing the artifact  will be stored in the component list with the label MVTPARAFAC. The component list is stored in ëSelectedFactors.matí in the same folder as the NIRS.mat. You could visualize them in the DisplayGUI before subtracting them. We recommend using the module ëSubtract Componentsí that will subtract all the components identified with the same label.'};
+b_extractnoise_PARAFAC.help     = {'First, identify noisy intervals. This function runs a PARAFAC decomposition on each pre-identified bad intervals (yellow segment in the DisplayGUI). The decomposition is performed on the noisy channel during this interval as a Target PARAFAC. The decomposition explaining the most of variance in the data will save as the one representing the artifact  will be stored in the component list with the label MVTPARAFAC. The component list is stored in ‚ÄòSelectedFactors.mat‚Äô in the same folder as the NIRS.mat. You could visualize them in the DisplayGUI before subtracting them. We recommend using the module ‚ÄòSubtract Components‚Äô that will subtract all the components identified with the same label.'};
 
 c_extractcomponent         = cfg_choice;
 c_extractcomponent.tag     = 'c_extractcomponent';
@@ -2690,7 +2690,7 @@ E_extractcomponent.tag  = 'E_extractcomponent';
 E_extractcomponent.val  = {c_extractcomponent};
 E_extractcomponent.prog = @nirs_run_E_extractcomponent;
 E_extractcomponent.vout = @nirs_cfg_vout_E_extractcomponent;
-E_extractcomponent.help = {'Identify data components using several data decomposition methods on target data. The component will be added to a list that could be visualized in the DisplayGUI (extract), subtract in case of an artifactual component using ëSubtract componentí or export as a relevant activity for further statistics using ëExport componentí. '};
+E_extractcomponent.help = {'Identify data components using several data decomposition methods on target data. The component will be added to a list that could be visualized in the DisplayGUI (extract), subtract in case of an artifactual component using ‚ÄòSubtract component‚Äô or export as a relevant activity for further statistics using ‚ÄòExport component‚Äô. '};
 %make NIRS.mat available as a dependency
 function vout = nirs_cfg_vout_E_extractcomponent(job)
 vout = cfg_dep;                    
@@ -2789,7 +2789,7 @@ f_component_list.tag     = 'f_component_list';       %file names
 f_component_list.filter  = {'xlsx','xls','txt'};
 f_component_list.ufilter = '.*';    
 f_component_list.num     = [1 Inf];     % Number of inputs required 
-f_component_list.help    = {'The export will be organized using the channel list order.  Each subject must have a close localization on the head to be compared. Enter the list to export columns such as:  ëNIRS.mat folderí, ëTypeí (GLM, PARAFAC,PCA), ëLabelí, Component name to filter, ëChannel Listí full file or .txt same folder as xls file and ëNameí use as the output name of the export.'};
+f_component_list.help    = {'The export will be organized using the channel list order.  Each subject must have a close localization on the head to be compared. Enter the list to export columns such as:  ‚ÄòNIRS.mat folder‚Äô, ‚ÄòType‚Äô (GLM, PARAFAC,PCA), ‚ÄòLabel‚Äô, Component name to filter, ‚ÄòChannel List‚Äô full file or .txt same folder as xls file and ‚ÄòName‚Äô use as the output name of the export.'};
 
 E_exportcomponent_list      = cfg_exbranch;
 E_exportcomponent_list.name = 'Export list';
@@ -2811,7 +2811,7 @@ f_component_zone.tag     = 'f_component_zone';       %file names
 f_component_zone.filter  = {'xlsx','xls','txt'};
 f_component_zone.ufilter = '.*';    
 f_component_zone.num     = [1 Inf];     % Number of inputs required 
-f_component_zone.help    = {'Enter the list to export columns such as: ëNIRS.mat folderí, ëTypeí (GLM, PARAFAC,PCA),ëLabelí ,Component name to filter, ëZone Listí full file or .txt same folder as xls file and ëNameí the output name of the export .'}; 
+f_component_zone.help    = {'Enter the list to export columns such as: ‚ÄòNIRS.mat folder‚Äô, ‚ÄòType‚Äô (GLM, PARAFAC,PCA),‚ÄòLabel‚Äô ,Component name to filter, ‚ÄòZone List‚Äô full file or .txt same folder as xls file and ‚ÄòName‚Äô the output name of the export .'}; 
 
 e_zonetoextract_label         = cfg_entry;
 e_zonetoextract_label.name    = 'Enter zone to extract';
@@ -2920,7 +2920,7 @@ b_MCT_Max         = cfg_branch;
 b_MCT_Max.tag    = 'b_MCT_Max';
 b_MCT_Max.name   = 'No' ;
 b_MCT_Max.val    = {};
-b_MCT_Max.help   = {'Use the maximal univariate comparaison to create null distribution; Troendle, J.F., 1995. A Stepwise Resampling Method of Multiple Hypothesis Testing. Journal of the American Statistical Association 90, 370ñ378. https://doi.org/10.1080/01621459.1995.10476522'};
+b_MCT_Max.help   = {'Use the maximal univariate comparaison to create null distribution; Troendle, J.F., 1995. A Stepwise Resampling Method of Multiple Hypothesis Testing. Journal of the American Statistical Association 90, 370‚Äì378. https://doi.org/10.1080/01621459.1995.10476522'};
 
  
 
@@ -2929,7 +2929,7 @@ c_statMultipleComparaisonTesting.tag     = 'c_statMultipleComparaisonTesting';
 c_statMultipleComparaisonTesting.name    = 'Multiple Comparaison';
 c_statMultipleComparaisonTesting.values  = {b_MCT_Max, b_MCT_ClusterBased};
 c_statMultipleComparaisonTesting.val     = {b_MCT_ClusterBased}; %Default option
-c_statMultipleComparaisonTesting.help    = {'Cluster-based permutation adapt clusterstat function from fieldtrip function and see for reference Maris, E., Oostenveld, R., 2007. Nonparametric statistical testing of EEG- and MEG-data. Journal of Neuroscience Methods 164, 177ñ190. https://doi.org/10.1016/j.jneumeth.2007.03.024'};
+c_statMultipleComparaisonTesting.help    = {'Cluster-based permutation adapt clusterstat function from fieldtrip function and see for reference Maris, E., Oostenveld, R., 2007. Nonparametric statistical testing of EEG- and MEG-data. Journal of Neuroscience Methods 164, 177‚Äì190. https://doi.org/10.1016/j.jneumeth.2007.03.024'};
 
 
 e_npermutation         =  cfg_entry;
@@ -3761,7 +3761,7 @@ b_Hilbert        = cfg_branch;
 b_Hilbert.tag    = 'b_Hilbert';
 b_Hilbert.name   = 'Hilbert join phase probability';
 b_Hilbert.val    = {c_Hilbert};
-b_Hilbert.help   = {'See B. Molavi et al., ìAnalyzing the resting state functional connectivity in the human language system using near infrared spectroscopy.î, Front. Hum. Neurosci. 7(January), 921 (2013) [doi:10.3389/fnhum.2013.00921].',...
+b_Hilbert.help   = {'See B. Molavi et al., ‚ÄúAnalyzing the resting state functional connectivity in the human language system using near infrared spectroscopy.‚Äù, Front. Hum. Neurosci. 7(January), 921 (2013) [doi:10.3389/fnhum.2013.00921].',...
                     'Use function from the CircStat2012a toolbox.' };
 
 
@@ -3997,7 +3997,7 @@ b_MCT_Max         = cfg_branch;
 b_MCT_Max.tag    = 'b_MCT_Max';
 b_MCT_Max.name   = 'No' ;
 b_MCT_Max.val    = {};
-b_MCT_Max.help   = {'Use the maximal univariate comparaison to create null distribution; Troendle, J.F., 1995. A Stepwise Resampling Method of Multiple Hypothesis Testing. Journal of the American Statistical Association 90, 370ñ378. https://doi.org/10.1080/01621459.1995.10476522'};
+b_MCT_Max.help   = {'Use the maximal univariate comparaison to create null distribution; Troendle, J.F., 1995. A Stepwise Resampling Method of Multiple Hypothesis Testing. Journal of the American Statistical Association 90, 370‚Äì378. https://doi.org/10.1080/01621459.1995.10476522'};
 
  
 
@@ -4006,7 +4006,7 @@ c_statMultipleComparaisonTesting.tag     = 'c_statMultipleComparaisonTesting';
 c_statMultipleComparaisonTesting.name    = 'Multiple Comparaison';
 c_statMultipleComparaisonTesting.values  = {b_MCT_Max, b_MCT_ClusterBased};
 c_statMultipleComparaisonTesting.val     = {b_MCT_ClusterBased}; %Default option
-c_statMultipleComparaisonTesting.help    = {'Cluster-based permutation adapt clusterstat function from fieldtrip function and see for reference Maris, E., Oostenveld, R., 2007. Nonparametric statistical testing of EEG- and MEG-data. Journal of Neuroscience Methods 164, 177ñ190. https://doi.org/10.1016/j.jneumeth.2007.03.024'};
+c_statMultipleComparaisonTesting.help    = {'Cluster-based permutation adapt clusterstat function from fieldtrip function and see for reference Maris, E., Oostenveld, R., 2007. Nonparametric statistical testing of EEG- and MEG-data. Journal of Neuroscience Methods 164, 177‚Äì190. https://doi.org/10.1016/j.jneumeth.2007.03.024'};
 
 
 
@@ -4038,7 +4038,7 @@ c_statpermutation.name    = 'Univariate permutations';
 c_statpermutation.values  = {b_permutation,b_Nopermutation };
 c_statpermutation.val     = {b_Nopermutation}; %Default option
 c_statpermutation.help    = {'Use permutation to create the empirical null distribution to calculate.',...
-    'Compared each link perm to its permuted distribution and also the max link value among the comparaison multiple comparaison to be more restrictive. See: Lage-Castellanos, A., MartÌnez-Montes, E., Hern·ndez-Cabrera, J.A., Gal·n, L., 2010. False discovery rate and permutation test: An evaluation in ERP data analysis. Statistics in Medicine 29, 63ñ74. https://doi.org/10.1002/sim.3784'};
+    'Compared each link perm to its permuted distribution and also the max link value among the comparaison multiple comparaison to be more restrictive. See: Lage-Castellanos, A., Mart√≠nez-Montes, E., Hern√°ndez-Cabrera, J.A., Gal√°n, L., 2010. False discovery rate and permutation test: An evaluation in ERP data analysis. Statistics in Medicine 29, 63‚Äì74. https://doi.org/10.1002/sim.3784'};
 
 m_export_matrix        = cfg_menu;
 m_export_matrix.tag    = 'm_export_matrix';
@@ -4293,7 +4293,7 @@ e_anovarep_model.num     = [0 inf];
 e_anovarep_model.val     = {'G1,G2 ~ X1'};
 e_anovarep_model.help    = {'Use Wilkinson notation to define your model see help in matlab for the function fitrm or see :',...
     'Wilkinson, G.N., Rogers, C.E., 1973. Symbolic Description of Factorial Models for Analysis of Variance.',...
-    'Journal of the Royal Statistical Society. Series C (Applied Statistics) 22, 392ñ399.',...
+    'Journal of the Royal Statistical Society. Series C (Applied Statistics) 22, 392‚Äì399.',...
     'https://doi.org/10.2307/2346786',...
     'The terms used must be column name in the xls table to specify your design.Example G1,G2 ~ AGE,  '};
 
@@ -4320,7 +4320,7 @@ b_kruskalwallis_Mat        = cfg_branch;
 b_kruskalwallis_Mat.tag    = 'b_kruskalwallis_Mat';
 b_kruskalwallis_Mat.name   = 'Kruskal Wallis' ;
 b_kruskalwallis_Mat.val    = {e_Anova1GR, c_statpermutation };
-b_kruskalwallis_Mat.help   = {'Apply kruskalwallis, For permutation: Odiase, J.I., Ogbonmwan, S.M., 2005. JMASM20: Exact Permutation Critical Values For The Kruskal-Wallis One-Way ANOVA. J. Mod. App. Stat. Meth. 4, 609ñ620. https://doi.org/10.22237/jmasm/1130804820'};
+b_kruskalwallis_Mat.help   = {'Apply kruskalwallis, For permutation: Odiase, J.I., Ogbonmwan, S.M., 2005. JMASM20: Exact Permutation Critical Values For The Kruskal-Wallis One-Way ANOVA. J. Mod. App. Stat. Meth. 4, 609‚Äì620. https://doi.org/10.22237/jmasm/1130804820'};
 
 
 b_manova1_Covariable         =  cfg_entry;
