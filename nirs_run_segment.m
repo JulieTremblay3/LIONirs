@@ -602,7 +602,7 @@ for filenb = 1:size(job.NIRSmat,1)
             end
        end
         %add outfile name to NIRS
-        if 1%
+        if 1% 
             NIRS.Cf.H.C.ok = chok;
             NIRS.Dt.fir.aux5ini = auxraw; %trig present dans le fichier raw
             NIRS.Dt.fir.aux5 = aux5temp;

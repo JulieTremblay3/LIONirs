@@ -4440,11 +4440,39 @@ M_others.tag    = 'M_others';
 M_others.values = {E_markCardiac_TargetPCA, E_correctCardiac_TargetPCA, E_correctCardiac_exportBV,E_createonset_correlationsignal}; %,E_createonset_correlationsignal
 M_others.help   = {'These modules convert nir file in .nirs, last module of data export, support the export of field such as data (d),coordinate (SD), trigger (s), time (t),do not support noise artifact marking or aux export'};
 
+
+
+
+
+f_HyperScan_outdir        = cfg_files;
+f_HyperScan_outdir.name    = 'Select output folder'; 
+f_HyperScan_outdir.tag     = 'f_HyperScan_outdir';       %file names
+f_HyperScan_outdir.filter  = {'dir'};
+f_HyperScan_outdir.ufilter = '.*';    
+f_HyperScan_outdir.num     = [0 1];      % Number of inputs required 
+f_HyperScan_outdir.val    = {''};
+f_HyperScan_outdir.help    = {'Select the output folder where to save data. By default if you let empty it will save in the first NIRS.mat file selected'}; 
+
+E_HyperScanCombineNIRS    = cfg_exbranch;
+E_HyperScanCombineNIRS.name = 'HyperScan';
+E_HyperScanCombineNIRS.tag  = 'E_HyperScanCombineNIRS';
+E_HyperScanCombineNIRS.val  = {NIRSmat, f_HyperScan_outdir};
+E_HyperScanCombineNIRS.prog = @nirs_run_E_HyperScanCombineNIRS;
+E_HyperScanCombineNIRS.vout = @nirs_cfg_vout_E_HyperScanCombineNIRS;
+E_HyperScanCombineNIRS.help = {['Combine the data of multiple subjects (NIRS.mat) in one file,  detector, and source label will be kept identical for the first-subject and replaced as additional sources and detectors for the second subject; for example, second-subject detectors 1-16 will become detectors 17 to 32,(if the first subject have 16 detectors... ']};
+
+function vout = nirs_cfg_vout_E_HyperScanCombineNIRS(job)
+    vout = cfg_dep;                    
+    vout.sname      = 'NIRS.mat';       
+    vout.src_output = substruct('.','NIRSmat'); 
+    vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
+end
+
 %Module Utility
 M_Utility        = cfg_choice; 
 M_Utility.name   = 'Utility NIRSmat';
 M_Utility.tag    = 'M_Utility';
-M_Utility.values = {E_NIRSmatdiradjust, E_NIRSmatcreatenewbranch  E_createseedlist E_qualityreport E_zone2channellist E_channellist2zone E_VIDEO E_viewNIRS M_datawritenirs M_others }; %
+M_Utility.values = {E_NIRSmatdiradjust, E_NIRSmatcreatenewbranch  E_createseedlist E_qualityreport E_zone2channellist E_channellist2zone E_VIDEO E_viewNIRS M_datawritenirs E_HyperScanCombineNIRS M_others }; %
 M_Utility.help   = {'Utility on NIRSmat function.'};
 
 nirsHSJ        = cfg_choice;
