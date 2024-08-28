@@ -10416,6 +10416,7 @@ catch
 end
 listCH = zeros(size( PMI{currentsub}.data.HRF.AvgC,2),1);
 listCH(plotLst) = 1;
+%EXCLUDE REJECTED CHANNEL
 listCH = PMI{1}.data.MeasListAct.*listCH
 both =  reshape(listCH,numel(listCH)/2,2);
 chHbO = find(sum(both,2));
@@ -10465,6 +10466,7 @@ else
         colorid = PMI{currentsub}.zone.color(num,:);
         listCH = zeros(size( PMI{currentsub}.data.HRF.AvgC,2),1);
         listCH(plotLst) = 1;
+        listCH = PMI{1}.data.MeasListAct.*listCH
         both =  reshape(listCH,numel(listCH)/2,2);
         chHbO = find(sum(both,2));
         chHbR =   chHbO + numel(listCH)/2;
