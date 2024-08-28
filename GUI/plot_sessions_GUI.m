@@ -10416,6 +10416,7 @@ catch
 end
 listCH = zeros(size( PMI{currentsub}.data.HRF.AvgC,2),1);
 listCH(plotLst) = 1;
+listCH = PMI{1}.data.MeasListAct.*listCH
 both =  reshape(listCH,numel(listCH)/2,2);
 chHbO = find(sum(both,2));
 chHbR =   chHbO + numel(listCH)/2;
@@ -10427,6 +10428,7 @@ if strcmp(get(handles.Context_MenuExportZone_All,'checked'),'off') %only one cur
     colorid = PMI{currentsub}.zone.color(num,:);
     listCH = zeros(size( PMI{currentsub}.data.HRF.AvgC,2),1);
     listCH(plotLst) = 1;
+    listCH = PMI{1}.data.MeasListAct.*listCH
     both =  reshape(listCH,numel(listCH)/2,2);
     chHbO = find(sum(both,2));
     chHbR =   chHbO + numel(listCH)/2;
