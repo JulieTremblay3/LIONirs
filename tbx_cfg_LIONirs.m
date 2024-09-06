@@ -1,4 +1,4 @@
-%___________________________________________________________________
+% Toolbox lionirs main function menu
 % Copyright (C) 2019 LION Lab, Centre de recherche CHU Sainte-Justine 
 % www.lionlab.umontreal.ca
 %___________________________________________________________________
