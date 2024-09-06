@@ -193,10 +193,10 @@ if isempty(strfind(NIRS.Dt.fir.pp(s).pre,'Manual Gui'))|~strcmp(upper(dir1),uppe
     end
         
         
-        try
-            copyfile(infilevhdr,outfilevhdr)
-        catch
-        end
+        % try
+        %     copyfile(infilevhdr,outfilevhdr) 
+        % catch
+        % end
         if DelPreviousData
             delete(infilenir);
             delete(infilevmrk);

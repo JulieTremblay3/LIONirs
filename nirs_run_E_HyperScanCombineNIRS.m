@@ -6,19 +6,21 @@ function out = nirs_run_E_HyperScanCombineNIRS(job)
 % do not support combine eeg or auxiliary file 
 %filename prefix 
 prefix = 'h'; %for "hyperscancombine"
-disp('WARNING UNFINISH FUNCTION')
+disp('WORK IN PROGRESS FUNCTION');
 
 NIRS = [];
-load(job.NIRSmat{1,1});
-NIRS1 = NIRS;
-%[dir2,tmp,tmp] = fileparts(job.NIRSmat{1,1});
-
 try    
  load(job.NIRSmat{2,1});
 catch
     disp('You must add 2 synchronized NIRS file to combine them for hyperscanning ')
 end
- NIRS2 = NIRS;
+NIRS2 = NIRS;
+ NIRS = [];
+load(job.NIRSmat{1,1});
+NIRS1 = NIRS;
+%default fields will be define according to file 1, the rest will be modify
+%to combine both file 
+
     %use last step of operation
     lst = length(NIRS1.Dt.fir.pp);
     rDtp1 = NIRS1.Dt.fir.pp(lst).p; % path for files to be processed
@@ -32,7 +34,7 @@ end
     end
 
     %Channel to be combine in one project 
-    nbSrc = NIRS.Cf.H.S.N %sources
+    nbSrc = NIRS.Cf.H.S.N; %sources
     nbDet = NIRS.Cf.H.D.N; %detector
 
     NIRS.Cf.H.C.n = [NIRS1.Cf.H.C.n; NIRS2.Cf.H.C.n];
@@ -55,7 +57,7 @@ end
   
     %sort wavelengt first:  HbO first subject, HbO second subject, HbR
     %first subject, HbR second subject
-    [B, idxwl] = sort( NIRS.Cf.H.C.wl) 
+    [B, idxwl] = sort( NIRS.Cf.H.C.wl) ;
 
     NIRS.Cf.H.C.n = NIRS.Cf.H.C.n(idxwl);
     NIRS.Cf.H.C.id = NIRS.Cf.H.C.id(:,idxwl);
@@ -63,18 +65,34 @@ end
     NIRS.Cf.H.C.gp =     NIRS.Cf.H.C.gp(idxwl);
     NIRS.Cf.H.C.ok =   NIRS.Cf.H.C.ok(idxwl);
     NIRS.Cf.H.C.N = NIRS.Cf.H.C.N;
-    
+     if isempty(job.f_HyperScan_outdir)
+         disp('Enter an output folder to save the sessions with both subject otherwise it will be save in the first subject folder');
+          [filepath,fil,ext]=fileparts(rDtp1{1});
+         job.f_HyperScan_outdir{1} =   filepath;
+     end
+      
     dirout = job.f_HyperScan_outdir{1};
-  
+    if ~isdir(dirout)
+        mkdir(dirout);
+        disp(['Folder: ' ,dirout,' Created']);
+    end
     for f=1:numel(rDtp1) %Loop over all files of a NIRS.mat
-         [filepath,fil,ext]=fileparts(rDtp1{f})
+         [filepath,fil,ext]=fileparts(rDtp1{f});
          outfile = fullfile(dirout,[prefix fil ext]);
           outfile_vmrk = fullfile(dirout,[prefix fil '.vmrk']);
-
+            outfile_vhdr = fullfile(dirout,[prefix fil '.vhdr']);
+        try    
         d1 = fopen_NIR(rDtp1{f},NC1);     
+        catch
+            disp(['Failed to open file: ' rDtp1{f} ,' if you move directory location use utility folder adjustement '])      
+        end
         d2 = fopen_NIR(rDtp2{f},NC2); 
-        
-        d = [d1;d2];
+        disp(['Open file A: ' rDtp1{f}])
+        disp(['Open file B: ' rDtp2{f}])
+
+        nsample = min([size(d2,2), size(d1,2)]);
+      
+        d = [d1(:,1:nsample);d2(:,1:nsample)];
         d = d(idxwl,:);
        
        nbChanneloffset = size(d1,1)/2; 
@@ -97,23 +115,43 @@ end
                  ind_dur_ch1(find(ind_dur_ch1(:,3)>nbChanneloffset),3) =  ind_dur_ch1(find(ind_dur_ch1(:,3)>nbChanneloffset),3) -  nbChanneloffset +  nbChanneloffsetHBR;
              
                 [dir2,fil2,~] = fileparts(rDtp2{f});
-                vmrk_path = fullfile(dir1,[fil2 '.vmrk']);
+                vmrk_path = fullfile(dir2,[fil2 '.vmrk']);
                 [label2,ind_dur_ch2] = read_vmrk_all(vmrk_path);
                 %HBR channel subject 2
                 ind_dur_ch2(find(ind_dur_ch2(:,3)>nbChanneloffset),3) =  ind_dur_ch2(find(ind_dur_ch2(:,3)>nbChanneloffset),3) +  nbChanneloffsetHBR;
                 %HBO channel subject 2
                 ind_dur_ch2(find(ind_dur_ch2(:,3)<nbChanneloffset & ind_dur_ch2(:,3)>0),3) =  ind_dur_ch2(find(ind_dur_ch2(:,3)<nbChanneloffset & ind_dur_ch2(:,3)>0),3) +  nbChanneloffset ; %add offset channel execept for the zero all channel implied
 
-                ind_dur_ch_all = [ind_dur_ch1;ind_dur_ch2]
-                label_all = [label1;label2]
+                ind_dur_ch_all = [ind_dur_ch1;ind_dur_ch2];
+                label_all = [label1;label2];
                 write_vmrk_all( outfile_vmrk,ind_dur_ch_all,label_all);
                
 
 
+                % try 
+                %     info1 = read_vhdr_brainvision((fullfile(dir1,[fil1,'.vhdr'])));
+                %      info2 = read_vhdr_brainvision((fullfile(dir2,[fil2,'.vhdr'])));
+                %     ChannelLabels = info.label;               
+                % 
+                % catch
+                % end
+                    ChannelLabels = ConvertmlIDsrs2label(NIRS);
+               
+                    nirs_boxy_write_vhdr( outfile_vhdr,... %Output file
+                    outfile,... %DataFile
+                    outfile_vmrk,... %MarkerFile,...
+                    'nirs_run_HyperScanCombine',... %Function that created the header
+                    '',... %Channel Resolution
+                    '',... %Channel Units
+                    ChannelLabels,... %names given as a column of cells
+                    1/NIRS.Cf.dev.fs*1000000,... %SamplingInterval in microseconds
+                    nsample); %info.datapoint
+                                   
 
-
-
-                info = read_vhdr_brainvision((fullfile(dir1,[fil1,'.vhdr'])));
+        %Video dual file not supported first file value by default 
+        %Aux dual file not supported  first file value by default 
+        %EEG dual file not supported  first file value by default 
+              
               
     end
     NIRS.Dt.fir.pp(lst+1).pre = 'HyperScanCombine';

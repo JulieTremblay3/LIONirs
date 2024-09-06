@@ -32,7 +32,7 @@ for filenb = 1:size(job.NIRSmat,1)
     if isfield(NIRS.Dt,'Audio')
         moduleAudio = numel(NIRS.Dt.Audio(end).pp);
     end
-    ifile = 1; %Utiliser si on remets chaque stim normaliser dans des fichier différent
+    ifile = 1; %Utiliser si on remets chaque stim normaliser dans des fichier diffÃ©rent
     
     for f=1:numel(rDtp) %Loop over all files of a NIRS.mat
         d = fopen_NIR(rDtp{f},NC);     
@@ -129,8 +129,12 @@ for filenb = 1:size(job.NIRSmat,1)
             end
              catch
                  disp('Failed NIRS segment trig could not be found to segment please verify your data or your parameter')
-                 out.NIRSmat = job.NIRSmat;
-                 return
+                 if strfind(job.pretime, 'Comments')
+                    disp('Identify comments to segment data set')
+                 else
+                    out.NIRSmat = job.NIRSmat;
+                    return
+                 end
              end
              
               if strfind(job.pretime,'start')
@@ -147,17 +151,26 @@ for filenb = 1:size(job.NIRSmat,1)
                         disp('Error, fields comments do not exist no segmentation')
                         return
                     end
-                 tmp=   NIRS.Dt.fir.comments{1}
+                 tmp=NIRS.Dt.fir.comments{1};
            
-                  findevent = strfind( tmp(:,1),strtrim(job.pretime(9:end)))
+                  findevent = strfind( tmp(:,1),strtrim(job.pretime(9:end)));
                   for idevt=1:numel(findevent)
                       if ~isempty(findevent{idevt})
-                            pretime = tmp{idevt,2}
+                            pretime = tmp{idevt,2};
+                            indstim = pretime ;
+                            pretime = 5;
+                            
                       end
+
                   end
+                
               else %specific time 
                       pretime  = round(fs*str2num(job.pretime));
                       
+              end
+              if isempty(pretime)
+                  disp(['Pretime could not be assign ', job.pretime, ' is not in the event list check spelling'])
+                  disp(tmp)
               end
               if strcmp(job.posttime,'end')                 
                       if numel(indstim)==1 
@@ -173,12 +186,46 @@ for filenb = 1:size(job.NIRSmat,1)
                   posttime = (idstimend - indstim(1));
                    disp(['Using posttime at ' job.posttime, ' at time: ', num2str(idstimend/fs) , 's find a duration segment of ', num2str(posttime),'sample']);
                  
-              else  %specific time number with time duration in second
+              elseif strfind(job.posttime,'Comments')
+                  if  strfind(job.pretime, job.posttime) %special case same event use post time as duration 
+                    
+                  end
+                      job.posttime(9:end)
+                    if ~isfield(NIRS.Dt.fir,'comments')
+                        disp('Error, fields comments do not exist no segmentation')
+                        return
+                    end
+                 tmp=   NIRS.Dt.fir.comments{1}
+           
+                  findevent = strfind( tmp(:,1),strtrim(job.posttime(9:end)))
+                  for idevt=1:numel(findevent)
+                      if ~isempty(findevent{idevt})
+                            posttime = tmp{idevt,2}
+                            posttime =  posttime - indstim;
+                      end
+                  end
+              for i=2:size(tmp,1)
+                  tmp{i,2}= tmp{i,2}-indstim+1;
+              end
+                 NIRS.Dt.fir.comments{1} = tmp;
+              else%specific time number with time duration in second
                      posttime = round(fs*str2num(job.posttime));
               end
+
+
            
             if isfield(NIRS.Dt,'EEG')
                 try
+                 if isempty(trigger) %segmentation additionale using comments
+                        %Video were alredy synchronised only adjust to the new comment reference. 
+                        if isfield(NIRS.Dt.EEG.pp(moduleEEG),'sync_timesec') 
+                         NIRS.Dt.EEG.pp(moduleEEG).sync_timesec{f} =  NIRS.Dt.EEG.pp(moduleEEG).sync_timesec{f}+indstim*1/fs
+                        else
+                             NIRS.Dt.EEG.pp(moduleEEG).sync_timesec{f} =indstim*1/fs
+                        end
+                        disp('No trigger, EEG segment adjust to comment segmentation, verify if it is well synchronized as you expect  ')
+                 else
+
                     tmp = EEG.marker{end,2};
                     idstimEEG = [];
                     tmp = EEG.marker{end,2};
@@ -234,6 +281,7 @@ for filenb = 1:size(job.NIRSmat,1)
                     fsEEG = 1/(EEG.infoBV.SamplingInterval/1000000); %uS en seconde
                     pretimeEEG = round(fsEEG*pretime/fs)-1;
                     posttimeEEG = round(fsEEG*posttime/fs);
+                 end
                 catch 
                     disp('Error EEG could not be open and synchronised')
                 end
@@ -259,7 +307,7 @@ for filenb = 1:size(job.NIRSmat,1)
                         else
                             idtrigAUX{iaux} = [sprintf('%3.0f',trigger(itypestim))];
                         end
-                        
+                        NIRS.Dt.AUX.pp(end).sync_timesec{ifile}
                         idstimAUX{iaux} = [idstimAUX{iaux};strmatch(deblank(idtrigAUX{iaux}),deblank(AUX(iaux).marker(:,2)))];
                     end
                     %PRESEGMENTATION ALLREALY DONE.
@@ -275,16 +323,23 @@ for filenb = 1:size(job.NIRSmat,1)
                         tmp = idstimAUX{iaux} ;
                         idstimAUX{iaux} = tmp(triginside);
                         end
-                      end
+                      end  
+                      if isempty(trigger)
+                          disp('Segment according to Comments, ensure that trigger have first segmentation already synchronised AUX and NIRS data file')
+                          NIRS.Dt.AUX.pp(end).sync_timesec{ifile} = NIRS.Dt.AUX.pp(end).sync_timesec{ifile}+ indstim*AUX(iaux).infoBV.SamplingInterval/1000000;
+                      else 
                            disp(['Find ', num2str(numel(idstimAUX{iaux})), ' AUX file ',AUX(iaux).file, ' trigger ', sprintf('S%3.0f, ',trigger),sprintf('\n'),...
                             'Time: ', sprintf('%.2f ',AUX(iaux).infoBV.SamplingInterval/1000000.* AUX(iaux).ind_dur_ch(idstimAUX{iaux})),'seconds to segment',sprintf('\n'),...
                             'Sample: ',sprintf('%.0f ', AUX(iaux).ind_dur_ch(idstimAUX{iaux},1)) ])
+                      end
                      %itrigger =[itrigger, ones(1,numel(idstim)).*trigger(itypestim)];
                     if numel(indstim)==numel(idstimAUX{iaux}) %gerer les cas stim agree dimension only
                         indstim_AUX{iaux} = AUX(iaux).ind_dur_ch(idstimAUX{iaux},1);
                          % disp(['Find AUX onset time: ', sprintf('%.2f ',AUX.infoBV.SamplingInterval/1000000*indstim_AUX{iaux}),'seconds to sync' ])
                         disp(['Find ', num2str(numel( indstim_AUX{iaux})), ' AUX trigger ', sprintf('S%3.0f, ',trigger) ,...
                             sprintf('\n'),'Time: ', sprintf('%.2f, ',AUX(iaux).infoBV.SamplingInterval/1000000*indstim_AUX{iaux}),'seconds to sync', sprintf('\n'),'Sample: ',sprintf('%d, ',indstim_AUX{iaux}) ]);
+                    elseif isempty(trigger)
+                        disp('AUX synchronised using comment segmentation')
 
                     else
 %                         idtocheckAUX = AUX(iaux).ind_dur_ch(idstimAUX{iaux},1);
@@ -346,6 +401,7 @@ for filenb = 1:size(job.NIRSmat,1)
             %Segment the data NIRS
             dnorm = d(:,indstim(istim)-pretime:indstim(istim)+posttime);
             dnoise = noise(:,indstim(istim)-pretime:indstim(istim)+posttime);
+           
             %figure;imagesc(dnoise)
             
             
@@ -389,7 +445,12 @@ for filenb = 1:size(job.NIRSmat,1)
                         offset = NIRS.Dt.Video.pp(moduleVideo).offset{f};
                     else
                         offset = 0;
-                    end
+                    end 
+                    if isempty(trigger)
+                        %Video were alredy synchronised only adjust to the new comment reference. 
+                         NIRS.Dt.Video.pp(moduleVideo).sync_timesec{f} =  NIRS.Dt.Video.pp(moduleVideo).sync_timesec{f}+indstim*1/fs
+                    else
+
                     switch  NIRS.Dt.Video.syncref                       
                         case 'EEG'
                             try
@@ -398,7 +459,7 @@ for filenb = 1:size(job.NIRSmat,1)
                             catch
                                 disp('Error Video segmentation could not be done using EEG trigger')                                
                             end
-                     
+                      
                         case 'NIRS'
                             try 
                             NIRS.Dt.Video.pp(moduleVideo+1).p{ifile} = NIRS.Dt.Video.pp(moduleVideo).p{f};
@@ -417,10 +478,14 @@ for filenb = 1:size(job.NIRSmat,1)
                                  disp('Error Video segmentation could not be done using AUX trigger') 
                              end
                     end
-                    
+                    end
                 end
                 if isfield(NIRS.Dt,'Audio')
                      offset = NIRS.Dt.Audio.pp(moduleAudio).offset{f};
+                      if isempty(trigger)
+                        %Video were alredy synchronised only adjust to the new comment reference. 
+                         NIRS.Dt.Audio.pp(moduleAudio).sync_timesec{f} =  NIRS.Dt.Audio.pp(moduleAudio).sync_timesec{f}+indstim*1/fs
+                    else
                     switch  NIRS.Dt.Audio.syncref                       
                         case 'EEG'
                             try
@@ -449,7 +514,7 @@ for filenb = 1:size(job.NIRSmat,1)
                                 disp('Error Audio segmentation could not be done using AUX trigger')
                             end
                     end
-                    
+                      end
                 end
                 
               

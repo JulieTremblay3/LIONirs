@@ -18,7 +18,7 @@ else
     idAUX = 1; %new fields for AUX
     NIRS.Dt.AUX(idAUX).pp.p{size(rDtp,1),1}=[];
     NIRS.Dt.AUX(idAUX).pp.sync_timesec{size(rDtp,1),1}=[];
-    NIRS.Dt.AUX(idAUX).label = [];
+    NIRS.Dt.AUX(idAUX).label = []; 
 end
 onsetall = [];
 fileall = [];
@@ -258,6 +258,8 @@ end
             if isempty(raw);raw = [A;VAL];else; raw = [raw;VAL];end
         else  % no additional regressor strcmp(job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel, 'No') | strcmp(job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel, ' ')
             A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0'};
+            if isempty(pretime);pretime = 0;end
+            if isempty(postime);postime = 0;end
             VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-pretime),...
             num2cell(onsetall+postime), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1)  ];
             if  isempty(raw);raw = [A;VAL];else; raw = [raw;VAL];end

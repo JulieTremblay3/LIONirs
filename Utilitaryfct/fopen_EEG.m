@@ -75,7 +75,8 @@ try
         pstop = round(tstop/((infoBV.SamplingInterval)*1e-6));
         tmax = size(data,1)*infoBV.SamplingInterval*1e-6; 
         if pstop > size(data,1)
-            data= [data;flipud(data)];
+           % data= [data;flipud(data)];
+             data= [data;nan(size(data))];
             data = data(pstart:pstop,:);
             disp(['Warning out of range padding in the last bloc aux file: ', filename ' stop at ',num2str(tmax), ' and need to pad time until ',num2str(tstop)]);
         else

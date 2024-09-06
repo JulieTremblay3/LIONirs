@@ -3,7 +3,7 @@ function out = nirs_run_chcorrMat(job)
 %brain area or use label per label zone if you brain area are under zone
 %definition.
 
-
+  
 NIRS = []; 
 
 
@@ -1230,7 +1230,8 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
             end
             % subplot(2,2,4);imagesc(matcorrHbR)
         end
-        if 1 %isfield(job.I_chcorrlist_type, 'b_crossspectrum')
+        1
+        if 0 %isfield(job.I_chcorrlist_type, 'b_crossspectrum')
             matcorr =zeros(numel(listHBO),numel(listHBO),size(yfft,1));
             matcorrHBR =zeros(numel(listHBR),numel(listHBR),size(yfft,1));
             

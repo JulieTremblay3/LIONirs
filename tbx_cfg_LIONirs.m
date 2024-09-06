@@ -1071,9 +1071,9 @@ trigger         = cfg_entry;
 trigger.name    = 'Trigger';
 trigger.tag     = 'trigger';
 trigger.strtype = 'r';
-trigger.num     = [1 Inf];
+trigger.num     = [0 Inf];
 trigger.val     = {1}; 
-trigger.help    = {'Enter trigger number.'};
+trigger.help    = {'Enter trigger number. If you used Comments to select an interval to segment let the this field empty'};
 
 pretime         = cfg_entry;
 pretime.name    = 'PreTime';
@@ -1085,7 +1085,8 @@ pretime.help    = {'Time to include before the trigger.',...
     'Write keyword ''start'' to go to the beginning of the raw segment.',...
     'Define as a positive value, as example 5 seconds before the onset. Unintuitively, -30 will give you 30 seconds after the trigger.',...
     'To write 0 use ''0''',...
-    'Write the keyword ''Comments evt01Start to stop the segment at the comment named evt01Start'};
+    'Write the keyword ''Comments evt01Start to stop the segment at the comment named evt01Start',...
+    'Write the same keyword for pretime and postime if you like to event start and be segment for the whole duration of the event.'};
 
 posttime         = cfg_entry;
 posttime.name    = 'PostTime';
@@ -1096,7 +1097,8 @@ posttime.val     = {'30'};
 posttime.help    = {'Time to include after the trigger.',...
     'Write keyword ''end'' to go to the end of the raw segment.',...
     'Write keyword ''trig9'' to go until this next specific trigger. Test only for one trig case yet',...
-    'Write the keyword ''Comments evt01End to stop the segment at the comment named evt01End'};
+    'Write the keyword ''Comments evt01End to stop the segment at the comment named evt01End',...
+    'Write the same keyword as pretime if you like to use the duration of the event marked in the comments'};
 
 
 m_NormType          = cfg_menu;
@@ -1152,7 +1154,7 @@ m_SegmentTrig.help     = {'By defaults, use all trig to segment. However, in som
 % Executable Branch
 E_segment      = cfg_exbranch;
 E_segment.name = 'Segment';
-E_segment.tag  = 'segment';
+E_segment.tag  = 'E_segment';
 E_segment.val  = {NIRSmat DelPreviousData trigger pretime posttime m_SegmentTrig };
 E_segment.prog = @nirs_run_segment;
 E_segment.vout = @nirs_cfg_vout_segment;
@@ -1219,7 +1221,7 @@ movingaverage_nbpoint.val     =  {1};
 movingaverage_nbpoint.help    = {'Defines the duration (sec) of the time interval (step) to calculate moving average M1 and M2: Xn to Xn+step. Depending on the smoothing the user wants to apply, i.e. how sensitive detection of the signal’s variation should be, a higher or lower value should be indicated.'};
 
 
-
+ 
 printreportthreshold        = cfg_menu;
 printreportthreshold.tag    = 'printreportthreshold';
 printreportthreshold.name   = 'Print threshold report for each channel';
@@ -1520,7 +1522,7 @@ end
 E_prewhitening = cfg_exbranch;
 E_prewhitening.name = 'PreWhitening';
 E_prewhitening.tag  = 'E_prewhitening';
-E_prewhitening.val  = {NIRSmat DelPreviousData };
+E_prewhitening.val  = {NIRSmat DelPreviousData }; 
 E_prewhitening.prog = @nirs_run_E_prewhitening;
 E_prewhitening.vout = @nirs_cfg_vout_prewhitening;
 E_prewhitening.help = {'Use Prewhitening see ref: , TOBE TESTED RAE'};
@@ -1997,7 +1999,7 @@ end
 E_writeHMR      = cfg_exbranch;
 E_writeHMR.name = 'Write HMR';
 E_writeHMR.tag  = 'E_writeHMR';
-E_writeHMR.val  = {NIRSmat,NIRSname,prjfile};
+E_writeHMR.val  = {NIRSmat,NIRSname,prjfile}; 
 E_writeHMR.prog = @nirs_run_writehmr;
 E_writeHMR.vout = @nirs_cfg_vout_writehmr;
 E_writeHMR.help = {'Write in NIRS.mat epoch average session in session for Homer .hmr.',...
@@ -4454,7 +4456,7 @@ f_HyperScan_outdir.val    = {''};
 f_HyperScan_outdir.help    = {'Select the output folder where to save data. By default if you let empty it will save in the first NIRS.mat file selected'}; 
 
 E_HyperScanCombineNIRS    = cfg_exbranch;
-E_HyperScanCombineNIRS.name = 'HyperScan';
+E_HyperScanCombineNIRS.name = 'HyperScan Combine';
 E_HyperScanCombineNIRS.tag  = 'E_HyperScanCombineNIRS';
 E_HyperScanCombineNIRS.val  = {NIRSmat, f_HyperScan_outdir};
 E_HyperScanCombineNIRS.prog = @nirs_run_E_HyperScanCombineNIRS;
@@ -4468,11 +4470,38 @@ function vout = nirs_cfg_vout_E_HyperScanCombineNIRS(job)
     vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
 end
 
+
+
+E_HyperScanDivideNIRS    = cfg_exbranch;
+E_HyperScanDivideNIRS.name = 'HyperScan Separate subject';
+E_HyperScanDivideNIRS.tag  = 'E_HyperScanDivideNIRS';
+E_HyperScanDivideNIRS.val  = {NIRSmat, f_HyperScan_outdir};
+E_HyperScanDivideNIRS.prog = @nirs_run_E_HyperScanDivideNIRS;
+E_HyperScanDivideNIRS.vout = @nirs_cfg_vout_E_HyperScanDivideNIRS;
+E_HyperScanDivideNIRS.help = {['UNCOMPLETE Divide the data of multiple subjects (NIRS.mat) in two file for hypyp compatibility ToDo']};
+
+function vout = nirs_cfg_vout_E_HyperScanDivideNIRS(job)
+    vout = cfg_dep;                    
+    vout.sname      = 'NIRS.mat';       
+    vout.src_output = substruct('.','NIRSmat'); 
+    vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
+end
+
+%Module  Write external file
+M_HyperScanNIRS        =  cfg_choice; 
+M_HyperScanNIRS.name   = 'HyperScan';
+M_HyperScanNIRS.tag    = 'M_HyperScanNIRS';
+M_HyperScanNIRS.values = {E_HyperScanCombineNIRS ,  E_HyperScanDivideNIRS}; 
+M_HyperScanNIRS.help   = {'These modules is design to combine or divide 2 subjects during synchronized hyperscanning session. Combine the sessions to see to participant at once',...
+    'After divide as subject for external software as Hypyp export (to complete).'};
+
+
+
 %Module Utility
 M_Utility        = cfg_choice; 
 M_Utility.name   = 'Utility NIRSmat';
 M_Utility.tag    = 'M_Utility';
-M_Utility.values = {E_NIRSmatdiradjust, E_NIRSmatcreatenewbranch  E_createseedlist E_qualityreport E_zone2channellist E_channellist2zone E_VIDEO E_viewNIRS M_datawritenirs E_HyperScanCombineNIRS M_others }; %
+M_Utility.values = {E_NIRSmatdiradjust, E_NIRSmatcreatenewbranch  E_createseedlist E_qualityreport E_zone2channellist E_channellist2zone E_VIDEO E_viewNIRS M_datawritenirs M_HyperScanNIRS  M_others }; %
 M_Utility.help   = {'Utility on NIRSmat function.'};
 
 nirsHSJ        = cfg_choice;
