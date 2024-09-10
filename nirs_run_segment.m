@@ -151,7 +151,7 @@ for filenb = 1:size(job.NIRSmat,1)
                         disp('Error, fields comments do not exist no segmentation')
                         return
                     end
-                 tmp=NIRS.Dt.fir.comments{1};
+                 tmp=NIRS.Dt.fir.comments{1}
            
                   findevent = strfind( tmp(:,1),strtrim(job.pretime(9:end)));
                   for idevt=1:numel(findevent)
@@ -568,6 +568,9 @@ for filenb = 1:size(job.NIRSmat,1)
                 %reajuster tout les trigs between pretime and postime of the
                 %selected segment
                 aux5all = NIRS.Dt.fir.aux5{f};
+                if isempty(itrigger)
+                    itrigger=1;
+                end
                 idtrigtokeep = find(aux5all(:,2)>(indstim(istim) - pretime) & aux5all(:,2)<(indstim(istim) +posttime));
                 if ~isempty( idtrigtokeep)
                     aux5new(:,1) = aux5all(idtrigtokeep,1);
