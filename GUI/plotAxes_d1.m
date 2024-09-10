@@ -809,10 +809,14 @@ if isfield(handles,'selected_trig')
             end
         end
        if isfield(handles.NIRS.Dt.fir,'comments')
-           comments = (handles.NIRS.Dt.fir.comments{1})
+           
+           comments = (handles.NIRS.Dt.fir.comments{1});
                 for i = 2:size(comments ,1)
+                    try
                     text(PMI{currentsub}.data(cf).HRF.tHRF(comments{i,2}),-0.01,comments{i,1})
                     plot([PMI{currentsub}.data(cf).HRF.tHRF(comments{i,2}),PMI{currentsub}.data(cf).HRF.tHRF(comments{i,2}+comments{i,3}) ], [-0.01 -0.01],'linestyle','-','marker','+','color','k','displayname',num2str(i),'uicontextmenu',handles.Context_removecomment)
+                    catch
+                    end
                 end
        end
     end
