@@ -4,7 +4,7 @@ function out = nirs_run_average(job)
 % avtype values : 2 -> average over separate files %to check
 %                 1 -> average over multiple files %valid now !
 %                 0 -> average over mutliple subjects %to check
-
+%
 prefix = 'AVE'; %for "averaged"
 DelPreviousData = job.DelPreviousData;
 % 
