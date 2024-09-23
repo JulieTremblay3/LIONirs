@@ -1152,13 +1152,13 @@ m_SegmentTrig.help     = {'By defaults, use all trig to segment. However, in som
 
 
 % Executable Branch
-E_segment      = cfg_exbranch;
-E_segment.name = 'Segment';
-E_segment.tag  = 'E_segment';
-E_segment.val  = {NIRSmat DelPreviousData trigger pretime posttime m_SegmentTrig };
-E_segment.prog = @nirs_run_segment;
-E_segment.vout = @nirs_cfg_vout_segment;
-E_segment.help = {'This module segments data around triggers (defining pretime and post time). This step is essential to synchronize multimodal data such as EEG, auxiliary (AUX)  or video. '};
+segment      = cfg_exbranch;
+segment.name = 'Segment';
+segment.tag  = 'segment';
+segment.val  = {NIRSmat DelPreviousData trigger pretime posttime m_SegmentTrig };
+segment.prog = @nirs_run_segment;
+segment.vout = @nirs_cfg_vout_segment;
+segment.help = {'This module segments data around triggers (defining pretime and post time). This step is essential to synchronize multimodal data such as EEG, auxiliary (AUX)  or video. '};
 %make NIRS.mat available as a dependency
 
 function vout = nirs_cfg_vout_segment(job)
@@ -4395,7 +4395,7 @@ M_readNIRS.help   = {'These modules read NIRS data in different formats.'};
 M_Segment        =   cfg_choice; 
 M_Segment.name   =  'Segment/Onset';
 M_Segment.tag    = 'M_Segment';
-M_Segment.values = {E_segment ,E_Concatenate_file,E_Concatenate_nirsmat,E_aux2manualtrig,E_manualtrig,E_createonset_correlationsignal }; 
+M_Segment.values = {segment ,E_Concatenate_file,E_Concatenate_nirsmat,E_aux2manualtrig,E_manualtrig,E_createonset_correlationsignal }; 
 M_Segment.help   = {'These modules segment or combine data.'};
 
 
