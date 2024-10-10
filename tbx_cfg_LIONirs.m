@@ -490,6 +490,25 @@ function vout = nirs_cfg_vout_readNIRxscout(job)
     vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
 end
 
+% Executable Branch
+E_readNIRSport     = cfg_exbranch;      
+E_readNIRSport.name = 'Read NIRSport';            
+E_readNIRSport.tag  = 'E_readNIRSport'; 
+E_readNIRSport.val  = {inputNIRxscout,age1,prjfile,output_path,c_nameconvention_NIRxscout};   
+E_readNIRSport.prog = @nirs_run_readNIRSport;  
+E_readNIRSport.vout = @nirs_cfg_vout_readNIRSport;
+E_readNIRSport.help = {'Read data acquired with NIRSport on a  NIRx system. Tested for 16x16 montage'};
+
+function vout = nirs_cfg_vout_readNIRSport(job)
+    vout = cfg_dep;                    
+    vout.sname      = 'NIRS.mat';       
+    vout.src_output = substruct('.','NIRSmat'); 
+    vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
+end
+
+
+
+
 % Create a file selector component to select .snirf file.
 inputSNIRF         = cfg_files;
 inputSNIRF.name    = 'Select .snirf data'; % The displayed name
@@ -604,7 +623,7 @@ e_MultimodalPath.name     = 'Select the new folder';
 e_MultimodalPath.tag      = 'e_MultimodalPath';
 e_MultimodalPath.filter   = {'dir'};
 e_MultimodalPath.ufilter  = '.*';    %
-e_MultimodalPath.num      = [1 1];     % Number of inputs required 
+e_MultimodalPath.num      = [0 1];     % Number of inputs required 
 e_MultimodalPath.help     = {'New folder used for multimodal files such as EEG, AUX, Video or Audio. If the location of the multimodal files has changed, enter the new directory location. This function expects all the multimodal files in the same folder. For a more specific adjustment use the Display GUI menu Setting/Multimodal files to define a new location.'};
 
 b_MultimodalPath_yes        = cfg_branch; % Is an empty branch.
@@ -3391,9 +3410,10 @@ e_AUXdir.tag     = 'e_AUXdir';
 e_AUXdir.filter  = 'dir';
 e_AUXdir.ufilter = '.*';    
 e_AUXdir.dir = '';
-e_AUXdir.num = [1 1];  % Number of inputs required 
-e_AUXdir.check = [];
-e_AUXdir.help    = {'Auxiliary output folder.'}; % help text displayed
+e_AUXdir.num = [0 Inf];  % Number of inputs required 
+e_AUXdir.val  = {''};
+%e_AUXdir.check = [];
+e_AUXdir.help    = {'Auxiliary output folder. If empty the output folder will be the same as data nirs'}; % help text displayed
 
 
 e_FWHM1         = cfg_entry; 
@@ -3482,7 +3502,7 @@ e_HRF_SDmodel.help   = {['Add short distance in the GLM model, ' ...
     'If you write ''Global'', the zone Global.zone will be used as defaul regressor in your folder subject for the physiology using the average of all channel average.,...' ...
     'If you write a ''AllShortDistance.zone'' the default short distance file will be used in your folder subject ' ...
     'Use a specific file name if you want to specify you choice at a custom location' ...
-    'If you enter No, or let the field empty no physiological regressor will be add in the model']};
+    ' If you enter No, or let the field empty no physiological regressor will be add in the model']};
 
 
 e_HRF_AUXmodel        = cfg_entry;
@@ -3506,14 +3526,15 @@ e_HRFxlsfiles.name    = 'XLS onset files'; % The displayed name
 e_HRFxlsfiles.tag     = 'e_HRFxlsfiles';          
 e_HRFxlsfiles.num     = [0 Inf];     % Number of inputs required 
 e_HRFxlsfiles.val{1}  = {''};
-e_HRFxlsfiles.help    = {'Open excel or text file with HRF table onset information. This file must contain 3 columns, first column = onset, second column = duration and third column=weight'}; % help text displayed
+e_HRFxlsfiles.help    = {'Open excel or text file with HRF table onset information. This file must contain 3 columns, first column = onset, second column = duration and third column=weight',...
+                        'fourth column pretime in second and fifth column postime in second', }; % help text displayed
 
 
 
 b_HRFxlsonset        = cfg_branch;
 b_HRFxlsonset.tag    = 'b_HRFxlsonset';
 b_HRFxlsonset.name   = 'HRF xls onset';
-b_HRFxlsonset.val    = {e_HRFxlsfiles  e_HRFlabel e_TimetoPeak1, e_FWHM1,e_TimetoPeak2,e_FWHM2,e_DIP,e_AUXdir };
+b_HRFxlsonset.val    = {e_HRFxlsfiles  e_HRFlabel e_TimetoPeak1, e_FWHM1,e_TimetoPeak2,e_FWHM2,e_DIP,e_AUXdir e_HRF_SDmodel  };
 b_HRFxlsonset.help   = {'Model HRF response using onset write the table (.xlsx or .txt file) using 3 columns first the onset time in seconds, second the duration in seconds and third the weight 1 or other'};
 
 
@@ -4388,7 +4409,7 @@ M_readMultimodal.help   = {'Read EEG or Auxiliary format to do visualized multim
 M_readNIRS        = cfg_choice; 
 M_readNIRS.name   = 'Read data';
 M_readNIRS.tag    = 'M_readNIRS';
-M_readNIRS.values = {E_readNIRxscout,E_rawhomer, E_readSNIRF,boxy1, E_GenericDataExportBV, M_readMultimodal}; 
+M_readNIRS.values = {E_readNIRxscout,E_rawhomer, E_readSNIRF,boxy1, E_GenericDataExportBV, E_readNIRSport, M_readMultimodal}; 
 M_readNIRS.help   = {'These modules read NIRS data in different formats.'};
 
 %Module segment or concatenate data 

@@ -181,9 +181,55 @@ for Idx_File=1:numel(job.inputrawhomer)
                 '',... %Channel Resolution
                 '',... %Channel Units
                 NIRS.Cf.H.C.n,... %names given as a column of cells 
-                1/NIRS.Cf.dev.fs,... %SamplingInterval in microseconds
+                1/NIRS.Cf.dev.fs * 1000000,... %SamplingInterval in microseconds
                 NIRS.Dt.fir.sizebloc); %SamplingInterval in microseconds
-            
+      if isfield(DATA,'aux')
+
+        fileoutAUX = fullfile(dirout ,['AUX', fil1 ,'.dat']);
+        idAUX = 1;
+        NIRS.Dt.AUX(idAUX).pp.p{size(Idx_File,1),1}=[]; %initialised 
+        NIRS.Dt.AUX(idAUX).pp.sync_timesec{size(Idx_File,1),1}=[];
+        NIRS.Dt.AUX(idAUX).label = [];
+
+         nbAUX = numel(DATA.aux)./numel(DATA.t);
+         disp(['Read AUX find ', num2str(nbAUX),' channel']);
+        
+         reshape(DATA.aux,numel(DATA.t), nbAUX);
+         AUX.data =  reshape(DATA.aux,numel(DATA.t), nbAUX);
+         AUX.ind_dur_ch=[1 1 0];
+         AUX.marker={'Time 0', 'S 1'};
+         name_ele = [];
+         for i=1:nbAUX
+            name_ele = [name_ele, {['AUX', num2str(i)]}];
+        
+         end
+        AUX.infoBV.DataFormat = 'BINARY';
+        AUX.infoBV.DataOrientation='VECTORIZED';
+        AUX.infoBV.DataType = 'TIMEDOMAIN';
+        AUX.infoBV.NumberOfChannels = num2str(nbAUX);
+        AUX.infoBV.DataPoints = numel(DATA.t);
+        AUX.infoBV.SamplingInterval = round(1/NIRS.Cf.dev.fs*1000000);
+        AUX.infoBV.BinaryFormat = 'IEEE_FLOAT_32';
+        AUX.infoBV.name_ele = name_ele; 
+         AUX.infoBV.coor_r = ones(1,nbAUX);
+         AUX.infoBV.coor_theta  = ones(1,nbAUX)*90;
+         AUX.infoBV.coor_phi =  ones(1,nbAUX)*45;
+         
+        
+   
+        
+        fwrite_EEG(fileoutAUX,AUX,1,AUX.infoBV.DataPoints );
+        NIRS.Dt.AUX(idAUX).pp(1,numel(NIRS.Dt.AUX(1).pp)).p{Idx_File,1}=fileoutAUX;
+        NIRS.Dt.AUX(idAUX).pp(1,numel(NIRS.Dt.AUX(1).pp)).sync_timesec{Idx_File,1}=0;
+        NIRS.Dt.AUX(idAUX).label = 'AUX';
+
+    end
+
+
+
+
+
+
      %Create a New Segment marker
     SD.Markers{Idx_File,1}.Type='New Segment';
     SD.Markers{Idx_File,1}.Description='';
@@ -233,7 +279,7 @@ end
         pos(i,3) = (z2-z1)/2+z1; 
         pos(i,4) = NIRS.Cf.H.C.gp(i,1);
     end
-    
+  
     %idbad = find(NIRS.Cf.H.C.gp<job.distmin|NIRS.Cf.H.C.gp>job.distmax);
      zone.SD.Lambda = NIRS.Cf.dev.wl;
      zone.SD.SrcPos = NIRS.Cf.H.S.r.o.mm.p';

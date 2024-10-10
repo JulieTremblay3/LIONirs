@@ -1768,7 +1768,7 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
             fprintf('%d,',ilink)
             if mod(ilink,30)==0
                 fprintf('\n ');
-            end
+            end 
             datatable.MAT= halfMAT(:,ilink);
             try
                 lme = fitlme( datatable,LMEformula); 

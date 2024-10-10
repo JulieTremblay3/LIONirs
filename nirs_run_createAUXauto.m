@@ -95,10 +95,14 @@ for ifile =1:numel(rDtp)
         HRFcurve.infoBV.name_ele = {deblank(label)};
         HRFcurve.infoBV.coor_r = 1;
         HRFcurve.infoBV.coor_theta  = 90;
-        HRFcurve.infoBV.coor_phi = 45;
+        HRFcurve.infoBV.coor_phi = 45; 
         HRFcurve.infoBV.DataPoints = numel(Scn);
         [pathstr, name, ext] = fileparts(filedata);
-        fileoutHRFcurve = fullfile(job.c_createAUXauto.b_HRFtriggeronset.e_AUXdir{1}, [label,name,'.dat']);
+        if isempty(job.c_createAUXauto.b_HRFtriggeronset.e_AUXdir)
+            fileoutHRFcurve = fullfile(pathstr, [label,name,'.dat']);
+        else
+            fileoutHRFcurve = fullfile(job.c_createAUXauto.b_HRFtriggeronset.e_AUXdir{1}, [label,name,'.dat']);
+        end
         disp(['File HRF AUX create: ', fileoutHRFcurve]); 
         fwrite_EEG(fileoutHRFcurve,HRFcurve,1,HRFcurve.infoBV.DataPoints );
         NIRS.Dt.AUX(idAUX).pp(1,numel(NIRS.Dt.AUX(1).pp)).p{ifile,1}=fileoutHRFcurve;
@@ -118,7 +122,12 @@ for ifile =1:numel(rDtp)
         end
   
     %HRF convolution
+    try
     onset =num(:,1);
+    catch
+        disp(['You need to enter an XLS onset files file with the 5 columns to create the hrf, first column onset, second column duration, third column weight',...
+             'fourth column pretime and fifth column postime']);
+    end
     dur = num(:,2);
     weight = num(:,3);
     eventV =zeros(size(EEG.data,1),1);
@@ -178,7 +187,11 @@ for ifile =1:numel(rDtp)
         HRFcurve.infoBV.coor_phi = 45;
         HRFcurve.infoBV.DataPoints = numel(Scn);
         [pathstr, name, ext] = fileparts(filedata);
-        fileoutHRFcurve = fullfile(job.c_createAUXauto.b_HRFxlsonset.e_AUXdir{1}, [label,name,'.dat']);
+        if isempty(job.c_createAUXauto.b_HRFxlsonset.e_AUXdir)
+            fileoutHRFcurve = fullfile(pathstr, [label,name,'.dat']);
+        else
+            fileoutHRFcurve = fullfile(job.c_createAUXauto.b_HRFxlsonset.e_AUXdir{1}, [label,name,'.dat']);
+        end
         disp(['File HRF AUX create: ', fileoutHRFcurve]);
         fwrite_EEG(fileoutHRFcurve,HRFcurve,1,HRFcurve.infoBV.DataPoints );
         NIRS.Dt.AUX(idAUX).pp(1,numel(NIRS.Dt.AUX(1).pp)).p{ifile,1}=fileoutHRFcurve;
@@ -198,15 +211,26 @@ try
 catch
     raw = [];
 end
-if isstring(job.c_createAUXauto.b_HRFtriggeronset.e_HRFpretime)
-    pretime = str2num(job.c_createAUXauto.b_HRFtriggeronset.e_HRFpretime);
-else
-    pretime =job.c_createAUXauto.b_HRFtriggeronset.e_HRFpretime;
+if isfield(job.c_createAUXauto,'b_HRFtriggeronset')
+    if isstring(job.c_createAUXauto.b_HRFtriggeronset.e_HRFpretime)
+        pretime = str2num(job.c_createAUXauto.b_HRFtriggeronset.e_HRFpretime);
+    else
+        pretime =job.c_createAUXauto.b_HRFtriggeronset.e_HRFpretime;
+    end
+elseif  isfield(job.c_createAUXauto,'b_HRFxlsonset')
+    pretime = num(:,4);
+
 end
-if isstring(job.c_createAUXauto.b_HRFtriggeronset.e_HRFposttime)
-    postime = str2num(job.c_createAUXauto.b_HRFtriggeronset.e_HRFposttime);
-else
-    postime =job.c_createAUXauto.b_HRFtriggeronset.e_HRFposttime;
+if isfield(job.c_createAUXauto,'b_HRFtriggeronset')
+    if isstring(job.c_createAUXauto.b_HRFtriggeronset.e_HRFposttime)
+        postime = str2num(job.c_createAUXauto.b_HRFtriggeronset.e_HRFposttime);
+    else
+        postime =job.c_createAUXauto.b_HRFtriggeronset.e_HRFposttime;
+    end
+elseif isfield(job.c_createAUXauto,'b_HRFxlsonset')
+    postime = num(:,5);
+
+
 end
 if isempty(pretime)
 for istep=1:numel(NIRS.Dt.fir.pp)
@@ -223,7 +247,7 @@ for istep=1:numel(NIRS.Dt.fir.pp)
 end
 end
 
-
+    if isfield(job.c_createAUXauto,'bHRFtiggeronset')
     if ~isfield(job.c_createAUXauto.b_HRFtriggeronset,'e_HRF_SDmodel')
         A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0'};
         VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-pretime),...
@@ -264,6 +288,53 @@ end
             num2cell(onsetall+postime), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1)  ];
             if  isempty(raw);raw = [A;VAL];else; raw = [raw;VAL];end
         end
+    end
+    elseif isfield(job.c_createAUXauto,'b_HRFxlsonset')
+        if ~isfield(job.c_createAUXauto.b_HRFxlsonset,'e_HRF_SDmodel')
+            A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0'};
+            VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-pretime),...
+                num2cell(onsetall+postime), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1)  ];
+            if isempty(raw);raw = [A;VAL];else; raw = [raw;VAL];end
+        elseif isfield(job.c_createAUXauto.b_HRFxlsonset,'e_HRF_SDmodel');
+            if strcmp(job.c_createAUXauto.b_HRFxlsonset.e_HRF_SDmodel, 'Global') %HRF only
+                [pathdefault, ~,~]= fileparts(NIRS.Dt.fir.pp(1).p{1});
+                disp(['Use default :',fullfile(pathdefault,'Global.zone'),' in the regression'])
+                job.c_createAUXauto.b_HRFxlsonset.e_HRF_SDmodel = fullfile(pathdefault,'Global.zone');
+                A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0', 'X1'};
+                nameSDfile =job.c_createAUXauto.b_HRFxlsonset.e_HRF_SDmodel;
+                VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-pretime),...
+                    num2cell(onsetall+postime), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1),repmat({nameSDfile},numel(onsetall),1)  ];
+                if isempty(raw);raw = [A;VAL];else; raw = [raw;VAL];end
+
+            elseif strcmp(job.c_createAUXauto.b_HRFxlsonset.e_HRF_SDmodel, 'AllShortDistance') %HRF only
+                [pathdefault, ~,~]= fileparts(NIRS.Dt.fir.pp(1).p{1});
+                disp(['Use default :',fullfile(pathdefault,'AllShortDistance.zone'),' in the regression'])
+                job.c_createAUXauto.b_HRFxlsonset.e_HRF_SDmodel = fullfile(pathdefault,'AllShortDistance.zone');
+                A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0', 'X1'};
+                nameSDfile =job.c_createAUXauto.b_HRFxlsonset.e_HRF_SDmodel;
+                VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-pretime),...
+                    num2cell(onsetall+postime), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1),repmat({nameSDfile},numel(onsetall),1)  ];
+                if isempty(raw);raw = [A;VAL];else; raw = [raw;VAL];end
+
+            elseif isfile(job.c_createAUXauto.b_HRFxlsonset.e_HRF_SDmodel) %isfile(job.c_createAUXauto.b_HRFxlsonset.e_HRF_SDmodel)
+                A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0', 'X1'};
+                 disp(['Use default :',job.c_createAUXauto.b_HRFxlsonset.e_HRF_SDmodel,' in the regression'])
+                nameSDfile =job.c_createAUXauto.b_HRFxlsonset.e_HRF_SDmodel; %'C:\data\FRESH\Analyzed\STAT_Motor\MotorSD.zone'
+                VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-pretime),...
+                    num2cell(onsetall+postime), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1),repmat({nameSDfile},numel(onsetall),1)  ];
+                if isempty(raw);raw = [A;VAL];else; raw = [raw;VAL];end
+            else  % no additional regressor strcmp(job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel, 'No') | strcmp(job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel, ' ')
+                A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0'};
+                disp(['No additional regressor'])
+                if isempty(pretime);pretime = 0;end
+                if isempty(postime);postime = 0;end
+                VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-pretime),...
+                    num2cell(onsetall+postime), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1)  ];
+                if  isempty(raw);raw = [A;VAL];else; raw = [raw;VAL];end
+            end
+        end
+
+
     end
  
 try

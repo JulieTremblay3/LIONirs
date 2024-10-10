@@ -1,0 +1,400 @@
+function out = nirs_run_readSNIRF(job)
+%NIRS_RUN_READSNIRF This function takes in a job and creates an analysis
+%step from it. It will read the snirf file and write a NIRS.mat construct
+%that can be used in the next steps of an analysis.
+%   prjname: .prj file for project
+%   fileIn: raw data file in .snirf format
+%   fileOut: .nir, .mat, .vhdr, .vmkr
+
+% NOTE: While based on nirs_run_readNIRxscout, DATA.d in nirs_run_readSNIRF
+% corresponds to the transposed of DATA.d in nirs_run_readNIRxscout. That
+% means that while original code use the value of DATA.d as is, code reused
+% from readNIRxscout has the DATA.d variable transposed (and the size
+% function has the 1 argument switched to 2).
+
+%PARAMETRE D'AQUISITION
+NIRS.Cf.dev.n = 'snirf';
+
+NIRS.Cf.H.n = 'SainteJustine prj';
+
+inputsnirf = job.inputSNIRF;
+
+
+    %Verifie si le path pointe vers un fichier
+    dirout = job.output_path;
+    if isfolder(dirout)
+        choice = questdlg(['Directory ', dirout,' already exist do  you want to continue and overwrite this folder ?'], ...
+        'WARNING',...
+            'Yes Overwrite', 'Cancel','Cancel');
+    switch choice
+         case 'Cancel'
+            return
+        case 'Yes Overwrite'
+            try
+                 rmdir(dirout);
+            catch
+                msgbox(['Please remove ' , dirout,' manually'])
+                disp(['Please remove ' , dirout,' manually, output could not be write'])
+                return
+            end
+    end
+    else
+        mkdir(dirout)
+    end
+
+    %Create or load a .prj file
+if isfield(job.c_createImportProjectSnirf,'b_createProject')
+    try
+        LoadedStruct = Createproject_fromsnirf(inputsnirf{1});
+        SaveStruct = Create_PrjStruct( LoadedStruct );
+        [filepath,name,ext] =fileparts(inputsnirf{1});
+        save(fullfile(dirout,[name,'.prj']), 'SaveStruct');
+        prjfile = fullfile(dirout ,[name,'.prj']);
+        disp(['Create automatic : ', prjfile])
+    catch
+         disp('Warning no optode coordinate information')
+    end
+elseif isfield(job.c_createImportProjectSnirf,'b_importProject')
+    prjfile = job.c_createImportProjectSnirf.b_importProject.prjfile{1};
+    LoadedStruct = load( prjfile,'-mat');
+    LoadedStruct = Load_PrjStruct(LoadedStruct,false);
+    disp(['Import: ', prjfile])
+end
+    
+% MISC. DATA
+% This section handle the data that is in the .snirf file but isn't part of
+% the measurement per se. Such data include the subject age
+
+assert(isfile(inputsnirf),"Input SNIRF doesn't exists."); % Check if the file still exists (could have been deleted in the meanwhile.)
+[dir1,fil1,ext1] = fileparts(inputsnirf{1});
+filehdr = fullfile(dir1,[fil1,ext1]);
+
+try
+    snirf = SnirfClass(inputsnirf{1});
+catch
+    disp('Please install https://github.com/fNIRS/snirf_homer3 to support snirf class compatibility ')
+    return
+end
+%use field as in .nirs file... 
+DATA.d = snirf.data.dataTimeSeries;
+DATA.t = snirf.data.time;
+fq=1/(DATA.t(2)-DATA.t(1));
+try
+if ~isempty(snirf.stim)
+    DATA.s = zeros(size(DATA.d,1), numel(snirf.stim));
+    for istim = 1 : numel(snirf.stim)
+        for idata=1:size(snirf.stim(istim).data,1)
+            snirf.stim(1,istim).name;
+            round(fq*snirf.stim(1,istim).data(idata,1));
+            DATA.s(round(fq*snirf.stim(1,istim).data(idata,1)),istim) = 1;
+        end
+    end
+else
+    DATA.s = zeros(size(DATA.d,1),1);
+end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Load stim from file and extract it for display
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    fprintf('    Stim (.snirf-style display):\n');
+    for ii=1:length(snirf.stim)
+        fprintf('        stim(%d): {name = ''%s'', data = [', ii, snirf.stim(ii).name);
+        for jj=1:size(snirf.stim(ii).data,1)
+            if jj==size(snirf.stim(ii).data,1)
+                fprintf('%0.1f', snirf.stim(ii).data(jj,1));
+            else
+                fprintf('%0.1f, ', snirf.stim(ii).data(jj,1));
+            end
+        end
+        fprintf(']}\n');
+    end
+    fprintf('\n');
+    for i = 1:size(snirf.aux,2)
+        aux(:,i) = snirf.aux(i).dataTimeSeries;
+    end
+catch %for FRESH data format
+    try
+    FileName= inputsnirf{1}
+    Events = importdata([FileName(1:end-10),'events.tsv']);
+    DATA.s = zeros(size(DATA.d,1),1);
+    DATA.s(Events.data(:,2))=Events.data(:,1);
+    catch
+        disp('No event imported')
+    end
+end
+
+
+
+try
+    DATA.SD.Lambda = snirf.probe.wavelengths; 
+    DATA.SD.SrcPos = snirf.probe.sourcePos2D;
+    DATA.SD.DetPos = snirf.probe.detectorPos2D;
+    DATA.SD.nSrc = size(snirf.probe.sourcePos2D,1);
+    DATA.SD.nDets = size(snirf.probe.detectorPos2D,1);
+    DATA.SD.SpatialUnit = 'mm';
+catch %Ajustement for FRESH snirf data coordinate are not embended in sNIRF format use tsv optode file 
+          try
+          disp('WARNING snirf format missing field adjust for FRESH project only')
+          A = importdata([FileName(1:end-26),'optodes.tsv'])
+          for ich=1:size(A.data,1)
+              label = A.textdata{ich+1,1};
+              if strcmp(label(1),'S')
+                sourcePos(str2num(label(2:end)),:)=A.data(ich,:);
+              elseif strcmp(label(1),'D')
+                detectorPos(str2num(label(2:end)),:)=A.data(ich,:);
+              end
+          end
+           
+           DATA.SD.SrcPos =  sourcePos;
+           DATA.SD.DetPos = detectorPos;
+           DATA.SD.SpatialUnit = 'm';
+           Channels = importdata([FileName(1:end-10),'channels.tsv']);
+          DATA.SD.Lambda = [760,850];
+           
+           DATA.SD.nSrc = size(sourcePos,1);
+           DATA.SD.nDets = size(detectorPos,1);
+          catch
+              disp('Warning : No optode coordinated')
+          end
+end
+
+
+source_lst = [];
+detector_lst = [];
+wavelength_lst = [];
+for i = 1:size(DATA.d,2)
+    foo_s = snirf.data.measurementList(i).sourceIndex;
+    foo_d = snirf.data.measurementList(i).detectorIndex;
+    foo_w = snirf.data.measurementList(i).wavelengthIndex;
+    
+    source_lst = [source_lst foo_s];
+    detector_lst = [detector_lst foo_d];
+    wavelength_lst = [wavelength_lst foo_w];
+end
+
+DATA.SD.MeasList(:,1) =  source_lst; 
+DATA.SD.MeasList(:,2) =  detector_lst;
+DATA.SD.MeasList(:,3) = ones(size(DATA.d,2),1);
+DATA.SD.MeasList(:,4) = wavelength_lst;
+
+DispHelm = get_Helmet( LoadedStruct );
+sMtg = get_Mtg( DispHelm );
+vHoles = get_vHoles( DispHelm );
+
+%ASSOCIATION SOURCE ML 1 = SOURCE HELMET 018001
+Nb_Sources_Disp = sMtg.Gen_Params.Nb_Sources_Disp/2;
+Nb_Detect_Disp = sMtg.Gen_Params.Nb_Detect_Disp;
+%FIDUCIAL
+NIRS.Cf.H.F.r.o.mm = sMtg.matFiducials(1:3,:)';
+%Source JUSTE POUR LE IMAGINC 16 CANAUX AVEC LE CASQUE STE-JUSTINE
+listsrs = [018001,020003,022005,024007,026009,028011,030013,032015,017002,019004,021006,023008,025010,027012,029014,031016,...
+    050033,052035,054037,056039,058041,060043,062045,064047, 049034,051036,053038,055040,057042,059044,061046,063048,...
+82065,84067,86069,88071,90073,92075,94077,96079,81066,83068,85070,87072,89074,91076,93078,95080,...
+114097,116099,118101,120103,122105,124107,126109,128111,113098,115100,117102,119104,121106,123108,125110,127112];
+
+NIRS.Cf.H.S.N =[Nb_Sources_Disp]; %Nb of source
+for i=1:Nb_Sources_Disp
+    p = find(listsrs(i)==sMtg.v_HolesMtg);
+    if numel(p)==1
+        NIRS.Cf.H.S.r.o.mm.p(:,i) =[vHoles(p).Coord.x,vHoles(p).Coord.y,vHoles(p).Coord.z]*100; %position cm
+    else
+         NIRS.Cf.H.S.r.o.mm.p(:,i) = [0,0,0];
+    end    
+end
+%Detector
+listdet = [1:Nb_Detect_Disp]*1000000;
+NIRS.Cf.H.D.N =[Nb_Detect_Disp]; %Nb of detecteur
+for i=1:numel(listdet)
+    p = find(listdet(i)==sMtg.v_HolesMtg);
+    if numel(p)==1
+        NIRS.Cf.H.D.r.o.mm.p(:,i) =[vHoles(p).Coord.x,vHoles(p).Coord.y,vHoles(p).Coord.z]*100; %position cm
+    else
+         NIRS.Cf.H.D.r.o.mm.p(:,i) = [0,0,0];
+    end
+end
+ 
+
+
+
+%PARAMETRE  
+NIRS.Dt.s.age = job.age1;
+NIRS.Dt.ana.T1 = ''; %FICHIER DE IRM
+NIRS.Cf.H.prj = prjfile;
+
+
+    
+fprintf('%s\n','File processed');
+for Idx_File=1:numel(job.inputSNIRF)
+     [dir1,fil1,ext1] = fileparts(job.inputSNIRF{Idx_File});
+  
+     
+     NIRS.Dt.s.p = [dir1,'/'];%RAW NIRS PATH
+     fileOut_nir = fullfile(dirout ,[fil1,'.nir']);
+     fileOutRoot_vhdr = fullfile(dirout ,[fil1,'.vhdr']);
+     fileOutRoot_vmrk = fullfile(dirout ,[fil1,'.vmrk']);
+ 
+
+   
+    if isfield(DATA.SD,'MeasList')    
+        DATA.ml = DATA.SD.MeasList;
+    elseif isfield(DATA,'ml')   
+        DATA.ml = DATA.ml;
+    end
+    [val,id] = sort(DATA.ml(:,4));     
+    DATA.ml = DATA.ml(id,:); %Wavelenght 1 et wavelength 2
+    DATA.d = DATA.d(:,id);
+   if isfield(DATA.SD,'Lambda')  
+    NIRS.Cf.dev.wl = DATA.SD.Lambda; 
+   else
+       disp(['Warning: Wavelengt device SD.Lambda is missing the in the .SNIRF information']);
+       [filepath,name,ext]  = fileparts(mfilename("fullpath"));
+       Lambda = load(fullfile(filepath,'DefaultWavelengthLambda.txt'));
+       NIRS.Cf.dev.wl = Lambda;
+       disp(['By default information from the file ', fullfile(filepath,'DefaultWavelengthLambda.txt')]);
+       disp(['Lambda ',  num2str( NIRS.Cf.dev.wl ) ,' will be used verify if this information is correct in your case else add the correct information in the snirf file']);
+   end
+    NIRS.Cf.dev.fs = 1/(DATA.t(2)-DATA.t(1));
+
+    
+    %ML 
+    %DISTANCE GEOMETRIQUE
+    for i=1:size(DATA.ml,1)        
+        NIRS.Cf.H.C.n{i,1} = ['S',num2str(DATA.ml(i,1)),'_D',num2str(DATA.ml(i,2)) ];  %Cell channel identification 
+        NIRS.Cf.H.C.id(1,i) = i;
+        NIRS.Cf.H.C.id(2,i) = DATA.ml(i,1); %Source 
+        NIRS.Cf.H.C.id(3,i) = DATA.ml(i,2);  %et detecteur
+        NIRS.Cf.H.C.wl(i) = DATA.ml(i,4);
+        x1 =  NIRS.Cf.H.S.r.o.mm.p(1,DATA.ml(i,1));
+        x2 =  NIRS.Cf.H.D.r.o.mm.p(1,DATA.ml(i,2));
+        y1 =  NIRS.Cf.H.S.r.o.mm.p(2,DATA.ml(i,1));
+        y2 =  NIRS.Cf.H.D.r.o.mm.p(2,DATA.ml(i,2));
+        z1 =  NIRS.Cf.H.S.r.o.mm.p(3,DATA.ml(i,1));
+        z2 =  NIRS.Cf.H.D.r.o.mm.p(3,DATA.ml(i,2));
+        NIRS.Cf.H.C.gp(i,1) = sqrt((x2-x1)^2+(y2-y1)^2+ (z2-z1)^2);%À CALCULER DISTANCE GÉOMETRIQUE
+        NIRS.Cf.H.C.ok(i,Idx_File) = 1;
+    end
+    NIRS.Cf.H.C.N = numel(NIRS.Cf.H.C.n);
+    NIRS.Cf.H.C.ok = ones(NIRS.Cf.H.C.N,numel(job.inputSNIRF)); 
+   %look to trig in the S structure 
+    %add a trig for each marker
+    % the structure s indicate the event and is format is s Ntime x N
+    % condition each different condition will be formated as a Trigger info [trig value, index of time sample]   
+    %Example; [2, 9;
+    %2, 1733;
+    %1,1]
+    %Trig 2 sample of time 2 et 1733, 
+    %Trig 1 sample 
+    aux5 = [];
+   if isfield(DATA, 's')
+       for i=1:size(DATA.s,2)
+          timesample= find(DATA.s(:,i));
+          for js = 1:numel(timesample)
+            aux5 = [aux5; DATA.s(timesample(js),i),timesample(js)];
+           
+          end
+       end
+   else
+       1;
+   end
+  
+   if isempty(aux5)
+           aux5  =[1 1]; %at least have one trig at the begining of the file
+   end
+   NIRS.Dt.fir.aux5{1} = aux5;
+    NIRS.Dt.fir.rons = [];     
+%     if isfield(DATA,'aux')
+%         if ~isempty(DATA.aux)        
+%             ind =  find(DATA.aux(:,1)>1.5);   
+%         end
+%     end
+%    NIRS.Dt.fir.aux5{Idx_File} = [ones(size(ind),1)*254,ind];
+    NIRS.Dt.fir.sizebloc = size(DATA.d,1);       
+    fwrite_NIR(fileOut_nir,DATA.d');
+  
+    NIRS.Cf.H.C.wl;
+    
+    nirs_boxy_write_vhdr(fileOutRoot_vhdr,... %Output file
+                fileOut_nir,... %DataFile
+                fileOutRoot_vmrk,... %MarkerFile,...
+                'nirs_convert_boxy',... %Function that created the header
+                '',... %Channel Resolution
+                '',... %Channel Units
+                NIRS.Cf.H.C.n,... %names given as a column of cells 
+                1/NIRS.Cf.dev.fs,... %SamplingInterval in microseconds
+                NIRS.Dt.fir.sizebloc); %SamplingInterval in microseconds
+            
+     %Create a New Segment marker
+    SD.Markers{Idx_File,1}.Type='New Segment';
+    SD.Markers{Idx_File,1}.Description='';
+    SD.Markers{Idx_File,1}.Position=1;
+    SD.Markers{Idx_File,1}.Size=1;
+    SD.Markers{Idx_File,1}.ChNumber=0; %all channels       
+   
+    
+    idmarker = 2;    
+    for istimulus=1:size(aux5,1)
+        SD.Markers{idmarker,1}.Type='trigger';
+        SD.Markers{idmarker,1}.Description=['S ' num2str(aux5(istimulus,1))];
+        SD.Markers{idmarker,1}.Position= aux5(istimulus,2);
+        SD.Markers{idmarker,1}.Size=1;
+        SD.Markers{idmarker,1}.ChNumber=0; %all channels
+        idmarker =  idmarker + 1;
+    end
+
+    nirs_boxy_write_markers(fileOutRoot_vmrk,... %Output file
+                fileOut_nir,... %DataFile
+                SD.Markers);
+    %FIRST STEP OF PROCESSING PP1
+    NIRS.Dt.fir.pp(1).p{Idx_File,1} = fileOut_nir; 
+    disp(['Save: ', fileOut_nir])
+    NIRS.Dt.fir.pp(1).pre = 'READ_RAW_NIRS';
+    NIRS.Dt.fir.pp(1).job = job;   
+end
+
+   %DISTANCE GEOMETRIQUE
+   %channel in measure list format
+   ml = ones(numel(NIRS.Cf.H.C.id(2,:)),4);
+   ml(:,1) =  NIRS.Cf.H.C.id(2,:); %= DATA.ml(i,1); %Source
+   ml(:,2) =  NIRS.Cf.H.C.id(3,:); %= DATA.ml(i,2);  %et detecteur
+   ml(:,3) = 1;
+   ml(:,4) =NIRS.Cf.H.C.wl(:); %= DATA.ml(i,4);
+   
+    for i=1:size(ml,1)
+        x1 =  NIRS.Cf.H.S.r.o.mm.p(1,ml(i,1));
+        x2 =  NIRS.Cf.H.D.r.o.mm.p(1,ml(i,2));
+        y1 =  NIRS.Cf.H.S.r.o.mm.p(2,ml(i,1));
+        y2 =  NIRS.Cf.H.D.r.o.mm.p(2,ml(i,2));
+        z1 =  NIRS.Cf.H.S.r.o.mm.p(3,ml(i,1));
+        z2 =  NIRS.Cf.H.D.r.o.mm.p(3,ml(i,2));
+        NIRS.Cf.H.C.gp(i,1) = sqrt((x2-x1)^2+(y2-y1)^2+ (z2-z1)^2);%À CALCULER DISTANCE GÉOMETRIQUE
+        pos(i,1) = (x2-x1)/2+x1;
+        pos(i,2) = (y2-y1)/2+y1;
+        pos(i,3) = (z2-z1)/2+z1; 
+        pos(i,4) = NIRS.Cf.H.C.gp(i,1);
+    end
+    
+    %idbad = find(NIRS.Cf.H.C.gp<job.distmin|NIRS.Cf.H.C.gp>job.distmax);
+     zone.SD.Lambda = NIRS.Cf.dev.wl;
+     zone.SD.SrcPos = NIRS.Cf.H.S.r.o.mm.p';
+     zone.SD.DetPos = NIRS.Cf.H.D.r.o.mm.p';
+     zone.SD.nSrcs  = numel(zone.SD.SrcPos)/3;
+     zone.SD.nDets  = numel(zone.SD.DetPos)/3;
+     zone.SD.SrcAmp = ones(zone.SD.nSrcs ,2);
+     zone.SD.DetAmp = ones(zone.SD.nDets,2);
+     zone.color = [lines(8);lines(8)];     
+     zone.ml = ml;
+     zone.peak = [];
+     zone.pos = pos;
+    zone.label{1} = ['Regressor All'];
+    zone.plot{1} = [ml(ml(: ,4)==1,1), ml(ml(: ,4)==1,2)];
+    zone.plotLst{1} =  [find(ml(: ,4)==1)];
+    zone.label{2} = ['All'];
+    zone.plot{2} = [ml(ml(: ,4)==1,1), ml(ml(: ,4)==1,2)];
+    zone.plotLst{2} =  [find(ml(: ,4)==1)];
+    save( [dirout, filesep,'Global.zone'],'zone');
+    disp(['Save: ', fullfile(dirout,'Global.zone')])
+    save(fullfile(dirout,'NIRS.mat'),'NIRS');
+    job.NIRSmat{1} =fullfile(dirout,'NIRS.mat');
+
+
+out.NIRSmat = job.NIRSmat;

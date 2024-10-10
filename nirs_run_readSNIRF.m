@@ -50,7 +50,7 @@ if isfield(job.c_createImportProjectSnirf,'b_createProject')
         [filepath,name,ext] =fileparts(inputsnirf{1});
         save(fullfile(dirout,[name,'.prj']), 'SaveStruct');
         prjfile = fullfile(dirout ,[name,'.prj']);
-        disp(['Create automatic 2d: ', prjfile])
+        disp(['Create automatic : ', prjfile])
     catch
          disp('Warning no optode coordinate information')
     end
@@ -243,9 +243,16 @@ for Idx_File=1:numel(job.inputSNIRF)
     [val,id] = sort(DATA.ml(:,4));     
     DATA.ml = DATA.ml(id,:); %Wavelenght 1 et wavelength 2
     DATA.d = DATA.d(:,id);
-   
+   if isfield(DATA.SD,'Lambda')  
     NIRS.Cf.dev.wl = DATA.SD.Lambda; 
-
+   else
+       disp(['Warning: Wavelengt device SD.Lambda is missing the in the .SNIRF information']);
+       [filepath,name,ext]  = fileparts(mfilename("fullpath"));
+       Lambda = load(fullfile(filepath,'DefaultWavelengthLambda.txt'));
+       NIRS.Cf.dev.wl = Lambda;
+       disp(['By default information from the file ', fullfile(filepath,'DefaultWavelengthLambda.txt')]);
+       disp(['Lambda ',  num2str( NIRS.Cf.dev.wl ) ,' will be used verify if this information is correct in your case else add the correct information in the snirf file']);
+   end
     NIRS.Cf.dev.fs = 1/(DATA.t(2)-DATA.t(1));
 
     
