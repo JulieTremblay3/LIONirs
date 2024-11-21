@@ -106,7 +106,7 @@ if isempty(strfind(NIRS.Dt.fir.pp(s).pre,'Manual Gui'))|~strcmp(upper(dir1),uppe
         try
             d = fopen_NIR(rDtp{f},NC);
         catch
-            msgbox(['ERROR Please check file ',rDtp{f} ])
+            msgbox(['ERROR Please check file ',rDtp{f}, ' you can used Utility / Folder adjustement if you move your analysis folder' ])
             disp(['ERROR Please check file ',rDtp{f} ,' you can used Utility / folder ajustement to modify the NIRS.mat at the new location.'])
             return
         end
@@ -152,28 +152,32 @@ if isempty(strfind(NIRS.Dt.fir.pp(s).pre,'Manual Gui'))|~strcmp(upper(dir1),uppe
         write_vmrk_all(outfilevmrk,ind_dur_ch,label);
         %vhdr copy
             %write outvhdr file
-           ChannelLabels= ConvertmlIDsrs2label(NIRS);
-%     for id=1:size(NIRS.Cf.H.C.id,2) 
-%          if strcmp(NIRS.Cf.dev.n,'NIRx') %NIRx
-%             srs = SDPairs2strboxy(NIRS.Cf.H.C.id(1,id));
-%             det = SDDet2strboxy(NIRS.Cf.H.C.id(1,id));
-%             ChannelLabels{id,1} = [srs, '_', det];
-%          else                             %On ajoute la nomenclature Ste-Justine 
-%             srs = SDPairs2strboxy_ISS(NIRS.Cf.H.C.id(1,id));
-%             det = SDDet2strboxy_ISS(NIRS.Cf.H.C.id(1,id));
-%             ChannelLabels{id,1} = [srs, '_', det];
-%         end
-%     end
-    SamplingInterval =floor(1000000/NIRS.Cf.dev.fs);
-    nirs_boxy_write_vhdr(outfilevhdr,... %Output file
-        outfile,... %DataFile
-        outfilevmrk,... %MarkerFile,...
-        'nirs_Concatenate_File',... %Function that created the header
-        '',... %Channel Resolution
-        '',... %Channel Units
-        ChannelLabels,... %names given as a column of cells
-        SamplingInterval,...%SamplingInterval in microseconds
-        size(d,2)); %Number Sample in microseconds
+            try %first to copy if error create a new
+                copyfile(infilevhdr,outfilevhdr)
+            catch
+                ChannelLabels= ConvertmlIDsrs2label(NIRS);
+                %     for id=1:size(NIRS.Cf.H.C.id,2)
+                %          if strcmp(NIRS.Cf.dev.n,'NIRx') %NIRx
+                %             srs = SDPairs2strboxy(NIRS.Cf.H.C.id(1,id));
+                %             det = SDDet2strboxy(NIRS.Cf.H.C.id(1,id));
+                %             ChannelLabels{id,1} = [srs, '_', det];
+                %          else                             %On ajoute la nomenclature Ste-Justine
+                %             srs = SDPairs2strboxy_ISS(NIRS.Cf.H.C.id(1,id));
+                %             det = SDDet2strboxy_ISS(NIRS.Cf.H.C.id(1,id));
+                %             ChannelLabels{id,1} = [srs, '_', det];
+                %         end
+                %     end
+                SamplingInterval =floor(1000000/NIRS.Cf.dev.fs);
+                nirs_boxy_write_vhdr(outfilevhdr,... %Output file
+                    outfile,... %DataFile
+                    outfilevmrk,... %MarkerFile,...
+                    'nirs_Concatenate_File',... %Function that created the header
+                    '',... %Channel Resolution
+                    '',... %Channel Units
+                    ChannelLabels,... %names given as a column of cells
+                    SamplingInterval,...%SamplingInterval in microseconds
+                    size(d,2)); %Number Sample in microseconds
+            end
      %UPDATE SelectedFactors to the last module
     %if the module is already the last module do not try to increment
     %try to increment only if you are in the previous module to modify the
@@ -5174,7 +5178,44 @@ indstop = indstop(end);
 
 gui_ParafacIO(indstart,indstop);
 
+function btn_COH_Callback(hObject, eventdata, handles)
+% hObject    handle to btn_PARAFAC (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
 
+%set(handles.radio_Parafac,'value',1)
+
+guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
+currentsub=1;
+PMI = get(guiHOMER,'UserData');
+cf = PMI{currentsub}.currentFile;
+
+time_start = str2num(get(handles.edit_time_start,'string')); %Debut segment
+time_stop = str2num(get(handles.edit_time_stop,'string'));  %Fin segment
+if isempty(time_start); indstart = 1;else;
+    indstart= find(time_start>PMI{currentsub}.data(cf).HRF.tHRF);
+    if isempty(indstart)
+        indstart = 1;
+    end
+end
+
+if isempty(time_stop);
+    indstop =numel(PMI{currentsub}.data(cf).HRF.tHRF);
+else
+    indstop= find(time_stop>PMI{currentsub}.data(cf).HRF.tHRF);
+    if isempty(indstop)
+        indstop = numel(PMI{currentsub}.data(cf).HRF.tHRF);
+    end
+    
+end
+indstart = indstart(end);
+indstop = indstop(end);
+% if isempty(time_start)|isempty(time_stop)
+%     set(handles.text_Advice,'string','Please enter time start and time stop to define time window')
+%     return
+% end
+
+gui_COH(indstart,indstop);
 
 
 % --------------------------------------------------------------------
@@ -6212,7 +6253,7 @@ timelist = 0;
 
 
 [pathstr, name, ext] = fileparts(filelist);
-if strcmp(ext,'.dat')| strcmp(ext,'.eeg')%Generic Data export analyser
+if strcmp(ext,'.dat')| strcmp(ext,'.eeg')| strcmp(ext,'.nir')%Generic Data export analyser
     %read the trig !
     [label_all,ind_dur_ch_all] = read_vmrk_all(fullfile(pathstr,[name,'.vmrk']));
     aux5 = handles.NIRS.Dt.fir(end).aux5{ifile};%trig  indice time
@@ -9789,6 +9830,8 @@ elseif  strcmp(listmethod{idval},'Offset Adjustment')
     disp('Offset Adjustment do not need to get decomposition, only press ''-'' button to apply the offset correction.')
 elseif strcmp(listmethod{idval},'ICA') %ICA
     btn_ICA_Callback(hObject, eventdata, handles)
+elseif strcmp(listmethod{idval},'COH') %COH
+    btn_COH_Callback(hObject, eventdata, handles)
     % elseif get(handles.popupmethodselected,'value')==4 %Wavelet
     %
     % elseif get(handles.popupmethodselected,'value')==5 %Linear detrend
@@ -9837,7 +9880,9 @@ catch ME
         otherwise
             rethrow(ME)
     end
-end    
+end   
+elseif strcmp(listmethod{idval},'COH')
+
 end 
 
 

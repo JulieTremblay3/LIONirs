@@ -132,7 +132,7 @@ elseif strcmp(ext,'.txt')
 end
 
 
-groupeall = [];
+groupeall = []; 
 for isubject=2:size(info,1)
     try
     id = isubject-1;
@@ -140,7 +140,7 @@ for isubject=2:size(info,1)
     if strcmp(tmp(end-2:end),'mat')
         try
             MAT = load(fullfile(info{isubject,1}, [info{isubject,2}]));
-            disp(['Load ' ,fullfile(info{isubject,1}, info{isubject,2}),'.mat G',num2str(info{isubject,4})]);
+            disp(['Load ' ,fullfile(info{isubject,1}, info{isubject,2}),'.mat G',num2str(info{isubject,4}),' ' ,num2str(size(MAT.meancorr,1)) ' ch']);
             if isfield(MAT,'ZoneList')
                 DATA{id}.ZoneList = MAT.ZoneList;
                 DATA{id}.MAT = MAT.meancorr;
@@ -311,7 +311,7 @@ for igroupe = 0:max(groupeall)
                end
                 if numel(x)>1
                     x = x(1);
-                    msgbox('Attention the zone are duplicated')
+                    %msgbox('Attention the zone are duplicated')
                 else
                     DATA{idsubject(isubject)}.zone.chMAT{x} = idlisti;
                 end

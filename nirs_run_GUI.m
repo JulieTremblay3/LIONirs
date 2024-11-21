@@ -1,4 +1,5 @@
 function out = nirs_run_GUI(job)
+
 % Call the GUI for data display.
 %
 subjectnb = 1; 

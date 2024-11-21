@@ -2122,10 +2122,13 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
     if ~isdir(dir1)
         mkdir(dir1);
     end
-    
+    try
     [FDR,Q] = mafdr(pval(:));
     Q = reshape(Q,size(pval));
-    
+    catch
+        Q = pval()
+        Q(:) = 1
+    end
     matcorr = zeros(size(MATall,2),size(MATall,2));
     matcorr(idhalf)=squeeze(meanall(:));
     matcorr = matcorr +flipud(rot90(matcorr));
@@ -2298,9 +2301,12 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
             
         end
     end
-    
+    try
     if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
         copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
+    end
+    catch
+        disp(['Error copy file:', fullfile(info{isubject,1}, ZONEid)])
     end
     %  dir1 = job.e_statmatrixPath{1};
     try

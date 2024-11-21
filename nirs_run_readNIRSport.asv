@@ -10,11 +10,7 @@ NIRS.Cf.dev.n = 'NIRx'; %'ISS Imagent' %'NIRSx';
 %adpated and tested for NIRx label. 
 
     pathout = job.output_path;   
-       
-    k = [strfind( pathout,'/') , strfind( pathout,'\')];
-    if ~isempty(k)
-        pathout(k)= filesep;
-    end
+    fileparts()
     if isdir(pathout)
         choice = questdlg(['Directory ', pathout,' already exist do  you want to continue and overwrite this folder ?'], ...
         'WARNING',...
@@ -38,7 +34,7 @@ NIRS.Cf.dev.n = 'NIRx'; %'ISS Imagent' %'NIRSx';
 
 %PARAMETRE DU MONTAGE (HELMET)
 NIRS.Cf.H.n = 'SainteJustine prj';
-%A completer pour mettre toute info du casque, inutilisé dans la présente
+%A completer pour mettre toute info du casque, inutilisÃ© dans la prÃ©sente
 %toolbox
 LoadedStruct = load(job.prjfile{1},'-mat');
 LoadedStruct = Load_PrjStruct(LoadedStruct,false);
@@ -92,7 +88,7 @@ NIRS.Dt.ana.T1 = ''; %FICHIER DE IRM
 %FILE
 %NIRS.Dt.fir.pp.p %read and process tdms file 
 fprintf('%s\n','File open: ');
-    inputrawscout = job.inputNIRxSport;
+    inputrawscout = job.inputNIRxscout;
 for Idx_File=1:numel(inputrawscout)
 
     [dir1,fil1,ext1] = fileparts(inputrawscout{Idx_File});
@@ -148,8 +144,8 @@ for Idx_File=1:numel(inputrawscout)
           idbad = []; %no additionnal pruning necessary
     elseif isfield(job.c_PruningNIRSport,'distmax_nirsport') 
         try
-        filewav1 = fullfile([dir1,filesep, fil1],['.wl1']);%fil1
-        filewav2 = fullfile([dir1,filesep, fil1],['.wl2']);%fil1,
+        filewav1 = fullfile(dir1,['.wl1']);%fil1
+        filewav2 = fullfile(dir1,['.wl2']);%fil1,
         WV1 = load(filewav1); 
         WV2 = load(filewav2);
         disp(['Load file ', filewav1, ' with ', num2str(size(WV1,2)),' channel'])   
@@ -158,8 +154,8 @@ for Idx_File=1:numel(inputrawscout)
         end 
     elseif  isfield(job.c_PruningNIRSport,'channelmask_nirsport') %custom mask 
         try
-        filewav1 = fullfile([dir1,filesep, fil1],['.wl1']);%fil1
-        filewav2 = fullfile([dir1,filesep, fil1],['.wl2']);%fil1,
+        filewav1 = fullfile(dir1,['.wl1']);%fil1
+        filewav2 = fullfile(dir1,['.wl2']);%fil1,
         WV1 = load(filewav1);
         WV2 = load(filewav2);
         disp(['Load file ', filewav1, ' with ', num2str(size(WV1,2)),' channel'])   
@@ -232,7 +228,7 @@ for Idx_File=1:numel(inputrawscout)
         y2 =  NIRS.Cf.H.D.r.o.mm.p(2,DATA.ml(i,2));
         z1 =  NIRS.Cf.H.S.r.o.mm.p(3,DATA.ml(i,1));
         z2 =  NIRS.Cf.H.D.r.o.mm.p(3,DATA.ml(i,2));
-        NIRS.Cf.H.C.gp(i,1) = sqrt((x2-x1)^2+(y2-y1)^2+ (z2-z1)^2);%À CALCULER DISTANCE GÉOMETRIQUE
+        NIRS.Cf.H.C.gp(i,1) = sqrt((x2-x1)^2+(y2-y1)^2+ (z2-z1)^2);%Ã€ CALCULER DISTANCE GÃ‰OMETRIQUE
         pos(i,1) = (x2-x1)/2+x1;
         pos(i,2) = (y2-y1)/2+y1;
         pos(i,3) = (z2-z1)/2+z1; 

@@ -319,7 +319,7 @@ for Idx_File=1:numel(inputrawscout)
        %define de zone (associate to the closest distance of the short
        %detector
        ishort = 1;
-       for izone = 1:8
+       for izone = 1:size(id,2)
            id(ishort, 1);
            zone.label{izone} = ['Short', num2str(DATA.ml(id(1,ishort),1))] ;
            zone.plot{izone} = [];
@@ -327,7 +327,7 @@ for Idx_File=1:numel(inputrawscout)
            ishort = ishort+1;
        end
        %associate all other channel to the closest zone 
-         for izone = 1:8
+         for izone = 1:size(id,2)
            for ich = 1:size(distancemat,1)
               [val,izone]= min(distancemat(ich,:));
               if val>0
@@ -337,7 +337,7 @@ for Idx_File=1:numel(inputrawscout)
            end
          end
        ishort = 1;
-       for izone = 9:1:16
+       for izone = (size(id,2)+1):1:size(id,2)*2
            id(ishort, 1);
            zone.label{izone} = ['Regressor Short', num2str(DATA.ml(id(1,ishort),1))] ;
            zone.plot{izone} = [DATA.ml(id(1,ishort),1),DATA.ml(id(1,ishort),2)];

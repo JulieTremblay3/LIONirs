@@ -490,11 +490,63 @@ function vout = nirs_cfg_vout_readNIRxscout(job)
     vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
 end
 
+
+inputNIRxSport        = cfg_files; %Select raw BOXY data files for this subject 
+inputNIRxSport.name    = 'Select NIRSport data'; % The displayed name
+inputNIRxSport.tag     = 'inputNIRxSport';    %file names
+inputNIRxSport.ufilter = '.hdr';    %
+inputNIRxSport.num     = [1 Inf];     % Number of inputs required 
+inputNIRxSport.help    = {'Recording files (.hdr, .wl1, .wl2, .lsl ) are placed in the same folder during recording sessions. Indicate the .hdr file containing the raw data. Trigger, wavelengths, and parameters will then be read and associated with the helmet project .prj. Ideally you do not rename the files, or if you do, rename them all identically and keep them in the same folder.'}; 
+
+
+
+%Maximum distance
+Pruning_nirsport         = cfg_entry; 
+Pruning_nirsport.name    = 'Default ChannelMask'; 
+Pruning_nirsport.tag     = 'Pruning_nirsport';      
+Pruning_nirsport.strtype = 's';       
+Pruning_nirsport.num     = [0 inf];     
+Pruning_nirsport.val     = {' '};
+Pruning_nirsport.help    = {['Optional, NIRsport already prune channel according to channel mask and NIRsite montage configuration.']}; 
+
+ 
+%Maximum distance
+distmax_nirsport         = cfg_entry; 
+distmax_nirsport.name    = 'Maximum distance'; 
+distmax_nirsport.tag     = 'distmax_nirsport';      
+distmax_nirsport.strtype = 's';       
+distmax_nirsport.num     = [0 inf];     
+distmax_nirsport.val     = {'8'};
+distmax_nirsport.help    = {['Optional, NIRsport already prune channel according to channel mask and NIRsite montage configuration. If all channel have been kept example you could use the maximal distance to help you prune the channel, else keep this information empty. ' ...
+    'Defines the maximal geometric distance between a source and a detector for data to be included (in centimeter).' ...
+    'It could also be a fix channel mask. ']}; 
+
+channelmask_nirsport         = cfg_entry; 
+channelmask_nirsport.name    = 'Custom ChannelMask'; 
+channelmask_nirsport.tag     = 'channelmask_nirsport';      
+channelmask_nirsport.strtype = 's';       
+channelmask_nirsport.num     = [1 inf];     
+channelmask_nirsport.val     = {''};
+channelmask_nirsport.help    = {['Custom channel mask channel mask apply to .wl1 and .wl2 use nirs converter and ensure that all raw data are present 16x16 channel',...
+    ' 1  1  1  1  0  0  0  0  1  0  0  0  0  0  0  0  1  1  1  1  0  0  0  0  1  0  0  0  0  0  0  0  1  1  1  1  1  0  0  0  1  0  0  0  0  0  0  0  0  1  1  1  1  1  1  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  1  1  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  0  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  0  0  0  0  0  0  0  0  1  0  0  0  0  0  0  0  1  1  1  1  0  0  0  0  1  0  0  0  0  0  0  0  1  1  1  1  0  0  0  0  1  0  0  0  0  0  0  0  1  1  1  1  1  0  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  1  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  1  1  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  0  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1']}; 
+
+
+
+
+% Create an option on wether a project file should be created or imported.
+c_PruningNIRSport          = cfg_choice;
+c_PruningNIRSport.tag      = 'c_PruningNIRSport';
+c_PruningNIRSport.name     = 'Pruning';
+c_PruningNIRSport.values   = {Pruning_nirsport distmax_nirsport channelmask_nirsport};
+c_PruningNIRSport.val      = {Pruning_nirsport};
+c_PruningNIRSport.help     = {'Choose whether you want to import a project or create a new one.'}';
+
+
 % Executable Branch
 E_readNIRSport     = cfg_exbranch;      
 E_readNIRSport.name = 'Read NIRSport';            
 E_readNIRSport.tag  = 'E_readNIRSport'; 
-E_readNIRSport.val  = {inputNIRxscout,age1,prjfile,output_path,c_nameconvention_NIRxscout};   
+E_readNIRSport.val  = {inputNIRxSport,age1,prjfile,c_PruningNIRSport , output_path,c_nameconvention_NIRxscout};   
 E_readNIRSport.prog = @nirs_run_readNIRSport;  
 E_readNIRSport.vout = @nirs_cfg_vout_readNIRSport;
 E_readNIRSport.help = {'Read data acquired with NIRSport on a  NIRx system. Tested for 16x16 montage'};

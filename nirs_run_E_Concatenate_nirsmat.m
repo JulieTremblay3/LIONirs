@@ -195,9 +195,13 @@ sizebloc = 0;
 for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat file
     NIRS = [];       
     try
-       
-            
-    load(fullfile(NIRSDtp{filenb},'NIRS.mat'));    
+       tmp = NIRSDtp{filenb};
+       if strcmp(tmp(end-7:end),'NIRS.mat')
+            load(fullfile(NIRSDtp{filenb}));    
+       else
+            load(fullfile(NIRSDtp{filenb},'NIRS.mat'));    
+       end
+ 
     lst = length(NIRS.Dt.fir.pp);
     NC = NIRS.Cf.H.C.N;
     fs = NIRS.Cf.dev.fs; 
@@ -369,9 +373,9 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
         linereport = ['Missing file:', NIRSDtp{filenb}];
         samplestart = [0];
          sampleend = [0];
-         fprintf(fidtxt,'%s\t','ND');
-    end
-    
+         fprintf(fidtxt,'%s\t','ND'); 
+    end 
+     
     fprintf(fidtxt,'%s\t%6.0f\t%6.0f\t%6.2f\t%6.2f\r\n', NIRSDtp{filenb}, samplestart, sampleend, samplestart/fs, sampleend/fs);
 end
         fclose(fidtxt);

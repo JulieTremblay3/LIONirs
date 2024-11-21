@@ -307,7 +307,7 @@ for filenb = 1:size(job.NIRSmat,1)
                         else
                             idtrigAUX{iaux} = [sprintf('%3.0f',trigger(itypestim))];
                         end
-                        NIRS.Dt.AUX.pp(end).sync_timesec{ifile}
+                        %NIRS.Dt.AUX.pp(end).sync_timesec{ifile}
                         idstimAUX{iaux} = [idstimAUX{iaux};strmatch(deblank(idtrigAUX{iaux}),deblank(AUX(iaux).marker(:,2)))];
                     end
                     %PRESEGMENTATION ALLREALY DONE.

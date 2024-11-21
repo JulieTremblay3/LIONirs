@@ -107,9 +107,16 @@ for Idx_File=1:numel(job.input_GenericDataExportBV)
 %     elseif isfield(DATA,'ml')   
 %         DATA.ml = DATA.ml;
 %     end
-%    [val,id] = sort(DATA.ml(:,4));     
+%    [val,id] = sort(DATA.ml(:,4));  
+if 0 %short cut pour affichage comme la nirs a retravailler
     DATA.ml = [MeasList;MeasList]; %Wavelenght 1 et wavelength 2
     DATA.d = [d,d];
+else
+    DATA.ml = [MeasList]; %Wavelenght 1 et wavelength 2
+    DATA.d = [d];
+end
+    
+    
     NIRS.Cf.dev.wl = 1;
     NIRS.Cf.dev.fs = 1/(infoBV.SamplingInterval)*1000000;
 
@@ -186,7 +193,7 @@ for Idx_File=1:numel(job.input_GenericDataExportBV)
                 '',... %Channel Resolution
                 '',... %Channel Units
                 NIRS.Cf.H.C.n,... %names given as a column of cells 
-                1/NIRS.Cf.dev.fs,... %SamplingInterval in microseconds
+                1/NIRS.Cf.dev.fs*1000000,... %SamplingInterval in microseconds
                 NIRS.Dt.fir.sizebloc); %SamplingInterval in microseconds
             
      %Create a New Segment marker
