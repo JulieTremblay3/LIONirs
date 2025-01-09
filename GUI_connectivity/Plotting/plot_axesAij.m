@@ -49,9 +49,10 @@ for izone = 1:numel(DATA{id}.zone.plotLst)
                  strSrs = SDPairs2strboxy(ML(ich,1));
                  idch = strmatch([strDet, ' ',strSrs ],List,'exact');    
             case 'EEG'                          
-                 strDet = SDDet2strEEG(ML(ich,2));
-                 strSrs = SDPairs2strEEG(ML(ich,1));
-                 idch = strmatch([strDet, ' ',strSrs ],List,'exact');    
+                 % strDet = SDDet2strEEG(ML(ich,2));
+                 % strSrs = SDPairs2strEEG(ML(ich,1));
+                 % idch = strmatch([strDet, ' ',strSrs ],List,'exact');    
+                 idch = ich; %pas de vérifiaction juste utilisation du canal
             otherwise
                 strDet = SDDet2strboxy_ISS(ML(ich,2));
                 strSrs = SDPairs2strboxy_ISS(ML(ich,1));
@@ -91,7 +92,7 @@ if get(handles.popupmenu_view,'value')==1%view zone
 %                         idch = strmatch([strDet, ' ',strSrs ],List,'exact');
 %                     end
                     idch=DATA{id}.zone.chMAT{izone};
-                    idlist = [idlist, idch];
+                    idlist = [idlist; idch(:)];
 %                     if ichzone==1
 %                         idzone =[idzone, izone];
 %                     else

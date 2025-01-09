@@ -863,6 +863,22 @@ function vout = nirs_cfg_vout_E_createonset_correlationsignal(job)
     vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
 end
 
+%Create marker based on correlation on signal based on recording
+E_eegnirs_MarkMuscular     = cfg_exbranch;
+E_eegnirs_MarkMuscular.name = 'Identify EEG/NIRS muscular artifact ';
+E_eegnirs_MarkMuscular.tag  = 'E_eegnirs_MarkMuscular';
+E_eegnirs_MarkMuscular.val  = {NIRSmat,DelPreviousData};
+E_eegnirs_MarkMuscular.prog = @nirs_run_E_eegnirs_MarkMuscular;
+E_eegnirs_MarkMuscular.vout = @nirs_cfg_vout_E_eegnirs_MarkMuscular;
+E_eegnirs_MarkMuscular.help = {'Mark as artefact EEG muscular event, they are identify as beta gamma burst higher than zscore distribution at p<0.05 and are also see as fast and local hemodynamic variation in NIRS, espacialy jaw and chewing artefact' };
+
+function vout = nirs_cfg_vout_E_eegnirs_MarkMuscular(job)
+    vout = cfg_dep;                    
+    vout.sname      = 'NIRS.mat';       
+    vout.src_output = substruct('.','NIRSmat'); 
+    vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
+end
+
 e_onset_trig        = cfg_entry; %subfolder new branch
 e_onset_trig.name    = 'Trigger';
 e_onset_trig.tag     = 'e_onset_trig';       
@@ -4488,7 +4504,7 @@ M_GUI.values = {E_GUI E_VIDEO };
 M_GUI.help   = {'Graphical user interface for data display.'};
 
 %Module Component
-M_dataComponent = cfg_choice;
+M_dataComponent        = cfg_choice;
 M_dataComponent.name   = 'Decomposition';
 M_dataComponent.tag    = 'M_dataComponent';
 M_dataComponent.values = { E_extractcomponent E_substractcomponent E_exportcomponent_list E_exportcomponent_zone E_statcomponent}; 
@@ -4512,7 +4528,7 @@ M_datawritenirs.help   = {'These modules convert nir file in .nirs, last module 
 M_others        =  cfg_choice; 
 M_others.name   = 'Additional function';
 M_others.tag    = 'M_others';
-M_others.values = {E_markCardiac_TargetPCA, E_correctCardiac_TargetPCA, E_correctCardiac_exportBV,E_createonset_correlationsignal}; %,E_createonset_correlationsignal
+M_others.values = {E_markCardiac_TargetPCA, E_correctCardiac_TargetPCA, E_correctCardiac_exportBV,E_createonset_correlationsignal, E_eegnirs_MarkMuscular}; %,E_createonset_correlationsignal
 M_others.help   = {'These modules convert nir file in .nirs, last module of data export, support the export of field such as data (d),coordinate (SD), trigger (s), time (t),do not support noise artifact marking or aux export'};
 
 

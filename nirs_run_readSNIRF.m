@@ -14,7 +14,7 @@ function out = nirs_run_readSNIRF(job)
 
 %PARAMETRE D'AQUISITION
 NIRS.Cf.dev.n = 'snirf';
-
+disp('note improve snirf trigger info')
 NIRS.Cf.H.n = 'SainteJustine prj';
 
 inputsnirf = job.inputSNIRF;

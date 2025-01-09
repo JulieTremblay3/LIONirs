@@ -64,9 +64,13 @@ load(job.NIRSmat{1})     % Matrice NIRS
          nirs= struct('d',d,'SD',SD,'t',t','s',s,'aux',aux);
         % Save SNIRF: Convert .nirs format data to SnirfClass object, save it to .snirf file (HDF5)
         fprintf('Saving %s ...\n', outfile);
-        % if 1 %HbO 
-        %     nirs.SD.Lambda = [1, 2] 
-        % end
+        if 0 %HbO 
+            nirs.SD.Lambda = [1, 2] 
+            
+        end
+
+        %add nan data
+        
         snirf_saved = SnirfClass(nirs);
         tic; snirf_saved.Save(outfile); toc 
     end

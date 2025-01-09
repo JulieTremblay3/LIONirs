@@ -181,13 +181,12 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 toremove = [toremove,icomp];
                 samp_length = size(d,2);
                 indt =PARCOMP(icomp).indt;%Time indice
-                intensnorm = d(indt,:);    
-                X = 1:1:size(intensnorm,1);
-                Mb1 =  ((intensnorm(end,:)-intensnorm(1,:))./numel(X))';
-                Mb2 =  intensnorm(1,:)'; %offset
-                A = reshape(X,numel(X),1)*reshape( Mb1,1,numel(Mb1)) +ones(numel(X),1)*reshape( Mb2,1,numel(Mb2));
-                spar = intensnorm - A;
-                
+                % intensnorm = d(indt,:);    
+                % X = 1:1:size(intensnorm,1);
+                % Mb1 =  ((intensnorm(end,:)-intensnorm(1,:))./numel(X))';
+                % Mb2 =  intensnorm(1,:)'; %offset
+                % A = reshape(X,numel(X),1)*reshape( Mb1,1,numel(Mb1)) +ones(numel(X),1)*reshape( Mb2,1,numel(Mb2));
+                % spar = intensnorm - A;
                 data = d(indt,:);
                 u =PARCOMP(icomp).u ;
                 s =PARCOMP(icomp).s ;
@@ -195,8 +194,10 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 listgood = [PARCOMP(icomp).listgood] ;
                 lstSV = 1;
                 temp = u(:,lstSV)*s(lstSV,lstSV)*v(:,lstSV)';
-                data(:,listgood) = data(:,listgood)- temp;
-                 d(indt,listgood) = data(:,listgood) ;
+                %figure;plot( data(:,listgood) )
+               % figure;subplot(3,1,1);plot( data(:,listgood));subplot(3,1,2);plot( temp);subplot(3,1,3);plot( B)
+                B = data(:,listgood)- temp;
+                 d(indt,listgood) = B ;
                  %new value substracted with xm
                 try
                     load(outfileCorrectionApply)
@@ -397,11 +398,11 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
             end
         end
         
-       
+      
         if icomporder < numel(PARCOMP) %save if the next one is different
             if ifile(icomporder)~= ifile(icomporder+1)
                 outfile = rDtp{file,1};
-                fwrite_NIR(rDtp{file},d');   
+                fwrite_NIR(rDtp{file},d');    
                    disp(['Save: ', outfile]);
             end
         end

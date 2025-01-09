@@ -9,17 +9,27 @@ if newfigure ==0
     cla;
     hold on;
     axis square
+    
 else
     figure
     subplot(10,10,[12:19,22:29,32:39,42:49,52:59,62:69,72:79,82:89]);hold on;
+    subplot(10,10,[12:19,22:29,32:39,42:49,52:59,62:69,72:79,82:89]);hold on;
+
     set(gca,'visible', 'off')
     axis square
     listfile = get( handles.popup_listsujet,'string');
      set(gcf,'WindowState','maximized')
     value  = get( handles.popup_listsujet,'value');
     filefrom = get(handles.edit_subjetxls,'string')
-    text(-2,-1.2, listfile{value},'fontsize',20)
-    text(-2,-1.3, filefrom,'fontsize',20)
+    text(-2,-1.2, listfile{value},'fontsize',10)
+    text(-2,-1.3, filefrom,'fontsize',10)
+    climvalue = get( handles.axes_AJD,'clim')
+    colormap(jet)
+    set(gca, 'clim',  climvalue)
+    hbar = colorbar 
+    set(hbar, 'position' , [0.787878787685267,0.191256830601093,0.014581909318751,0.648087431693989])
+    string = get(handles.edit_threshold,'string');   
+    hbar.Label.String = ['Tr >',string];
 end
  
 
@@ -119,7 +129,7 @@ end
 %                     idch = strmatch([strDet, ' ',strSrs ],List,'exact');
 %                 end
                  idch=DATA{id}.zone.chMAT{izone};
-                 idlist = [idlist, idch];
+                 idlist = [idlist; idch(:)];
                % if ichzone==1
                %     idzone =[idzone, izone];
                % else

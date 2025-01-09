@@ -210,12 +210,14 @@ for isubject=2:size(info,1)
   name = MAT.ZoneList{1};
   if strcmp(name(1:2),'D0')
       DATA{id}.System = 'NIRx';
+  elseif strcmp(name(1),'E')
+       DATA{id}.System = 'EEG';
   else
       DATA{id}.System = 'ISS Imagent';
 %       DATA{id}.System = 'ISS' ;           -+*
   end
   try
-  names = fieldnames(zone);
+  names = fieldnames(zone); 
   catch
       1;
   end 
@@ -301,7 +303,9 @@ for igroupe = 0:max(groupeall)
                         case 'nirs'                          
                             strDet = SDDet2strboxy(ML(ich,2));
                             strSrs = SDPairs2strboxy(ML(ich,1));
-                           idch = strmatch([strDet, ' ',strSrs ],List,'exact');           
+                           idch = strmatch([strDet, ' ',strSrs ],List,'exact');     
+                       case 'EEG'
+                            idch = ich; % no name verification direct 
                        otherwise                            
                            strDet = SDDet2strboxy_ISS(ML(ich,2));
                            strSrs = SDPairs2strboxy_ISS(ML(ich,1));
@@ -336,7 +340,9 @@ for igroupe = 0:max(groupeall)
                         case 'nirs'                          
                             strDet = SDDet2strboxy(ML(ich,2));
                             strSrs = SDPairs2strboxy(ML(ich,1));
-                           idch = strmatch([strDet, ' ',strSrs ],List,'exact');        
+                           idch = strmatch([strDet, ' ',strSrs ],List,'exact');       
+                        case 'EEG'
+                            idch = ich;   % no name verification direct 
                         otherwise
                            strDet = SDDet2strboxy_ISS(ML(ich,2));
                             strSrs = SDPairs2strboxy_ISS(ML(ich,1));
@@ -1932,6 +1938,7 @@ linkselected = get(handles.context_link_name,'label');
 [tok,rem] = strtok(linkselected,'=');
 [linkij,rem] = strtok(rem,'=');
 [linkname,rem] = strtok(rem,'=');
+[linkroi,rem] = strtok(rem,'=');
 valG1 = [];
 valG2 = [];
 groupeall = [];
@@ -1979,7 +1986,7 @@ xlabel('Groups');
 %bar(2,nanmean(valG2),'facealpha',0.5)
 [filepath,name,ext] =fileparts(get(handles.edit_subjetxls,'string'));
 
-title([linkname,' ' , name]);
+title([linkroi, linkname,' ' , name]);
 
 
 

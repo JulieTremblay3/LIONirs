@@ -108,7 +108,7 @@ for Idx_File=1:numel(job.input_GenericDataExportBV)
 %         DATA.ml = DATA.ml;
 %     end
 %    [val,id] = sort(DATA.ml(:,4));  
-if 0 %short cut pour affichage comme la nirs a retravailler
+if 1 %short cut pour affichage comme la nirs a retravailler
     DATA.ml = [MeasList;MeasList]; %Wavelenght 1 et wavelength 2
     DATA.d = [d,d];
 else

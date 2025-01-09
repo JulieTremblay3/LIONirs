@@ -8,7 +8,7 @@ if numel(varargin)>1; newfigure = varargin{2};else; newfigure = 0;end
 if newfigure ==0
     axes(handles.axes_Zone);cla;hold on
 else
-    figure;hold on
+    hfig=figure;hold on   
 end
 
 DATA = get(handles.GUI_LookMat,'UserData');

@@ -50,7 +50,7 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
                     ind_dur_ch(badind,2)=size(noise,2)- ind_dur_ch(badind,1);
                 end
                 for Idx = 1:size(noise,2)
-                    mrks = find(ind_dur_ch(:,3)==Idx);
+                    mrks = find(ind_dur_ch(:,3)==Idx|ind_dur_ch(:,3)==0);
                     ind = ind_dur_ch(mrks,1);
                     indf = ind + ind_dur_ch(mrks,2) - 1;
                     if ~isempty(ind)
@@ -122,7 +122,9 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
                     Mb2 =  intensnorm(1,:)'; %offset
                     A = reshape(X,numel(X),1)*reshape( Mb1,1,numel(Mb1)) +ones(numel(X),1)*reshape( Mb2,1,numel(Mb2));
                     spar = intensnorm - A;
-                    spar = cat(3,spar(:,1:end/2),spar(:,end/2+1:end));
+                    % figure;plot(intensnorm )
+                    %    figure;plot( spar)
+                    spar = cat(3,spar(:,1:end/2),spar(:,end/2+1:end)); 
                     spartmp = spar(:,listgood,:);
                     listgood = find(MeasListActplotLst);
                     %PCA first component !
@@ -136,7 +138,7 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
                             
                             [coeff,score,latent,tsquared,explained] = pca(c);
                             
-                            
+                             
                             iscumlowerthantop = cumsum(explained)<job.c_extractcomponent.b_extractcomponent_PCA.i_extractnoiseupto_nbPCA;
                             ishigherthanmin = explained>job.c_extractcomponent.b_extractcomponent_PCA.i_extractnoise_nbPCA;
                             atleastone = zeros(size(explained));
@@ -292,7 +294,7 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                     ind_dur_ch(badind,2)=size(noise,1)- ind_dur_ch(badind,1);
                 end
                 for Idx = 1:size(noise,2)
-                    mrks = find(ind_dur_ch(:,3)==Idx);
+                    mrks = find(ind_dur_ch(:,3)==Idx |ind_dur_ch(:,3)==0 );
                     ind = ind_dur_ch(mrks,1);
                     indf = ind + ind_dur_ch(mrks,2) - 1;
                     if ~isempty(ind)

@@ -103,7 +103,9 @@ for isubject=2:size(info,1)
         
         
         DATA{id}.System = 'ISS';
-        
+        if 1
+            DATA{id}.System = 'EEG';
+        end
         
         load(fullfile(info{isubject,1}, info{isubject,3}),'-mat');
         names = fieldnames(zone);
@@ -136,6 +138,7 @@ if job.m_nodeunit==1 %channel mode
     ZONEid = [info{end,3}];
     ZoneList =  DATA{end}.ZoneList;
     labelnode = 'c';
+    dir1 = job.e_statmatrixPath{1};
 elseif  job.m_nodeunit==2 %use by zone
     
     MATall =zeros(numel(DATA),numel(DATA{id}.zone.label),numel(DATA{id}.zone.label));
@@ -145,8 +148,12 @@ elseif  job.m_nodeunit==2 %use by zone
             name = List{1};
             if strcmp(name(1:2),'D0')
                 DATA{isubject}.System = 'NIRx';
+         
+            elseif strcmp(name(1:1),'E')
+                DATA{isubject}.System = 'EEG';
             else
                 DATA{isubject}.System = 'ISS';
+
             end
             for izone = 1:numel(DATA{isubject}.zone.label)
                 ML = DATA{isubject}.zone.ml;
@@ -165,6 +172,10 @@ elseif  job.m_nodeunit==2 %use by zone
                             strDet = SDDet2strboxy(ML(ich,2));
                             strSrs = SDPairs2strboxy(ML(ich,1));
                             idch = strmatch([strDet, ' ',strSrs ],List,'exact');
+                        case 'EEG'
+                              strDet = 'EEG';
+                                strSrs = 'EEG'; 
+                        idch = ich;
                     end
                     idliststr =[idliststr,{[strDet, ' ',strSrs ]}];
                     idlisti = [idlisti, idch];
@@ -185,13 +196,21 @@ elseif  job.m_nodeunit==2 %use by zone
                                 strDet = SDDet2strboxy(ML(ich,2));
                                 strSrs = SDPairs2strboxy(ML(ich,1));
                                 idch = strmatch([strDet, ' ',strSrs ],List,'exact');
+                            case 'EEG'
+                                strDet = 'EEG';
+                                strSrs = 'EEG';
+                                idch = ich; %no verification take channel as it is
                         end
                         idliststr =[idliststr,{[strDet, ' ',strSrs ]}];
                         idlistj = [idlistj, idch];
                     end
                     matROI = DATA{isubject}.MAT(idlisti,idlistj);
                     id = find(matROI==0);
-                    if isempty(id)
+                    if ~isempty(id)
+                        matROI(id)=nan;
+                    end
+                    id = find(matROI==Inf);
+                    if ~isempty(id)
                         matROI(id)=nan;
                     end
                     MATall(isubject,izone,jzone) = nanmean(matROI(:));
@@ -201,7 +220,7 @@ elseif  job.m_nodeunit==2 %use by zone
                     end
                 end
             end
-            
+             
             groupid(isubject)= DATA{isubject}.GR;
             labelnode = 'z';
         catch
@@ -234,7 +253,7 @@ elseif  job.m_nodeunit==2 %use by zone
     zone.color = zone.color;
     zone.ml = MLfake;
     zone.chMAT = plotLst;
-    dir1 = job.e_statmatrixPath{1}
+    dir1 = job.e_statmatrixPath{1};
     save(fullfile(dir1,['avg', info{isubject,3}]),'zone','-mat');
     ZONEid = ['avg', info{isubject,3}];
 end
@@ -339,6 +358,23 @@ elseif isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
         mkdir(dir1);
     end
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
+
+    try %SAVE Zone individual file
+        for ifile=1:numel(idG1)
+         file = [info{idG1(ifile)+1,2},'.mat'];
+        
+         matcorr = squeeze(MATall(idG1(ifile),:,:));
+         meancorr = matcorr;
+                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    disp(['Save: ', fullfile(dir1,[file])]);
+                    new = [{dir1},{file}, {ZONEid},{1} ];
+                    infonew = [infonew;new];
+        end        
+    catch
+    end
+
+
+
     
     matcorr =  meanall;
     meancorr = meanall;
@@ -546,7 +582,7 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
                     meancorr = matcorr;
                     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
                     disp(['Save: ', fullfile(dir1,[file])]);
-                    new = [{dir1},{file}, {ZONEid},{1} ];
+                    new = [{dir1},{file}, {ZONEid},{0} ];
                     infonew = [infonew;new];
                     
                 end
@@ -571,7 +607,7 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
                     meancorr = matcorr;
                     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
                     disp(['Save: ', fullfile(dir1,[file])]);
-                    new = [{dir1},{file}, {ZONEid},{1} ];
+                    new = [{dir1},{file}, {ZONEid},{0} ];
                     infonew = [infonew;new];
                 end
             else
@@ -580,7 +616,31 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
             
         end
     end
-    
+    try %SAVE Zone individual file
+        for ifile=1:numel(g1)
+         file = ['G1', info{g1(ifile)+1,2},'.mat'];
+        
+         matcorr = squeeze(MATall(g1(ifile),:,:));
+         meancorr = matcorr;
+                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    disp(['Save: ', fullfile(dir1,[file])]);
+                    new = [{dir1},{file}, {ZONEid},{1} ];
+                    infonew = [infonew;new];
+        end
+        for ifile = 1:numel(g2)
+        file = ['G2', info{g2(ifile)+1,2},'.mat'];
+        
+         matcorr = squeeze(MATall(g2(ifile),:,:));
+         meancorr = matcorr;
+                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    disp(['Save: ', fullfile(dir1,[file])]);
+                    new = [{dir1},{file}, {ZONEid},{2} ];
+                    infonew = [infonew;new];
+        end
+    catch
+    end
+
+
     try %optionnal cohend
         file = [name,labelnode,'Cohend_TPositive','.mat'];
         matcorr = zeros(size(MATall,2),size(MATall,2));
@@ -589,7 +649,7 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
         meancorr = matcorr;
         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
-        new = [{dir1},{file}, {ZONEid},{1} ];
+        new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
         file = [name,labelnode,'Cohend_TNegative','.mat'];
         matcorr = zeros(size(MATall,2),size(MATall,2));
@@ -598,7 +658,7 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
         meancorr = matcorr;
         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
-        new = [{dir1},{file}, {ZONEid},{1} ];
+        new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
         file = [name,labelnode,'Cohend','.mat'];
         matcorr = zeros(size(MATall,2),size(MATall,2));
@@ -607,7 +667,7 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
         meancorr = matcorr;
         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
-        new = [{dir1},{file}, {ZONEid},{1} ];
+        new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
         
     catch
@@ -629,7 +689,7 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
         meancorr = matcorr;
         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
-        new = [{dir1},{file}, {ZONEid},{1} ];
+        new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
         
         file = [name,labelnode,'UnpairedTtest -tval','.mat'];
@@ -639,7 +699,7 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
         meancorr = matcorr;
         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
-        new = [{dir1},{file}, {ZONEid},{1} ];
+        new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
     catch
         disp(['File : ', file ' could not be create'])
@@ -654,7 +714,7 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
         
         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
-        new = [{dir1},{file}, {ZONEid},{1} ];
+        new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
     catch
         disp(['File : ', file ' could not be create'])
@@ -2043,7 +2103,7 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
     id =1;
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
     %Use a specific groupe
-    
+     
     idG1 = find( sum( groupeall==job.c_statmatrix.b_PairedTtest.e_TtestOneSampleGR,2));
     idG2 = find(  sum(  groupeall==job.c_statmatrix.b_PairedTtest.e_TtestOneSampleGR2,2));
     GRname = [' GR',num2str(job.c_statmatrix.b_PairedTtest.e_TtestOneSampleGR),'vs',num2str(job.c_statmatrix.b_PairedTtest.e_TtestOneSampleGR2),' '];
@@ -2052,6 +2112,26 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
     halfMAT = MATall(:,idhalf);
     MATallG1 =  halfMAT( idG1,:);
     MATallG2 =  halfMAT( idG2,:);
+
+    for ifile=1:numel(idG1)
+         file = ['G1', info{idG1(ifile)+1,2}];        
+         matcorr = squeeze(MATall(idG1(ifile),:,:));
+         meancorr = matcorr;
+                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    disp(['Save: ', fullfile(dir1,[file])]);
+                    new = [{dir1},{file}, {ZONEid},{1} ];
+                    infonew = [infonew;new];
+        end
+   for ifile=1:numel(idG2)
+         file = ['G2', info{idG2(ifile)+1,2}];        
+         matcorr = squeeze(MATall(idG2(ifile),:,:));
+         meancorr = matcorr;
+                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    disp(['Save: ', fullfile(dir1,[file])]);
+                    new = [{dir1},{file}, {ZONEid},{2} ];
+                    infonew = [infonew;new];
+   end
+
     try
         matdiff = MATallG1 -  MATallG2;
     catch
@@ -2066,14 +2146,14 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
     totaltrialgood =1;
     dir1 = job.e_statmatrixPath{1};
     for ifile=1:size(matdiff,1)
-        file = ['Paired',sprintf('%03.0f',(ifile)),' ',    list_subject{idG1(ifile) } '-', list_subject{idG2(ifile)}  ,'.mat'];
+        file = ['Paired',sprintf('%03.0f',(ifile)),' ',    list_subject{idG1(ifile) } '-', list_subject{idG2(ifile)}];
         matcorr = zeros(size(MATall,2),size(MATall,2));
         matcorr(idhalf) = squeeze(MATallG1(ifile,:) -  MATallG2(ifile,:));
         matcorr = matcorr +flipud(rot90(matcorr));
         meancorr = matcorr;
         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
         disp(['Save: ', fullfile(dir1,[file])]);
-        new = [{dir1},{file}, {ZONEid},{2} ];
+        new = [{dir1},{file}, {ZONEid},{3} ];
         infonew = [infonew;new];
     end
     disp(['Perform Groupe ', num2str(job.c_statmatrix.b_PairedTtest.e_TtestOneSampleGR) ' - Groupe ', num2str(job.c_statmatrix.b_PairedTtest.e_TtestOneSampleGR2)])
@@ -2137,7 +2217,7 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
     file = [name,labelnode,GRname,'PAIREDTtest mean','.mat'];
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     disp(['Save: ', fullfile(dir1,[file])]);
-    new = [{dir1},{file}, {ZONEid},{1} ];
+    new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
     
     file = [name,labelnode,GRname,'PAIREDTtest meanp',num2str(alpha_threshold),'.mat'];
@@ -2147,7 +2227,7 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
     meancorr = matcorr;
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     disp(['Save: ', fullfile(dir1,[file])]);
-    new = [{dir1},{file}, {ZONEid},{1} ];
+    new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
     
     file = [name,labelnode,GRname,'PAIREDTtest meanFDR',num2str(alpha_threshold),'.mat'];
@@ -2157,7 +2237,7 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
     meancorr = matcorr;
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     disp(['Save: ', fullfile(dir1,[file])]);
-    new = [{dir1},{file}, {ZONEid},{1} ];
+    new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
     
     
@@ -2170,7 +2250,7 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
     file = [name,labelnode,GRname,'PAIREDTtest tval','.mat'];
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     disp(['Save: ', fullfile(dir1,[file])]);
-    new = [{dir1},{file}, {ZONEid},{1} ];
+    new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
     
     file = [name,labelnode,GRname,'PAIREDTtest tvalp',num2str(alpha_threshold),'.mat'];
@@ -2180,7 +2260,7 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
     meancorr = matcorr;
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     disp(['Save: ', fullfile(dir1,[file])]);
-    new = [{dir1},{file}, {ZONEid},{1} ];
+    new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
     
     file = [name,labelnode,GRname,'PAIREDTtest tvalFDR',num2str(alpha_threshold),'.mat'];
@@ -2190,18 +2270,21 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
     meancorr = matcorr;
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     disp(['Save: ', fullfile(dir1,[file])]);
-    new = [{dir1},{file}, {ZONEid},{1} ];
+    new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
     
-    file = [name,labelnode,GRname,'PAIREDTtest tvalFDR',num2str(alpha_threshold),'.mat'];
+
+    file = [name,labelnode,GRname,'PAIREDTtest pval','.mat'];
     matcorr = zeros(size(MATall,2),size(MATall,2));
-    matcorr(idhalf) =  tval.*double(Q<alpha_threshold);
+    matcorr(idhalf) =  pval;
     matcorr = matcorr +flipud(rot90(matcorr));
     meancorr = matcorr;
     save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
     disp(['Save: ', fullfile(dir1,[file])]);
-    new = [{dir1},{file}, {ZONEid},{1} ];
+    new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
+
+   
     if isfield(job.c_statmatrix.b_PairedTtest.c_statpermutation,'b_permutation') %permutation here
         iduse = [idG1;idG2];
         nperm = str2num(job.c_statmatrix.b_PairedTtest.c_statpermutation.b_permutation.e_npermutation);
