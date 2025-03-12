@@ -443,6 +443,13 @@ for iorder = 1:length(idchrono)
              LINKNAME = [LINKNAME,' (' tmp(1:end-4),',',tmp2(1:end-4),')'];
      end
       lstch = [lstch; idlist(row(i)),idlist(col(i))];
+      if row(i)==col(i)       
+        h=line(cos(t(row(i))), sin(t(col(i))),'marker','x','markersize',14, 'linewidth',14,'Color', newcolor,'displayname',LINKNAME );
+         if newfigure ==0
+        set(h,'uicontextmenu',handles.context_link);
+        end
+      
+      end
    if ~isnan(newcolor)
         h = line( r*cos(theta)+x0,...
                   r*sin(theta)+y0,...

@@ -1,5 +1,7 @@
 function out = nirs_run_E_statmatrix(job)
-
+%Utilise les matrices créées pour calculés les statistiques. 
+%Fichier xls avec colonne 1 path, colonne 2 nom de la matrices, colonne 3
+%la zone ou le channel list
 xlslistfile = job.f_matrix{1};
 [~,~,ext] =fileparts(xlslistfile);
 try
@@ -77,14 +79,12 @@ for isubject=2:size(info,1)
             elseif job.m_fishertransform==2 % no fisher transform
                 DATA{id}.MAT = matcorr;
             elseif job.m_fishertransform==3
-                matcorr =  abs(1/2*log((1+matcorr)./(1-matcorr)));
-                
+                matcorr =  abs(1/2*log((1+matcorr)./(1-matcorr)));                
                 DATA{id}.MAT = matcorr;
             end
         end
         
         DATA{id}.name = info{isubject,2};
-        %DATA{id}.MATtrial =  MAT.matcorr;
         DATA{id}.GR = info{isubject,4};
         infocov = [];
         if size(info,2) > 4
@@ -142,7 +142,7 @@ if job.m_nodeunit==1 %channel mode
 elseif  job.m_nodeunit==2 %use by zone
     
     MATall =zeros(numel(DATA),numel(DATA{id}.zone.label),numel(DATA{id}.zone.label));
-    for isubject = 1:numel(groupeall)
+    for isubject = 1:numel(groupeall) 
         try
             List = DATA{isubject}.ZoneList;
             name = List{1};
@@ -193,7 +193,7 @@ elseif  job.m_nodeunit==2 %use by zone
                                 strSrs = SDPairs2strboxy_ISS(ML(ich,1));
                                 idch = strmatch([strDet, ' ',strSrs ],List,'exact');
                             case 'NIRx'
-                                strDet = SDDet2strboxy(ML(ich,2));
+                                strDet = SDDet2strboxy(ML(ich,2)); 
                                 strSrs = SDPairs2strboxy(ML(ich,1));
                                 idch = strmatch([strDet, ' ',strSrs ],List,'exact');
                             case 'EEG'
@@ -204,7 +204,9 @@ elseif  job.m_nodeunit==2 %use by zone
                         idliststr =[idliststr,{[strDet, ' ',strSrs ]}];
                         idlistj = [idlistj, idch];
                     end
-                    matROI = DATA{isubject}.MAT(idlisti,idlistj);
+                     matROI = DATA{isubject}.MAT(idlisti,idlistj);
+                     
+
                     id = find(matROI==0);
                     if ~isempty(id)
                         matROI(id)=nan;
@@ -256,14 +258,21 @@ elseif  job.m_nodeunit==2 %use by zone
     dir1 = job.e_statmatrixPath{1};
     save(fullfile(dir1,['avg', info{isubject,3}]),'zone','-mat');
     ZONEid = ['avg', info{isubject,3}];
+   for izone = 1:numel(DATA{isubject}.zone.plotLst) %Utilise la coordonnée moyenne pour chaque region 
+        idlisti = DATA{isubject}.zone.plotLst{izone};
+       chanposzone(izone,:) = mean(zone.pos(idlisti,:));
+   end 
+
 end
 
 matid = zeros(size(MATall,2),size(MATall,2));
 id =1;
+%modifier pour inclure la diagonal pour gerer le cas ou les zones sont
+%utilisées
 for ielex=1:size(MATall,2)
     ielex;
     ieley = 1;
-    while ieley < ielex
+    while ieley <= ielex
         matid(ielex,ieley)=id;
         ieley = ieley + 1;
         id = id + 1;
@@ -271,21 +280,14 @@ for ielex=1:size(MATall,2)
 end
 idhalf = find(matid);
 matid(idhalf);
-%  get relevant indice to use only pertinent half matrix without
-%  diagonal in the permutation to reduce the number of computation
-%  use :
-%  matgr1 = zeros(nele,nele);
-%  matgr1(idhalf)=dat(:,1)
-%  matgr1 = matgr1 +flipud(rot90(matgr1))
-%  to be back in matrices !
+
 try
-    %not all channel could be use in the final matrice get the position
-    %from one subjet and ensure you associate label in the Data.ZoneList to
-    %a position in the zone.ml first col source second col detector
-    sujet = 1; %need projet V5
+ 
+    if job.m_nodeunit==1 
+    sujet = 1; %need projet V5 
     zonelist = DATA{sujet}.ZoneList;
     chanpos = zeros(numel(zonelist),3);
-    for id=1:size(zonelist)
+    for id=1:numel(zonelist)
         name = zonelist{id};
         [DetL,SrsL] =strtok(name,' ');
         SDdetL = StrBoxy2SDDet(DetL);
@@ -295,8 +297,15 @@ try
             chanpos(id,:) =  DATA{1}.zone.pos(idml,1:3);
         end
     end
+     disp(['Use channel position'])   
+    elseif    job.m_nodeunit==2 %pour les zones utilisés les zones moyennées
+        chanpos= chanposzone;
+        disp('Use zone middle point  position')
+        %figure;plot3(chanpos(:,1),chanpos(:,2),chanpos(:,3),'x')
+    end
 catch
-    disp('Multiple comparaison cluster could not find channel position, use all cluster')
+    
+    disp('Multiple comparaison cluster could not find channel position, use all cluster')   
 end
 
 [filepath,name,ext] = fileparts(xlslistfile);
@@ -361,33 +370,36 @@ elseif isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
 
     try %SAVE Zone individual file
         for ifile=1:numel(idG1)
-         file = [info{idG1(ifile)+1,2},'.mat'];
-        
-         matcorr = squeeze(MATall(idG1(ifile),:,:));
-         meancorr = matcorr;
-                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                    disp(['Save: ', fullfile(dir1,[file])]);
-                    new = [{dir1},{file}, {ZONEid},{1} ];
-                    infonew = [infonew;new];
-        end        
+            if job.m_nodeunit==1 %channel
+                file = [info{idG1(ifile)+1,2},'c','.mat'];
+            else job.m_nodeunit==2 %zon
+                file = [info{idG1(ifile)+1,2},'z','.mat'];
+            end
+
+            meancorr =  squeeze(MATall(idG1(ifile),:,:));
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
+            disp(['Save: ', fullfile(dir1,[file])]);
+            new = [{dir1},{file}, {ZONEid},{1} ];
+            infonew = [infonew;new];
+        end
     catch
     end
 
 
 
     
-    matcorr =  meanall;
+  
     meancorr = meanall;
     totaltrialgood = mean(dfall(:));
     file = [name,labelnode,GRname, 'OneSampleTtest mean','.mat'];
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
+
     file = [name,labelnode,GRname, 'OneSampleTtest meanp',num2str(alpha_threshold),'.mat'];
-    matcorr = [];
     meancorr = meanall.*double(pval<alpha_threshold);
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
@@ -397,9 +409,8 @@ elseif isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
         [FDR,Q] = mafdr(pval(:));
         Q = reshape(Q,size(pval));
         file = [name,labelnode,GRname, 'OneSampleTtest meanFDR',num2str(alpha_threshold),'.mat'];
-        matcorr =  [];
         meancorr = meanall.*double(Q<alpha_threshold);
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
@@ -408,28 +419,26 @@ elseif isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     end
     
     % ZoneList = MAT.ZoneList;
-    matcorr =  [];
+
     meancorr = tval;
     totaltrialgood = mean(dfall(:));
     file = [name,labelnode,GRname, 'OneSampleTtest tval','.mat'];
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
     
     file = [name,labelnode,GRname,'OneSampleTtest tvalp',num2str(alpha_threshold),'.mat'];
-    matcorr =[];
     meancorr = tval.*double(pval<alpha_threshold);
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
     
     try
         file = [name,labelnode,GRname,'OneSampleTtest tvalFDR',num2str(alpha_threshold),'.mat'];
-        matcorr =[];
         meancorr = tval.*double(Q<alpha_threshold);
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
@@ -440,9 +449,8 @@ elseif isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     
     try
         file = [name,labelnode,GRname,'OneSampleTtest N.mat'];
-        matcorr = [];
-        meancorr = squeeze(sum(~isnan(MATallG1(:,:,:)),1));;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        meancorr = squeeze(sum(~isnan(MATallG1(:,:,:)),1));
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
@@ -487,8 +495,6 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
     g2 = find(sum(groupeall==job.c_statmatrix.b_UnpairedTtest.e_TtestOneSampleGR2,2));
     iduse = [g1;g2];
     halfMAT = MATall(:,idhalf);
-    
-     
     if isfield(job.c_statmatrix.b_UnpairedTtest.c_statpermutation,'b_Nopermutation')
         for ilink = 1:size(halfMAT,2)
             [h,p,ci,stats] = ttest2(halfMAT(g1,ilink), halfMAT(g2,ilink));
@@ -496,7 +502,7 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
             tval(:,ilink) = stats.tstat;
             try; cohend(:,ilink)=computeCohen_d(halfMAT(g1,ilink), halfMAT(g2,ilink),'independent');catch;end
             
-        end
+        end   
     elseif isfield(job.c_statmatrix.b_UnpairedTtest.c_statpermutation,'b_permutation')
         halfMAT = MATall(:,idhalf);
         g1 = find(sum(groupeall==job.c_statmatrix.b_UnpairedTtest.e_TtestOneSampleGR,2));
@@ -538,7 +544,7 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
         %  figure;hist(t_dist_all(:),1000)
         if isfield(job.c_statmatrix.b_UnpairedTtest.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting,'b_MCT_ClusterBased')
             statrand = permute(tvalperm(1,:,:), [3 2 1]);
-            statobs = permute(tval(1,:),[2,1]);
+            statobs = permute(tval(1,:),[2,1]); 
             tmp = randperm(numel(statrand));
             statrand =reshape(statrand(tmp),size(statrand,1),size(statrand,2));
             minnbchan = job.c_statmatrix.b_UnpairedTtest.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_minnbchan;
@@ -549,38 +555,35 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
             save(fullfile(dir1,'Unpairedttest_stat.mat'),'stat')
             disp(['Save cluster', fullfile(dir1,'Unpairedttest_stat.mat') ])
             
-            %View link for neighbor
-            if 0
-                for ilink=1:300
-                    file = [name,labelnode,num2str(nperm),' neiglink',num2str(ilink),'.mat'];
-                    matcorr = zeros(size(MATall,2),size(MATall,2));
-                    matcorr(idhalf)=matneig(:,ilink);
-                    matcorr = matcorr +flipud(rot90(matcorr));
-                    meancorr = matcorr;
-                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                    disp(['Save: ', fullfile(dir1,[file])]);
-                    new = [{dir1},{file}, {ZONEid},{0} ];
-                    infonew = [infonew;new];
-                end
-            end
+            % %View link for neighbor debug
+            % if 0 
+            %     for ilink=1:300 
+            %         file = [name,labelnode,GRname, num2str(nperm),' neiglink',num2str(ilink),'.mat'];
+            %         matcorr = zeros(size(MATall,2),size(MATall,2));
+            %         matcorr(idhalf)=matneig(:,ilink);
+            %         matcorr = matcorr %+flipud(rot90(matcorr));
+            %         meancorr = matcorr;
+            %         save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+            %         disp(['Save: ', fullfile(dir1,[file])]);
+            %         new = [{dir1},{file}, {ZONEid},{0} ];
+            %         infonew = [infonew;new];
+            %     end
+            % end
             
             if isfield(stat,'posclusterslabelmat')
                 for iposcluster = 1:numel(stat.posclusters)
-                    file = [name,labelnode,num2str(nperm),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                    matcorr = zeros(size(MATall,2),size(MATall,2));
-                    matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                    matcorr = matcorr +flipud(rot90(matcorr));
-                    meancorr = matcorr;
-                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                    disp(['Save: ', fullfile(dir1,[file])]);
+                    file = [name,labelnode,GRname, num2str(nperm),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
+                    tmp=(stat.posclusterslabelmat==iposcluster);
+                    meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+                    save(fullfile(dir1,[file]),'ZoneList','meancorr');
+                    disp(['Save: ', fullfile(dir1,[file])]); 
                     new = [{dir1},{file}, {ZONEid},{0} ];
                     infonew = [infonew;new];
                     
-                    file = [name,labelnode,num2str(nperm),' posCluster tval', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                    matcorr(idhalf)=squeeze(tval(:)).*(stat.posclusterslabelmat==iposcluster);;
-                    matcorr = matcorr +flipud(rot90(matcorr));
-                    meancorr = matcorr;
-                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    file = [name,labelnode,GRname, num2str(nperm),' posCluster tval', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
+                    tmp=squeeze(tval(:)).*(stat.posclusterslabelmat==iposcluster);
+                    meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+                    save(fullfile(dir1,[file]),'ZoneList','meancorr');
                     disp(['Save: ', fullfile(dir1,[file])]);
                     new = [{dir1},{file}, {ZONEid},{0} ];
                     infonew = [infonew;new];
@@ -591,21 +594,19 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
             end
             if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
                 for inegcluster = 1:numel(stat.negclusters)
-                    file = [name,labelnode,num2str(nperm),' negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
-                    matcorr = zeros(size(MATall,2),size(MATall,2));
-                    matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                    matcorr = matcorr +flipud(rot90(matcorr));
-                    meancorr = matcorr;
-                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    file = [name,labelnode,GRname, num2str(nperm),' negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
+             
+                    tmp=(stat.negclusterslabelmat==inegcluster);
+                    meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+                    save(fullfile(dir1,[file]),'ZoneList','meancorr');
                     disp(['Save: ', fullfile(dir1,[file])]);
                     new = [{dir1},{file}, {ZONEid},{0} ];
                     infonew = [infonew;new];
                     
-                    file = [name,labelnode,num2str(nperm),' negCluster tval', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
-                    matcorr(idhalf)=squeeze(tval(:)).*(stat.negclusterslabelmat==inegcluster);
-                    matcorr = matcorr +flipud(rot90(matcorr));
-                    meancorr = matcorr;
-                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    file = [name,labelnode, GRname, num2str(nperm),' negCluster tval', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];                   
+                    tmp=squeeze(tval(:)).*(stat.negclusterslabelmat==inegcluster);                    
+                    meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+                    save(fullfile(dir1,[file]),'ZoneList','meancorr');
                     disp(['Save: ', fullfile(dir1,[file])]);
                     new = [{dir1},{file}, {ZONEid},{0} ];
                     infonew = [infonew;new];
@@ -618,54 +619,57 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
     end
     try %SAVE Zone individual file
         for ifile=1:numel(g1)
-         file = ['G1', info{g1(ifile)+1,2},'.mat'];
-        
-         matcorr = squeeze(MATall(g1(ifile),:,:));
-         meancorr = matcorr;
-                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                    disp(['Save: ', fullfile(dir1,[file])]);
-                    new = [{dir1},{file}, {ZONEid},{1} ];
-                    infonew = [infonew;new];
+            if job.m_nodeunit==1 %channel
+            file = ['G1', info{g1(ifile)+1,2},'c.mat'];
+
+            elseif job.m_nodeunit==2%zone
+                   file = ['G1', info{g1(ifile)+1,2},'z.mat'];
+            end
+            meancorr =  squeeze(MATall(g1(ifile),:,:));
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
+            disp(['Save: ', fullfile(dir1,[file])]);
+            new = [{dir1},{file}, {ZONEid},{1} ];
+            infonew = [infonew;new];
         end
         for ifile = 1:numel(g2)
-        file = ['G2', info{g2(ifile)+1,2},'.mat'];
+             if job.m_nodeunit==1 %channel
+                file = ['G2', info{g2(ifile)+1,2},'c.mat'];
+             elseif job.m_nodeunit==2 %zone
+                file = ['G2', info{g2(ifile)+1,2},'z.mat'];
+             end
         
-         matcorr = squeeze(MATall(g2(ifile),:,:));
-         meancorr = matcorr;
-                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                    disp(['Save: ', fullfile(dir1,[file])]);
-                    new = [{dir1},{file}, {ZONEid},{2} ];
-                    infonew = [infonew;new];
+          meancorr =squeeze(MATall(g2(ifile),:,:));
+          save(fullfile(dir1,[file]),'ZoneList','meancorr');
+          disp(['Save: ', fullfile(dir1,[file])]);
+          new = [{dir1},{file}, {ZONEid},{2} ];
+          infonew = [infonew;new];
         end
     catch
     end
 
 
     try %optionnal cohend
-        file = [name,labelnode,'Cohend_TPositive','.mat'];
-        matcorr = zeros(size(MATall,2),size(MATall,2));
-        matcorr(idhalf)=squeeze(cohend(:)).*squeeze(tval(:)>0);
-        matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        file = [name,labelnode,GRname, 'Cohend_TPositive','.mat'];
+        tmp=squeeze(cohend(:)).*squeeze(tval(:)>0);
+         meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
-        file = [name,labelnode,'Cohend_TNegative','.mat'];
-        matcorr = zeros(size(MATall,2),size(MATall,2));
-        matcorr(idhalf)=squeeze(cohend(:)).*squeeze(tval(:)<0);;
-        matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        
+        file = [name,labelnode,GRname,'Cohend_TNegative','.mat'];
+        tmp=squeeze(cohend(:)).*squeeze(tval(:)<0);
+        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
-        file = [name,labelnode,'Cohend','.mat'];
-        matcorr = zeros(size(MATall,2),size(MATall,2));
-        matcorr(idhalf)=squeeze(cohend(:));
-        matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        
+        file = [name,labelnode,GRname,'Cohend','.mat'];
+  
+        tmp = squeeze(cohend(:));
+        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
@@ -682,22 +686,25 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
     
     
     try
-        file = [name,labelnode,'UnpairedTtest tval','.mat'];
-        matcorr = zeros(size(MATall,2),size(MATall,2));
-        matcorr(idhalf)=squeeze(tval(:));
-        matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        file = [name,labelnode,GRname,'UnpairedTtest tval','.mat'];       
+        meancorr = halfmat2mat(tval,idhalf, size(MATall,2));  
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
-        
-        file = [name,labelnode,'UnpairedTtest -tval','.mat'];
-        matcorr = zeros(size(MATall,2),size(MATall,2));
-        matcorr(idhalf)=-squeeze(tval(:));
-        matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+
+        file = [name,labelnode,GRname,'UnpairedTtest tval_p', num2str(alpha_threshold),'unc','.mat'];     
+        tmp=squeeze(tval(:)).*squeeze(double(pval(:)<alpha_threshold));
+        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2));  
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
+        disp(['Save: ', fullfile(dir1,[file])]);
+        new = [{dir1},{file}, {ZONEid},{0} ];
+        infonew = [infonew;new];
+              
+        file = [name,labelnode,GRname,'UnpairedTtest -tval','.mat'];       
+        tmp=-squeeze(tval(:));
+        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2));
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
@@ -706,13 +713,10 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
     end
     
     try
-        file = [name,labelnode,'UnpairedTtest 1-pval','.mat'];
-        matcorr = zeros(size(MATall,2),size(MATall,2));
-        matcorr(idhalf)=squeeze(1-pval(:));
-        matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;
-        
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        file = [name,labelnode,GRname,'UnpairedTtest pval','.mat'];
+        tmp =squeeze(pval(:));
+        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2));
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
@@ -734,7 +738,7 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
         else
             try
                 xlswrite(fullfile(dir1,[name,labelnode,GRname,'UnpairedTtest.xlsx']),infonew);
-                disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,GRname,'UnpairedTtest.txt'])]);
+                disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,GRname,'UnpairedTtest.xlsx'])]);
             catch
                 writetxtfile(fullfile(dir1,[name,labelnode,GRname,'UnpairedTtest.txt']),infonew);
                 disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,GRname,'UnpairedTtest.txt'])]);
@@ -850,86 +854,76 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
     
     %WRITE IN A NEW FILE
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
-    file = [name,'_',labelnode,GRname,num2str(NPERM),'permutation tstat','.mat'];
-    matcorr = Toij;
+    file = [name,'_',labelnode,GRname,num2str(NPERM),'permutation tstat','.mat'];   
     meancorr = Toij;
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
-    file = [name,'_',labelnode,GRname,num2str(NPERM),'permutation 1-pval','.mat'];
-    matcorr = 1-FUniv;
+    file = [name,'_',labelnode,GRname,num2str(NPERM),'permutation 1-pval','.mat'];    
     meancorr = 1-FUniv;
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
     
     file = [name,'_',labelnode,GRname,num2str(NPERM),'permutation mean', num2str(job.c_statmatrix.b_PermutationTest.e_TtestOneSampleGR),'-',num2str(job.c_statmatrix.b_PermutationTest.e_TtestOneSampleGR2) ,'.mat'];
-    matcorr = real(squeeze((nanmean(cb1,1)- nanmean(pb1,1))));
-    meancorr = real(squeeze((nanmean(cb1,1)- nanmean(pb1,1))));
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+      meancorr = real(squeeze((nanmean(cb1,1)- nanmean(pb1,1))));
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
     
     file = [name,'_',labelnode,GRname,num2str(NPERM),'permutation mean ', num2str(job.c_statmatrix.b_PermutationTest.e_TtestOneSampleGR2),'-',num2str(job.c_statmatrix.b_PermutationTest.e_TtestOneSampleGR) ,'.mat'];
-    matcorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1)));
-    meancorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1)));
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+      meancorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1)));
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
     file = [name,'_',labelnode,GRname,num2str(NPERM),'permutation mean ', num2str(job.c_statmatrix.b_PermutationTest.e_TtestOneSampleGR),'-',num2str(job.c_statmatrix.b_PermutationTest.e_TtestOneSampleGR2),' p',num2str(alpha_threshold),'.mat'];
-    matcorr = real(squeeze(nanmean(cb1,1))-squeeze(nanmean(pb1,1))).*double(FUniv<alpha_threshold);
     meancorr = real(squeeze(nanmean(cb1,1))-squeeze(nanmean(pb1,1))).*double(FUniv<alpha_threshold);
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
     file = [name,'_',labelnode,GRname,num2str(NPERM),'permutation mean ',num2str(job.c_statmatrix.b_PermutationTest.e_TtestOneSampleGR2),'-',num2str(job.c_statmatrix.b_PermutationTest.e_TtestOneSampleGR) ,' p',num2str(alpha_threshold),'.mat'];
-    matcorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1))).*double(FUniv<alpha_threshold);
     meancorr = real(squeeze(nanmean(pb1,1))-squeeze(nanmean(cb1,1))).*double(FUniv<alpha_threshold);
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
     file = [name,'_',labelnode,GRname,num2str(NPERM),'permutation mean G',num2str(job.c_statmatrix.b_PermutationTest.e_TtestOneSampleGR),'.mat'];
-    matcorr = real(squeeze(nanmean(cb1,1)));
     meancorr = real(squeeze(nanmean(cb1,1)));
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
     file = [name,'_',labelnode,GRname,num2str(NPERM),'permutation mean G',num2str(job.c_statmatrix.b_PermutationTest.e_TtestOneSampleGR2),'.mat'];
-    matcorr = real(squeeze(nanmean(pb1,1)));
     meancorr = real(squeeze(nanmean(pb1,1)));
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
     
     file = [name,'_',labelnode,GRname,num2str(NPERM),'permutation N G',num2str(job.c_statmatrix.b_PermutationTest.e_TtestOneSampleGR),'.mat'];
-    matcorr = ncb1;
     meancorr = ncb1;
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
     
     
     file = [name,'_',labelnode,GRname,num2str(NPERM),'permutation N G',num2str(job.c_statmatrix.b_PermutationTest.e_TtestOneSampleGR2),'.mat'];
-    matcorr = npb1;
     meancorr = npb1;
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
@@ -949,7 +943,7 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
             disp(['Result .xlsx file saved ' fullfile(dir1,[name,'_',labelnode,num2str(NPERM),'PermutationTtest.xlsx'])]);
         catch
             writetxtfile(fullfile(dir1,[name,GRname,labelnode,num2str(NPERM),'PermutationTtest.txt']),infonew);
-            disp(['Result .xlsx file saved ' fullfile(dir1,[name,'_',labelnode,num2str(NPERM),'PermutationTtest.xlsx'])]);
+            disp(['Result .xlsx file saved ' fullfile(dir1,[name,'_',labelnode,num2str(NPERM),'PermutationTtest.txt'])]);
         end
     end
     
@@ -1034,19 +1028,17 @@ elseif isfield(job.c_statmatrix,'b_PearsonCorr_Mat')
             
             %WRITE IN A NEW FILE
             
-            file = [name,'_',Pearsony,'PEARSON','.mat'];
-            matcorr = PearsonCoef;
+            file = [name,'_',Pearsony,'PEARSON','.mat'];    
             meancorr = PearsonCoef;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{1} ];
             infonew = [infonew;new];
             
             
             file = [name,'_',Pearsony,'PEARSONp',num2str(alpha_threshold),'.mat'];
-            matcorr = PearsonCoefSig;
             meancorr = PearsonCoefSig;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{1} ];
             infonew = [infonew;new];
@@ -1202,10 +1194,10 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
                 end
                 disp([upper(job.c_statmatrix.b_GLM_Mat.e_GLMGR), ' group where used for the regression n=',num2str(numel(subjecttoapply))])
                 for isubject = 1:numel(subjecttoapply)
-                    matcorr = squeeze(residual(subjecttoapply(isubject),:,:));
+                   
                     meancorr = squeeze(residual(subjecttoapply(isubject),:,:));
                     file = ['res ' covariableall{idcov2substract}, info{subjecttoapply(isubject)+1,2}];
-                    save(fullfile(info{subjecttoapply(isubject)+1,1},file),'ZoneList','matcorr','meancorr');
+                    save(fullfile(info{subjecttoapply(isubject)+1,1},file),'ZoneList','meancorr');
                     new = [info{subjecttoapply(isubject)+1,1},{file}, {ZONEid},{1}, num2cell(score(subjecttoapply(isubject),:))  ];
                     infonew = [infonew;new];
                     disp( ['Save residual: ', fullfile(info{subjecttoapply(isubject)+1,1},file)])
@@ -1223,90 +1215,79 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
         
         %WRITE IN A NEW FILE
         for icov = 1:numel(covariableall)
-            file = ['Beta',name,'_',covariableall{icov},'.mat'];
-            eval(['matcorr =','bCOV',num2str(icov),';']);
+            file = ['Beta',name,'_',covariableall{icov},'.mat'];        
             eval(['meancorr =','bCOV',num2str(icov),';']);
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             new = [{dir1},{file}, {ZONEid},{0}, num2cell(zeros(1,numel(covariableall)))];
             infonew = [infonew;new];
-            file = ['Beta',name,'_',covariableall{icov},'p',num2str(alpha_threshold),'.mat'];
-            eval(['matcorr =','bCOV',num2str(icov),'sig;']);
+            file = ['Beta',name,'_',covariableall{icov},'p',num2str(alpha_threshold),'.mat'];           
             eval(['meancorr =','bCOV',num2str(icov),'sig;']);
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             new = [{dir1},{file}, {ZONEid},{0}, num2cell(zeros(1,numel(covariableall)))];
             infonew = [infonew;new];
         end
         
         try
             file = ['R2_cov=',covariablestring];
-            matcorr =r2;
-            meancorr =matcorr;
-            save(fullfile(dir1,file),'ZoneList','matcorr','meancorr');
+            meancorr =r2;
+            save(fullfile(dir1,file),'ZoneList','meancorr');
             new = [{dir1},{file},{ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
             infonew = [infonew;new];
             disp( ['Save R2: ', fullfile(info{isubject,1},file)])
         catch
         end
         
-        file = ['F stat_cov=',covariablestring];
-        matcorr =F;
-        meancorr =matcorr;
-        save(fullfile(dir1,file),'ZoneList','matcorr','meancorr');
+        file = ['F stat_cov=',covariablestring];     
+        meancorr =F;
+        save(fullfile(dir1,file),'ZoneList','meancorr');
         new = [{dir1},{file},{ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
         infonew = [infonew;new];
         disp( ['Save Fstat: ', fullfile(info{isubject,1},file)])
         
-        file = ['1-pval_cov=',covariablestring];
-        matcorr =1-pval;
-        meancorr =matcorr;
-        save(fullfile(dir1,file),'ZoneList','matcorr','meancorr');
+        file = ['1-pval_cov=',covariablestring];        
+        meancorr =1-pval
+        save(fullfile(dir1,file),'ZoneList','meancorr');
         new = [{dir1},{file},{ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
         infonew = [infonew;new];
         disp( ['Save 1-pval: ', fullfile(info{isubject,1},file)])
         
         file = ['RMSerr_cov=',covariablestring];
-        matcorr =RMSerr;
-        meancorr =matcorr;
-        save(fullfile(dir1,file),'ZoneList','matcorr','meancorr');
+        meancorr =RMSerr;
+        save(fullfile(dir1,file),'ZoneList','meancorr');
         new = [{dir1},{file}, {ZONEid},{0} ,num2cell(zeros(1,numel(covariableall)))];
         infonew = [infonew;new];
         disp( ['Save Root Mean Square Error: ',fullfile(info{isubject,1},file)])
         
         file = ['n',name];
-        matcorr = mat_n_used;
         meancorr = mat_n_used;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         new = [{dir1},{file}, {ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
         infonew = [infonew;new];
         
         file = ['f2',name];
-        matcorr = f2;
         meancorr = f2;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         new = [{dir1},{file}, {ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
         infonew = [infonew;new];
         
         
-        file = ['f2BetaPosive',name];
-        matcorr = f2.*double(bCOV2>0);
+        file = ['f2BetaPosive',name];       
         meancorr = f2.*double(bCOV2>0);
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         new = [{dir1},{file}, {ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
         infonew = [infonew;new];
         
         
-        file = ['f2BetaNegative',name];
-        matcorr = f2.*double(bCOV2<0);
+        file = ['f2BetaNegative',name];     
         meancorr = f2.*double(bCOV2<0);
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         new = [{dir1},{file}, {ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
         infonew = [infonew;new];
         
         
-        file = ['R2inc',name];
-        matcorr = R2inc;
+        file = ['R2inc',name];        
         meancorr = R2inc;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         new = [{dir1},{file}, {ZONEid},{0},num2cell(zeros(1,numel(covariableall)))];
         infonew = [infonew;new];
         try
@@ -1441,9 +1422,9 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
                 statrand(tmp) = statrand;
             end
             if 0
-                fileMean = 'C:\NIRx-actiCHAMP_Analysed\ELAN\Resting2021\Matrices\Stat\0mOneSample_ttest\_OHBM_MatriceCOH_Elan_BAYLEY_REVIEWmai2023cGR1 OneSampleTtest mean.mat'
-                load(fileMean)
-                MeanAmp = meancorr
+                fileMean = 'C:\NIRx-actiCHAMP_Analysed\ELAN\Resting2021\Matrices\Stat\0mOneSample_ttest\_OHBM_MatriceCOH_Elan_BAYLEY_REVIEWmai2023cGR1 OneSampleTtest mean.mat';
+                load(fileMean);
+                MeanAmp = meancorr;
                 statobs = F' .*double(MeanAmp(idhalf)>0);
                 disp('Mask positive Pearson before cluster')
                 statrand =statrand(:,:).*(double(MeanAmp(idhalf)>0)*ones(1,nperm));
@@ -1460,11 +1441,9 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
             if isfield(stat,'posclusterslabelmat')
                 for iposcluster = 1:numel(stat.posclusters)
                     file = [name,labelnode,num2str(nperm),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                    matcorr = zeros(size(MATall,2),size(MATall,2));
-                    matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                    matcorr = matcorr +flipud(rot90(matcorr));
-                    meancorr = matcorr;
-                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    tmp=(stat.posclusterslabelmat==iposcluster);              
+                    meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+                    save(fullfile(dir1,[file]),'ZoneList','meancorr');
                     disp(['Save: ', fullfile(dir1,[file])]);
                     new = [{dir1},{file}, {ZONEid},{0} ];
                     infonew = [infonew;new];
@@ -1474,12 +1453,8 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
                     for icov = 1:numel(covariableall)
                         file = ['Beta','_',covariableall{icov},'posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
                         meancorr = zeros(size(MATall,2),size(MATall,2));
-                        eval(['meancorr(idhalf) =','bCOV',num2str(icov),';']);
-                        meancorr = meancorr +flipud(rot90(meancorr ));
-                        matsig = zeros(size(MATall,2),size(MATall,2));
-                        matsig(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                        matsig = matsig +flipud(rot90(matsig));
-                        meancorr =  meancorr.* double(matsig);
+                        eval(['tmp =','bCOV',num2str(icov),';']);
+                        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
                         disp(['Save file: ', fullfile(dir1,[file])]);
                         save(fullfile(dir1,[file]),'ZoneList','meancorr');
                         new = [{dir1},{file}, {ZONEid},{0}];
@@ -1493,11 +1468,9 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
             if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
                 for inegcluster = 1:numel(stat.negclusters)
                     file = [name,labelnode,num2str(nperm),' negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
-                    matcorr = zeros(size(MATall,2),size(MATall,2));
-                    matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                    matcorr = matcorr +flipud(rot90(matcorr));
-                    meancorr = matcorr;
-                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    tmp=(stat.negclusterslabelmat==inegcluster);                  
+                    meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+                    save(fullfile(dir1,[file]),'ZoneList','meancorr');
                     disp(['Save: ', fullfile(dir1,[file])]);
                     new = [{dir1},{file}, {ZONEid},{0} ];
                     infonew = [infonew;new];
@@ -1506,12 +1479,9 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
                     for icov = 1:numel(covariableall)
                         file = ['Beta','_',covariableall{icov},'negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat']
                         meancorr = zeros(size(MATall,2),size(MATall,2));
-                        eval(['meancorr(idhalf) =','bCOV',num2str(icov),';']);
-                        meancorr = meancorr +flipud(rot90(meancorr ));
-                        matsig = zeros(size(MATall,2),size(MATall,2));
-                        matsig(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                        matsig = matsig +flipud(rot90(matsig));
-                        meancorr =  meancorr.* double(matsig);
+                        eval(['meancorr(idhalf) =','bCOV',num2str(icov),';']);                              
+                        tmp=(stat.negclusterslabelmat==inegcluster);                   
+                        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
                         disp(['Save file: ', fullfile(dir1,[file])]);
                         save(fullfile(dir1,[file]),'ZoneList','meancorr');
                         new = [{dir1},{file}, {ZONEid},{0}];
@@ -1541,12 +1511,6 @@ elseif isfield(job.c_statmatrix,'b_LM_Mat')
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
     datatable= readtable(xlslistfile)
     halfMAT = MATall(:,idhalf);
-    %verify transfert
-    %      tmp = squeeze(MATall(1,:,:));
-    %      halfMAT1 = MATall(1,idhalf);
-    %       matcorr = zeros(size(MATall,2),size(MATall,2));
-    %       matcorr(idhalf)=halfMAT1;
-    %       matcorr = matcorr +flipud(rot90(matcorr));
     LMformula = deblank(job.c_statmatrix.b_LM_Mat.b_LME_formula);
     fprintf('%s',['RUN LM : ', LMformula, ' link:'])
     try %load precomputed to speed up not keep as standard way of working
@@ -1588,8 +1552,8 @@ elseif isfield(job.c_statmatrix,'b_LM_Mat')
         
         file = ['Nobservation.mat']
         meancorr = zeros(size(MATall,2),size(MATall,2));
-        eval(['meancorr(idhalf) =','N;']);
-        meancorr = meancorr +flipud(rot90(meancorr ));
+        eval(['tmp =','N;']);
+        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
         disp(['Save file: ', fullfile(dir1,[file])]);
         save(fullfile(dir1,[file]),'ZoneList','meancorr');
         new = [{dir1},{file}, {ZONEid},{0}];
@@ -1597,8 +1561,8 @@ elseif isfield(job.c_statmatrix,'b_LM_Mat')
         
         file = ['R2.mat']
         meancorr = zeros(size(MATall,2),size(MATall,2));
-        eval(['meancorr(idhalf) =','r2']);
-        meancorr = meancorr +flipud(rot90(meancorr ));
+        eval(['tmp =','r2']);       
+        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
         disp(['Save file: ', fullfile(dir1,[file])]);
         save(fullfile(dir1,[file]),'ZoneList','meancorr');
         new = [{dir1},{file}, {ZONEid},{0}];
@@ -1607,13 +1571,11 @@ elseif isfield(job.c_statmatrix,'b_LM_Mat')
         % WRITE Tval in file
         for icov = 1:size(lm.Coefficients,1)
             file = ['TCOV',num2str(icov),'_', lm.CoefficientNames{1,icov},'.mat']
-            meancorr = zeros(size(MATall,2),size(MATall,2));
-            eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
-            meancorr = meancorr +flipud(rot90(meancorr ));
-            matsig = zeros(size(MATall,2),size(MATall,2));
-            eval(['matsig(idhalf) =','pCOV',num2str(icov),';'])
-            matsig = matsig +flipud(rot90(matsig));
-            meancorr =  meancorr.* double(matsig<alpha_threshold);
+            eval(['tmp =','TCOV',num2str(icov),';']);    
+            eval(['matsig =','pCOV',num2str(icov),';']);          
+           
+            tmp = tmp.* double(matsig<alpha_threshold);
+            meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
             disp(['Save file: ', fullfile(dir1,[file])]);
             save(fullfile(dir1,[file]),'ZoneList','meancorr');
             new = [{dir1},{file}, {ZONEid},{0}];
@@ -1623,12 +1585,10 @@ elseif isfield(job.c_statmatrix,'b_LM_Mat')
         for icov = 1:size(lm.Coefficients,1)
             file = ['ECOV',num2str(icov),'_', lm.CoefficientNames{1,icov},'.mat']
             meancorr = zeros(size(MATall,2),size(MATall,2));
-            eval(['meancorr(idhalf) =','ECOV',num2str(icov),';']);
-            meancorr = meancorr +flipud(rot90(meancorr ));
-            matsig = zeros(size(MATall,2),size(MATall,2));
-            eval(['matsig(idhalf) =','pCOV',num2str(icov),';'])
-            matsig = matsig +flipud(rot90(matsig));
-            meancorr =  meancorr.* double(matsig<alpha_threshold);
+            eval(['tmp =','ECOV',num2str(icov),';']);
+            eval(['matsig =','pCOV',num2str(icov),';']);            
+            tmp = tmp.* double(matsig<alpha_threshold);
+            meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
             disp(['Save file: ', fullfile(dir1,[file])]);
             save(fullfile(dir1,[file]),'ZoneList','meancorr');
             new = [{dir1},{file}, {ZONEid},{0}];
@@ -1726,31 +1686,24 @@ elseif isfield(job.c_statmatrix,'b_LM_Mat')
                 if isfield(stat,'posclusterslabelmat')
                     for iposcluster = 1:numel(stat.posclusters)
                         file = [name,labelnode,num2str(nperm),'COV', num2str(icov),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                        matcorr = zeros(size(MATall,2),size(MATall,2));
-                        matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                        tmp=(stat.posclusterslabelmat==iposcluster);                      
+                        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+                        save(fullfile(dir1,[file]),'ZoneList','meancorr');
                         disp(['Save: ', fullfile(dir1,[file])]);
                         new = [{dir1},{file}, {ZONEid},{0} ];
-                        infonew = [infonew;new];
-                        
-                        
+                        infonew = [infonew;new];                       
+                       
                         %WRITE beta and cluster in file
-                  
                             file = ['Tval','COV', num2str(icov),'_','posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
                             meancorr = zeros(size(MATall,2),size(MATall,2));
-                            eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
-                            meancorr = meancorr +flipud(rot90(meancorr ));
-                            matsig = zeros(size(MATall,2),size(MATall,2));
-                            matsig(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                            matsig = matsig +flipud(rot90(matsig));
-                            meancorr =  meancorr.* double(matsig);
+                            eval(['tmp =','TCOV',num2str(icov),';']);                        
+                            matsig=(stat.posclusterslabelmat==iposcluster);
+                            tmp = tmp.*matsig;
+                            meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
                             disp(['Save file: ', fullfile(dir1,[file])]);
                             save(fullfile(dir1,[file]),'ZoneList','meancorr');
                             new = [{dir1},{file}, {ZONEid},{0}];
-                            infonew = [infonew;new];
-                     
+                            infonew = [infonew;new];                     
                     end
                     
                 else
@@ -1759,24 +1712,20 @@ elseif isfield(job.c_statmatrix,'b_LM_Mat')
                 if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
                     for inegcluster = 1:numel(stat.negclusters)
                         file = [name,labelnode,num2str(nperm),'COV', num2str(icov),' negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
-                        matcorr = zeros(size(MATall,2),size(MATall,2));
-                        matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                        tmp=(stat.negclusterslabelmat==inegcluster);                                      
+                        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+                        save(fullfile(dir1,[file]),'ZoneList','meancorr');
                         disp(['Save: ', fullfile(dir1,[file])]);
                         new = [{dir1},{file}, {ZONEid},{0} ];
                         infonew = [infonew;new];
                         
                         %WRITE beta and cluster in file
                         file = ['Tval','COV', num2str(icov),'negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat']
-                        meancorr = zeros(size(MATall,2),size(MATall,2));
-                        eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
-                        meancorr = meancorr +flipud(rot90(meancorr ));
-                        matsig = zeros(size(MATall,2),size(MATall,2));
-                        matsig(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                        matsig = matsig +flipud(rot90(matsig));
-                        meancorr =  meancorr.* double(matsig);
+                        
+                        eval(['tmp =','TCOV',num2str(icov),';']);                  
+                        matsig=(stat.negclusterslabelmat==inegcluster);
+                        tmp =  tmp.* double(matsig);
+                        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
                         disp(['Save file: ', fullfile(dir1,[file])]);
                         save(fullfile(dir1,[file]),'ZoneList','meancorr');
                         new = [{dir1},{file}, {ZONEid},{0}];
@@ -1802,10 +1751,10 @@ elseif isfield(job.c_statmatrix,'b_LM_Mat')
     
     
 elseif isfield(job.c_statmatrix,'b_LME_Mat')
-    disp('Warning function LME in developpement')
+    disp('Warning function LME in developpement');
     dir1 = job.e_statmatrixPath{1};
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
-    datatable= readtable(xlslistfile)
+    datatable= readtable(xlslistfile);
     halfMAT = MATall(:,idhalf);
     LMEformula = job.c_statmatrix.b_LME_Mat.b_LME_formula;
     try %load precomputed to speed up not keep as standard way of working
@@ -1869,17 +1818,17 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
         
         file = ['R2Ordinary.mat'];
         meancorr = zeros(size(MATall,2),size(MATall,2));
-        eval(['meancorr(idhalf) =','R2ord;']);
-        meancorr = meancorr +flipud(rot90(meancorr ));
+        eval(['tmp =','R2ord;']);
+        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
         disp(['Save file: ', fullfile(dir1,[file])]);
         save(fullfile(dir1,[file]),'ZoneList','meancorr');
         new = [{dir1},{file}, {ZONEid},{0}];
         infonew = [infonew;new]; 
         
-        file = ['R2Ajusted.mat'];
-        meancorr = zeros(size(MATall,2),size(MATall,2));
-        eval(['meancorr(idhalf) =','R2adj;']);
-        meancorr = meancorr +flipud(rot90(meancorr ));
+        file = ['R2Ajusted.mat'];        
+        
+        eval(['tmp =','R2adj;']);
+           meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
         disp(['Save file: ', fullfile(dir1,[file])]);
         save(fullfile(dir1,[file]),'ZoneList','meancorr');
         new = [{dir1},{file}, {ZONEid},{0}];
@@ -1888,12 +1837,10 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
         for icov = 1:size(lme.Coefficients,1)
             file = ['TCOV',num2str(icov),'_', lme.Coefficients{icov,1},'.mat'];
             meancorr = zeros(size(MATall,2),size(MATall,2));
-            eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
-            meancorr = meancorr +flipud(rot90(meancorr ));
-            matsig = zeros(size(MATall,2),size(MATall,2));
-            eval(['matsig(idhalf) =','pCOV',num2str(icov),';'])
-            matsig = matsig +flipud(rot90(matsig));
-            meancorr =  meancorr.* double(matsig<alpha_threshold);
+            eval(['tmp =','TCOV',num2str(icov),';']);     
+            eval(['matsig =','pCOV',num2str(icov),';']);        
+            tmp=  tmp.* double(matsig<alpha_threshold);
+            meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
             disp(['Save file: ', fullfile(dir1,[file])]);
             save(fullfile(dir1,[file]),'ZoneList','meancorr');
             new = [{dir1},{file}, {ZONEid},{0}];
@@ -1904,13 +1851,11 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
         
          for icov = 1:size(lme.Coefficients,1)
             file = ['ECOV',num2str(icov),'_', lme.Coefficients{icov,1},'.mat'];
-            meancorr = zeros(size(MATall,2),size(MATall,2));
-            eval(['meancorr(idhalf) =','ECOV',num2str(icov),';']);
-            meancorr = meancorr +flipud(rot90(meancorr ));
-            matsig = zeros(size(MATall,2),size(MATall,2));
-            eval(['matsig(idhalf) =','pCOV',num2str(icov),';'])
-            matsig = matsig +flipud(rot90(matsig));
-            meancorr =  meancorr.* double(matsig<alpha_threshold);
+           
+            eval(['tmp =','ECOV',num2str(icov),';']);             
+            eval(['matsig =','pCOV',num2str(icov),';']);       
+            tmp =  tmp.* double(matsig<alpha_threshold);
+            meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
             disp(['Save file: ', fullfile(dir1,[file])]);
             save(fullfile(dir1,[file]),'ZoneList','meancorr');
             new = [{dir1},{file}, {ZONEid},{0}];
@@ -1918,37 +1863,36 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
          end
          
         
-         for irand = 1:size(statsrandom,1)    
-              %save random effect Tval 
-            file = ['Trand ', statsrandom{irand,1}, statsrandom{irand,2},statsrandom{irand,3},'.mat'];
-            meancorr = zeros(size(MATall,2),size(MATall,2));
-            eval(['meancorr(idhalf) =','TRand(',num2str(irand),',:);']);
-            meancorr = meancorr +flipud(rot90(meancorr ));
-            matsig = zeros(size(MATall,2),size(MATall,2));            
-            eval(['matsig(idhalf) =','pRand(',num2str(irand),',:);']);
-            matsig = matsig +flipud(rot90(matsig));
-            meancorr =  meancorr.* double(matsig<alpha_threshold);
-            disp(['Save file: ', fullfile(dir1,[file])]);
-            save(fullfile(dir1,[file]),'ZoneList','meancorr');
-            new = [{dir1},{file}, {ZONEid},{0}];
-            infonew = [infonew;new];
-       
-        
-         %save random effect results Estimate
-             
-            file = ['Erand ', statsrandom{irand,1}, statsrandom{irand,2},statsrandom{irand,3},'.mat'];
-            meancorr = zeros(size(MATall,2),size(MATall,2));
-            eval(['meancorr(idhalf) =','ERand(',num2str(irand),',:);']);
-            meancorr = meancorr +flipud(rot90(meancorr ));
-            matsig = zeros(size(MATall,2),size(MATall,2));            
-            eval(['matsig(idhalf) =','pRand(',num2str(irand),',:);']);
-            matsig = matsig +flipud(rot90(matsig));
-            meancorr =  meancorr.* double(matsig<alpha_threshold);
-            disp(['Save file: ', fullfile(dir1,[file])]);
-            save(fullfile(dir1,[file]),'ZoneList','meancorr'); 
-            new = [{dir1},{file}, {ZONEid},{0}];
-            infonew = [infonew;new];
-        end
+        %  for irand = 1:size(statsrandom,1)    
+        %       %save random effect Tval 
+        %     file = ['Trand ', statsrandom{irand,1}, statsrandom{irand,2},statsrandom{irand,3},'.mat'];
+        %     meancorr = zeros(size(MATall,2),size(MATall,2));
+        %     eval(['meancorr(idhalf) =','TRand(',num2str(irand),',:);']);
+        %     meancorr = meancorr +flipud(rot90(meancorr ));
+        %     matsig = zeros(size(MATall,2),size(MATall,2));            
+        %     eval(['matsig =','pRand(',num2str(irand),',:);']);           
+        %     meancorr =  meancorr.* double(matsig<alpha_threshold);
+        %     disp(['Save file: ', fullfile(dir1,[file])]);
+        %     save(fullfile(dir1,[file]),'ZoneList','meancorr');
+        %     new = [{dir1},{file}, {ZONEid},{0}];
+        %     infonew = [infonew;new];
+        % 
+        % 
+        %  %save random effect results Estimate
+        % 
+        %     file = ['Erand ', statsrandom{irand,1}, statsrandom{irand,2},statsrandom{irand,3},'.mat'];
+        %     meancorr = zeros(size(MATall,2),size(MATall,2));
+        %     eval(['meancorr(idhalf) =','ERand(',num2str(irand),',:);']);
+        %     meancorr = meancorr +flipud(rot90(meancorr ));
+        %     matsig = zeros(size(MATall,2),size(MATall,2));            
+        %     eval(['matsig(idhalf) =','pRand(',num2str(irand),',:);']);
+        %     matsig = matsig +flipud(rot90(matsig));
+        %     meancorr =  meancorr.* double(matsig<alpha_threshold);
+        %     disp(['Save file: ', fullfile(dir1,[file])]);
+        %     save(fullfile(dir1,[file]),'ZoneList','meancorr'); 
+        %     new = [{dir1},{file}, {ZONEid},{0}];
+        %     infonew = [infonew;new];
+        % end
          
         
         try
@@ -2030,24 +1974,20 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
                 if isfield(stat,'posclusterslabelmat')
                     for iposcluster = 1:numel(stat.posclusters)
                         file = [name,labelnode,num2str(nperm),'COV', num2str(icov), 'posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                        matcorr = zeros(size(MATall,2),size(MATall,2));
-                        matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                        tmp=(stat.posclusterslabelmat==iposcluster);
+                        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+                        save(fullfile(dir1,[file]),'ZoneList','meancorr');
                         disp(['Save: ', fullfile(dir1,[file])]);
                         new = [{dir1},{file}, {ZONEid},{0} ];
                         infonew = [infonew;new];
                         
                         %WRITE beta and cluster in file
                         file = ['Tval','COV', num2str(icov),'_','posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                        meancorr = zeros(size(MATall,2),size(MATall,2));
-                        eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
-                        meancorr = meancorr +flipud(rot90(meancorr ));
-                        matsig = zeros(size(MATall,2),size(MATall,2));
-                        matsig(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                        matsig = matsig +flipud(rot90(matsig));
-                        meancorr =  meancorr.* double(matsig);
+                        eval(['tmp =','TCOV',num2str(icov),';']);                      
+                        matsig=(stat.posclusterslabelmat==iposcluster);  
+
+                        tmp =  tmp.* double(matsig);
+                        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
                         disp(['Save file: ', fullfile(dir1,[file])]);
                         save(fullfile(dir1,[file]),'ZoneList','meancorr');
                         new = [{dir1},{file}, {ZONEid},{0}];
@@ -2060,23 +2000,20 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
                 if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
                     for inegcluster = 1:numel(stat.negclusters)
                         file = [name,labelnode,num2str(nperm),'COV', num2str(icov),' negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
-                        matcorr = zeros(size(MATall,2),size(MATall,2));
-                        matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                        tmp=(stat.negclusterslabelmat==inegcluster);
+                         meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+                        save(fullfile(dir1,[file]),'ZoneList','meancorr');
                         disp(['Save: ', fullfile(dir1,[file])]);
                         new = [{dir1},{file}, {ZONEid},{0} ];
                         infonew = [infonew;new];
                         %WRITE beta and cluster in file
                         file =  ['Tval','COV',num2str(icov),'negCluster', num2str(inegcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat']
                         meancorr = zeros(size(MATall,2),size(MATall,2));
-                        eval(['meancorr(idhalf) =','TCOV',num2str(icov),';']);
-                        meancorr = meancorr +flipud(rot90(meancorr ));
-                        matsig = zeros(size(MATall,2),size(MATall,2));
-                        matsig(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                        matsig = matsig +flipud(rot90(matsig));
-                        meancorr =  meancorr.* double(matsig);
+                        eval(['tmp =','TCOV',num2str(icov),';']);
+                                             
+                        matsig=(stat.negclusterslabelmat==inegcluster);                     
+                        tmp = tmp.* double(matsig);
+                        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
                         disp(['Save file: ', fullfile(dir1,[file])]);
                         save(fullfile(dir1,[file]),'ZoneList','meancorr');
                         new = [{dir1},{file}, {ZONEid},{0}];
@@ -2098,11 +2035,11 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
     end
     %
     
-elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
+elseif isfield(job.c_statmatrix,'b_PairedTtest') 
     AllC = [];
     id =1;
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
-    %Use a specific groupe
+    %Use a specific groupev
      
     idG1 = find( sum( groupeall==job.c_statmatrix.b_PairedTtest.e_TtestOneSampleGR,2));
     idG2 = find(  sum(  groupeall==job.c_statmatrix.b_PairedTtest.e_TtestOneSampleGR2,2));
@@ -2114,22 +2051,20 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
     MATallG2 =  halfMAT( idG2,:);
 
     for ifile=1:numel(idG1)
-         file = ['G1', info{idG1(ifile)+1,2}];        
-         matcorr = squeeze(MATall(idG1(ifile),:,:));
-         meancorr = matcorr;
-                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                    disp(['Save: ', fullfile(dir1,[file])]);
-                    new = [{dir1},{file}, {ZONEid},{1} ];
-                    infonew = [infonew;new];
+          file = ['G1', info{idG1(ifile)+1,2}];      
+          meancorr = squeeze(MATall(idG1(ifile),:,:));
+          save(fullfile(dir1,[file]),'ZoneList','meancorr');
+          disp(['Save: ', fullfile(dir1,[file])]);
+          new = [{dir1},{file}, {ZONEid},{1} ];
+          infonew = [infonew;new];
         end
    for ifile=1:numel(idG2)
-         file = ['G2', info{idG2(ifile)+1,2}];        
-         matcorr = squeeze(MATall(idG2(ifile),:,:));
-         meancorr = matcorr;
-                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
-                    disp(['Save: ', fullfile(dir1,[file])]);
-                    new = [{dir1},{file}, {ZONEid},{2} ];
-                    infonew = [infonew;new];
+       file = ['G2', info{idG2(ifile)+1,2}];
+       meancorr = squeeze(MATall(idG2(ifile),:,:));
+       save(fullfile(dir1,[file]),'ZoneList','meancorr');
+       disp(['Save: ', fullfile(dir1,[file])]);
+       new = [{dir1},{file}, {ZONEid},{2} ];
+       infonew = [infonew;new];
    end
 
     try
@@ -2143,15 +2078,12 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
         return
     end
     %savein result folder
-    totaltrialgood =1;
     dir1 = job.e_statmatrixPath{1};
     for ifile=1:size(matdiff,1)
-        file = ['Paired',sprintf('%03.0f',(ifile)),' ',    list_subject{idG1(ifile) } '-', list_subject{idG2(ifile)}];
-        matcorr = zeros(size(MATall,2),size(MATall,2));
-        matcorr(idhalf) = squeeze(MATallG1(ifile,:) -  MATallG2(ifile,:));
-        matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        file = ['Paired',sprintf('%03.0f',(ifile)),' ',    list_subject{idG1(ifile) } '-', list_subject{idG2(ifile)}];      
+        tmp =squeeze(MATallG1(ifile,:) -  MATallG2(ifile,:));
+        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2));
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{3} ];
         infonew = [infonew;new];
@@ -2209,77 +2141,66 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
         Q = pval()
         Q(:) = 1
     end
-    matcorr = zeros(size(MATall,2),size(MATall,2));
-    matcorr(idhalf)=squeeze(meanall(:));
-    matcorr = matcorr +flipud(rot90(matcorr));
-    meancorr = matcorr;
+    
+    tmp = squeeze(meanall(:));
+    meancorr = halfmat2mat(tmp,idhalf, size(MATall,2));      
     totaltrialgood = mean(dfall(:));
     file = [name,labelnode,GRname,'PAIREDTtest mean','.mat'];
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
     
     file = [name,labelnode,GRname,'PAIREDTtest meanp',num2str(alpha_threshold),'.mat'];
-    matcorr = zeros(size(MATall,2),size(MATall,2));
-    matcorr(idhalf) = meanall.*double(pval<alpha_threshold);
-    matcorr = matcorr +flipud(rot90(matcorr));
-    meancorr = matcorr;
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    tmp = meanall.*double(pval<alpha_threshold);
+    meancorr = halfmat2mat(tmp,idhalf, size(MATall,2));   
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
     
     file = [name,labelnode,GRname,'PAIREDTtest meanFDR',num2str(alpha_threshold),'.mat'];
-    matcorr = zeros(size(MATall,2),size(MATall,2));
-    matcorr(idhalf) =  meanall.*double(Q<alpha_threshold);
-    matcorr = matcorr +flipud(rot90(matcorr));
-    meancorr = matcorr;
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    tmp =  meanall.*double(Q<alpha_threshold);
+    meancorr = halfmat2mat(tmp,idhalf, size(MATall,2));   
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
     
     
-    % ZoneList = MAT.ZoneList;
-    matcorr = zeros(size(MATall,2),size(MATall,2));
-    matcorr(idhalf) =  tval;
-    matcorr = matcorr +flipud(rot90(matcorr));
-    meancorr = matcorr;
+    % ZoneList = MAT.ZoneList; 
     totaltrialgood = mean(dfall(:));
+    tmp = tval;
+    meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
     file = [name,labelnode,GRname,'PAIREDTtest tval','.mat'];
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
     
     file = [name,labelnode,GRname,'PAIREDTtest tvalp',num2str(alpha_threshold),'.mat'];
-    matcorr = zeros(size(MATall,2),size(MATall,2));
-    matcorr(idhalf) = tval.*double(pval<alpha_threshold);
-    matcorr = matcorr +flipud(rot90(matcorr));
-    meancorr = matcorr;
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+  
+    
+    tmp =  tval.*double(pval<alpha_threshold);;
+    meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
     
     file = [name,labelnode,GRname,'PAIREDTtest tvalFDR',num2str(alpha_threshold),'.mat'];
-    matcorr = zeros(size(MATall,2),size(MATall,2));
-    matcorr(idhalf) =  tval.*double(Q<alpha_threshold);
-    matcorr = matcorr +flipud(rot90(matcorr));
-    meancorr = matcorr;
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    tmp =   tval.*double(Q<alpha_threshold);
+    meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
     
 
     file = [name,labelnode,GRname,'PAIREDTtest pval','.mat'];
-    matcorr = zeros(size(MATall,2),size(MATall,2));
-    matcorr(idhalf) =  pval;
-    matcorr = matcorr +flipud(rot90(matcorr));
-    meancorr = matcorr;
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    tmp =  pval;
+    meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
@@ -2332,12 +2253,10 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
             disp(['Save cluster', fullfile(dir1,'Pairedttest_stat.mat') ])
             if isfield(stat,'posclusterslabelmat')
                 for iposcluster = 1:numel(stat.posclusters)
-                    file = [name,labelnode,num2str(nperm),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                    matcorr = zeros(size(MATall,2),size(MATall,2));
-                    matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                    matcorr = matcorr +flipud(rot90(matcorr));
-                    meancorr = matcorr;
-                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    file = [name,labelnode,num2str(nperm),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];               
+                    tmp=(stat.posclusterslabelmat==iposcluster);
+                    meancorr = halfmat2mat(tmp,idhalf, size(MATall,2));                         
+                    save(fullfile(dir1,[file]),'ZoneList','meancorr');
                     disp(['Save: ', fullfile(dir1,[file])]);
                     new = [{dir1},{file}, {ZONEid},{0} ];
                     infonew = [infonew;new];
@@ -2348,11 +2267,9 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
             if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
                 for inegcluster = 1:numel(stat.negclusters)
                     file = [name,labelnode,num2str(nperm),' negCluster', num2str(iposcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
-                    matcorr = zeros(size(MATall,2),size(MATall,2));
-                    matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                    matcorr = matcorr +flipud(rot90(matcorr));
-                    meancorr = matcorr;
-                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    tmp=(stat.negclusterslabelmat==inegcluster);
+                    meancorr = halfmat2mat(tmp,idhalf, size(MATall,2));  
+                    save(fullfile(dir1,[file]),'ZoneList','meancorr');
                     disp(['Save: ', fullfile(dir1,[file])]);
                     new = [{dir1},{file}, {ZONEid},{0} ];
                     infonew = [infonew;new];
@@ -2365,11 +2282,9 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest') %old
         
         try %optionnal cohend
             file = [name,labelnode,'Cohend',num2str(alpha_threshold),'.mat'];
-            matcorr = zeros(size(MATall,2),size(MATall,2));
-            matcorr(idhalf)=squeeze(cohend(:));
-            matcorr = matcorr +flipud(rot90(matcorr));
-            meancorr = matcorr;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+            tmp=squeeze(cohend(:));
+            meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{1} ];
             infonew = [infonew;new];
@@ -2422,14 +2337,12 @@ elseif isfield(job.c_statmatrix,'b_zscore_Mat')
     meanG1 = squeeze(nanmean(  MATallG1 ,1));
     stdG1 = squeeze(nanstd(  MATallG1 ,1));
     %savein result folder
-    totaltrialgood =1;
     dir1 = job.e_statmatrixPath{1} ;
     
     for ifile=1:size(MATallG2)
-        file = [name,'Zscore_',sprintf('%03.0f',(ifile)),list_subject{idG2(ifile)}  ,'.mat'];
-        matcorr = (squeeze(MATallG2(ifile,:,:))- meanG1)./ stdG1;
-        meancorr =  matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        file = [name,'Zscore_',sprintf('%03.0f',(ifile)),list_subject{idG2(ifile)}  ,'.mat']; 
+        meancorr =  (squeeze(MATallG2(ifile,:,:))- meanG1)./ stdG1;
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{2} ];
         infonew = [infonew;new];
@@ -2458,8 +2371,6 @@ elseif isfield(job.c_statmatrix,'b_zscore_Mat')
 elseif isfield(job.c_statmatrix,'b_anova1_Mat')
     AllC = [];
     id =1;
-    
-    totaltrialgood =1;
     dir1 = job.e_statmatrixPath{1} ;
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
     GROUPELIST = str2num(job.c_statmatrix.b_anova1_Mat.e_Anova1GR);
@@ -2520,9 +2431,8 @@ elseif isfield(job.c_statmatrix,'b_anova1_Mat')
         Q = reshape(Q,size(panova));
         %SAVE FDR
         file = [name,labelnode,'ANOVAFDR p',num2str(alpha_threshold),'.mat'];
-        matcorr = double( Q<alpha_threshold);
         meancorr = double( Q<alpha_threshold);
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
@@ -2531,9 +2441,8 @@ elseif isfield(job.c_statmatrix,'b_anova1_Mat')
             iduse = find(  sum(groupeall==GROUPELIST(igr),2));
             file = [name,labelnode,'meanGR',num2str(GROUPELIST(igr)),'.mat'];
             meanG1 = squeeze(nanmean(MATall(iduse,:,:) ,1));
-            matcorr = meanG1;
             meancorr = meanG1;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
             infonew = [infonew;new];
@@ -2543,9 +2452,8 @@ elseif isfield(job.c_statmatrix,'b_anova1_Mat')
             iduse = find(  sum(groupeall==GROUPELIST(igr),2));
             file = [name,labelnode,'meanGR',num2str(GROUPELIST(igr)),'p',num2str(alpha_threshold),'.mat'];
             meanG1 = squeeze(nanmean(MATall(iduse,:,:) ,1)).*double(panova<alpha_threshold);
-            matcorr = meanG1;
-            meancorr = meanG1;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+             meancorr = meanG1;
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
             infonew = [infonew;new];
@@ -2554,70 +2462,62 @@ elseif isfield(job.c_statmatrix,'b_anova1_Mat')
         
         for icomp = 1:size(diff,1)
             file = [name,labelnode,'diffGR',labelmultcompare{icomp},'.mat'];
-            meanG1 = squeeze(diff(icomp,:,:));
-            matcorr = meanG1;
+            meanG1 = squeeze(diff(icomp,:,:));          
             meancorr = meanG1;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
             infonew = [infonew;new];
             file = [name,labelnode,'diffGR',labelmultcompareneg{icomp},'.mat'];
-            meanG1 = squeeze(diff(icomp,:,:));
-            matcorr = -meanG1;
+            meanG1 = squeeze(diff(icomp,:,:));          
             meancorr = -meanG1;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
             infonew = [infonew;new];
             
             file = [name,labelnode,'diffGR',labelmultcompare{icomp},'p',num2str(alpha_threshold),'.mat'];
-            meanG1 = squeeze(diff(icomp,:,:)).*double(panova<alpha_threshold).*double(squeeze(pdiff(icomp,:,:)) <alpha_threshold);
-            matcorr = meanG1;
+            meanG1 = squeeze(diff(icomp,:,:)).*double(panova<alpha_threshold).*double(squeeze(pdiff(icomp,:,:)) <alpha_threshold);          
             meancorr = meanG1;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
             infonew = [infonew;new];
             file = [name,labelnode,'diffGR',labelmultcompareneg{icomp},'p',num2str(alpha_threshold),'.mat'];
             meanG1 = squeeze(diff(icomp,:,:)).*double(panova<alpha_threshold).*double(squeeze(pdiff(icomp,:,:)) <alpha_threshold);
-            matcorr = -meanG1;
             meancorr = -meanG1;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
             infonew = [infonew;new];
         end
-        file = [name,labelnode,'GR ',num2str(GROUPELIST),' pval',num2str(alpha_threshold),'.mat'];
-        matcorr = double(panova);
+        file = [name,labelnode,'GR ',num2str(GROUPELIST),' pval',num2str(alpha_threshold),'.mat'];       
         meancorr = double(panova);
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
         
         file = [name,labelnode,'GR ',num2str(GROUPELIST),' 1-pval',num2str(alpha_threshold),'.mat'];
-        matcorr = double(1-panova);
         meancorr = double(1-panova);
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
         
         
-        file = [name,labelnode,'GR ',num2str(GROUPELIST),' n valid measure ','.mat'];
-        matcorr = double(nanova);
+        file = [name,labelnode,'GR ',num2str(GROUPELIST),' n valid measure ','.mat'];    
         meancorr = double(nanova);
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
         
         
         try
-            file = [name,labelnode,'GR ',num2str(GROUPELIST),' eta2 sizeeffect ','.mat'];
-            matcorr = eta2;
+            file = [name,labelnode,'GR ',num2str(GROUPELIST),' eta2 sizeeffect ','.mat'];            
             meancorr = eta2;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{0} ];
             infonew = [infonew;new];
@@ -2686,11 +2586,9 @@ elseif isfield(job.c_statmatrix,'b_anova1_Mat')
             if isfield(stat,'posclusterslabelmat')
                 for iposcluster = 1:numel(stat.posclusters)
                     file = [name,labelnode,num2str(nperm),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                    matcorr = zeros(size(MATall,2),size(MATall,2));
-                    matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                    matcorr = matcorr +flipud(rot90(matcorr));
-                    meancorr = matcorr;
-                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    tmp=(stat.posclusterslabelmat==iposcluster);                 
+                    meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+                    save(fullfile(dir1,[file]),'ZoneList','meancorr');
                     disp(['Save: ', fullfile(dir1,[file])]);
                     new = [{dir1},{file}, {ZONEid},{0} ];
                     infonew = [infonew;new];
@@ -2701,11 +2599,9 @@ elseif isfield(job.c_statmatrix,'b_anova1_Mat')
             if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
                 for inegcluster = 1:numel(stat.negclusters)
                     file = [name,labelnode,num2str(nperm),' negCluster', num2str(iposcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
-                    matcorr = zeros(size(MATall,2),size(MATall,2));
-                    matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                    matcorr = matcorr +flipud(rot90(matcorr));
-                    meancorr = matcorr;
-                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr');
+                    tmp=(stat.negclusterslabelmat==inegcluster);                    
+                    meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+                    save(fullfile(dir1,[file]),'ZoneList','meancorr');
                     disp(['Save: ', fullfile(dir1,[file])]);
                     new = [{dir1},{file}, {ZONEid},{0} ];
                     infonew = [infonew;new];
@@ -2735,11 +2631,9 @@ elseif isfield(job.c_statmatrix,'b_anova1_Mat')
             Q = reshape(Q,size(panova));
             %SAVE FDR
             file = [name,labelnode,'Anova_FDR Qval.mat'];
-            matcorr = zeros(size(MATall,2),size(MATall,2));
-            matcorr(idhalf)=double(Q);
-            matcorr = matcorr +flipud(rot90(matcorr));
-            meancorr = matcorr;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+            tmp=double(Q);         
+            meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{0} ];
             infonew = [infonew;new];
@@ -2748,72 +2642,58 @@ elseif isfield(job.c_statmatrix,'b_anova1_Mat')
         
         %SAVE p anova
         file = [name,labelnode,'Anova_pval.mat'];
-        matcorr = zeros(size(MATall,2),size(MATall,2));
-        matcorr(idhalf)=double(panova);
-        matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        tmp=double(panova);    
+        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
         
         %SAVE p prem
         file = [name,labelnode,'Anova_pperm', num2str(nperm),'.mat'];
-        matcorr = zeros(size(MATall,2),size(MATall,2));
-        matcorr(idhalf)= double(pperm);
-        matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        tmp= double(pperm);
+        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
         
         file = [name,labelnode,'Anova_ppermmax', num2str(nperm),'.mat']; %problem possible avec le ppermmax plusieurs groupe lire +
-        matcorr = zeros(size(MATall,2),size(MATall,2));
-        matcorr(idhalf)= double(ppermmax);
-        matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        tmp= double(ppermmax);     
+         meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
         
         file = [name,labelnode,'Anova_pval 1-p.mat'];
-        matcorr = zeros(size(MATall,2),size(MATall,2));
-        matcorr(idhalf)= double(1-panova);
-        matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        tmp= double(1-panova);       
+         meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
         
         file = [name,labelnode,'Anova_pperm', num2str(nperm),' 1-p.mat'];
-        matcorr = zeros(size(MATall,2),size(MATall,2));
-        matcorr(idhalf) =  double(1-pperm);
-        matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        tmp =  double(1-pperm);
+        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
         
         file = [name,labelnode,'Anova_ppermmax', num2str(nperm),' 1-p.mat']; %problem possible avec le ppermmax plusieurs groupe lire +
-        matcorr = zeros(size(MATall,2),size(MATall,2));
-        matcorr(idhalf) =  double(1-ppermmax);
-        matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        tmp =  double(1-ppermmax);
+        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
         
         file = [name,labelnode,'Anova_F','.mat'];
-        matcorr = zeros(size(MATall,2),size(MATall,2));
-        matcorr(idhalf) =  double(fanova);
-        matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        tmp =  double(fanova);
+        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
@@ -2880,7 +2760,6 @@ elseif isfield(job.c_statmatrix,'b_ANCOVA_Mat') %version de matlab juste une cov
     end
     AllC = [];
     id =1;
-    totaltrialgood =1;
     dir1 = job.e_statmatrixPath{1} ;
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
     GROUPELIST = str2num(job.c_statmatrix.b_ANCOVA_Mat.e_Anova1GR);
@@ -2957,9 +2836,8 @@ elseif isfield(job.c_statmatrix,'b_ANCOVA_Mat') %version de matlab juste une cov
     Q = reshape(Q,size(panovaGroupe));
     %SAVE FDR
     file = [name,labelnode,'ANCOVAFDR groupe p',num2str(alpha_threshold),'.mat'];
-    matcorr = double( Q<alpha_threshold);
     meancorr = double( Q<alpha_threshold);
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
@@ -2969,9 +2847,8 @@ elseif isfield(job.c_statmatrix,'b_ANCOVA_Mat') %version de matlab juste une cov
     %figure;hist(panovaCoV(:))
     %SAVE FDR
     file = [name,labelnode,'ANCOVAFDR COV p',num2str(alpha_threshold),'.mat'];
-    matcorr = double( Q<alpha_threshold);
     meancorr = double( Q<alpha_threshold);
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
@@ -2980,9 +2857,8 @@ elseif isfield(job.c_statmatrix,'b_ANCOVA_Mat') %version de matlab juste une cov
     Q = reshape(Q,size(panovaGroupebyCoV));
     %SAVE FDR
     file = [name,labelnode,'ANCOVAFDR groupe p',num2str(alpha_threshold),'.mat'];
-    matcorr = double( Q<alpha_threshold);
     meancorr = double( Q<alpha_threshold);
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
@@ -2992,70 +2868,61 @@ elseif isfield(job.c_statmatrix,'b_ANCOVA_Mat') %version de matlab juste une cov
         iduse = find(  sum(groupeall==GROUPELIST(igr),2));
         file = [name,labelnode,'meanGR',num2str(GROUPELIST(igr)),'.mat'];
         meanG1 = squeeze(nanmean(MATall(iduse,:,:) ,1));
-        matcorr = meanG1;
         meancorr = meanG1;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
         infonew = [infonew;new];
     end
     for icomp = 1:size(diff,1)
         file = [name,labelnode,'Ancova diffGR',labelmultcompare{icomp},'.mat'];
-        meanG1 = squeeze(diff(icomp,:,:)).*double(panovaGroupe<=alpha_threshold);
-        matcorr = meanG1;
+        meanG1 = squeeze(diff(icomp,:,:)).*double(panovaGroupe<=alpha_threshold); 
         meancorr = meanG1;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
         infonew = [infonew;new];
         file = [name,labelnode,'Ancova diffGR',labelmultcompareneg{icomp},'.mat'];
         meanG1 = squeeze(diff(icomp,:,:)).*double(panovaGroupe<=alpha_threshold);
-        matcorr = -meanG1;
         meancorr = -meanG1;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
         infonew = [infonew;new];
         
         file = [name,labelnode,'Ancova diffGR',labelmultcompare{icomp},'p',num2str(alpha_threshold),'.mat'];
-        meanG1 = squeeze(diff(icomp,:,:)).*double(panovaGroupe<alpha_threshold).*double(squeeze(pdiff(icomp,:,:)) <alpha_threshold);
-        
-        matcorr = meanG1;
+        meanG1 = squeeze(diff(icomp,:,:)).*double(panovaGroupe<alpha_threshold).*double(squeeze(pdiff(icomp,:,:)) <alpha_threshold);        
         meancorr = meanG1;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
         infonew = [infonew;new];
         file = [name,labelnode,'Ancova diffGR',labelmultcompareneg{icomp},'p',num2str(alpha_threshold),'.mat'];
         meanG1 = squeeze(diff(icomp,:,:)).*double(panovaGroupe<alpha_threshold).*double(squeeze(pdiff(icomp,:,:)) <alpha_threshold);
-        matcorr = -meanG1;
         meancorr = -meanG1;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
         infonew = [infonew;new];
     end
-    file = [name,labelnode,'Ancova GR ',num2str(GROUPELIST),', pGroupe',num2str(alpha_threshold),'.mat'];
-    matcorr = double(panovaGroupe<alpha_threshold);
+    file = [name,labelnode,'Ancova GR ',num2str(GROUPELIST),', pGroupe',num2str(alpha_threshold),'.mat'];   
     meancorr = double(panovaGroupe<alpha_threshold);
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
     
     
     file = [name,labelnode,'Ancova GR ',num2str(GROUPELIST), ', pCoV',num2str(alpha_threshold),'.mat'];
-    matcorr = double(panovaCoV<alpha_threshold);
     meancorr = double(panovaCoV<alpha_threshold);
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
     
     file = [name,labelnode,'Ancova GR ',num2str(GROUPELIST), ', pGroupebyCoV',num2str(alpha_threshold),'.mat'];
-    matcorr = double(panovaGroupebyCoV<alpha_threshold);
     meancorr = double(panovaGroupebyCoV<alpha_threshold);
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
@@ -3081,7 +2948,6 @@ elseif isfield(job.c_statmatrix,'b_ANCOVA_Mat') %version de matlab juste une cov
 elseif isfield(job.c_statmatrix,'b_anovarep_Mat')
     dir1 = job.e_statmatrixPath{1};
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
-    totaltrialgood =1;
     covariableall=[];
     covariablestring = job.c_statmatrix.b_anovarep_Mat.e_Anovarep_predictor;
     [token,remain] =strtok(covariablestring,',');
@@ -3120,17 +2986,14 @@ elseif isfield(job.c_statmatrix,'b_anovarep_Mat')
         iduse = find(  sum(groupeall==GROUPELIST(igr),2));
         file = [name,labelnode,'meanGR',num2str(igr),'.mat'];
         meanG1 = squeeze(nanmean(MATall(iduse,:,:) ,1));
-        matcorr = meanG1;
+
         meancorr = meanG1;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
         infonew = [infonew;new];
     end
-    %            DiffTime = zeros(
-    %            PvalTime
-    %            PvalGR
-    %            DiffGR
+
     
     for i= 1:size(MATall,2)
         disp(num2str(i));
@@ -3211,10 +3074,9 @@ elseif isfield(job.c_statmatrix,'b_anovarep_Mat')
     
     
     for ifval = 1:numel(Panova)
-        file = [name,labelnode,' fanova', num2str(ifval) ,'.mat'];
-        matcorr = eval(['fanova', num2str(ifval)]);
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        file = [name,labelnode,' fanova', num2str(ifval) ,'.mat'];        
+        meancorr = eval(['fanova', num2str(ifval)]);
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
@@ -3223,9 +3085,8 @@ elseif isfield(job.c_statmatrix,'b_anovarep_Mat')
     
     for ipval = 1:numel(Panova)
         file = [name,labelnode,'1-panova', num2str(ipval),'.mat'];
-        matcorr = eval(['1-panova', num2str(ipval)]);
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        meancorr = eval(['1-panova', num2str(ipval)]);   
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
@@ -3233,17 +3094,15 @@ elseif isfield(job.c_statmatrix,'b_anovarep_Mat')
     
     for igr= 1:size(DiffGR,1)
         file = [name,labelnode,nameGR{igr},'diff.mat'];
-        matcorr = squeeze(DiffGR(igr,:,:)) ;
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+         meancorr = squeeze(DiffGR(igr,:,:)) ;
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
         
         file = [name,labelnode,nameGR{igr},'diffp,',num2str(alpha_threshold),'.mat'];
-        matcorr = squeeze(DiffGR(igr,:,:)).*double(squeeze(PvalGR(igr,:,:))<alpha_threshold) ;
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        meancorr = squeeze(DiffGR(igr,:,:)).*double(squeeze(PvalGR(igr,:,:))<alpha_threshold) ;
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
@@ -3251,17 +3110,16 @@ elseif isfield(job.c_statmatrix,'b_anovarep_Mat')
     
     
     for igr= 1:size(DiffTime,1)
-        file = [name,labelnode,nameTime{igr},'diff.mat'];
-        matcorr = squeeze(DiffTime(igr,:,:)) ;
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        file = [name,labelnode,nameTime{igr},'diff.mat'];  
+        meancorr = squeeze(DiffTime(igr,:,:)) ;
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
         file = [name,labelnode,nameTime{igr},'diffp,',num2str(alpha_threshold),'.mat'];
-        matcorr = squeeze(DiffTime(igr,:,:)).*double(squeeze(PvalTime(igr,:,:))<alpha_threshold) ;
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+
+        meancorr = squeeze(DiffTime(igr,:,:)).*double(squeeze(PvalTime(igr,:,:))<alpha_threshold) ;
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
@@ -3288,8 +3146,6 @@ elseif isfield(job.c_statmatrix,'b_anovarep_Mat')
 elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
     AllC = [];
     id =1;
-    
-    totaltrialgood =1;
     dir1 = job.e_statmatrixPath{1} ;
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
     GROUPELIST = str2num(job.c_statmatrix.b_kruskalwallis_Mat.e_Anova1GR);
@@ -3347,16 +3203,14 @@ elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
         Q = reshape(Q,size(panova));
         %SAVE FDR
         file = [name,labelnode,'KrustalWallisFDR Q','.mat'];
-        matcorr = double(Q);
         meancorr = double(Q);
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
         file = [name,labelnode,'KrustalWallisFDR Q 1-Q','.mat'];
-        matcorr = double(1-Q);
-        meancorr = double(1-Q);
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+         meancorr = double(1-Q);
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
@@ -3405,12 +3259,10 @@ elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
             
             if isfield(stat,'posclusterslabelmat')
                 for iposcluster = 1:numel(stat.posclusters)
-                    file = [name,num2str(nperm),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                    matcorr = zeros(size(MATall,2),size(MATall,2));
-                    matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                    matcorr = matcorr +flipud(rot90(matcorr));
-                    meancorr = matcorr;
-                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+                    file = [name,num2str(nperm),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];                   
+                    tmp=(stat.posclusterslabelmat==iposcluster);
+                    meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+                    save(fullfile(dir1,[file]),'ZoneList','meancorr');
                     disp(['Save: ', fullfile(dir1,[file])]);
                     new = [{dir1},{file}, {ZONEid},{0} ];
                     infonew = [infonew;new];
@@ -3421,11 +3273,9 @@ elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
             if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
                 for inegcluster = 1:numel(stat.negclusters)
                     file = [name, num2str(nperm),' negCluster', num2str(iposcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
-                    matcorr = zeros(size(MATall,2),size(MATall,2));
-                    matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                    matcorr = matcorr +flipud(rot90(matcorr));
-                    meancorr = matcorr;
-                    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+                    tmp=(stat.negclusterslabelmat==inegcluster);
+                    meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+                    save(fullfile(dir1,[file]),'ZoneList','meancorr');
                     disp(['Save: ', fullfile(dir1,[file])]);
                     new = [{dir1},{file}, {ZONEid},{0} ];
                     infonew = [infonew;new];
@@ -3461,41 +3311,33 @@ elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
         
         
         file = [name,labelnode,'KrustalWallis',num2str(nperm), 'Permp.mat'];
-        matcorr = zeros(size(MATall,2),size(MATall,2));
-        matcorr(idhalf)=double( pperm);
-        matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        tmp=double(pperm);       
+        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
         
         file = [name,labelnode,'KrustalWallis',num2str(nperm), 'Permmaxp.mat'];
-        matcorr = zeros(size(MATall,2),size(MATall,2));
-        matcorr(idhalf)=double(ppermmax);
-        matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        tmp=double(ppermmax);      
+        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
         
         file = [name,labelnode,'KrustalWallis',num2str(nperm), 'Perm 1-p.mat'];
-        matcorr = zeros(size(MATall,2),size(MATall,2));
-        matcorr(idhalf)= double(1-pperm);
-        matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        tmp= double(1-pperm);     
+         meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
         
         file = [name,labelnode,'KrustalWallis',num2str(nperm), 'Permmax 1-p.mat'];
-        matcorr = zeros(size(MATall,2),size(MATall,2));
-        matcorr(idhalf)= double( 1-ppermmax);
-        matcorr = matcorr +flipud(rot90(matcorr));
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        tmp= double( 1-ppermmax);        
+        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
@@ -3512,9 +3354,8 @@ elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
         iduse = find(  sum(groupeall==GROUPELIST(igr),2));
         file = [name,labelnode,'meanGR',num2str(GROUPELIST(igr)),'.mat'];
         meanG1 = squeeze(nanmean(MATall(iduse,:,:) ,1));
-        matcorr = meanG1;
         meancorr = meanG1;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
         infonew = [infonew;new];
@@ -3526,7 +3367,7 @@ elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
         meanG1 = squeeze(nanmean(MATall(iduse,:,:) ,1)).*double(panova<alpha_threshold);
         matcorr = meanG1;
         meancorr = meanG1;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
         infonew = [infonew;new];
@@ -3536,34 +3377,30 @@ elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
         for icomp = 1:size(diff,1)
             file = [name,labelnode,'diff_rank_GR',labelmultcompare{icomp},'.mat'];
             meanG1 = squeeze(diff(icomp,:,:));
-            matcorr = meanG1;
             meancorr = meanG1;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
             infonew = [infonew;new];
             file = [name,labelnode,'diff_rank_GR',labelmultcompareneg{icomp},'.mat'];
             meanG1 = squeeze(diff(icomp,:,:));
-            matcorr = -meanG1;
             meancorr = -meanG1;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
             infonew = [infonew;new];
             
             file = [name,labelnode,'diff_rank_GR',labelmultcompare{icomp},'p',num2str(alpha_threshold),'.mat'];
-            meanG1 = squeeze(diff(icomp,:,:)).*double(panova<alpha_threshold).*double(squeeze(pdiff(icomp,:,:)) <alpha_threshold);
-            matcorr = meanG1;
+            meanG1 = squeeze(diff(icomp,:,:)).*double(panova<alpha_threshold).*double(squeeze(pdiff(icomp,:,:)) <alpha_threshold);   
             meancorr = meanG1;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
             infonew = [infonew;new];
             file = [name,labelnode,'diff_rank_GR',labelmultcompareneg{icomp},'p',num2str(alpha_threshold),'.mat'];
             meanG1 = squeeze(diff(icomp,:,:)).*double(panova<alpha_threshold).*double(squeeze(pdiff(icomp,:,:)) <alpha_threshold);
-            matcorr = -meanG1;
             meancorr = -meanG1;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
             infonew = [infonew;new];
@@ -3571,23 +3408,28 @@ elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
     catch
     end
     file = [name,labelnode,'GR KruskalWallis',num2str(GROUPELIST),' pval',num2str(alpha_threshold),'.mat'];
-    matcorr = double(panova);
     meancorr = double(panova);
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
     
     file = [name,labelnode,'GR KruskalWallis',num2str(GROUPELIST),' n valid measure ','.mat'];
-    matcorr = double(nanova);
     meancorr = double(nanova);
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
-    if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
-        copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid))
-    end
+    if job.m_nodeunit==1
+        try            
+            if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
+                copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid))
+                 disp(['Copy file: ',  fullfile(info{isubject,1}, ZONEid) ' to ',fullfile(dir1,  ZONEid) ])
+            end
+        catch
+            disp(['Could not copy file: ',  fullfile(info{isubject,1}, ZONEid)])
+        end
+    end 
     if ismac
         % Code to run on Mac platform problem with xlswrite
         writetxtfile(fullfile(dir1,[name,labelnode,'GR ',num2str(GROUPELIST),' KruskalWallis.txt']),infonew);
@@ -3646,7 +3488,6 @@ elseif isfield(job.c_statmatrix,'b_manova1_Mat')
     end
     AllC = [];
     id =1;
-    totaltrialgood =1;
     dir1 = job.e_statmatrixPath{1} ;
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
     GROUPELIST = str2num(job.c_statmatrix.b_manova1_Mat.e_Anova1GR);
@@ -3723,9 +3564,8 @@ elseif isfield(job.c_statmatrix,'b_manova1_Mat')
         Q = reshape(Q,size(panovaGroupe));
         %SAVE FDR
         file = [name,labelnode,'ANCOVAFDR groupe p',num2str(alpha_threshold),'.mat'];
-        matcorr = double( Q<alpha_threshold);
         meancorr = double( Q<alpha_threshold);
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
@@ -3734,10 +3574,9 @@ elseif isfield(job.c_statmatrix,'b_manova1_Mat')
         Q = reshape(Q,size( panovaCoV));
         %figure;hist(panovaCoV(:))
         %SAVE FDR
-        file = [name,labelnode,'ANCOVAFDR COV p',num2str(alpha_threshold),'.mat'];
-        matcorr = double( Q<alpha_threshold);
+        file = [name,labelnode,'ANCOVAFDR COV p',num2str(alpha_threshold),'.mat'];       
         meancorr = double( Q<alpha_threshold);
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
@@ -3746,9 +3585,8 @@ elseif isfield(job.c_statmatrix,'b_manova1_Mat')
         Q = reshape(Q,size(panovaGroupebyCoV));
         %SAVE FDR
         file = [name,labelnode,'ANCOVAFDR groupe p',num2str(alpha_threshold),'.mat'];
-        matcorr = double( Q<alpha_threshold);
         meancorr = double( Q<alpha_threshold);
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
@@ -3759,10 +3597,9 @@ elseif isfield(job.c_statmatrix,'b_manova1_Mat')
     for igr = 1:numel(GROUPELIST)
         iduse = find(  sum(groupeall==GROUPELIST(igr),2));
         file = [name,labelnode,'meanGR',num2str(GROUPELIST(igr)),'.mat'];
-        meanG1 = squeeze(nanmean(MATall(iduse,:,:) ,1));
-        matcorr = meanG1;
+        meanG1 = squeeze(nanmean(MATall(iduse,:,:) ,1));      
         meancorr = meanG1;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
         infonew = [infonew;new];
@@ -3770,60 +3607,51 @@ elseif isfield(job.c_statmatrix,'b_manova1_Mat')
     for icomp = 1:size(diff,1)
         file = [name,labelnode,'Ancova diffGR',labelmultcompare{icomp},'.mat'];
         meanG1 = squeeze(diff(icomp,:,:)).*double(panovaGroupe<=alpha_threshold);
-        matcorr = meanG1;
         meancorr = meanG1;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
         infonew = [infonew;new];
         file = [name,labelnode,'Ancova diffGR',labelmultcompareneg{icomp},'.mat'];
         meanG1 = squeeze(diff(icomp,:,:)).*double(panovaGroupe<=alpha_threshold);
-        matcorr = -meanG1;
         meancorr = -meanG1;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
         infonew = [infonew;new];
         
         file = [name,labelnode,'Ancova diffGR',labelmultcompare{icomp},'p',num2str(alpha_threshold),'.mat'];
-        meanG1 = squeeze(diff(icomp,:,:)).*double(panovaGroupe<alpha_threshold).*double(squeeze(pdiff(icomp,:,:)) <alpha_threshold);
-        
-        matcorr = meanG1;
+        meanG1 = squeeze(diff(icomp,:,:)).*double(panovaGroupe<alpha_threshold).*double(squeeze(pdiff(icomp,:,:)) <alpha_threshold);        
         meancorr = meanG1;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
         infonew = [infonew;new];
         file = [name,labelnode,'Ancova diffGR',labelmultcompareneg{icomp},'p',num2str(alpha_threshold),'.mat'];
         meanG1 = squeeze(diff(icomp,:,:)).*double(panovaGroupe<alpha_threshold).*double(squeeze(pdiff(icomp,:,:)) <alpha_threshold);
-        matcorr = -meanG1;
         meancorr = -meanG1;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
         infonew = [infonew;new];
     end
     file = [name,labelnode,'Ancova GR ',num2str(GROUPELIST),', pGroupe',num2str(alpha_threshold),'.mat'];
-    matcorr = double(panovaGroupe<alpha_threshold);
     meancorr = double(panovaGroupe<alpha_threshold);
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
-    infonew = [infonew;new];
+    infonew = [infonew;new];   
     
-    
-    file = [name,labelnode,'Ancova GR ',num2str(GROUPELIST), ', pCoV',num2str(alpha_threshold),'.mat'];
-    matcorr = double(panovaCoV<alpha_threshold);
+    file = [name,labelnode,'Ancova GR ',num2str(GROUPELIST), ', pCoV',num2str(alpha_threshold),'.mat']; 
     meancorr = double(panovaCoV<alpha_threshold);
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
     
     file = [name,labelnode,'Ancova GR ',num2str(GROUPELIST), ', pGroupebyCoV',num2str(alpha_threshold),'.mat'];
-    matcorr = double(panovaGroupebyCoV<alpha_threshold);
     meancorr = double(panovaGroupebyCoV<alpha_threshold);
-    save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
     disp(['Save: ', fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{0} ];
     infonew = [infonew;new];
@@ -3846,7 +3674,6 @@ elseif isfield(job.c_statmatrix,'b_manova1_Mat')
 elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
     dir1 = job.e_statmatrixPath{1};
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
-    totaltrialgood =1;
     covariableall=[];
     covariablestring = job.c_statmatrix.b_fitMANCOVAN_Mat.b_fitMANCOVAN_Covariable;
     [token,remain] =strtok(covariablestring,',');
@@ -3888,9 +3715,8 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
         iduse = find(  sum(groupeall==GROUPELIST(igr),2));
         file = [name,labelnode,'meanGR',num2str(igr),'.mat'];
         meanG1 = squeeze(nanmean(MATall(iduse,:,:) ,1));
-        matcorr = meanG1;
         meancorr = meanG1;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{GROUPELIST(igr)} ];
         infonew = [infonew;new];
@@ -3936,45 +3762,40 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
     
     for icond = 1:numel(LabelSTAT)
         file = [name,labelnode,' fanova', LabelSTAT{icond},'.mat'];
-        matcorr = squeeze(Fanoval(icond,:,:));
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        meancorr =squeeze(Fanoval(icond,:,:));
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
     end
     for icond = 1:numel(LabelSTAT)
         file = [name,labelnode,'panova 1-p', LabelSTAT{icond},'.mat'];
-        matcorr = squeeze(1-Panoval(icond,:,:));
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        meancorr =  squeeze(1-Panoval(icond,:,:));
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
     end
     for icond = 1:numel(LabelSTAT)
-        file = [name,labelnode,'panova', LabelSTAT{icond},'.mat'];
-        matcorr = squeeze(Panoval(icond,:,:));
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        file = [name,labelnode,'panova', LabelSTAT{icond},'.mat'];      
+        meancorr = squeeze(Panoval(icond,:,:));
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
     end
     for icond  = 1:numel(LabelSTAT)
         file = [name,labelnode,'Beta', LabelSTAT{icond },'.mat'];
-        matcorr = squeeze(Banoval(icond ,:,:));
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        meancorr = squeeze(Banoval(icond ,:,:));
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
     end
     for icond = 1:numel(LabelSTAT)
         file = [name,labelnode,'Beta', LabelSTAT{icond },'p',num2str(alpha_threshold),'.mat'];
-        matcorr = squeeze(Banoval(icond ,:,:).*double(Panoval(icond ,:,:)<alpha_threshold));
-        meancorr = matcorr;
-        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+        meancorr =  squeeze(Banoval(icond ,:,:).*double(Panoval(icond ,:,:)<alpha_threshold));
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];
@@ -4080,11 +3901,9 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
                 if isfield(stat,'posclusterslabelmat')
                     for iposcluster = 1:numel(stat.posclusters)
                         file = [name,labelnode, LabelSTAT{icomp},num2str(nperm),' posCluster', num2str(iposcluster),' MCp=',num2str(stat.posclusters(iposcluster).prob),'.mat'];
-                        matcorr = zeros(size(MATall,2),size(MATall,2));
-                        matcorr(idhalf)=(stat.posclusterslabelmat==iposcluster);
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+                        tmp=(stat.posclusterslabelmat==iposcluster);
+                        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+                        save(fullfile(dir1,[file]),'ZoneList','meancorr');
                         disp(['Save: ', fullfile(dir1,[file])]);
                         new = [{dir1},{file}, {ZONEid},{0} ];
                         infonew = [infonew;new];
@@ -4095,11 +3914,9 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
                 if isfield(stat,'negclusterslabelmat') %technicaly no neg cluster in f value...
                     for inegcluster = 1:numel(stat.negclusters)
                         file = [name,labelnode, LabelSTAT{icomp},num2str(nperm),' negCluster', num2str(iposcluster),' MCp=',num2str(stat.negclusters(inegcluster).prob),'.mat'];
-                        matcorr = zeros(size(MATall,2),size(MATall,2));
-                        matcorr(idhalf)=(stat.negclusterslabelmat==inegcluster);
-                        matcorr = matcorr +flipud(rot90(matcorr));
-                        meancorr = matcorr;
-                        save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+                        tmp=(stat.negclusterslabelmat==inegcluster);                        
+                        meancorr = halfmat2mat(tmp,idhalf, size(MATall,2));
+                        save(fullfile(dir1,[file]),'ZoneList','meancorr');
                         disp(['Save: ', fullfile(dir1,[file])]);
                         new = [{dir1},{file}, {ZONEid},{0} ];
                         infonew = [infonew;new];
@@ -4134,12 +3951,10 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
         
         
         for icond = 1:numel(LabelSTAT)
-            file = [name,labelnode,' fanova', num2str(icond), LabelSTAT{icond},'.mat'];
-            matcorr = zeros(size(MATall,2),size(MATall,2));
-            matcorr(idhalf)=Fanoval(icond,:);
-            matcorr = matcorr +flipud(rot90(matcorr));
-            meancorr = matcorr;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+            file = [name,labelnode,' fanova', num2str(icond), LabelSTAT{icond},'.mat'];        
+            tmp=Fanoval(icond,:);
+            meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{0} ];
             infonew = [infonew;new];
@@ -4147,11 +3962,9 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
         
         for icond = 1:numel(LabelSTAT)
             file = [name,labelnode,'panova', ' 1-p',LabelSTAT{icond},'.mat'];
-            matcorr = zeros(size(MATall,2),size(MATall,2));
-            matcorr(idhalf)=1-Panoval(icond,:);
-            matcorr = matcorr +flipud(rot90(matcorr));
-            meancorr = matcorr;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+            tmp=1-Panoval(icond,:);    
+            meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{0} ];
             infonew = [infonew;new];
@@ -4159,11 +3972,9 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
         
         for icond= 1:numel(LabelSTAT)
             file = [name,labelnode,'panova',num2str(nperm),'perm',' 1-p', LabelSTAT{icond},'.mat'];
-            matcorr = zeros(size(MATall,2),size(MATall,2));
-            matcorr(idhalf)=squeeze(1-pperm(icond,:));
-            matcorr = matcorr +flipud(rot90(matcorr));
-            meancorr = matcorr;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+            tmp=squeeze(1-pperm(icond,:));        
+            meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{0} ];
             infonew = [infonew;new];
@@ -4171,12 +3982,10 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
         
         
         for icond= 1:numel(LabelSTAT)
-            file = [name,labelnode,'panova', LabelSTAT{icond},'.mat'];
-            matcorr = zeros(size(MATall,2),size(MATall,2));
-            matcorr(idhalf)=squeeze(1-Panoval(icond,:));
-            matcorr = matcorr +flipud(rot90(matcorr));
-            meancorr = matcorr;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+            file = [name,labelnode,'panova', LabelSTAT{icond},'.mat'];          
+            tmp = squeeze(1-Panoval(icond,:))
+            meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{0} ];
             infonew = [infonew;new];
@@ -4184,11 +3993,9 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
         
         for icond= 1:numel(LabelSTAT)
             file = [name,labelnode,'panova',num2str(nperm),'perm', LabelSTAT{icond},'.mat'];
-            matcorr = zeros(size(MATall,2),size(MATall,2));
-            matcorr(idhalf)=squeeze(pperm( icond,:));
-            matcorr = matcorr +flipud(rot90(matcorr));
-            meancorr = matcorr;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+            tmp=squeeze(pperm( icond,:));       
+            meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{0} ];
             infonew = [infonew;new];
@@ -4196,11 +4003,9 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
         
         for icond= 1:numel(LabelSTAT)
             file = [name,labelnode,'beta',LabelSTAT{ icond},'.mat'];
-            matcorr = zeros(size(MATall,2),size(MATall,2));
-            matcorr(idhalf)=squeeze(Banoval( icond,:));
-            matcorr = matcorr +flipud(rot90(matcorr));
-            meancorr = matcorr;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+            tmp = squeeze(Banoval( icond,:));
+            meancorr = halfmat2mat(tmp,idhalf, size(MATall,2));
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{0} ];
             infonew = [infonew;new];
@@ -4208,11 +4013,9 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
         
         for icond= 1:numel(LabelSTAT)
             file = [name,labelnode,'beta',LabelSTAT{ icond},'pperm',num2str(alpha_threshold),'.mat'];
-            matcorr = zeros(size(MATall,2),size(MATall,2));
-            matcorr(idhalf)=squeeze(Banoval( icond,:).*double(pperm( icond,:)<alpha_threshold));
-            matcorr = matcorr +flipud(rot90(matcorr));
-            meancorr = matcorr;
-            save(fullfile(dir1,[file]),'ZoneList','matcorr','meancorr','totaltrialgood');
+            tmp = squeeze(Banoval( icond,:).*double(pperm( icond,:)<alpha_threshold));
+            meancorr = halfmat2mat(tmp,idhalf, size(MATall,2)); 
+            save(fullfile(dir1,[file]),'ZoneList','meancorr');
             disp(['Save: ', fullfile(dir1,[file])]);
             new = [{dir1},{file}, {ZONEid},{0} ];
             infonew = [infonew;new];
@@ -4645,3 +4448,11 @@ if numArgs < low
     x = MException(msgId,msg);
     x.throwAsCaller;
 end
+
+function mat = halfmat2mat(halfmat,idhalf, n)
+%fonction pour remettre la demi matrice en colonne en matrice carré
+%symétrique en faisant attention de ne pas doublé la diagonale. 
+mat = zeros(n,n);
+mat(idhalf)=squeeze(halfmat);
+mat = mat+flipud(rot90(mat));
+mat =  mat.*(ones(n,n)-eye(n)*0.5 );  %ajustement pour ne pas doublé la diagonale dans l'addition . 

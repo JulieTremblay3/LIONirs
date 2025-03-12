@@ -9,7 +9,7 @@ function [stat neiglinkmat]= FindClusterBasedPermutationInMatrix(chanpos,neighbo
 % statobs: stat observe
 % statrand: stat random
 
-
+ 
 
 if isempty(chanpos)
 %     load('C:\data\EEGClinique\Script_Janie\chanpos.mat')
@@ -131,12 +131,37 @@ else %gere les combinaison commune
    neighbourdistnb = str2num(neighbourdist);
    neighbours = compneighbstructfromgradelec(chanpos,listelectrode,neighbourdistnb);
      id = 1;
-    nele = numel(listelectrode);
+    nele = numel(listelectrode); 
     matid = zeros(nele,nele);
    
-         id = 1;
+   % en channel sans le canal homologue
+    % id = 1;
+    %     for ieley=1:nele                 
+    %           for  ielex=(ieley+1):nele
+    %              option{id}.ele1 =  listelectrode{ielex};
+    %             option{id}.ele2 =  listelectrode{ieley};
+    %              option{id}.matposition = [ielex,ieley];      
+    %             matid(ielex,ieley)=id;
+    %             neiglink(id).label1 = [listelectrode{ielex}];
+    %             neiglink(id).label2 =  [listelectrode{ieley}];
+    %             idele1(id) = ielex;
+    %             idele2(id) = ieley;
+    %             label1{id} = listelectrode{ielex};
+    %             label2{id} = listelectrode{ieley};   
+    %              neiglink(id).neighblabel1 = [neighbours(ielex).neighblabel];
+    %             neiglink(id).neighblabel2 =   [neighbours(ieley).neighblabel];
+    %             neiglink(id).ideleneigh1 =[neighbours(ielex).idneigh];
+    %             neiglink(id).ideleneigh2=[neighbours(ieley).idneigh];
+    %            id = id + 1;
+    %          end
+    % 
+    %     end
+
+   % en zone avec le canal homologue T4 T4
+   1
+  id = 1;
         for ieley=1:nele                 
-              for  ielex=(ieley+1):nele
+              for  ielex=(ieley):nele
                  option{id}.ele1 =  listelectrode{ielex};
                 option{id}.ele2 =  listelectrode{ieley};
                  option{id}.matposition = [ielex,ieley];      
@@ -154,7 +179,38 @@ else %gere les combinaison commune
                id = id + 1;
              end
         
-    end
+        end
+
+%         id =1;
+% for ielex=1:nele 
+%     ielex;
+%     ieley = 1;
+%     while ieley <= ielex
+%          option{id}.ele1 =  listelectrode{ielex};
+%                 option{id}.ele2 =  listelectrode{ieley};
+%                  option{id}.matposition = [ielex,ieley];      
+%                 matid(ielex,ieley)=id;
+%                 neiglink(id).label1 = [listelectrode{ielex}];
+%                 neiglink(id).label2 =  [listelectrode{ieley}];
+%                 idele1(id) = ielex;
+%                 idele2(id) = ieley;
+%                 label1{id} = listelectrode{ielex};
+%                 label2{id} = listelectrode{ieley};   
+%                  neiglink(id).neighblabel1 = [neighbours(ielex).neighblabel];
+%                 neiglink(id).neighblabel2 =   [neighbours(ieley).neighblabel];
+%                 neiglink(id).ideleneigh1 =[neighbours(ielex).idneigh];
+%                 neiglink(id).ideleneigh2=[neighbours(ieley).idneigh];
+% 
+% 
+% 
+% 
+%         matid(ielex,ieley)=id;
+%         ieley = ieley + 1;
+%         id = id + 1;
+%     end
+% end
+idhalf = find(matid);
+
     
     
     for  idhalf=find(matid);
@@ -163,47 +219,47 @@ else %gere les combinaison commune
         neiglinkmat = false(length(neiglink),length(neiglink));
     end
     
-    if 0
-     for ilink=1:length(neiglink)
-
-        %look for close neighbours combinaisaion 
-         %imply link 1
-         tic
-        [sellink1] = [match_str(label1,  label1(ilink)); match_str(label2,  label1(ilink))];
-        [sellink2] = [match_str(label1,  label2(ilink)); match_str(label2,  label2(ilink))];
-        temp = zeros(size(neiglinkmat,1),2);
-        temp(sellink1,1)=1;
-        temp(sellink2,2)=1;
-         idfind=  find(sum(temp,2)==2);
-         toc
-        % disp(['find' label1(ilink), label2(ilink)])
-           %idself
-           for ineigh2 = 1:numel(neiglink(ilink).neighblabel2)
-              [sellink1] = [match_str(label1,  label1(ilink)); match_str(label2,  label1(ilink))]; 
-               label2neig = neiglink(ilink).neighblabel2{ineigh2 };
-              [sellink2] = [match_str(label1,  label2neig); match_str(label2,  label2neig)];
-               temp = zeros(size(neiglinkmat,1),2);
-               temp(sellink1,1)=1;
-               temp(sellink2,2)=1;
-               idfind=  find(sum(temp,2)==2);
-             disp(['find' label1(find(sum(temp,2)==2)), label2(find(sum(temp,2)==2))]);
-               neiglinkmat(find(sum(temp,2)==2),find(sum(temp,2)==2)) = true;       
-           end
-            for ineigh1 = 1:numel(neiglink(ilink).neighblabel1)
-              [sellink1] = [match_str(label1,  label2(ilink)); match_str(label2,  label2(ilink))]; 
-               label1neig = neiglink(ilink).neighblabel1{ineigh1 };
-              [sellink2] = [match_str(label1,  label1neig); match_str(label2,  label1neig)];
-               temp = zeros(size(neiglinkmat,1),2);
-               temp(sellink1,1)=1;
-               temp(sellink2,2)=1;
-               idfind=  find(sum(temp,2)==2);
-               disp(['find' label1(find(sum(temp,2)==2)), label2(find(sum(temp,2)==2))]);
-               neiglinkmat(find(sum(temp,2)==2),find(sum(temp,2)==2)) = true;       
-           end
-     end 
- 
-    
-    end
+    % if 0
+    %  for ilink=1:length(neiglink)
+    % 
+    %     %look for close neighbours combinaisaion 
+    %      %imply link 1
+    %      tic
+    %     [sellink1] = [match_str(label1,  label1(ilink)); match_str(label2,  label1(ilink))];
+    %     [sellink2] = [match_str(label1,  label2(ilink)); match_str(label2,  label2(ilink))];
+    %     temp = zeros(size(neiglinkmat,1),2);
+    %     temp(sellink1,1)=1;
+    %     temp(sellink2,2)=1;
+    %      idfind=  find(sum(temp,2)==2);
+    %      toc
+    %     % disp(['find' label1(ilink), label2(ilink)])
+    %        %idself
+    %        for ineigh2 = 1:numel(neiglink(ilink).neighblabel2)
+    %           [sellink1] = [match_str(label1,  label1(ilink)); match_str(label2,  label1(ilink))]; 
+    %            label2neig = neiglink(ilink).neighblabel2{ineigh2 };
+    %           [sellink2] = [match_str(label1,  label2neig); match_str(label2,  label2neig)];
+    %            temp = zeros(size(neiglinkmat,1),2);
+    %            temp(sellink1,1)=1;
+    %            temp(sellink2,2)=1;
+    %            idfind=  find(sum(temp,2)==2);
+    %          disp(['find' label1(find(sum(temp,2)==2)), label2(find(sum(temp,2)==2))]);
+    %            neiglinkmat(find(sum(temp,2)==2),find(sum(temp,2)==2)) = true;       
+    %        end
+    %         for ineigh1 = 1:numel(neiglink(ilink).neighblabel1)
+    %           [sellink1] = [match_str(label1,  label2(ilink)); match_str(label2,  label2(ilink))]; 
+    %            label1neig = neiglink(ilink).neighblabel1{ineigh1 };
+    %           [sellink2] = [match_str(label1,  label1neig); match_str(label2,  label1neig)];
+    %            temp = zeros(size(neiglinkmat,1),2);
+    %            temp(sellink1,1)=1;
+    %            temp(sellink2,2)=1;
+    %            idfind=  find(sum(temp,2)==2);
+    %            disp(['find' label1(find(sum(temp,2)==2)), label2(find(sum(temp,2)==2))]);
+    %            neiglinkmat(find(sum(temp,2)==2),find(sum(temp,2)==2)) = true;       
+    %        end
+    %  end 
+    % 
+    % 
+    % end
      tic
     for  ilink=1:length(neiglink)
         %commun link
@@ -231,10 +287,13 @@ else %gere les combinaison commune
     end
     toc
 end  
-   
+     
 % 
-% figure;
-% imagesc(neiglinkmat);
+
+matcorr = neiglinkmat +flipud(rot90(neiglinkmat));
+neiglinkmat=logical(matcorr);
+figure;
+imagesc(neiglinkmat);
 % title(['Neighbor definition: ',neighbourdist ])
 %  matcorr = zeros(83,83);
 %                     matcorr(idhalf)=  neiglinkmat(:,329); %idhalf ;
@@ -249,7 +308,7 @@ cfg.tail             = 0;
 cfg.clustertail      = 0;
 cfg.connectivity     = neiglinkmat;
 cfg.latency          = 'all';
-cfg.frequency        = 'all';
+cfg.frequency        = 'all'; 
 cfg.numrandomization = 'all';
 cfg.dim              = [size(statobs,1),1,1];
 cfg.dimord           = 'chan_freq_time';
@@ -260,9 +319,10 @@ cfg.clustercritval   = clustercritval;
 cfg.minnbchan        = str2num(minnbchan);      %nb element significatif conjoints pour le cluster + haut car beaucoup de canaux
 try
 [stat, cfg] = clusterstat(cfg,statrand, statobs); 
+%figure;hist(statrand(77,:))
 catch 
     stat = []; 
-    'no cluster'
+    disp('ERROR no cluster function clusterstat not working')
 end 
 end 
 
@@ -276,13 +336,22 @@ for i=1:nsensors
   dist(i,:) = sqrt(sum((chanpos(1:nsensors,:) - repmat(chanpos(i,:), nsensors, 1)).^2,2))';
 end
 
+% figure;hold on
+% for iele=1:16
+% plot3(chanpos(iele,1),chanpos(iele,2),chanpos(iele,3),'x','DisplayName',label{iele})
+% end
 % find the neighbouring electrodes based on distance
 % later we have to restrict the neighbouring electrodes to those actually selected in the dataset
-channeighbstructmat = (dist<neighbourdist);
+channeighbstructmat = (dist<neighbourdist);  
+%electrode by itself is a neighboors in region 
+
+
 
 % electrode istelf is not a neighbour
-channeighbstructmat = (channeighbstructmat .* ~eye(nsensors));
+%channeighbstructmat = (channeighbstructmat .* ~eye(nsensors));
 
+
+ 
 % construct a structured cell array with all neighbours
 neighbours=struct;
 for i=1:nsensors

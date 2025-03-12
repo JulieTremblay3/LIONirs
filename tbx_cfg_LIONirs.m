@@ -2,7 +2,7 @@
 % Copyright (C) 2019 LION Lab, Centre de recherche CHU Sainte-Justine 
 % www.lionlab.umontreal.ca
 %___________________________________________________________________
-function nirsHSJ = tbx_cfg_LIONirs
+function nirsHSJ = tbx_cfg_LIONirs;
 
 
 addpath(fileparts(which(mfilename))); 
@@ -525,7 +525,7 @@ channelmask_nirsport         = cfg_entry;
 channelmask_nirsport.name    = 'Custom ChannelMask'; 
 channelmask_nirsport.tag     = 'channelmask_nirsport';      
 channelmask_nirsport.strtype = 's';       
-channelmask_nirsport.num     = [1 inf];     
+channelmask_nirsport.num     = [0 inf];     
 channelmask_nirsport.val     = {''};
 channelmask_nirsport.help    = {['Custom channel mask channel mask apply to .wl1 and .wl2 use nirs converter and ensure that all raw data are present 16x16 channel',...
     ' 1  1  1  1  0  0  0  0  1  0  0  0  0  0  0  0  1  1  1  1  0  0  0  0  1  0  0  0  0  0  0  0  1  1  1  1  1  0  0  0  1  0  0  0  0  0  0  0  0  1  1  1  1  1  1  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  1  1  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  0  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  0  0  0  0  0  0  0  0  1  0  0  0  0  0  0  0  1  1  1  1  0  0  0  0  1  0  0  0  0  0  0  0  1  1  1  1  0  0  0  0  1  0  0  0  0  0  0  0  1  1  1  1  1  0  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  1  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  1  1  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  0  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1']}; 
@@ -1024,6 +1024,44 @@ function vout = nirs_cfg_vout_E_manualtrig(job)
     vout.src_output = substruct('.','NIRSmat'); 
     vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
 end
+
+
+
+
+m_trigfilelsl         = cfg_files;
+m_trigfilelsl.name    = 'Enter new trig definition'; 
+m_trigfilelsl.tag     = 'm_trigfilelsl';       %file names
+m_trigfilelsl.filter  = 'lsl.tri';
+m_trigfilelsl.ufilter = 'lsl.tri';    
+m_trigfilelsl.num     = [1 Inf];     % Number of inputs required 
+m_trigfilelsl.help    = {'Open file'}; 
+
+
+E_manualtriglsl      = cfg_exbranch;
+E_manualtriglsl.name = 'Trigger lsl.tri';
+E_manualtriglsl.tag  = 'E_manualtriglsl';
+E_manualtriglsl.val  = {NIRSmat m_trigfilelsl m_trigmode};
+E_manualtriglsl.prog = @nirs_run_E_manualtriglsl;
+E_manualtriglsl.vout = @nirs_cfg_vout_E_manualtriglsl;
+E_manualtriglsl.help = {['Read lsl.tri file to add trigger as example the file contain one line by trigger as follow ',...
+    'Timestamp;sample in nirs ; triggervalue',...
+    '2024-07-26T10:35:02.901947;1481;0',...
+    '2024-07-26T10:35:40.891001;1867;3',...
+    '2024-07-26T10:36:43.853145;2508;2',...
+    '2024-07-26T10:36:56.863759;2640;1']};
+
+function vout = nirs_cfg_vout_E_manualtriglsl(job)
+    vout = cfg_dep;                    
+    vout.sname      = 'NIRS.mat';       
+    vout.src_output = substruct('.','NIRSmat'); 
+    vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
+end
+
+
+
+
+
+
 
 e_Concatenate_blocid            = cfg_entry;
 e_Concatenate_blocid.tag        = 'e_Concatenate_blocid';
@@ -4484,7 +4522,7 @@ M_readNIRS.help   = {'These modules read NIRS data in different formats.'};
 M_Segment        =   cfg_choice; 
 M_Segment.name   =  'Segment/Onset';
 M_Segment.tag    = 'M_Segment';
-M_Segment.values = {segment ,E_Concatenate_file,E_Concatenate_nirsmat,E_aux2manualtrig,E_manualtrig,E_createonset_correlationsignal }; 
+M_Segment.values = {segment ,E_Concatenate_file,E_Concatenate_nirsmat,E_aux2manualtrig,E_manualtriglsl, E_manualtrig,E_createonset_correlationsignal }; 
 M_Segment.help   = {'These modules segment or combine data.'};
 
 
@@ -4561,26 +4599,26 @@ end
 
 
 
-E_HyperScanDivideNIRS    = cfg_exbranch;
-E_HyperScanDivideNIRS.name = 'HyperScan Separate subject';
-E_HyperScanDivideNIRS.tag  = 'E_HyperScanDivideNIRS';
-E_HyperScanDivideNIRS.val  = {NIRSmat, f_HyperScan_outdir};
-E_HyperScanDivideNIRS.prog = @nirs_run_E_HyperScanDivideNIRS;
-E_HyperScanDivideNIRS.vout = @nirs_cfg_vout_E_HyperScanDivideNIRS;
-E_HyperScanDivideNIRS.help = {['UNCOMPLETE Divide the data of multiple subjects (NIRS.mat) in two file for hypyp compatibility ToDo']};
-
-function vout = nirs_cfg_vout_E_HyperScanDivideNIRS(job)
-    vout = cfg_dep;                    
-    vout.sname      = 'NIRS.mat';       
-    vout.src_output = substruct('.','NIRSmat'); 
-    vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
-end
+% E_HyperScanDivideNIRS    = cfg_exbranch;
+% E_HyperScanDivideNIRS.name = 'HyperScan Separate subject';
+% E_HyperScanDivideNIRS.tag  = 'E_HyperScanDivideNIRS';
+% E_HyperScanDivideNIRS.val  = {NIRSmat, f_HyperScan_outdir};
+% E_HyperScanDivideNIRS.prog = @nirs_run_E_HyperScanDivideNIRS;
+% E_HyperScanDivideNIRS.vout = @nirs_cfg_vout_E_HyperScanDivideNIRS;
+% E_HyperScanDivideNIRS.help = {['UNCOMPLETE Divide the data of multiple subjects (NIRS.mat) in two file for hypyp compatibility ToDo']};
+% 
+% function vout = nirs_cfg_vout_E_HyperScanDivideNIRS(job)
+%     vout = cfg_dep;                    
+%     vout.sname      = 'NIRS.mat';       
+%     vout.src_output = substruct('.','NIRSmat'); 
+%     vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
+% end
 
 %Module  Write external file
 M_HyperScanNIRS        =  cfg_choice; 
 M_HyperScanNIRS.name   = 'HyperScan';
 M_HyperScanNIRS.tag    = 'M_HyperScanNIRS';
-M_HyperScanNIRS.values = {E_HyperScanCombineNIRS ,  E_HyperScanDivideNIRS}; 
+M_HyperScanNIRS.values = {E_HyperScanCombineNIRS };  %,  E_HyperScanDivideNIRS
 M_HyperScanNIRS.help   = {'These modules is design to combine or divide 2 subjects during synchronized hyperscanning session. Combine the sessions to see to participant at once',...
     'After divide as subject for external software as Hypyp export (to complete).'};
 

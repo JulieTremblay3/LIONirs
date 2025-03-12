@@ -2228,7 +2228,8 @@ if  exportview.autotitle == 1
     end
     angle =  get(handles.angle_rotation_cote,'string')
     anglef =  get(handles.angle_rotation_face,'string')
-
+    A = handles.d1;
+    save([path,name(1:end-4),'.mat'], 'A')
     [name,path] = uiputfile([angle,anglef , suj, cond,sprintf('%2.1f',str2num(get(handles.text_Time,'string'))),type{id}, Conc,'.tif'])
     saveas(h,[path,name(1:end-4),'.tif'],'tif');
     saveas(h,[path,name(1:end-4),'.fig'],'fig');
@@ -2238,6 +2239,8 @@ else
    if path==0
        return
    end
+    A = handles.d1;
+    save([path,name(1:end-4),'.mat'], 'A')
     savetopo([path,name],vColor,1)
     saveas(h,[path,name(1:end-4),'.tif'],'tif');
     saveas(h,[path,name(1:end-4),'.fig'],'fig');

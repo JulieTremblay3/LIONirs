@@ -247,7 +247,7 @@ for istep=1:numel(NIRS.Dt.fir.pp)
 end
 end
 
-    if isfield(job.c_createAUXauto,'bHRFtiggeronset')
+    if isfield(job.c_createAUXauto,'b_HRFtriggeronset')
     if ~isfield(job.c_createAUXauto.b_HRFtriggeronset,'e_HRF_SDmodel')
         A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0'};
         VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-pretime),...

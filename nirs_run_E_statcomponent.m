@@ -17,7 +17,11 @@ end
     AllC = [];
     for i=1:numel(job.c_statcomponent.b_TtestOneSample.f_component)
         load(job.c_statcomponent.b_TtestOneSample.f_component{i},'-mat');
-        AllC = [AllC,A];
+        if size(A,1)> size(A,2)
+            AllC = [AllC,A];
+        else
+             AllC = [AllC,A'];
+        end
         try
         info.zonelistG1{i} = zonelist;    
         catch

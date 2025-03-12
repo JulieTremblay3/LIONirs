@@ -5308,8 +5308,8 @@ if strcmp(listmethod{idval},'Parafac')  %substractPARAFAC
         PARCORR.modulestr = moduleall{get(handles.popupmenu_module, 'value')};
         PARCORR.listgood =  listgood;
         PARCORR.indt = indt;
-        PARCORR.data = data(:,listgood,:);
-        PARCORR.Xm = Xm;
+        PARCORR.data = []; data(:,listgood,:);
+        PARCORR.Xm = []; %Xm;
         PARCORR.FacA = PMI{currentsub}.tmpPARAFAC.Factors{1};
         PARCORR.FacB = PMI{currentsub}.tmpPARAFAC.Factors{2};
         PARCORR.FacC = PMI{currentsub}.tmpPARAFAC.Factors{3};
@@ -5331,8 +5331,8 @@ if strcmp(listmethod{idval},'Parafac')  %substractPARAFAC
         PARCORR(id+1).modulestr = moduleall{get(handles.popupmenu_module, 'value')};
         PARCORR(id+1).listgood =  listgood;
         PARCORR(id+1).indt = indt; %indice de temps.
-        PARCORR(id+1).data = data(:,listgood,:);
-        PARCORR(id+1).Xm = Xm;
+        PARCORR(id+1).data = []; %data(:,listgood,:);
+        PARCORR(id+1).Xm = []; %Xm;
         PARCORR(id+1).FacA = PMI{currentsub}.tmpPARAFAC.Factors{1};
         PARCORR(id+1).FacB = PMI{currentsub}.tmpPARAFAC.Factors{2};
         PARCORR(id+1).FacC = PMI{currentsub}.tmpPARAFAC.Factors{3};
@@ -5391,12 +5391,11 @@ elseif strcmp(listmethod{idval},'PCA') %substract PCA
         PARCORR.modulestr = moduleall{get(handles.popupmenu_module, 'value')};
         PARCORR.listgood = listgood;
         PARCORR.indt = indt; %indice de temps.
-        PARCORR.data = data(:,listgood,:);
-        PARCORR.Xm = Xm;
+        PARCORR.data = [];% data(:,listgood,:);  
         PARCORR.u =  PMI{currentsub}.tmpPCA.u;
         PARCORR.s = PMI{currentsub}.tmpPCA.s;
         PARCORR.v = PMI{currentsub}.tmpPCA.v;
-        PARCORR.Xm = PARCORR.u*PARCORR.s*PARCORR.v';
+        PARCORR.Xm = []; %PARCORR.u*PARCORR.s*PARCORR.v';
         PARCORR.ComponentToKeep = PMI{1}.tmpPCA.selected;
         PARCORR.label= ['PCA' sprintf('%03.0f',size(PARCORR,2)),' ',fileall{get(handles.popupmenu_file,'value')}];
         PARCORR.type = 'PCA';
@@ -5413,11 +5412,11 @@ elseif strcmp(listmethod{idval},'PCA') %substract PCA
         PARCORR(id+1).modulestr = moduleall{get(handles.popupmenu_module, 'value')};
         PARCORR(id+1).listgood = listgood;
         PARCORR(id+1).indt = indt; %indice de temps.
-        PARCORR(id+1).data = data(:,listgood,:);
+        PARCORR(id+1).data =  [];data(:,listgood,:);
         PARCORR(id+1).u =  PMI{currentsub}.tmpPCA.u;
         PARCORR(id+1).s = PMI{currentsub}.tmpPCA.s;
         PARCORR(id+1).v = PMI{currentsub}.tmpPCA.v;
-        PARCORR(id+1).Xm = PARCORR(id+1).u*PARCORR(id+1).s*PARCORR(id+1).v';
+        PARCORR(id+1).Xm =  []; %PARCORR(id+1).u*PARCORR(id+1).s*PARCORR(id+1).v';
         PARCORR(id+1).ComponentToKeep = PMI{1}.tmpPCA.selected;
         PARCORR(id+1).label= ['PCA' sprintf('%03.0f',size(PARCORR,2)),' ',fileall{get(handles.popupmenu_file,'value')}];
         PARCORR(id+1).type = 'PCA';
@@ -9073,17 +9072,25 @@ else
 end
 
 for i=1:numel(PARCORR(1,id).listgood)
-    idxc = find_idx_color(PMI{currentsub}.data(cf).MeasList, PARCORR(1,id).listgood(i),...
+        idxc = find_idx_color(PMI{currentsub}.data(cf).MeasList, PARCORR(1,id).listgood(i),...
             numel(PMI{currentsub}.color)/3);
-    h=plot(PMI{currentsub}.data(cf).HRF.tHRF(PARCORR(1,id).indt(1):PARCORR(1,id).indt(end)),PARCORR(1,id).Xm(:,i,1)+step,'color', PMI{currentsub}.color(idxc,:));
-       srs = SDPairs2strboxy(PMI{currentsub}.data(cf).MeasList(PARCORR(1,id).listgood(i),1));
+    if ~isempty(PARCORR(1,id).Xm)
+        h=plot(PMI{currentsub}.data(cf).HRF.tHRF(PARCORR(1,id).indt(1):PARCORR(1,id).indt(end)),PARCORR(1,id).Xm(:,i,1)+step,'color', PMI{currentsub}.color(idxc,:));
+      
+    elseif strcmp(PARCORR(1,id).type,'PCA')
+        Xm = PARCORR(id).u*PARCORR(id).s*PARCORR(id).v';
+        h=plot(PMI{currentsub}.data(cf).HRF.tHRF(PARCORR(1,id).indt(1):PARCORR(1,id).indt(end)),Xm(:,i,1)+step,'color', PMI{currentsub}.color(idxc,:));
+    elseif strcmp(PARCORR(1,id).type,'PARAFAC')
+         [Xm]=nmodel(({PARCORR(1,id).FacA,PARCORR(1,id).FacB,PARCORR(1,id).FacC}));
+         h=plot(PMI{currentsub}.data(cf).HRF.tHRF(PARCORR(1,id).indt(1):PARCORR(1,id).indt(end)),Xm(:,i,1)+step,'color', PMI{currentsub}.color(idxc,:));
+
+    end
+        srs = SDPairs2strboxy(PMI{currentsub}.data(cf).MeasList(PARCORR(1,id).listgood(i),1));
         det = SDDet2strboxy(PMI{currentsub}.data(cf).MeasList(PARCORR(1,id).listgood(i),2));
-    set(h,'displayname',['ch',num2str(PARCORR(1,id).listgood(i)),'_',srs, '_', det]);
-    set(h,'linewidth',2);
-    %set(gca,'fontsize',12)
-    xlabel('Time (s)');
-
-
+        set(h,'displayname',['ch',num2str(PARCORR(1,id).listgood(i)),'_',srs, '_', det]);
+        set(h,'linewidth',2);
+        %set(gca,'fontsize',12)
+        xlabel('Time (s)');
 end
 
 
@@ -9386,8 +9393,8 @@ if strcmp(listmethod{idval},'Parafac') %get(handles.popupmethodselected,'value')
             PARCOMP.modulestr = moduleall{get(handles.popupmenu_module, 'value')};
             PARCOMP.listgood =  listgood;
             PARCOMP.indt = indt; %indice de temps.
-            PARCOMP.data = data(:,listgood,:);
-            PARCOMP.Xm = Xm;
+            PARCOMP.data = [];data(:,listgood,:);
+            PARCOMP.Xm = [];%Xm;
             PARCOMP.FacA = PMI{currentsub}.tmpPARAFAC.Factors{1};
             PARCOMP.FacB = PMI{currentsub}.tmpPARAFAC.Factors{2};
             PARCOMP.FacC = PMI{currentsub}.tmpPARAFAC.Factors{3};
@@ -9412,8 +9419,8 @@ if strcmp(listmethod{idval},'Parafac') %get(handles.popupmethodselected,'value')
             PARCOMP(id+1).modulestr = moduleall{get(handles.popupmenu_module, 'value')};
             PARCOMP(id+1).listgood = listgood;
             PARCOMP(id+1).indt = indt; %indice de temps.
-            PARCOMP(id+1).data = data(:,listgood,:);
-            PARCOMP(id+1).Xm = Xm;
+            PARCOMP(id+1).data =[]; %data(:,listgood,:);
+            PARCOMP(id+1).Xm = []; %Xm;
             PARCOMP(id+1).FacA = PMI{currentsub}.tmpPARAFAC.Factors{1};
             PARCOMP(id+1).FacB = PMI{currentsub}.tmpPARAFAC.Factors{2};
             PARCOMP(id+1).FacC = PMI{currentsub}.tmpPARAFAC.Factors{3};
@@ -9480,13 +9487,13 @@ elseif strcmp(listmethod{idval},'PCA')  %extract PCA get(handles.radio_PCA,'valu
             PARCOMP.modulestr       = moduleall{get(handles.popupmenu_module, 'value')};
             PARCOMP.listgood        =  listgood;
             PARCOMP.indt            = indt; %indice de temps.
-            PARCOMP.data            = data(:,listgood,:);
+            PARCOMP.data            = [];%data(:,listgood,:);
             %PARCOMP.Xm             = temp;
             PARCOMP.u               = PMI{currentsub}.tmpPCA.u;
             PARCOMP.s               = PMI{currentsub}.tmpPCA.s;
             PARCOMP.v               = PMI{currentsub}.tmpPCA.v;
             lstSV                   = PMI{1}.tmpPCA.selected;
-            PARCOMP.Xm              = PARCOMP.u(:,lstSV)*PARCOMP.s(lstSV,lstSV)*PARCOMP.v(:,lstSV)';
+            PARCOMP.Xm              = [];%PARCOMP.u(:,lstSV)*PARCOMP.s(lstSV,lstSV)*PARCOMP.v(:,lstSV)';
             PARCOMP.ComponentToKeep = PMI{1}.tmpPCA.selected;
             labelid                 = get(handles.edit_selectedlabel,'string');
             PARCOMP.label           = [labelid,'PCA' sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}];
@@ -9504,13 +9511,13 @@ elseif strcmp(listmethod{idval},'PCA')  %extract PCA get(handles.radio_PCA,'valu
             PARCOMP(id+1).modulestr = moduleall{get(handles.popupmenu_module, 'value')};
             PARCOMP(id+1).listgood = listgood;
             PARCOMP(id+1).indt = indt; %indice de temps.
-            PARCOMP(id+1).data = data(:,listgood,:);
+            PARCOMP(id+1).data = []; %data(:,listgood,:);
             PARCOMP(id+1).u = PMI{currentsub}.tmpPCA.u;
             PARCOMP(id+1).s = PMI{currentsub}.tmpPCA.s;
             PARCOMP(id+1).v = PMI{currentsub}.tmpPCA.v;
             PARCOMP(id+1).ComponentToKeep = PMI{1}.tmpPCA.selected;
             lstSV = PMI{1}.tmpPCA.selected;
-            PARCOMP(id+1).Xm = PARCOMP(id+1).u(:,lstSV)*PARCOMP(id+1).s(lstSV,lstSV)*PARCOMP(id+1).v(:,lstSV)';
+            PARCOMP(id+1).Xm = [];PARCOMP(id+1).u(:,lstSV)*PARCOMP(id+1).s(lstSV,lstSV)*PARCOMP(id+1).v(:,lstSV)';
             labelid  = get(handles.edit_selectedlabel,'string');
             PARCOMP(id+1).label= [labelid,'PCA' sprintf('%03.0f',size(PARCOMP,2)),' ',fileall{get(handles.popupmenu_file,'value')}];
             PARCOMP(id+1).type = 'PCA';
