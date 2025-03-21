@@ -218,7 +218,11 @@ if isfield(job.c_createAUXauto,'b_HRFtriggeronset')
         pretime =job.c_createAUXauto.b_HRFtriggeronset.e_HRFpretime;
     end
 elseif  isfield(job.c_createAUXauto,'b_HRFxlsonset')
+    try
     pretime = num(:,4);
+    catch
+        disp('4 column indicate pretime')
+    end
 
 end
 if isfield(job.c_createAUXauto,'b_HRFtriggeronset')

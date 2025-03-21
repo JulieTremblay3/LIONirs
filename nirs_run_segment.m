@@ -125,7 +125,7 @@ for filenb = 1:size(job.NIRSmat,1)
                     indstim = indstim(1);
                    disp(['Use only first trig ', num2str(trigger(1)) ,' to segment at Time: ', sprintf('%.2f ',1/fs*indstim) ])
                 end
-                 
+                  
             end
              catch
                  disp('Failed NIRS segment trig could not be found to segment please verify your data or your parameter')

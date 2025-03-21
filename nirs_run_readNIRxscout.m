@@ -418,7 +418,7 @@ for Idx_File=1:numel(inputrawscout)
 if numel(evt)>0 % Verify that the event matrix is not empty.
     NIRS.Dt.fir.aux5{Idx_File} = [ones(size(evt,1),1),evt(:,1)]; %valeur 1 internal trigger
     NIRS.Dt.fir.aux5{Idx_File} = [ones(size(evt,1),1),evt(:,1)]; %valeur 1 internal trigger
-    trigdec = evt(:,2)*2^0+  evt(:,3)*2^1+evt(:,4)*2^2+evt(:,5)*2^3; % Convert the trigger identifier byte to decimal.
+    trigdec = evt(:,2)*2^0+  evt(:,3)*2^1+evt(:,4)*2^2+evt(:,5)*2^3+evt(:,6)*2^4+evt(:,7)*2^5+evt(:,8)*2^6+evt(:,8)*2^7; % Convert the trigger identifier byte to decimal.
     NIRS.Dt.fir.aux5{Idx_File} = [trigdec ,evt(:,1)]; % Concatenate the decimal trigger identifier with the time collumn of the event file.
 else
     NIRS.Dt.fir.aux5{Idx_File} = [1 1]; % Create a row of two ones if no event is provided.
