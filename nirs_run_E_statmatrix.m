@@ -927,8 +927,11 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
     disp(['Save: ',fullfile(dir1,[file])]);
     new = [{dir1},{file}, {ZONEid},{1} ];
     infonew = [infonew;new];
+    try
     if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
         copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid))
+    end
+    catch
     end
     if ismac
         % Code to run on Mac platform problem with xlswrite

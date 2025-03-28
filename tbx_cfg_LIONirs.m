@@ -1095,12 +1095,12 @@ f_Concatenate_outdir.help    = {'Select the output folder where to save data. By
 
 
 E_Concatenate_file      = cfg_exbranch;
-E_Concatenate_file.name = 'Concatenate blocks in NIRS.mat';
+E_Concatenate_file.name = 'Concatenate several data files in the same NIRS.mat';
 E_Concatenate_file.tag  = 'E_Concatenate_file';
 E_Concatenate_file.val  = {NIRSmat,m_Concatenate_option,e_Concatenate_blocid, f_Concatenate_outdir  };
 E_Concatenate_file.prog = @nirs_run_E_Concatenate_file;
 E_Concatenate_file.vout = @nirs_cfg_vout_E_Concatenate_file;
-E_Concatenate_file.help = {'Join several blocks in the NIRS.mat, support EEG or AUX multimodal information, additional files Allxxx.dat will be created. Does not support video.'};
+E_Concatenate_file.help = {'Join several data files in the NIRS.mat, not support EEG, AUX or video multimodal information. Use concatenate NIRS.mat to combine multiple NIRS.mat file '};
 
 function vout = nirs_cfg_vout_E_Concatenate_file(job)
     vout = cfg_dep;                    
@@ -4522,7 +4522,7 @@ M_readNIRS.help   = {'These modules read NIRS data in different formats.'};
 M_Segment        =   cfg_choice; 
 M_Segment.name   =  'Segment/Onset';
 M_Segment.tag    = 'M_Segment';
-M_Segment.values = {segment ,E_Concatenate_file,E_Concatenate_nirsmat,E_aux2manualtrig,E_manualtriglsl, E_manualtrig,E_createonset_correlationsignal }; 
+M_Segment.values = {segment ,E_Concatenate_nirsmat,E_Concatenate_file,E_aux2manualtrig,E_manualtriglsl, E_manualtrig,E_createonset_correlationsignal }; 
 M_Segment.help   = {'These modules segment or combine data.'};
 
 

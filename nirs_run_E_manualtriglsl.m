@@ -15,6 +15,7 @@ for ifile = 1:numel(NIRS.Dt.fir.pp(end).p)
         NIRS.Dt.fir.aux5{ifile}=aux5;
         clear aux5;
     else %remplacer aux5 par le trig manuel
+        aux5 = [];
         aux5 = [aux5;evt];
         NIRS.Dt.fir.aux5{ifile}=aux5;
         clear aux5;

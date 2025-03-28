@@ -7,10 +7,15 @@ prefix = 'All';
     ind_dur_chtmp =[];
     labeltmp=[] ;
 
+if numel(job.NIRSmat)>1
+    disp('ERROR uses the concatenate file to juxtapose files in only one NIRS.mat. To merge multiple NIRS.mat sessions uses concatenate NIRS.mat')
+    return 
+end
+
 for filenb=1:numel(job.NIRSmat) %only one NIRS.mat merge file inside
     NIRS = [];
     load(job.NIRSmat{filenb,1});
-    [dir2,tmp,tmp] = fileparts(job.NIRSmat{filenb,1});
+    [dir2,tmp,tmp] = fileparts(job.NIRSmat{filenb,1}); 
     
     %use last step of preprocessing
     lst = length(NIRS.Dt.fir.pp);
