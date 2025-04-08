@@ -879,6 +879,27 @@ function vout = nirs_cfg_vout_E_eegnirs_MarkMuscular(job)
     vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
 end
 
+
+
+
+%Create marker based on correlation on signal based on recording
+E_GoNoGotrig     = cfg_exbranch;
+E_GoNoGotrig.name = 'GoNoGotrig';
+E_GoNoGotrig.tag  = 'E_GoNoGotrig';
+E_GoNoGotrig.val  = {NIRSmat,output_path};
+E_GoNoGotrig.prog = @nirs_run_E_GoNoGotrig;
+E_GoNoGotrig.vout = @nirs_cfg_vout_E_GoNoGotrig;
+E_GoNoGotrig.help = {'Function special for GonoGo malnutrition project , check the good answer in the EEG trig ' };
+
+function vout = nirs_cfg_vout_E_GoNoGotrig(job)
+    vout = cfg_dep;                    
+    vout.sname      = 'NIRS.mat';       
+    vout.src_output = substruct('.','NIRSmat'); 
+    vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
+end
+
+
+
 e_onset_trig        = cfg_entry; %subfolder new branch
 e_onset_trig.name    = 'Trigger';
 e_onset_trig.tag     = 'e_onset_trig';       
@@ -4172,8 +4193,8 @@ c_statpermutation.help    = {'Use permutation to create the empirical null distr
 m_export_matrix        = cfg_menu;
 m_export_matrix.tag    = 'm_export_matrix';
 m_export_matrix.name   = 'Export';
-m_export_matrix.labels = {'.mat format', '.xls format' };
-m_export_matrix.values = {1,2};
+m_export_matrix.labels = {'.mat format' };
+m_export_matrix.values = {1};
 m_export_matrix.val    = {1}; 
 m_export_matrix.help   = {'Export all observation in one file for external statistique.'};
 
@@ -4562,11 +4583,15 @@ M_datawritenirs.tag    = 'M_datawritenirs';
 M_datawritenirs.values = {E_writeNIRSHomer,  E_writeSNIRF, E_NIR_segment,E_writeHMR}; 
 M_datawritenirs.help   = {'These modules convert nir file in .nirs, last module of data export, support the export of field such as data (d),coordinate (SD), trigger (s), time (t),do not support noise artifact marking or aux export'};
 
+
+
+
+
 %Module  Write external file
 M_others        =  cfg_choice; 
 M_others.name   = 'Additional function';
 M_others.tag    = 'M_others';
-M_others.values = {E_markCardiac_TargetPCA, E_correctCardiac_TargetPCA, E_correctCardiac_exportBV,E_createonset_correlationsignal, E_eegnirs_MarkMuscular}; %,E_createonset_correlationsignal
+M_others.values = {E_markCardiac_TargetPCA, E_correctCardiac_TargetPCA, E_correctCardiac_exportBV,E_createonset_correlationsignal, E_eegnirs_MarkMuscular, E_GoNoGotrig}; %,E_createonset_correlationsignal
 M_others.help   = {'These modules convert nir file in .nirs, last module of data export, support the export of field such as data (d),coordinate (SD), trigger (s), time (t),do not support noise artifact marking or aux export'};
 
 

@@ -8606,9 +8606,9 @@ PMI = get(guiHOMER,'UserData');
 cf = 1;
 
 nch = size(PMI{currentsub}.data(cf).HRF.AvgC,2);
-MeasListAct=PMI{currentsub}.data(cf).MeasListAct;
-MeasListAct(:)=1;
-plotLst= find( PMI{currentsub}.data(cf).MeasListAct);
+%MeasListAct=PMI{currentsub}.data(cf).MeasListAct;
+%MeasListAct(:)=1;
+plotLst= 1:nch; % find( PMI{currentsub}.data(cf).MeasListAct);
 if ~isempty(plotLst)
     PMI{currentsub}.plotLst = plotLst;
     set(handles.edit_plotLst,'string',mat2str(plotLst))

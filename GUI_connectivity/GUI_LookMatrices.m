@@ -22,7 +22,7 @@ function varargout = GUI_LookMatrices(varargin)
 
 % Edit the above text to modify the response to help GUI_LookMatrices
 
-% Last Modified by GUIDE v2.5 08-Sep-2022 10:52:57
+% Last Modified by GUIDE v2.5 08-Apr-2025 10:44:29
 
 % Begin initialization code - DO NOT EDITspm
 gui_Singleton = 1;
@@ -154,7 +154,7 @@ for isubject=2:size(info,1)
         try
             MAT = load(fullfile(info{isubject,1}, [info{isubject,2},'.mat']));
             disp(['Load ' ,fullfile(info{isubject,1}, info{isubject,2}),'.mat']);
-            if isfield(MAT,'ZoneList')
+            if isfield(MAT,'ZoneList') 
                 DATA{id}.ZoneList = MAT.ZoneList;
                 DATA{id}.MAT = MAT.meancorr;
             end
@@ -199,13 +199,18 @@ for isubject=2:size(info,1)
     end
       if isubject==2
         set(handles.popupmenu_covariable,'string',infocov );
+        set(handles.popupmenu_covariable,'value',1);
       end
       %If format A a1b2... or D01 for NIRx
 
   try
         load(fullfile(info{isubject,1}, info{isubject,3}),'-mat');
-    catch
-        disp(['ERROR ' ,fullfile(info{isubject,1}, info{isubject,3})]);
+  catch
+      try          
+        load(info{isubject,3},'-mat');
+      catch  
+        disp(['ERROR ' ,fullfile( info{isubject,3})]);
+      end
   end
   name = MAT.ZoneList{1};
   if strcmp(name(1:2),'D0')
@@ -1878,6 +1883,14 @@ function btn_BrowseMask_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 guidata(handles.GUI_LookMat, handles);
+[file,location] = uigetfile('.mat');
+if isequal(file,0)
+   disp('User selected Cancel')
+else
+    set(handles.edit_filenameMaskMatrice,'string', fullfile(location,file));
+    set(handles.radio_Applymask,'value',1);
+end
+
 updateNetAllView(handles)
 
 % --------------------------------------------------------------------
@@ -1934,6 +1947,12 @@ function context_link_histogramme_Callback(hObject, eventdata, handles)
 
 DATA = get(handles.GUI_LookMat,'UserData');
 id = get(handles.popup_listsujet, 'value');
+
+
+get(handles.axes_viewlink,'children')
+
+namech = get(gco,'displayname');
+
 linkselected = get(handles.context_link_name,'label');
 [tok,rem] = strtok(linkselected,'=');
 [linkij,rem] = strtok(rem,'=');
@@ -2247,7 +2266,7 @@ function context_link_CopyValue_Callback(hObject, eventdata, handles)
 % hObject    handle to context_link_CopyValue (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-1
+
 DATA = get(handles.GUI_LookMat,'UserData');
 id = get(handles.popup_listsujet, 'value');
 linkselected = get(handles.context_link_name,'label');
@@ -2265,7 +2284,6 @@ for i=1:numel(DATA)
     end
 end
 
-figure;hold on
 [filepath,name,ext] =fileparts(get(handles.edit_subjetxls,'string'));
 copytxt = sprintf('%s\n', [linkselected,' ', name]);
 for   idsubjet   = 1:numel(DATA)
@@ -2285,4 +2303,119 @@ end
 
 clipboard('copy', copytxt)
    
+
+
+
+% --------------------------------------------------------------------
+function context_link_CopyCluster_Callback(hObject, eventdata, handles)
+% hObject    handle to context_link_CopyCluster (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+DATA = get(handles.GUI_LookMat,'UserData');
+id = get(handles.popup_listsujet, 'value'); 
+linkselected = get(handles.context_link_name,'label');
+[tok,rem] = strtok(linkselected,'=');
+[linkij,rem] = strtok(rem,'=');
+[linkname,rem] = strtok(rem,'=');
+valG1 = [];
+valG2 = [];
+groupeall = [];
+for i=1:numel(DATA)
+    try
+    groupeall=[groupeall,DATA{1,i}.GR];
+    catch
+        groupeall=[groupeall,0];
+    end
+end
+if get(handles.radio_fisher,'value')
+    disp('Apply fisher transform')
+end
+
+linkijcluster = [];
+linkobj = get(handles.axes_viewlink,'children');
+for iobj = 1:numel(linkobj) %RETROUVER JUSTE LES LIEN nommées (i,j)
+
+    linkselected = get(linkobj(iobj),'DisplayName');
+  if numel(linkselected)>4
+      if strcmp(linkselected(1:5), '(i,j)')
+            if strcmp(linkselected, '(i,j)')
+                [tok,rem] = strtok(linkselected,'=');
+                [linkij,rem] = strtok(rem,'=');
+                [linkname,rem] = strtok(rem,'=');
+            end
+            [itmp,jtmp] =  strtok(linkij,',')
+            inum = str2num(itmp(2:end));
+            jnum= str2num(jtmp(2:end-1));
+            linkijcluster = [linkijcluster; inum, jnum ];
+      end
+  end
+end
+
+
+% 
+% linkijcluster = [  14    14
+%     12    14
+%     11    14
+%     10    14
+%     14    12
+%     12    12
+%     11    12
+%     14    11
+%     12    11
+%     14    10
+%     12    15
+%      9    15
+%      9    14
+%     15    12
+%     10    12
+%      9    12
+%     12    10
+%     15     9
+%     14     9
+%     12     9
+%     11    15
+%      1    12
+%     15    11
+%     12     1];
+
+
+
+
+[filepath,name,ext] =fileparts(get(handles.edit_subjetxls,'string'));
+copytxt = sprintf('%s\n', ['Cluster']);
+for   idsubjet   = 1:numel(DATA)
+        try
+        for ilink = 1:size(linkijcluster,1 )       
+        eval(['new(',int2str(ilink),')=DATA{',num2str(idsubjet),'}.MAT(',int2str(linkijcluster(ilink,1)) ,',' ,int2str(linkijcluster(ilink,2)),');']);
+        end          
+            if get(handles.radio_fisher,'value')
+                new =1/2*(log((1+new )./(1-new )));            
+            end
+        valG1 = [valG1,nanmean(new)];
+        copytxt = [copytxt,sprintf('%d\n',nanmean(new))];
+        catch
+          copytxt= [copytxt,sprintf('%s\n','Nan')];
+        end
+        
+end
+
+disp(valG1)
+disp('Cluster value ready to copy')
+clipboard('copy', copytxt)
+
+
+% --- Executes on button press in radio_Applymask.
+function radio_Applymask_Callback(hObject, eventdata, handles)
+% hObject    handle to radio_Applymask (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radio_Applymask
+
+
+if get(handles.radio_Applymask,'value')
+    
+else
+end
 
