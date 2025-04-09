@@ -5680,6 +5680,9 @@ elseif strcmp(listmethod{idval},'Component') %substract selected componenet PCA 
         indt = PARCOMP(idcomp).indt(1):PARCOMP(idcomp).indt(end);
         listgood = PARCOMP(idcomp).listgood;
         Xm = PARCOMP(idcomp).Xm;
+        if isempty(Xm)
+             [Xm]=nmodel(({PARCOMP(1,idcomp).FacA,PARCOMP(1,idcomp).FacB,PARCOMP(1,idcomp).FacC}));
+        end
         d = PMI{currentsub}.data(cf).HRF.AvgC;
         data = cat(3,d(indt,1:end/2),d(indt,end/2+1:end));
         data(:,listgood,:) = data(:,listgood,:)-Xm;
@@ -5728,7 +5731,11 @@ elseif strcmp(listmethod{idval},'Component') %substract selected componenet PCA 
         end
          indt = PARCOMP(idcomp).indt(1):PARCOMP(idcomp).indt(end);
          listgood = PARCOMP(idcomp).listgood;
-         Xm = PARCOMP(idcomp).Xm; 
+         Xm = PARCOMP(idcomp).Xm;        
+        if isempty(Xm)    %ICI
+                lstSV = PARCOMP(1,idcomp).ComponentToKeep;
+                [Xm]=PARCOMP(1,idcomp).u(:,lstSV)*PARCOMP(1,idcomp).s(lstSV,lstSV)*PARCOMP(1,idcomp).v(:,lstSV)';          
+        end
         PMI{currentsub}.data(cf).HRF.AvgC(indt,listgood) = PMI{currentsub}.data(cf).HRF.AvgC(indt,listgood)-Xm;
     elseif strcmp(PARCOMP(idcomp).type,'ICA')
         
@@ -5755,7 +5762,7 @@ elseif strcmp(listmethod{idval},'Component') %substract selected componenet PCA 
          if newfile == 0
             id = numel(PARCORR);
             PARCORR(id+1).file= PARCOMP(idcomp).file;
-            PARCORR(id+1).filestr = PARCOMP(idcomp).filestr;
+            PARCORR(id+1).filestr = PARCOMP(idcomp).filestr;PARCOMP(idcomp).Xm
             PARCORR(id+1).module = PARCOMP(idcomp).module;
             PARCORR(id+1).modulestr = PARCOMP(idcomp).modulestr;
             PARCORR(id+1).listgood = PARCOMP(idcomp).listgood ;
@@ -5946,12 +5953,17 @@ elseif strcmp(listmethod{valmethod},'Component')
     PARCORR(1,idcomp).module;
     listgood = PARCORR(1,idcomp).listgood;
     Xm = PARCORR(1,idcomp).Xm;
+   
     indt = PARCORR(1,idcomp).indt(1):PARCORR(1,idcomp).indt(end);
     d = PMI{currentsub}.data(cf).HRF.AvgC;
     
     switch PARCORR(1,idcomp).type
         case 'PARAFAC'
             data = cat(3,d(indt,1:end/2),d(indt,end/2+1:end));
+             if isempty(Xm)    
+                [Xm]=nmodel(({PARCORR(1,idcomp).FacA,PARCORR(1,idcomp).FacB,PARCORR(1,idcomp).FacC}));
+             end
+
             data(:,listgood,:) = data(:,listgood,:)+Xm;
             PMI{currentsub}.data(cf).HRF.AvgC(indt,:) = reshape(data,[numel(indt),size(d,2)]);
             try
@@ -6000,6 +6012,11 @@ elseif strcmp(listmethod{valmethod},'Component')
             
             
         case 'PCA'
+            
+            if isempty(Xm)    %ICI
+                lstSV = PARCORR(idcomp).ComponentToKeep;
+                [Xm]=PARCORR(1,idcomp).u(:,lstSV)*PARCORR(1,idcomp).s(lstSV,lstSV)*PARCORR(1,idcomp).v(:,lstSV)';
+            end
             PMI{currentsub}.data(cf).HRF.AvgC(indt,listgood) =  d(indt,listgood) + Xm;
             try
                 load(fullfile(pathstr,'SelectedFactors.mat'))
@@ -9058,8 +9075,11 @@ step = str2num(get(handles.edit_stepvalue,'string'));
 if strcmp(get(handles.context_enable_autozoom,'Checked'),'on')	
 tstart = str2num(get(handles.edit_time_start,'string'));
 tstop = str2num(get(handles.edit_time_stop,'string'));
-set(handles.edit_start,'string', num2str(tstart-3));
-set(handles.edit_duration,'string', num2str(tstop-tstart+6));
+if get(handles.radiobutton_autoscaletime,'value')
+    set(handles.edit_start,'string', num2str(tstart-3));
+    set(handles.edit_duration,'string', num2str(tstop-tstart+6));
+end
+
 end
 updatedisplay(handles);
 guidata(handles.figure1, handles);

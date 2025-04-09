@@ -161,17 +161,17 @@ resetview(handles);
 
 p = mfilename('fullpath');
 [tok,rem]= strtok(fliplr(p),'\');
-path = fliplr(rem);
-strBmp =[path,'AngleRotationCote.jpg'];
+pathselect = fliplr(rem);
+strBmp =[pathselect,'AngleRotationCote.jpg'];
 matpix = imread( strBmp,'jpg' );
 set(handles.text_angle_rotation_cote, 'CData', matpix );
-strBmp =[path,'AngleRotationFace.jpg'];
+strBmp =[pathselect,'AngleRotationFace.jpg'];
 matpix = imread( strBmp,'jpg' );
 set(handles.text_angle_rotation_face, 'CData', matpix );
-strBmp =[path,'Play.jpg'];
+strBmp =[pathselect,'Play.jpg'];
 matpix = imread( strBmp,'jpg' );
 set(handles.btn_play, 'CData', matpix );
-strBmp =[path,'Pause.jpg'];
+strBmp =[pathselect,'Pause.jpg'];
 matpix = imread( strBmp,'jpg' );
 set(handles.btn_stop, 'CData', matpix );
 colormap jet;
@@ -961,13 +961,13 @@ elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
                 PMI{currentsub}.data(cf).HRF.AvgC(echantillon_time,nbhalf+1:end);
         end
     elseif type==0 %TOPO do not support topo for release no in doc
-         [name,path]= uigetfile({'*.vcolor';'*.img'});
-         if path==0
+         [name,pathselect]= uigetfile({'*.vcolor';'*.img'});
+         if pathselect==0
              d1 = PMI{currentsub}.data(cf).HRF.AvgC(echantillon_time,1:nbhalf);
              set(handles.popupmenu_display,'string',{'Current module',['Topo ']});
          else
-             [path1, name1, ext] = fileparts([path name]);
-             d1= opentopo([path name]);
+             [path1, name1, ext] = fileparts([pathselect name]);
+             d1= opentopo([pathselect name]);
              set(handles.popupmenu_display,'string',{'Current module',['Topo ',name1]});
          end
     elseif strcmp(typelabel{type}, 'Mean start stop time')  %Mean time start time stop 
@@ -984,9 +984,9 @@ elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
         end
         echantillon_time = echantillon_time(1);
     elseif strcmp(typelabel{type}, 'Projection Channel .cp')  %load D1 matrix 'Projection Channel .cp',
-        [name,path]= uigetfile({'*.mat';'Select channel projection *.cp'});
-        disp(['Project: ',[path,name]])
-        d1 = load('-mat',[path name]);
+        [name,pathselect]= uigetfile({'*.mat';'Select channel projection *.cp'});
+        disp(['Project: ',[pathselect,name]])
+        d1 = load('-mat',[pathselect name]);
         if isfield(d1,'zonelist')
             if isempty(d1.zonelist)
                  d1 = d1.A;      
@@ -1027,7 +1027,7 @@ elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
         else
              d1 = d1.A;                   
         end            
-        set(handles.edit_D1matrix,'string',[path,name]) ;
+        set(handles.edit_D1matrix,'string',[pathselect,name]) ;
         get(handles.edit_D1matrix,'position'); 
          set(handles.edit_D1matrix,'value',1);
          guidata(hObject,handles);
@@ -2229,21 +2229,21 @@ if  exportview.autotitle == 1
     angle =  get(handles.angle_rotation_cote,'string')
     anglef =  get(handles.angle_rotation_face,'string')
     A = handles.d1;
-    save([path,name(1:end-4),'.mat'], 'A')
-    [name,path] = uiputfile([angle,anglef , suj, cond,sprintf('%2.1f',str2num(get(handles.text_Time,'string'))),type{id}, Conc,'.tif'])
-    saveas(h,[path,name(1:end-4),'.tif'],'tif');
-    saveas(h,[path,name(1:end-4),'.fig'],'fig');
-    save([path,name(1:end-4),'.vcolor'], 'vColor','-mat');
+    save([pathselect,name(1:end-4),'.mat'], 'A')
+    [name,pathselect] = uiputfile([angle,anglef , suj, cond,sprintf('%2.1f',str2num(get(handles.text_Time,'string'))),type{id}, Conc,'.tif'])
+    saveas(h,[pathselect,name(1:end-4),'.tif'],'tif');
+    saveas(h,[pathselect,name(1:end-4),'.fig'],'fig');
+    save([pathselect,name(1:end-4),'.vcolor'], 'vColor','-mat');
 else
-   [name,path]= uiputfile('.img');
-   if path==0
+   [name,pathselect]= uiputfile('.img');
+   if pathselect==0
        return
    end
     A = handles.d1;
-    save([path,name(1:end-4),'.mat'], 'A')
-    savetopo([path,name],vColor,1)
-    saveas(h,[path,name(1:end-4),'.tif'],'tif');
-    saveas(h,[path,name(1:end-4),'.fig'],'fig');
+    save([pathselect,name(1:end-4),'.mat'], 'A')
+    savetopo([pathselect,name],vColor,1)
+    saveas(h,[pathselect,name(1:end-4),'.tif'],'tif');
+    saveas(h,[pathselect,name(1:end-4),'.fig'],'fig');
     close(h);
 end
 % set(newaxesh,'xcolor',exportview.setcolor)
@@ -2895,7 +2895,7 @@ type = 0;
 if ~iscell(filename)
     filename = {filename}
 end
-[path] = uigetdir()
+[pathselect] = uigetdir()
 for i = 1:numel(filename)
     d1 = load('-mat',[pathname filename{i}]);
     d1temp= d1.A;
@@ -2904,7 +2904,7 @@ for i = 1:numel(filename)
         PrjStruct = display_MRIcolor(PrjStruct,PMI,d1, type);
         setappdata(handles.IO_HelmetMTG,'PrjStruct',PrjStruct);
         resetview(handles);
-        btn_exportHelmetFigure_Callback(hObject, eventdata, handles,[path,'\',num2str(id1temp),filename{i}]);
+        btn_exportHelmetFigure_Callback(hObject, eventdata, handles,[pathselect,'\',num2str(id1temp),filename{i}]);
     end
 end
 
@@ -3037,7 +3037,7 @@ for det = 1:numel(DOT{currentsub}.SD.DetPos(:,1));
     end
 
 end
-[path] = uigetdir()
+[pathselect] = uigetdir()
 for num = 1:numel(DOT{currentsub}.zone.plotLst)
     tic
     DOT{currentsub}.plot =  DOT{currentsub}.zone.plot{num};
@@ -3051,7 +3051,7 @@ for num = 1:numel(DOT{currentsub}.zone.plotLst)
     set(handles.axes_Mtg2,'CameraTarget',[0,0,0]);
     set(handles.axes_Mtg2,'CameraPosition',PositionFuite);
     set(handles.axes_Mtg2,'CameraUpVector',[0,0,1]);
-    titlefigure = [path,DOT{currentsub}.zone.label{num}]
+    titlefigure = [pathselect,DOT{currentsub}.zone.label{num}]
     btn_exportHelmetFigure_Callback([], [],handles,titlefigure)
     toc
 end
@@ -3069,7 +3069,7 @@ a_cote = [];
 a_face = [];
 h = handles.IO_HelmetMTG
 rem=angle;
-[name,path] = uiputfile();
+[name,pathselect] = uiputfile();
 if name==0
     return
 end
@@ -3089,7 +3089,7 @@ axisfactor = 0.15;
 for i=0:numwindows-1
     tic
     %     h = figure;
-    titlefigure = [path,name,'view',sprintf('%02.0f',a_cote(i+1)),sprintf('%02.0f',a_face(i+1))];
+    titlefigure = [pathselect,name,'view',sprintf('%02.0f',a_cote(i+1)),sprintf('%02.0f',a_face(i+1))];
     angle_cote = a_cote(i+1);
     angle_face = a_face(i+1);
     cp_x = cos(angle_cote*pi/180) * cos(angle_face*pi/180)*dist;
@@ -3343,11 +3343,11 @@ function menu_open_Topomat_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_open_Topomat (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[file,path]= uigetfile('*Topo.mat');
-if path==0
+[file,pathselect]= uigetfile('*Topo.mat');
+if pathselect==0
     set(handles.edit_TOPOmatfile,'string',['']);
 else
-    set(handles.edit_TOPOmatfile,'string',[path,file]);
+    set(handles.edit_TOPOmatfile,'string',[pathselect,file]);
 end
 
 
