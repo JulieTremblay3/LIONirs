@@ -2331,23 +2331,26 @@ end
 if get(handles.radio_fisher,'value')
     disp('Apply fisher transform')
 end
-
+ 
 linkijcluster = [];
+linkROIall = [];
 linkobj = get(handles.axes_viewlink,'children');
 for iobj = 1:numel(linkobj) %RETROUVER JUSTE LES LIEN nommées (i,j)
-
     linkselected = get(linkobj(iobj),'DisplayName');
-  if numel(linkselected)>4
-      if strcmp(linkselected(1:5), '(i,j)')
-            if strcmp(linkselected, '(i,j)')
-                [tok,rem] = strtok(linkselected,'=');
-                [linkij,rem] = strtok(rem,'=');
-                [linkname,rem] = strtok(rem,'=');
-            end
+  if numel(linkselected)>4 
+      if strcmp(linkselected(1:5), '(i,j)')  
+
+           [tok,rem] = strtok(linkselected,'=');
+            [linkij,rem] = strtok(rem,'=');
+            [linkname,rem] = strtok(rem,'=');
+            [linkval,rem] = strtok(rem,' ');
+             linkROI = rem(2:end);
+      
             [itmp,jtmp] =  strtok(linkij,',')
-            inum = str2num(itmp(2:end));
+            inum = str2num(itmp(2:end)); 
             jnum= str2num(jtmp(2:end-1));
             linkijcluster = [linkijcluster; inum, jnum ];
+         %  linkROIall = [linkROIall, {linkROI}]
       end
   end
 end
@@ -2380,7 +2383,7 @@ end
 %     12     1];
 
 
-
+allG1 = [];
 
 [filepath,name,ext] =fileparts(get(handles.edit_subjetxls,'string'));
 copytxt = sprintf('%s\n', ['Cluster']);
@@ -2390,9 +2393,13 @@ for   idsubjet   = 1:numel(DATA)
         eval(['new(',int2str(ilink),')=DATA{',num2str(idsubjet),'}.MAT(',int2str(linkijcluster(ilink,1)) ,',' ,int2str(linkijcluster(ilink,2)),');']);
         end          
             if get(handles.radio_fisher,'value')
-                new =1/2*(log((1+new )./(1-new )));            
+               %disp('Fisher transform is apply to connectivity value')
+                new =1/2*(log((1+new )./(1-new )));           
+            else
+               % disp('Verify if the fisher transform is already done to your data before to perform statistic to normalized the distribution')
             end
         valG1 = [valG1,nanmean(new)];
+      %  allG1 = [allG1;new]
         copytxt = [copytxt,sprintf('%d\n',nanmean(new))];
         catch
           copytxt= [copytxt,sprintf('%s\n','Nan')];
@@ -2400,7 +2407,8 @@ for   idsubjet   = 1:numel(DATA)
         
 end
 
-disp(valG1)
+%writetable(T,'myData.xls')
+disp(valG1);
 disp('Cluster value ready to copy')
 clipboard('copy', copytxt)
 

@@ -2418,6 +2418,101 @@ updatedisplay(handles);
 
 
 
+function remove_entire_ch_all_Callback(hObject, eventdata, handles)
+% hObject    handle to remove_entire_ch (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
+currentsub=1;
+PMI = get(guiHOMER,'UserData');
+cf = PMI{currentsub}.currentFile;
+fileid=get(handles.popupmenu_file,'value');
+x = handles.NIRS.Dt.fir.pp(end).p{fileid};
+%Get the co-channel too
+%ch1 = str2double(get(gco, 'Tag'));
+chall = str2num(get(handles.edit_plotLst,'string'));
+chboth = [];
+for ich=1:numel(chall)
+    ch1 = chall(ich);
+    if ch1 <= handles.NIRS.Cf.H.C.N/2
+        ch2 = ch1 + handles.NIRS.Cf.H.C.N/2;
+    else
+        ch2 = ch1 - handles.NIRS.Cf.H.C.N/2;
+    end
+    chboth = [chboth; ch1,ch2];
+%ici
+end
+idmodule = get(handles.popupmenu_module, 'value');
+epochavg = 0;
+if numel(handles.NIRS.Dt.fir.pp(idmodule).pre)>15
+    if strcmp(handles.NIRS.Dt.fir.pp(idmodule).pre(1:15), 'Epoch averaging');
+        epochavg = 1;
+    end
+end
+
+if ~isempty( strfind(handles.NIRS.Dt.fir.pp(idmodule).pre, 'Epoch averaging'));    
+    handles.NIRS.Cf.H.C.okavg(chboth(:),:) =0;
+else
+    handles.NIRS.Cf.H.C.ok(chboth(:), fileid) = 0;
+end
+NIRS=handles.NIRS;
+save(handles.NIRSpath{handles.subjectnb,1},'NIRS','-mat');
+
+PMI{currentsub}.data(cf).MeasListAct(chboth(:)) = 0;
+set(guiHOMER,'UserData',PMI);
+handles.newlist=1; %update helmet channel
+guidata(hObject,handles);
+updatedisplay(handles);
+
+
+function restore_entire_ch_all_Callback(hObject, eventdata, handles)
+% hObject    handle to remove_entire_ch (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
+currentsub=1;
+PMI = get(guiHOMER,'UserData');
+cf = PMI{currentsub}.currentFile;
+fileid=get(handles.popupmenu_file,'value');
+x = handles.NIRS.Dt.fir.pp(end).p{fileid};
+%Get the co-channel too
+%ch1 = str2double(get(gco, 'Tag'));
+chall = str2num(get(handles.edit_plotLst,'string'));
+chboth = [];
+for ich=1:numel(chall)
+    ch1 = chall(ich);
+    if ch1 <= handles.NIRS.Cf.H.C.N/2
+        ch2 = ch1 + handles.NIRS.Cf.H.C.N/2;
+    else
+        ch2 = ch1 - handles.NIRS.Cf.H.C.N/2;
+    end
+    chboth = [chboth; ch1,ch2];
+%ici
+end
+idmodule = get(handles.popupmenu_module, 'value');
+epochavg = 0;
+if numel(handles.NIRS.Dt.fir.pp(idmodule).pre)>15
+    if strcmp(handles.NIRS.Dt.fir.pp(idmodule).pre(1:15), 'Epoch averaging');
+        epochavg = 1;
+    end
+end
+
+if ~isempty( strfind(handles.NIRS.Dt.fir.pp(idmodule).pre, 'Epoch averaging'));    
+    handles.NIRS.Cf.H.C.okavg(chboth(:),:) =1;
+else
+    handles.NIRS.Cf.H.C.ok(chboth(:), fileid) = 1;
+end
+NIRS=handles.NIRS;
+save(handles.NIRSpath{handles.subjectnb,1},'NIRS','-mat');
+
+PMI{currentsub}.data(cf).MeasListAct(chboth(:)) = 1;
+set(guiHOMER,'UserData',PMI);
+handles.newlist=1; %update helmet channel
+guidata(hObject,handles);
+updatedisplay(handles);
+
 % --------------------------------------------------------------------
 function remove_bad_ch_Callback(hObject, eventdata, handles)
 % hObject    handle to remove_bad_ch (see GCBO)

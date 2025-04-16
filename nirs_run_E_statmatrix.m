@@ -3247,6 +3247,92 @@ elseif isfield(job.c_statmatrix,'b_anovarep_Mat')
             disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'RepAnova.txt'])]);
         end
     end
+elseif isfield(job.c_statmatrix,'b_NWayANOVA_Mat')
+
+     GROUPE =  str2num(job.c_statmatrix.b_NWayANOVA_Mat.e_NWayANOVA_model_GR);          
+     iduse = find(sum(groupeall==GROUPE,2));
+     eval(['formule=',job.c_statmatrix.b_NWayANOVA_Mat.e_NWayANOVA_model,';'])   
+
+
+       formule_to_eval= [];
+       varsname_to_eval= [];
+        for i=1:numel(formule)
+            formule_to_eval = [formule_to_eval, 'T.', formule{i},'(iduse),'] 
+            varsname_to_eval = [ varsname_to_eval , '''',formule{i},''';']
+        end
+        formule_to_eval(end) = []; 
+        varsname_to_eval(end)=[];
+       
+
+    dir1 = job.e_statmatrixPath{1};
+    infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
+
+T = readtable(xlslistfile);
+
+
+%g1 =find(sum(groupeall==1,2)) ;
+%g2 =find(sum(groupeall==2,2)) ;
+ for i= 1:size(MATall,2)
+        disp(num2str(i));
+        for j = 1:size(MATall,3)
+
+        y = squeeze(MATall(:,i,j));
+      
+      % T.PREMA(iduse)
+       eval(['[Panova,tbl2,stats,terms] = anovan(y(iduse),{', formule_to_eval,'},''model'',''full'',''varnames'',{',varsname_to_eval ,'},''display'',''off'');'])
+        %[h,p,ci,stats] = ttest2(y(g1), y(g2));
+        %tval(i,j) = stats.tstat;
+        
+       Panova = 1-Panova;                  
+                    for ipval = 1:numel(Panova)
+                        eval(['panova',num2str(ipval),'(',num2str(i),',',num2str(j),')=  Panova(',num2str(ipval),');']);
+                    end
+        end
+ end
+
+   for ipval = 1:numel(Panova)
+       condition =tbl2{1+ipval,1};
+       k = findstr(condition,':');
+       if ~isempty(k)
+       condition(k)=[' '];
+       end
+       file = [name,labelnode,'1-panova', num2str(ipval),condition, '.mat'];
+        meancorr = eval(['panova', num2str(ipval)]);
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
+        disp(['Save: ', fullfile(dir1,[file])]);
+        new = [{dir1},{file}, {ZONEid},{0} ];
+        infonew = [infonew;new];
+
+        % file = [name,labelnode,'tval.mat'];
+        % meancorr = tval;
+        % save(fullfile(dir1,[file]),'ZoneList','meancorr');
+        % disp(['Save: ', fullfile(dir1,[file])]);
+        % new = [{dir1},{file}, {ZONEid},{0} ];
+        % infonew = [infonew;new];
+        % 
+        % 
+        % file = [name,labelnode,'-tval.mat'];
+        % meancorr = -tval;
+        % save(fullfile(dir1,[file]),'ZoneList','meancorr');
+        % disp(['Save: ', fullfile(dir1,[file])]);
+        % new = [{dir1},{file}, {ZONEid},{0} ];
+        % infonew = [infonew;new];
+
+   end
+
+    if ismac
+        % Code to run on Mac platform problem with xlswrite
+        writetxtfile(fullfile(dir1,[name,labelnode,'NWAYAnova.txt']),infonew);
+        disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'NWAYAnova.txt'])]);
+    else
+        try
+            xlswrite(fullfile(dir1,[name,labelnode,'NWAYAnova.xlsx']),infonew);
+            disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,'NWAYAnova.xlsx'])]);
+        catch
+            writetxtfile(fullfile(dir1,[name,labelnode,'NWAYAnova.txt']),infonew);
+            disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'NWAYAnova.txt'])]);
+        end
+    end
 
 elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
     AllC = [];
@@ -3426,7 +3512,7 @@ elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
         file = [name,labelnode,'KrustalWallis',num2str(nperm), 'Permmaxp.mat'];
         tmp=double(ppermmax);
         meancorr = halfmat2mat(tmp,idhalf, size(MATall,2));
-        save(fullfile(dir1,[file]),'ZoneList','meancorr');
+        save(fullfile(dir1,file),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
         new = [{dir1},{file}, {ZONEid},{0} ];
         infonew = [infonew;new];

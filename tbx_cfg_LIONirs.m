@@ -4464,7 +4464,32 @@ b_anovarep_Mat.help   = {'Apply Anova repeted measure model, fonction fitrm. ',.
     'first observation of group 1 will be paired with first observation of group 2. '};
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%
+e_NWayANOVA_model_GR       =  cfg_entry;
+e_NWayANOVA_model_GR.name    = 'Group to be include in the model';
+e_NWayANOVA_model_GR.tag     = 'e_NWayANOVA_model_GR';       
+e_NWayANOVA_model_GR.strtype = 's';
+e_NWayANOVA_model_GR.num     = [1 inf];
+e_NWayANOVA_model_GR.val     = {'1,2'};
+e_NWayANOVA_model_GR.help    = {'Write the group number in the column 4 of the matrix file identification to be consider in the model'};
 
+
+
+e_NWayANOVA_model        =  cfg_entry;
+e_NWayANOVA_model.name    = 'Model';
+e_NWayANOVA_model.tag     = 'e_NWayANOVA_model';       
+e_NWayANOVA_model.strtype = 's';
+e_NWayANOVA_model.num     = [0 inf];
+e_NWayANOVA_model.val     = {['{''PREMA'',''VERBAL'',''RARE''}']};
+e_NWayANOVA_model.help    = {'Write the variable to include in the Nway anova model, it must be exact the column name. See anovan help in matlab'};
+
+
+
+b_NWayANOVA_Mat        = cfg_branch;
+b_NWayANOVA_Mat.tag    = 'b_NWayANOVA_Mat';
+b_NWayANOVA_Mat.name   = 'NWAY Anova' ;
+b_NWayANOVA_Mat.val    = {e_NWayANOVA_model_GR  e_NWayANOVA_model };
+b_NWayANOVA_Mat.help   = {'Apply NWAY ANOVA'};
 
 b_kruskalwallis_Mat        = cfg_branch;
 b_kruskalwallis_Mat.tag    = 'b_kruskalwallis_Mat';
@@ -4490,7 +4515,7 @@ b_manova1_Mat.help   = {'Apply manova on specific groups.'};
 c_statmatrix         = cfg_choice;
 c_statmatrix.tag     = 'c_statmatrix';
 c_statmatrix.name    = 'Choose the statistical test';
-c_statmatrix.values  = {m_export_matrix, b_TtestOneSamplematrix,b_UnpairedTtest, b_PairedTtest, b_PearsonCorr_Mat, b_GLM_Mat,b_zscore_Mat,b_anova1_Mat,b_anovarep_Mat,b_kruskalwallis_Mat, b_fitMANCOVAN_Mat, b_exportNBSformat,b_PermutationTest, b_LME_Mat, b_fitLM_Mat};%b_ANCOVA_Mat aoctool remove,
+c_statmatrix.values  = {m_export_matrix, b_TtestOneSamplematrix,b_UnpairedTtest, b_PairedTtest, b_PearsonCorr_Mat, b_GLM_Mat,b_zscore_Mat,b_anova1_Mat,b_anovarep_Mat,b_NWayANOVA_Mat, b_kruskalwallis_Mat, b_fitMANCOVAN_Mat, b_exportNBSformat,b_PermutationTest, b_LME_Mat, b_fitLM_Mat};%b_ANCOVA_Mat aoctool remove,
 c_statmatrix.val     = {b_TtestOneSamplematrix}; %Default option
 c_statmatrix.help    = {'Select one of the statistical tests.'};
 
