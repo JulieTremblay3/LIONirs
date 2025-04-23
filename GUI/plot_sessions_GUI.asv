@@ -1007,11 +1007,18 @@ if 1 %numel(PMI{currentsub}.plotLst)==1
         d2ok = intensnorm(:,ich);
         rall(ich) = corr(xref,d2ok);
     end
+    rall(find(MeasListAct==0)) = 0; %set to zero rejected channel 
     plotLst = find(abs(rall)>corrcoef);
     PMI{currentsub}.plotLst = plotLst;
     set(handles.edit_plotLst,'string',mat2str(plotLst))
     
 end
+ PMI{currentsub}.plotLst 
+disp(['Select channels in the visualisation with a correlation higher than ',num2str(corrcoef), ' of the current selected channel averaged', ...
+    'this option is useful to apply decomposition on an easily identified artifact and find channels with a similar event. ',...
+    'Separately it also creates a zone grouping similar signature based on their correlation.' ...
+    'Rejected channels are ignored for this correlation'] )
+
 %Be sure both wavelength selected
 listgood = PMI{currentsub}.plotLst ; % find(double(PMI{currentsub}.data(cf).MeasListAct==1).*double(MeasListActplotLst==1));
 nc830 = numel(PMI{currentsub}.data(cf).MeasListAct)/2;
@@ -2432,7 +2439,7 @@ x = handles.NIRS.Dt.fir.pp(end).p{fileid};
 %Get the co-channel too
 %ch1 = str2double(get(gco, 'Tag'));
 chall = str2num(get(handles.edit_plotLst,'string'));
-chboth = []
+chboth = [];
 for ich=1:numel(chall)
     ch1 = chall(ich);
     if ch1 <= handles.NIRS.Cf.H.C.N/2
@@ -2480,7 +2487,7 @@ x = handles.NIRS.Dt.fir.pp(end).p{fileid};
 %Get the co-channel too
 %ch1 = str2double(get(gco, 'Tag'));
 chall = str2num(get(handles.edit_plotLst,'string'));
-chboth = []
+chboth = [];
 for ich=1:numel(chall)
     ch1 = chall(ich);
     if ch1 <= handles.NIRS.Cf.H.C.N/2
@@ -2500,14 +2507,14 @@ if numel(handles.NIRS.Dt.fir.pp(idmodule).pre)>15
 end
 
 if ~isempty( strfind(handles.NIRS.Dt.fir.pp(idmodule).pre, 'Epoch averaging'));    
-    handles.NIRS.Cf.H.C.okavg(chboth(:),:) =0;
+    handles.NIRS.Cf.H.C.okavg(chboth(:),:) =1;
 else
-    handles.NIRS.Cf.H.C.ok(chboth(:), fileid) = 0;
+    handles.NIRS.Cf.H.C.ok(chboth(:), fileid) = 1;
 end
 NIRS=handles.NIRS;
 save(handles.NIRSpath{handles.subjectnb,1},'NIRS','-mat');
 
-PMI{currentsub}.data(cf).MeasListAct(chboth(:)) = 0;
+PMI{currentsub}.data(cf).MeasListAct(chboth(:)) = 1;
 set(guiHOMER,'UserData',PMI);
 handles.newlist=1; %update helmet channel
 guidata(hObject,handles);
@@ -3843,7 +3850,22 @@ end
 
 
 nch = size(PMI{currentsub}.data(cf).HRF.AvgC,2);
-plotLst= find( reshape(sum(PMI{currentsub}.data(cf).HRF.noise(indstart:indstop,:))~=0,nch,1) & reshape(PMI{currentsub}.data(cf).MeasListAct,nch,1))
+%find noise in good channel
+if get(handles.Context_Select_HbO,'checked')
+    plotLst= find( reshape(sum(PMI{currentsub}.data(cf).HRF.noise(indstart:indstop,:))~=0,nch,1) & reshape(PMI{currentsub}.data(cf).MeasListAct,nch,1)&PMI{currentsub}.data(cf).MeasList(:,4)==1);
+
+
+elseif get(handles.Context_Select_HbR,'checked')
+    plotLst= find( reshape(sum(PMI{currentsub}.data(cf).HRF.noise(indstart:indstop,:))~=0,nch,1) & reshape(PMI{currentsub}.data(cf).MeasListAct,nch,1)&PMI{currentsub}.data(cf).MeasList(:,4)==2);
+
+else
+    plotLst= find( reshape(sum(PMI{currentsub}.data(cf).HRF.noise(indstart:indstop,:))~=0,nch,1) & reshape(PMI{currentsub}.data(cf).MeasListAct,nch,1));
+end
+
+ plotLst= find( reshape(sum(PMI{currentsub}.data(cf).HRF.noise(indstart:indstop,:))~=0,nch,1) & reshape(PMI{currentsub}.data(cf).MeasListAct,nch,1));
+
+PMI{currentsub}.data(cf).MeasList(:,4)==1
+,nch,1)
 if ~isempty(plotLst)
     PMI{currentsub}.plotLst = plotLst;
     set(handles.edit_plotLst,'string',mat2str(plotLst))
@@ -3938,7 +3960,12 @@ end
 idmodule = get(handles.popupmenu_module, 'value');
 posxstart = str2num(get(handles.edit_time_start,'string'));
 posxstop = str2num(get(handles.edit_time_stop,'string'));
+try
 indstart= find(posxstart>PMI{currentsub}.data(cf).HRF.tHRF);
+catch
+    disp('Please select an interval')
+    return
+end
 indstop= find(posxstop>PMI{currentsub}.data(cf).HRF.tHRF);
 PMI{currentsub}.data(cf).HRF.noise(indstart(end):indstop(end),[ch1 ch2])= 1;
 set(guiHOMER,'UserData',PMI)
@@ -10361,9 +10388,17 @@ cf = 1;
 
 nch = size(PMI{currentsub}.data(cf).HRF.AvgC,2);
 PMI{currentsub}.data(cf).MeasList(:,4)==1; % TODO: Verify if this is the intended operation as it looks like an assignment.
-MeasListAct=PMI{currentsub}.data(cf).MeasListAct;
-MeasListAct(:)=1;
-plotLst= find( PMI{currentsub}.data(cf).MeasListAct & PMI{currentsub}.data(cf).MeasList(:,4)==1);
+if get(handles.HbO_Context_Select_Good,'Checked')
+    MeasListAct=PMI{currentsub}.data(cf).MeasListAct;
+    disp('Select HbO channel, without rejected channel')
+elseif get(handles.HbO_Context_Select_Bad,'Checked')
+    MeasListAct=~PMI{currentsub}.data(cf).MeasListAct;
+    disp('Select HbO channel, only rejected channel')
+else
+    MeasListAct(:)=1;
+    disp('Select HbO channel, including  rejected channel')
+end
+plotLst= find(MeasListAct& PMI{currentsub}.data(cf).MeasList(:,4)==1);
 if ~isempty(plotLst)
     PMI{currentsub}.plotLst = plotLst;
     set(handles.edit_plotLst,'string',mat2str(plotLst))
@@ -10374,6 +10409,7 @@ handles.newlist=1;
 set(guiHOMER,'UserData',PMI)
 guidata(hObject, handles);
 updatedisplay(handles)
+
 
 
 % --- Executes on button press in btn_HBR.
@@ -10389,9 +10425,21 @@ cf = 1;
 
 nch = size(PMI{currentsub}.data(cf).HRF.AvgC,2);
 PMI{currentsub}.data(cf).MeasList(:,4)==1; % TODO: See if this is intented. Looks like bebug code.
-MeasListAct=PMI{currentsub}.data(cf).MeasListAct;
-MeasListAct(:)=1;
-plotLst= find( PMI{currentsub}.data(cf).MeasListAct & PMI{currentsub}.data(cf).MeasList(:,4)==2);
+
+
+if get(handles.HbO_Context_Select_Good,'Checked')
+    MeasListAct=PMI{currentsub}.data(cf).MeasListAct;
+    disp('Select HbR channel, without rejected channel')
+elseif get(handles.HbO_Context_Select_Bad,'Checked')
+    MeasListAct=~PMI{currentsub}.data(cf).MeasListAct;
+    disp('Select HbR channel, only rejected channel')
+else
+    MeasListAct(:)=1;
+    disp('Select HbR channel, including rejected channel')
+end
+
+
+plotLst= find( MeasListAct & PMI{currentsub}.data(cf).MeasList(:,4)==2);
 if ~isempty(plotLst)
     PMI{currentsub}.plotLst = plotLst;
     set(handles.edit_plotLst,'string',mat2str(plotLst))
@@ -10402,6 +10450,44 @@ handles.newlist=1;
 set(guiHOMER,'UserData',PMI)
 guidata(hObject, handles);
 updatedisplay(handles)
+
+function HbO_Context_Select_Good_Callback(hObject, eventdata, handles)
+    if get(handles.HbO_Context_Select_Good,'Checked')
+        set(handles.HbO_Context_Select_Good,'Checked',0)  
+       
+    else
+        set(handles.HbO_Context_Select_Good,'Checked',1)
+        set(handles.HbO_Context_Select_Bad,'Checked',0)
+    end
+
+function HbO_Context_Select_Bad_Callback(hObject, eventdata, handles)
+    if get(handles.HbO_Context_Select_Bad,'Checked')
+        set(handles.HbO_Context_Select_Bad,'Checked',0)      
+    else
+        set(handles.HbO_Context_Select_Bad,'Checked',1)
+         set(handles.HbO_Context_Select_Good,'Checked',0)
+    end    
+
+
+function Context_Select_HbO_Callback(hObject, eventdata, handles)
+    if get(handles.Context_Select_HbO,'Checked')
+        set(handles.Context_Select_HbO,'Checked',0)      
+    else
+        set(handles.Context_Select_HbO,'Checked',1)
+         set(handles.Context_Select_HbR,'Checked',0)
+    end    
+
+
+
+function Context_Select_HbR_Callback(hObject, eventdata, handles)
+    if get(handles.Context_Select_HbR,'Checked')
+        set(handles.Context_Select_HbR,'Checked',0)      
+    else
+        set(handles.Context_Select_HbR,'Checked',1)
+         set(handles.Context_Select_HbO,'Checked',0)
+    end    
+
+
 
 
 % --------------------------------------------------------------------
@@ -11010,17 +11096,16 @@ function context_addnewtrigger_Callback(hObject, eventdata, handles)
 % hObject    handle to context_addnewtrigger (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-position = get(gca,  'CurrentPoint')
+position = get(gca,  'CurrentPoint');
 idfile = get(handles.popupmenu_file,'value');
 aux5 = handles.NIRS.Dt.fir.aux5{idfile};
-newsample = round(handles.NIRS.Cf.dev.fs*position(1))
-handles.NIRS.Dt.fir.aux5{idfile} = [aux5;[1, newsample]]
-defaulttrig = '1';
-defaulttrig = EnterANewTrigger(defaulttrig);
+newsample = round(handles.NIRS.Cf.dev.fs*position(1));
+handles.NIRS.Dt.fir.aux5{idfile} = [aux5;[1, newsample]];
+defaulttrig = EnterANewTrigger();
 trigval = str2num(defaulttrig);
 
-newsample = round(handles.NIRS.Cf.dev.fs*position(1))
-handles.NIRS.Dt.fir.aux5{idfile} = [aux5;[trigval, newsample]]
+newsample = round(handles.NIRS.Cf.dev.fs*position(1));
+handles.NIRS.Dt.fir.aux5{idfile} = [aux5;[trigval, newsample]];
 
 
 existingtrig= get(handles.popupmenu8, 'String');
@@ -11043,7 +11128,7 @@ if isfield(handles.NIRS.Dt.fir,'aux5')
     %for i=1:numel(unique_trig)
     trig_list = [];
     for i=1:numel(unique_trig)
-        id = find(unique_trig(i)==viewtrig(:,1))
+        id = find(unique_trig(i)==viewtrig(:,1));
         if viewtrig(id,2)==0
             trig_list = [trig_list;  {[num2str(unique_trig(i)),' off']}];
         else            

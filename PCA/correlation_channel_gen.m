@@ -62,7 +62,7 @@ elseif usewv == 3
         ch = chokHbO(i);
         chHbO =  chokHbO(i);
         chHbR =  chokHbR(i);
-        d1ok = (abs(d1(:,chHbO)) + abs(d1(:,chHbR)))/2;
+        %d1ok = (abs(d1(:,chHbO)) + abs(d1(:,chHbR)))/2;
         for j = i:numel(chok)
             ch2 = chokHbO(j);
             chHbO =  chokHbO(j);
@@ -76,8 +76,24 @@ elseif usewv == 3
     end
    
     chok = find(measlistact(end/2+1:end));
+
+
+elseif usewv ==4
+      chok = find(measlistact(1:end/2));
+    for i = 1:numel(chok)
+        ch = chok(i);
+        d1ok = d1(:,ch);
+        for j = i:numel(chok)
+            ch2 = chok(j);
+            d2ok = d1(:,ch2);
+             matcorr(ch,ch2) = abs(corr(d1ok,d2ok)); 
+             matcorr(ch2,ch) = matcorr(ch,ch2);
+        end
+    end
+
+
 end
- %figure;imagesc(matcorr)
+%figure;imagesc(matcorr)
 %1
 %load('C:\data\default\01_default_pre\mat_default20trial.mat')
 %matcorr = matall
@@ -109,12 +125,12 @@ colorlist = [1 0 0;
     1,0,1
     85/255,0,1
 colorcube(numel(together830))];
-if  usewv == 1 | usewv == 2 
+if  usewv == 1 | usewv == 2 | usewv == 4 
     [nb,ind]= sort(togethernb,'descend');
     together830 = together830(ind);
     numel(together830);
 end 
-if  usewv == 3 
+if  usewv == 3  
     [nb,ind]= sort(meanmaxamp,'descend');
     together830 = together830(ind);
     numel(together830);
@@ -141,13 +157,13 @@ for nb_zone = 1:numel(together830);
         idzone = idzone + 1;
         zone.plot{idzone} = [MeasList(together830{nb_zone},1),MeasList(together830{nb_zone},2)];
         zone.plotLst{idzone} = [together830{nb_zone}'];
-        zone.label{idzone} = [num2str(nb_zone),'_830'];
+        zone.label{idzone} = [num2str(nb_zone),'_wl1'];
         zone.color= [zone.color; colorlist(nb_zone,:)] ;  
         %690
         idzone = idzone + 1;
         zone.plot{idzone} = [MeasList(together830{nb_zone},1),MeasList(together830{nb_zone},2)];
         zone.plotLst{idzone} = [together830{nb_zone}'+nbch];
-        zone.label{idzone} = [num2str(nb_zone),'_690'];
+        zone.label{idzone} = [num2str(nb_zone),'_wl2'];
         zone.color= [zone.color; colorlist(nb_zone,:)] ; 
         end
     end

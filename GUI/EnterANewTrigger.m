@@ -54,9 +54,11 @@ function EnterANewTrigger_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for EnterANewTrigger
 handles.output = hObject;
-if ~isempty(varargin)
-    set(handles.edit1,'string',varargin{1})
-end
+% if ~isempty(varargin)
+%     set(handles.edit1,'string','1')
+% else
+   set(handles.edit1,'string','1')
+%end
 guidata(hObject, handles);
 uiwait(handles.figure1);
 % Update handles structure
