@@ -7,7 +7,7 @@ for imodule = numel(NIRS.Dt.fir.pp):-1:1
     if imodule == 2
         1;
     end
-    for ifile = 1:numel(NIRS.Dt.fir.pp(imodule).p)
+    for ifile = 1:numel(NIRS.Dt.fir.pp(imodule).p) 
     %Find the new root dir 
     try
         fileloc_previous = NIRS.Dt.fir.pp(imodule).p{ifile};
@@ -15,10 +15,17 @@ for imodule = numel(NIRS.Dt.fir.pp):-1:1
         fileloc_previous = NIRS.Dt.fir.pp(imodule).p
     end
         [dir1,file1,ext1]=fileparts(fileloc_previous);
+        %linux problem \
+        id = strfind(fileloc_previous,'\');
+        fileloc_previous(id)=filesep;
+        id = strfind(fileloc_previous,'/');
+         fileloc_previous(id)=filesep;
+        [dir1,file1,ext1]=fileparts(fileloc_previous);
+
     %Descendre les répertoire pour trouver la partie qui doit être modifier
     %
     [toknew,remnew]=strtok(fliplr(NIRSmatnewdir),{'\','/'});
-    [tok1,rem1]=strtok(fliplr(dir1),{'\','/'});
+    [tok1,rem1]=strtok(fliplr(dir1),{'\','/'}); 
     ok = 1;
     while ok
      if  strcmp(toknew, tok1)
@@ -34,7 +41,7 @@ for imodule = numel(NIRS.Dt.fir.pp):-1:1
      end
          
     end 
-     NIRS.Dt.fir.pp(imodule).p{ifile} = fullfile( dirrootnew , [file1,ext1]); 
+     NIRS.Dt.fir.pp(imodule).p{ifile} = fullfile( NIRSmatnewdir , [file1,ext1]); 
     end                
 end 
 disp(['Folder adjustment location: ', dirrootnew]); 

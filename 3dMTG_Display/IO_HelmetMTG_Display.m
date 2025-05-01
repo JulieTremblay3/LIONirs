@@ -160,7 +160,7 @@ cameratoolbar(handles.IO_HelmetMTG,'Show','SetMode','nomode');
 resetview(handles);
 
 p = mfilename('fullpath');
-[tok,rem]= strtok(fliplr(p),'\');
+[tok,rem]= strtok(fliplr(p),filesep);
 pathselect = fliplr(rem);
 strBmp =[pathselect,'AngleRotationCote.jpg'];
 matpix = imread( strBmp,'jpg' );

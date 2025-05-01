@@ -1942,6 +1942,9 @@ if isempty(indstop)
 end
 indstop = indstop(end);
 PMI{currentsub}.data(cf).HRF.noise(indstart:indstop,plotLst)= state;
+
+ handles = btn_savenoise_Callback(0,0,handles);
+
 set(guiHOMER,'UserData',PMI);
 updatedisplay(handles);
 
@@ -3851,9 +3854,9 @@ end
 
 nch = size(PMI{currentsub}.data(cf).HRF.AvgC,2);
 %find noise in good channel
-if get(handles.Context_Select_HbO,'checked')
+if strcmp(get(handles.Context_Select_HbO,'checked'),'on')
     plotLst= find( reshape(sum(PMI{currentsub}.data(cf).HRF.noise(indstart:indstop,:))~=0,nch,1) & reshape(PMI{currentsub}.data(cf).MeasListAct,nch,1)&PMI{currentsub}.data(cf).MeasList(:,4)==1);
-elseif get(handles.Context_Select_HbR,'checked')
+elseif strcmp(get(handles.Context_Select_HbR,'checked'),'on')
     plotLst= find( reshape(sum(PMI{currentsub}.data(cf).HRF.noise(indstart:indstop,:))~=0,nch,1) & reshape(PMI{currentsub}.data(cf).MeasListAct,nch,1)&PMI{currentsub}.data(cf).MeasList(:,4)==2);
 else
     plotLst= find( reshape(sum(PMI{currentsub}.data(cf).HRF.noise(indstart:indstop,:))~=0,nch,1) & reshape(PMI{currentsub}.data(cf).MeasListAct,nch,1));
@@ -4851,6 +4854,7 @@ if strcmp(eventdata.Key,'y')
     indstop= find(posxstop>PMI{currentsub}.data(cf).HRF.tHRF);
     PMI{currentsub}.data(cf).HRF.noise(indstart(end):indstop(end),plotLst)= 1;
     set(guiHOMER,'UserData',PMI);
+    handles = btn_savenoise_Callback(0,0,handles);   
     updatedisplay(handles);
 end
 if strcmp(eventdata.Key,'u')
@@ -4883,9 +4887,13 @@ if strcmp(eventdata.Key,'u')
     
     PMI{currentsub}.data(cf).HRF.noise(indstart(end):indstop(end),plotLst)= 0;
     set(guiHOMER,'UserData',PMI);
+    handles = btn_savenoise_Callback(0,0,handles);   
     updatedisplay(handles);
 end
 if strcmp(eventdata.Key,'c')
+       button = questdlg(['Are you sure you want to clear all artifact ' ...
+           '(in yellow) for the whole recording ?'],'Confirm','Yes','No','No');
+        if strcmp(button,'Yes')
     guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
     currentsub=1;
     PMI = get(guiHOMER,'UserData');
@@ -4916,7 +4924,9 @@ if strcmp(eventdata.Key,'c')
     end
     PMI{currentsub}.data(cf).HRF.noise(:,:)= 0;
     set(guiHOMER,'UserData',PMI);
+    yhandles = btn_savenoise_Callback(0,0,handles);  
     updatedisplay(handles);
+        end
 end
 
 
@@ -4997,6 +5007,7 @@ if strcmp(eventdata.Key,'downarrow')
             valuel=1;
         end
     end
+  
     set(handles.listbox_normlist,'value',valuel);
     listbox_normlist_Callback(hObject, eventdata, handles);
 end
@@ -10394,10 +10405,11 @@ cf = 1;
 
 nch = size(PMI{currentsub}.data(cf).HRF.AvgC,2);
 PMI{currentsub}.data(cf).MeasList(:,4)==1; % TODO: Verify if this is the intended operation as it looks like an assignment.
-if get(handles.HbO_Context_Select_Good,'Checked')
+
+if strcmp(get(handles.HbO_Context_Select_Good,'Checked'),'on')
     MeasListAct=PMI{currentsub}.data(cf).MeasListAct;
     disp('Select HbO channel, without rejected channel')
-elseif get(handles.HbO_Context_Select_Bad,'Checked')
+elseif strcmp(get(handles.HbO_Context_Select_Bad,'Checked'),'on')
     MeasListAct=~PMI{currentsub}.data(cf).MeasListAct;
     disp('Select HbO channel, only rejected channel')
 else
@@ -10433,10 +10445,10 @@ nch = size(PMI{currentsub}.data(cf).HRF.AvgC,2);
 PMI{currentsub}.data(cf).MeasList(:,4)==1; % TODO: See if this is intented. Looks like bebug code.
 
 
-if get(handles.HbO_Context_Select_Good,'Checked')
+if strcmp(get(handles.HbO_Context_Select_Good,'Checked'),'on')
     MeasListAct=PMI{currentsub}.data(cf).MeasListAct;
     disp('Select HbR channel, without rejected channel')
-elseif get(handles.HbO_Context_Select_Bad,'Checked')
+elseif strcmp(get(handles.HbO_Context_Select_Bad,'Checked'),'on')
     MeasListAct=~PMI{currentsub}.data(cf).MeasListAct;
     disp('Select HbR channel, only rejected channel')
 else
@@ -10458,7 +10470,7 @@ guidata(hObject, handles);
 updatedisplay(handles)
 
 function HbO_Context_Select_Good_Callback(hObject, eventdata, handles)
-    if get(handles.HbO_Context_Select_Good,'Checked')
+    if strcmp(get(handles.HbO_Context_Select_Good,'Checked'),'on')
         set(handles.HbO_Context_Select_Good,'Checked',0)  
        
     else
@@ -10467,7 +10479,7 @@ function HbO_Context_Select_Good_Callback(hObject, eventdata, handles)
     end
 
 function HbO_Context_Select_Bad_Callback(hObject, eventdata, handles)
-    if get(handles.HbO_Context_Select_Bad,'Checked')
+    if strcmp(get(handles.HbO_Context_Select_Bad,'Checked'),'on')
         set(handles.HbO_Context_Select_Bad,'Checked',0)      
     else
         set(handles.HbO_Context_Select_Bad,'Checked',1)
@@ -10476,7 +10488,7 @@ function HbO_Context_Select_Bad_Callback(hObject, eventdata, handles)
 
 
 function Context_Select_HbO_Callback(hObject, eventdata, handles)
-    if get(handles.Context_Select_HbO,'Checked')
+    if strcmp(get(handles.Context_Select_HbO,'Checked'),'on')
         set(handles.Context_Select_HbO,'Checked',0)      
     else
         set(handles.Context_Select_HbO,'Checked',1)
@@ -10486,7 +10498,7 @@ function Context_Select_HbO_Callback(hObject, eventdata, handles)
 
 
 function Context_Select_HbR_Callback(hObject, eventdata, handles)
-    if get(handles.Context_Select_HbR,'Checked')
+    if strcmp(get(handles.Context_Select_HbR,'Checked'),'on')
         set(handles.Context_Select_HbR,'Checked',0)      
     else
         set(handles.Context_Select_HbR,'Checked',1)

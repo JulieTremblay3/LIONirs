@@ -91,18 +91,39 @@ idlabelall = [];
 %POUR IDENTIFICATION DE TOUTE LES ZONES
 for izone = 1:numel( DATA{id}.zone.plotLst)
     chzone =  DATA{id}.zone.plotLst{izone};
-    for ichzone = 1:numel(chzone)
-        ich = chzone(ichzone);
-        strDet = SDDet2strboxy_ISS(ML(ich,2));
-        strSrs = SDPairs2strboxy_ISS(ML(ich,1));
-        idch = strmatch([strDet, ' ',strSrs ],List,'exact');    
-        idlist = [idlist, idch];
-        if ichzone==1
-            idzone =[idzone, izone];
-        else
-            idzone =[idzone, 0];
-        end
+    switch DATA{1}.System 
+        case 'ISS Imagent'
+            for ichzone = 1:numel(chzone)
+                ich = chzone(ichzone);
+                strDet = SDDet2strboxy_ISS(ML(ich,2));
+                strSrs = SDPairs2strboxy_ISS(ML(ich,1));
+                idch = strmatch([strDet, ' ',strSrs ],List,'exact');    
+                if ichzone==1
+                    idzone =[idzone, izone];
+                else
+                    idzone =[idzone, 0];
+                end
+            end
+
+    case 'NIRx'
+          for ichzone = 1:numel(chzone)
+                ich = chzone(ichzone);
+                strDet = SDDet2strboxy(ML(ich,2));
+                strSrs = SDPairs2strboxy(ML(ich,1));
+                idch = strmatch([strDet, ' ',strSrs ],List,'exact');
+              if ichzone==1
+                    idzone =[idzone, izone];
+                else
+                    idzone =[idzone, 0];
+                end
+            end
+    case 'EEG'
+            strDet = 'EEG';
+            strSrs = 'EEG';
+            idch = squeeze(chzone);  
     end
+
+    idlist = [idlist; idch];
     idlabelall = [idlabelall, {deblank([ DATA{id}.zone.label{izone}])}];
  
 end
