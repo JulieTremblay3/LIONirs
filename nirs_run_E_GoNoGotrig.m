@@ -41,7 +41,7 @@ disp('Bloc S10 tache NOGO')
 disp(['Voir le nombre de bonne réponse NOGO event S 1 trig sans réponse ou' ...
     'd''erreur  4 réponse à un no go erreur du participant'])
 
-iGo = [];
+iGo = []; 
 iNoGo= [];
 iend = [];
 for im=1:size(EEG.marker,1)% S 11
@@ -122,6 +122,8 @@ disp(['Create as report the file', fullfile(job.output_path,[filename,'.txt']),.
       'first column percentage GoOk, second column percentage NoGoOK'])
 
 
+
+ 
 
 for ibloc = 1:numel(pourcentageGoOK)
     fprintf(fid, '%d\t%d\r ', pourcentageGoOK(ibloc), pourcentageNoGoOK(ibloc) );

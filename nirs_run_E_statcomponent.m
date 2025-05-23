@@ -141,14 +141,22 @@ elseif isfield(job.c_statcomponent,'b_TtestUnpaired')
     AllG1 = [];
     for i = 1:numel(job.c_statcomponent.b_TtestUnpaired.f_componentG1)
         load(job.c_statcomponent.b_TtestUnpaired.f_componentG1{i},'-mat');        
-        AllG1 = [AllG1,A];
+         if size(A,1)>=size(A,2)
+             AllG1 = [AllG1,A];
+        elseif size(A,1)<=size(A,2)
+             AllG1 = [AllG1,A'];
+        end
         info.zonelistG1{i} = zonelist;
     end 
     
      AllG2 = [];
     for i = 1:numel(job.c_statcomponent.b_TtestUnpaired.f_componentG2)
         load(job.c_statcomponent.b_TtestUnpaired.f_componentG2{i},'-mat');      
-        AllG2 = [AllG2,A];
+        if size(A,1)>=size(A,2)
+             AllG2 = [AllG2,A];
+        elseif size(A,1)<=size(A,2)
+             AllG2 = [AllG2,A'];
+        end
         info.zonelistG2{i}=zonelist;
     end
         try
@@ -206,10 +214,14 @@ elseif isfield(job.c_statcomponent,'b_TtestUnpaired')
      A = mval.*double(pval<alphatr);
      save(fullfile(dir1,['TWOSAMPLE_mean_', num2str(alphatr),'unc.mat']),'A','zonelist');    
      disp(['Save: ',fullfile(dir1,['TWOSAMPLE_mean_', num2str(alphatr),'unc.mat'])]); 
+     try
      [FDR,Q] = mafdr(pval);         
      A = mval.*double(Q<alphatr);
      save(fullfile(dir1,['TWOSAMPLE_mean_',num2str(alphatr),'fdr.mat']),'A','zonelist');
      disp(['Save: ',fullfile(dir1,['TWOSAMPLE_mean_',num2str(alphatr),'fdr.mat'])]);
+     catch
+         
+     end
        if  isfield(job.c_statcomponent.b_TtestUnpaired.c_statpermutation,'b_permutation') 
            halfMAT = [AllG1,AllG2]
           Randgroupe = [ones(size( AllG1,2),1);ones(size( AllG2,2),1)*2] ;          
@@ -490,8 +502,9 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
      
      %Case anovan each ch save each average and pval add fdr correction! 
      %load the observation if 
+     try
     [pathstr, name, ext]=fileparts(raw{2,3});
-
+    
     AllCOM = []; 
     for i=2:size(raw,1)
         tmp         = load(fullfile(raw{i,1},raw{i,2}),'-mat'); % Load data  
@@ -523,7 +536,24 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
              %disp('Warning be carefull to verify that the montage and channel are the same among all the experiment')
             zonelist = [];
         end 
+    end
+     catch
+     disp('No channel list available data will only be add together in the default order')
+       AllCOM = []; 
+        for i=2:size(raw,1)
+            try
+            tmp         = load(fullfile(raw{i,1},raw{i,2}),'-mat'); % Load data  
+            AllCOM = [AllCOM,tmp.A];       
+            zonelist = []; 
+            catch
+                tmp.A(:) = nan;
+                AllCOM = [AllCOM,tmp.A];       
+                zonelist = [];  
+                disp(['Missing ', fullfile(raw{i,1},raw{i,2})])
+            end
+        end     
      end
+
      
 
      

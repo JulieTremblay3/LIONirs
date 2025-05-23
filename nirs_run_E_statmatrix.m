@@ -112,7 +112,7 @@ for isubject=2:size(info,1)
             load(fullfile(info{isubject,1}, info{isubject,3}),'-mat');  %load zone default current directory
         end
 
-        names = fieldnames(zone);
+        names = fieldnames(zone); 
         for iname = 1:numel(names)
             eval(['DATA{id}.zone.',names{iname},' =zone.',names{iname},';']);
         end

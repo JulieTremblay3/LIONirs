@@ -1167,9 +1167,10 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                         %figure;plot(PMI{1}.tmpGLM.spar)
                         if sum(isnan(y))
                             b = zeros(size(X,2),1);
-                            beta(:,idch) = 0;
-                            bstd(:,idch) = 0;
-                            R2(:,idch) = 0;
+                            b = nan(size(X,2),1);
+                            beta(:,idch) = nan; % 0;
+                            bstd(:,idch) = nan; % 0;
+                            R2(:,idch) = nan; %0
                         else
                             [b,bint,r,rint,stats]=  regress(y,X);
                             beta(:,idch) = b;
@@ -1363,7 +1364,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                     end
                 end
             catch
-                disp('WARNING topo could not be exported')
+                disp('WARNING topo could not be exported verify channel list')
             end
         end
         %disp(['Error unable to GLM on ' , NIRSmat])

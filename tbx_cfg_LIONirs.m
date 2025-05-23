@@ -1149,7 +1149,7 @@ m_Concatenate_Exclude.help      = {'Set excluded channels to NaN.',...
     'Exclude: rejected channel will be set to NaN. ',...
     'Keep: no special process concerning the rejected channels will be applied.'};
 
-m_Concatenate_Normalized        = cfg_menu;
+m_Concatenate_Normalized        = cfg_menu; 
 m_Concatenate_Normalized.tag    = 'm_Concatenate_Normalized';
 m_Concatenate_Normalized.name   = 'Normalization';
 m_Concatenate_Normalized.labels = {'No normalization','Min-Max Normalization','z-score Normalization'};
@@ -2622,8 +2622,8 @@ m_replaceglmlist.help   = {'Avoid to run twice the extract GLM on the data, just
 m_glmlist_autoexport_HbO       = cfg_menu;
 m_glmlist_autoexport_HbO.tag    = 'm_glmlist_autoexport_HbO';
 m_glmlist_autoexport_HbO.name   = 'Export chromophore';
-m_glmlist_autoexport_HbO.labels = {'HbO' ,'HbR'};
-m_glmlist_autoexport_HbO.values = {1,2};
+m_glmlist_autoexport_HbO.labels = {'HbO' ,'HbR','HbO&HbR'};
+m_glmlist_autoexport_HbO.values = {1,2,3};
 m_glmlist_autoexport_HbO.val    = {1}; 
 m_glmlist_autoexport_HbO.help   = {''};
 
