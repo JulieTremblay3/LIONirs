@@ -1014,6 +1014,10 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
         else
              labelisbad = 'ok';
         end
+        pourcentagenoisebychHbO = sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),1:end/2))./numel(tmpGLM.indt(1):tmpGLM.indt(end))*100;
+        pourcentagenoisebychHbR = sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),end/2+1:end))./numel(tmpGLM.indt(1):tmpGLM.indt(end))*100;
+
+        pourcentagenoise = pourcentagenoise*100;
         if job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_nan_chrejected==1
             %(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:))./numel(d1(tmpGLM.indt(1):tmpGLM.indt(end),1)))
             ch_remove_for_int =(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:))./numel(d1(tmpGLM.indt(1):tmpGLM.indt(end),1)))< (job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_labelbad_threshold/100);
@@ -1332,7 +1336,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                                 A = nan(size(listHBOch,1),1);
                                 idok = find(listbad(listHBOch)); 
                                 A(idok,1) = topo(listHBOch(idok));
-                                save(fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile' );
+                                save(fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile', 'pourcentagenoise', 'pourcentagenoisebychHbO' );
                                 disp(['Create export: load(''', fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat'')'])]);
                           end
                     elseif job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.m_glmlist_autoexport_HbO==2
@@ -1340,7 +1344,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                             A = nan(size(listHBRch,1),1);
                             idok = find(listbad(listHBRch));
                             A(idok,1) = topo(listHBRch(idok));
-                            save(fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile' );
+                            save(fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile', 'pourcentagenoise','pourcentagenoisebychHbR' );
                             disp(['Create export: load(''', fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat'')'])])
                           end
                     elseif job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.m_glmlist_autoexport_HbO==3
@@ -1349,7 +1353,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                                 A = nan(size(listHBOch,1),1);
                                 idok = find(listbad(listHBOch)); 
                                 A(idok,1) = topo(listHBOch(idok));
-                                save(fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile' );
+                                save(fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile','pourcentagenoise', 'pourcentagenoisebychHbO' );
                                 disp(['Create export: load(''', fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat'')'])]);
                           end
                         
@@ -1358,7 +1362,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                             A = nan(size(listHBRch,1),1);
                             idok = find(listbad(listHBRch));
                             A(idok,1) = topo(listHBRch(idok));
-                            save(fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile' );
+                            save(fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile','pourcentagenoise', 'pourcentagenoisebychHbR' );
                             disp(['Create export: load(''', fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat'')'])])
                           end
                     end

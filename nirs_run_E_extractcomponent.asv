@@ -138,7 +138,7 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
                             
                             [coeff,score,latent,tsquared,explained] = pca(c);
                             
-                            
+                             
                             iscumlowerthantop = cumsum(explained)<job.c_extractcomponent.b_extractcomponent_PCA.i_extractnoiseupto_nbPCA;
                             ishigherthanmin = explained>job.c_extractcomponent.b_extractcomponent_PCA.i_extractnoise_nbPCA;
                             atleastone = zeros(size(explained));
@@ -1014,6 +1014,8 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
         else
              labelisbad = 'ok';
         end
+        pourcentagenoisebych = sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:))./numel(tmpGLM.indt(1):tmpGLM.indt(end))*100;
+        pourcentagenoise = pourcentagenoise*100;
         if job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_nan_chrejected==1
             %(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:))./numel(d1(tmpGLM.indt(1):tmpGLM.indt(end),1)))
             ch_remove_for_int =(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:))./numel(d1(tmpGLM.indt(1):tmpGLM.indt(end),1)))< (job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_labelbad_threshold/100);
@@ -1167,9 +1169,10 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                         %figure;plot(PMI{1}.tmpGLM.spar)
                         if sum(isnan(y))
                             b = zeros(size(X,2),1);
-                            beta(:,idch) = 0;
-                            bstd(:,idch) = 0;
-                            R2(:,idch) = 0;
+                            b = nan(size(X,2),1);
+                            beta(:,idch) = nan; % 0;
+                            bstd(:,idch) = nan; % 0;
+                            R2(:,idch) = nan; %0
                         else
                             [b,bint,r,rint,stats]=  regress(y,X);
                             beta(:,idch) = b;
@@ -1331,7 +1334,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                                 A = nan(size(listHBOch,1),1);
                                 idok = find(listbad(listHBOch)); 
                                 A(idok,1) = topo(listHBOch(idok));
-                                save(fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile' );
+                                save(fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile', 'pourcentagenoise' );
                                 disp(['Create export: load(''', fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat'')'])]);
                           end
                     elseif job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.m_glmlist_autoexport_HbO==2
@@ -1339,7 +1342,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                             A = nan(size(listHBRch,1),1);
                             idok = find(listbad(listHBRch));
                             A(idok,1) = topo(listHBRch(idok));
-                            save(fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile' );
+                            save(fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile', 'pourcentagenoise' );
                             disp(['Create export: load(''', fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat'')'])])
                           end
                     elseif job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.m_glmlist_autoexport_HbO==3
@@ -1348,7 +1351,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                                 A = nan(size(listHBOch,1),1);
                                 idok = find(listbad(listHBOch)); 
                                 A(idok,1) = topo(listHBOch(idok));
-                                save(fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile' );
+                                save(fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile','pourcentagenoise' );
                                 disp(['Create export: load(''', fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat'')'])]);
                           end
                         
@@ -1357,13 +1360,13 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                             A = nan(size(listHBRch,1),1);
                             idok = find(listbad(listHBRch));
                             A(idok,1) = topo(listHBRch(idok));
-                            save(fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile' );
+                            save(fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile','pourcentagenoise' );
                             disp(['Create export: load(''', fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat'')'])])
                           end
                     end
                 end
             catch
-                disp('WARNING topo could not be exported')
+                disp('WARNING topo could not be exported verify channel list')
             end
         end
         %disp(['Error unable to GLM on ' , NIRSmat])
