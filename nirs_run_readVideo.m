@@ -25,10 +25,14 @@ for ifile=1:numel(job.Video_files)
         disp(['Additionnal offset with reference: ', num2str(job.c_videooffset.b_videooffsetwithtrig_yes.i_videooffset(ifile)),' secondes']);
         trig = NIRS.Dt.fir.aux5{1};
         trigid= job.c_videooffset.b_videooffsetwithtrig_yes.i_videooffsetwithtrig   
-        id = find(trig(:,1)==trigid);     
-
+        id = find(trig(:,1)==trigid);   
+        if isempty(id)
+            disp('Warning: Could not synchronize video file')
+            NIRS.Dt.Video.pp(1).offset{ifile} = 0;
+        else
         triglag_sec = trig(id(1),2)*  1/NIRS.Cf.dev.fs;
         NIRS.Dt.Video.pp(1).offset{ifile} =   offset_sec-triglag_sec;
+        end
 
     else        
         NIRS.Dt.Video.pp(1).offset{ifile} = 0;

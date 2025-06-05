@@ -209,6 +209,7 @@ for Idx_File=1:numel(inputrawscout)
        evt = evtLSL(:,2:3);
        disp(['LSL trigger file ', fileevt, ' is read with ' num2str(size(evt,1)), ' event'])
     catch
+        evt = [];
        disp(['LSL trigger file ', fileevt, 'could not be read'])
     end
        
