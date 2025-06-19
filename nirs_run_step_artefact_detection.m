@@ -74,6 +74,12 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
         ind = [];
         dur = [];
         [ind_dur_ch] = read_vmrk_find(vmrk_path,mrk_type_arr);
+
+
+
+        
+
+
         if ~isempty(ind_dur_ch)
             maxpoint  = ind_dur_ch(:,1)+ind_dur_ch(:,2);
             badind = find(maxpoint>size(noise,1));

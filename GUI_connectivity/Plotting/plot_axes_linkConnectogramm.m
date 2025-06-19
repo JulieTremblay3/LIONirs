@@ -211,6 +211,7 @@ elseif get(handles.popup_ConnectogramColor,'value')==2 %jet colormap mask/color 
         colorMatrix(i,j) = sum(cf<MAT(i,j));
         end
     end
+     5
      colorMatrix = colorMatrix(idlist,idlist);
         % idlabelall(idzone(find(idzone)))
      %use definition xls color to find all not define ROI combinaision

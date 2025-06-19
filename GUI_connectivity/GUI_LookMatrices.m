@@ -400,7 +400,12 @@ for igroupe = 0:max(groupeall)
        DATA{idnew}.zone.plot = plot;
        DATA{idnew}.zone.plotLst = plotLst;
        DATA{idnew}.zone.label = idlabelall;
+       try
        DATA{idnew}.zone.color = DATA{idsubject(1)}.zone.color; 
+       
+       catch
+           DATA{idnew}.zone.color = [0 0 0 ] 
+       end
        DATA{idnew}.zone.ml = MLfake;
        DATA{idnew}.zone.chMAT = plotLst;
        list_subject{idnew} =DATA{idnew}.name;

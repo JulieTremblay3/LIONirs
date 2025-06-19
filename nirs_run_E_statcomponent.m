@@ -540,16 +540,22 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
      catch
      disp('No channel list available data will only be add together in the default order')
        AllCOM = []; 
+       percentagenoise = [];
         for i=2:size(raw,1)
             try
             tmp         = load(fullfile(raw{i,1},raw{i,2}),'-mat'); % Load data  
-            AllCOM = [AllCOM,tmp.A];       
+            AllCOM = [AllCOM,tmp.A]; 
+            if isfield( tmp,'pourcentagenoise')
+                percentagenoise = [percentagenoise ,tmp.pourcentagenoise];
+            end
+           
             zonelist = []; 
             catch
-                tmp.A(:) = nan;
+                tmp.A(:) = nan; 
                 AllCOM = [AllCOM,tmp.A];       
                 zonelist = [];  
                 disp(['Missing ', fullfile(raw{i,1},raw{i,2})])
+                percentagenoise = [percentagenoise, nan];
             end
         end     
      end
@@ -559,7 +565,7 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
      
      A = AllCOM';
      info = raw;
-     save(fullfile(dir1,'databychannel.mat'), 'A', 'zonelist','info')
+     save(fullfile(dir1,'databychannel.mat'), 'A', 'zonelist','info','percentagenoise')
      disp(['Save ', fullfile(dir1,'databychannel.mat')])
    elseif  isfield(job.c_statcomponent.c_StatcomponentExport,'f_componentexportzone')
       

@@ -248,6 +248,7 @@ for Idx_File=1:numel(inputrawscout)
     if isfield(job.c_PruningNIRSport,'distmax_nirsport')         
         idbad = find(NIRS.Cf.H.C.gp > str2num(job.c_PruningNIRSport.distmax_nirsport) );   
         DATA.d(:,idbad)= [];
+        %POUR CE06_004 erreur d'export mettre les données 51 dans 86 
         channelmask = ones(16,16);
         channelmask(idbad(1:end/2))=0;
         disp(['Channel mask = ' , num2str(channelmask(:)')])

@@ -2849,6 +2849,9 @@ end
 
 
 
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%MODULE 9 Artifact substract component decomposition
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -3262,6 +3265,28 @@ function vout = nirs_cfg_vout_E_statcomponent(job)
     vout.src_output = substruct('.','NIRSmat'); 
     vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
 end
+
+
+
+
+% Executable Branch
+E_MarkCorrectionAsNoise      = cfg_exbranch;
+E_MarkCorrectionAsNoise.name = 'Mark Correction As Noise';
+E_MarkCorrectionAsNoise.tag  = 'E_MarkCorrectionAsNoise';
+E_MarkCorrectionAsNoise.val  = {NIRSmat, DelPreviousData};
+E_MarkCorrectionAsNoise.prog = @nirs_run_E_MarkCorrectionAsNoise;
+E_MarkCorrectionAsNoise.vout = @nirs_cfg_vout_E_MarkCorrectionAsNoise;
+E_MarkCorrectionAsNoise.help = {'Identify intervall were a correction were apply and mark as noise (yellow) to show were the modification were don '};
+%make NIRS.mat available as a dependency
+function vout = nirs_cfg_vout_E_MarkCorrectionAsNoise(job)
+vout = cfg_dep;                    
+vout.sname      = 'NIRS.mat';       
+vout.src_output = substruct('.','NIRSmat'); 
+vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
+end
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Generic data EEG file
@@ -4591,7 +4616,7 @@ M_GUI.help   = {'Graphical user interface for data display.'};
 M_dataComponent        = cfg_choice;
 M_dataComponent.name   = 'Decomposition';
 M_dataComponent.tag    = 'M_dataComponent';
-M_dataComponent.values = { E_extractcomponent E_substractcomponent E_exportcomponent_list E_exportcomponent_zone E_statcomponent}; 
+M_dataComponent.values = { E_extractcomponent E_substractcomponent E_exportcomponent_list E_exportcomponent_zone E_statcomponent E_MarkCorrectionAsNoise}; 
 M_dataComponent.help   = {'Apply operation on selected component identify in display GUI data decomposition'};
 
 %Module Connectivity
