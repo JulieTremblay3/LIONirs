@@ -59,7 +59,7 @@ load(job.NIRSmat{1})     % Matrice NIRS
             
              %need to have and aux file
             aux = zeros(size(d,1),1);
-    end
+    
 
          nirs= struct('d',d,'SD',SD,'t',t','s',s,'aux',aux);
         % Save SNIRF: Convert .nirs format data to SnirfClass object, save it to .snirf file (HDF5)
@@ -71,8 +71,9 @@ load(job.NIRSmat{1})     % Matrice NIRS
 
         %add nan data
         
-        snirf_saved = SnirfClass(nirs);
+        snirf_saved = SnirfClass(nirs); 
         tic; snirf_saved.Save(outfile); toc 
+    end
     end
 
 out.NIRSmat = job.NIRSmat;
