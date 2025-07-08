@@ -327,6 +327,19 @@ catch
     disp('Multiple comparaison cluster could not find channel position, use all cluster')
 end
 
+if(job.m_OutlierControl)==1 %no control
+     disp(['No outlier control'])
+
+elseif(job.m_OutlierControl)==2 %winsor 595
+    for i=1:size(MATall,2)
+        for j=1:size(MATall,2)
+        MATall_corr(:,i,j) = winsor(MATall(:,i,j),[5 95]);
+        end
+    end
+    MATall = MATall_corr;
+    disp(['Winsor 5 95 % adjust: ', num2str(sum(MATall_corr(:)~=MATall(:))./numel(MATall)*100),' % of the value as outlier'])
+end% end
+
 [filepath,name,ext] = fileparts(xlslistfile);
 if  isfield(job.c_statmatrix,'m_export_matrix')
     if job.c_statmatrix.m_export_matrix == 1

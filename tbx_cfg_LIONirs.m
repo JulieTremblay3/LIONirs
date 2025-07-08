@@ -4537,6 +4537,8 @@ b_manova1_Mat.name   = 'manova (manova1)' ;
 b_manova1_Mat.val    = {e_Anova1GR, b_manova1_Covariable};
 b_manova1_Mat.help   = {'Apply manova on specific groups.'};
 
+
+
 c_statmatrix         = cfg_choice;
 c_statmatrix.tag     = 'c_statmatrix';
 c_statmatrix.name    = 'Choose the statistical test';
@@ -4553,10 +4555,20 @@ e_statmatrixPath.ufilter  = '.*';    %
 e_statmatrixPath.num      = [1 1];     % Number of inputs required 
 e_statmatrixPath.help     = {'Result of the statistics will be saved in this folder.'};
 
+
+m_OutlierControl        = cfg_menu;
+m_OutlierControl.tag    = 'm_OutlierControl';
+m_OutlierControl.name   = 'Outlier Control';
+m_OutlierControl.labels = {'No', 'Winsor 595' };
+m_OutlierControl.values = {1,2};
+m_OutlierControl.val    = {1}; 
+m_OutlierControl.help   = {'Control Outlier before statistics'};
+
+
 E_statmatrix    = cfg_exbranch;
 E_statmatrix.name = 'Stats Matrices';
 E_statmatrix.tag  = 'E_statmatrix';
-E_statmatrix.val  = {f_matrix,m_fishertransform,e_statcomponent_alpha,m_nodeunit,c_statmatrix, e_statmatrixPath};
+E_statmatrix.val  = {f_matrix,m_fishertransform,e_statcomponent_alpha,m_nodeunit,c_statmatrix, e_statmatrixPath, m_OutlierControl};
 E_statmatrix.prog = @nirs_run_E_statmatrix;
 E_statmatrix.vout = @nirs_cfg_vout_E_statmatrix;
 E_statmatrix.help = {'Apply basic statistics on exported connectivity matrices.'};
