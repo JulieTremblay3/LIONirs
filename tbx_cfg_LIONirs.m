@@ -3265,7 +3265,61 @@ function vout = nirs_cfg_vout_E_statcomponent(job)
     vout.src_output = substruct('.','NIRSmat'); 
     vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
 end
+ 
 
+
+e_NPLSEEGELEfiles         = cfg_files;  
+e_NPLSEEGELEfiles.name    = 'Electrode EEG'; % The displayed name
+e_NPLSEEGELEfiles.tag     = 'e_NPLSEEGELEfiles';          
+e_NPLSEEGELEfiles.num     = [0 Inf];     % Number of inputs required 
+e_NPLSEEGELEfiles.filter  = 'ele';
+e_NPLSEEGELEfiles.ufilter = '.*';  
+e_NPLSEEGELEfiles.val{1}  = {''};
+e_NPLSEEGELEfiles.help    = {'Select a subset of electrode for the EEG decomposition. If empty all electrode will be used. It use .ele format a list of electrode and coordinate in a text file as follow: E2 45 23 43 /n  E3 45 23 43' }; % help text displayed
+
+e_NPLSpathout        = cfg_entry; %path
+e_NPLSpathout.name    = 'Path NIRS-EEG decompositon results';
+e_NPLSpathout.tag     = 'e_NPLSpathout';       
+e_NPLSpathout.strtype = 's';
+e_NPLSpathout.num     = [1 Inf];     
+e_NPLSpathout.val     = {'E:\data\Data_NIRS\BebeResting\connectivityMAT\'}; 
+e_NPLSpathout.help    = {['Path to save NIRS-EEG decomposition results.']}; 
+
+m_NPLSmode          = cfg_menu;
+m_NPLSmode.tag      = 'm_NPLSmode';
+m_NPLSmode.name     = 'Option';  
+m_NPLSmode.labels   = {'PARAFAC and HRF correlation',''}; 
+m_NPLSmode.values   = {0,1};
+m_NPLSmode.val      = {0};
+m_NPLSmode.help     = {'Option 1 : PARAFAC and HRF correlation will decompose and find the decomposition with the highest correlation with the HRF'};
+
+e_NPLSxlsfiles         = cfg_files;  
+e_NPLSxlsfiles.name    = 'NPLS setting'; % The displayed name
+e_NPLSxlsfiles.tag     = 'e_NPLSxlsfiles';          
+e_NPLSxlsfiles.num     = [0 Inf];     % Number of inputs required 
+e_NPLSxlsfiles.val{1}  = {''};
+e_NPLSxlsfiles.help    = {'Open excel file with NIRS.mat, tstart and tstop to decompose using NPLS'}; % help text displayed
+
+
+
+
+
+% Executable Branch Module 3   
+E_NPLS    = cfg_exbranch;
+E_NPLS.name = 'NPLS';            
+E_NPLS.tag  = 'E_NPLS'; 
+E_NPLS.val  = {e_NPLSxlsfiles, m_NPLSmode,e_NPLSEEGELEfiles, e_NPLSpathout};   
+E_NPLS.prog = @nirs_run_E_NPLS;  
+E_NPLS.vout = @nirs_cfg_vout_NPLS;
+E_NPLS.help = {'Apply NPLS fNIRS-EEG decomposition.'};
+
+%make NIRS.mat available as a dependency
+function vout = nirs_cfg_vout_NPLS(job)
+vout = cfg_dep;                    
+vout.sname      = 'NIRS.mat';       
+vout.src_output = substruct('.','NIRSmat'); 
+vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
+end
 
 
 
@@ -4653,7 +4707,7 @@ M_datawritenirs.help   = {'These modules convert nir file in .nirs, last module 
 M_others        =  cfg_choice; 
 M_others.name   = 'Additional function';
 M_others.tag    = 'M_others';
-M_others.values = {E_markCardiac_TargetPCA, E_correctCardiac_TargetPCA, E_correctCardiac_exportBV,E_createonset_correlationsignal, E_eegnirs_MarkMuscular, E_GoNoGotrig}; %,E_createonset_correlationsignal
+M_others.values = {E_markCardiac_TargetPCA, E_correctCardiac_TargetPCA, E_correctCardiac_exportBV,E_createonset_correlationsignal, E_eegnirs_MarkMuscular, E_GoNoGotrig, E_NPLS}; %,E_createonset_correlationsignal
 M_others.help   = {'These modules convert nir file in .nirs, last module of data export, support the export of field such as data (d),coordinate (SD), trigger (s), time (t),do not support noise artifact marking or aux export'};
 
 

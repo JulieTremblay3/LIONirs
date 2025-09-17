@@ -158,8 +158,8 @@ for Idx_File=1:numel(inputrawscout)
         end 
     elseif  isfield(job.c_PruningNIRSport,'channelmask_nirsport') %custom mask 
         try
-        filewav1 = fullfile([dir1,filesep, fil1],['.wl1']);%fil1
-        filewav2 = fullfile([dir1,filesep, fil1],['.wl2']);%fil1,
+        filewav1 = fullfile([dir1,filesep],['.wl1']);%fil1
+        filewav2 = fullfile([dir1,filesep],['.wl2']);%fil1,
         WV1 = load(filewav1);
         WV2 = load(filewav2);
         disp(['Load file ', filewav1, ' with ', num2str(size(WV1,2)),' channel'])   
