@@ -103,7 +103,7 @@ spar = spar(:,listgood,:);
 % PMI{currentsub}.tmpPARAFAC.spar = spartmp;                    %Data initial
 % PMI{currentsub}.tmpPARAFAC.listgood = listgood ; 
 % PMI{currentsub}.tmpPARAFAC.indt = [tstart(end),tstop(end)];%Time indice
-try
+try 
 zone = PMI{currentsub}.zone;
 catch
    disp('Please enter a zone it''s needed to ') 
@@ -209,9 +209,9 @@ end
 
      1
      dNIRS = spar;
-     disp(['Run parafac fNIRS on ', num2str(t(end)-t(1))  's CH=', num2str(size(dNIRS,2)), ' WV=2']);
+     disp(['Run parafac fNIRS on ', num2str(t(end)-t(1))  's ', 'datatime:',  num2str(t(1)), 'to', num2str(t(end)), ' CH=', num2str(size(dNIRS,2)), ' WV=2']);
      dEEG = Sc;
-     disp(['Run parafac EEG on ', num2str(tEEGdsc(end)), 's CH=', num2str(size(dNIRS,2)), ' WV=2']);
+     disp(['Run parafac EEG on ', num2str(tEEGdsc(end)), 's Wavelet:', num2str(freqVec(1)), 'to', num2str(freqVec(end)), ' Hz Channel: ', num2str(size(Sc,3))]);
 
     %PARAFAC EEG WITHOUT CONVOLUTION 
 
@@ -223,7 +223,7 @@ end
         idstop = id+ size(dNIRS,1)-1;
         [Factors,it,err,corcondia] = parafac(Sc,Ncomp,opt,const);       
         [AEEG,BEEG,CEEG]=fac2let(Factors);
-        FactorComp{Ncomp}.EEG =  Factors; 
+        FactorComp{Ncomp}.EEG =  Factors;  
         HRF_TimeComponent = conv2(H.X(:,1,1)/10,AEEG);       
         %figure;plot(t,HRF_TimeComponent(id:idstop,:))
         [rEEGHRF_MODEL(Ncomp,1:Ncomp),pvalEEGHRF_MODEL(Ncomp,1:Ncomp)]  =  corr(HRF_TimeComponent(id:idstop,:),dModel );

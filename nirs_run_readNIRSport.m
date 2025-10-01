@@ -166,7 +166,7 @@ for Idx_File=1:numel(inputrawscout)
         catch
             disp('To prune using a custom mask you first need to use the nirs converter on the .roh or .zip file to export .wl1 and .wl2 with all recorded channel (as example 16det x 16src) = 256 ch ')
         end 
-        Channelmask = reshape(str2num(job.c_PruningNIRSport.channelmask_nirsport),info.nbDet, info.nbSrs)
+        Channelmask = reshape(str2num(job.c_PruningNIRSport.channelmask_nirsport),info.nbDet, info.nbSrs)';
         %use the channel mask in for bad channel in the mlfile 
           id = 0;
           mlSPORT = [];
@@ -260,7 +260,7 @@ for Idx_File=1:numel(inputrawscout)
    
     
      idall = ones(size(DATA.ml,1),1); 
-     idall(idbad) = [];     
+     idall(idbad) = 0;     
      idgood = find(idall);
      for i = 1:numel(idgood)
         NIRS.Cf.H.C.n{i,1}  = temp{idgood(i) ,1};
@@ -387,7 +387,7 @@ end
         NIRS.Dt.fir.sizebloc{Idx_File}); %SamplingInterval in microseconds
     
     %dummy segment, add real marker read
-    SD.Markers{1,Idx_File}.Type='New Segment';
+    SD.Markers{1,Idx_File}.Type='New Segment'; 
     SD.Markers{1,Idx_File}.Description='';
     SD.Markers{1,Idx_File}.Position=1;
     SD.Markers{1,Idx_File}.Size=1;

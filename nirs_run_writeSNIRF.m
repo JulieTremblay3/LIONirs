@@ -12,10 +12,11 @@ function out = nirs_run_writeSNIRF(job)
 % from readNIRxscout has the DATA.d variable transposed (and the size
 % function has the 1 argument switched to 2).
 
-load(job.NIRSmat{1})     % Matrice NIRS
+%load(job.NIRSmat{1})     % Matrice NIRS
 %Big loop over all subjects
 
-    for Idx=1:size(job.NIRSmat,1)      
+    for Idx=1:numel(job.NIRSmat)   
+        load(job.NIRSmat{Idx})
         nbch = numel(NIRS.Cf.H.C.n);
         dall = [];
         Sessionid = numel(NIRS.Dt.fir.pp); %prendre la dernière session
