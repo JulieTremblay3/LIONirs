@@ -3823,7 +3823,7 @@ i_Freq_crossspectrum         = cfg_entry;
 i_Freq_crossspectrum.name    = 'Frequency range to obtain Cxy(f)'; 
 i_Freq_crossspectrum.tag     = 'i_Freq_crossspectrum';      
 i_Freq_crossspectrum.strtype = 'r';       
-i_Freq_crossspectrum.num     = [1 inf];     
+i_Freq_crossspectrum.num     = [0 inf];     
 i_Freq_crossspectrum.val     = {[0.03,0.08]};
 i_Freq_crossspectrum.help    = {'Frequency to extract the matrix output.'}; 
 
@@ -3999,17 +3999,27 @@ e_startwaveletcluster         = cfg_entry; %path
 e_startwaveletcluster.name    = 'Start Time (s)';
 e_startwaveletcluster.tag     = 'e_startwaveletcluster';       
 e_startwaveletcluster.strtype = 's';
-e_startwaveletcluster.num     = [1 Inf];     
+e_startwaveletcluster.num     = [0 Inf];     
 e_startwaveletcluster.val     = {'100'}; 
-e_startwaveletcluster.help    = {['Start time for wavelet decomposition']}; 
+e_startwaveletcluster.help    = {['Start time for wavelet decomposition, let it empty to use the whole dataset']}; 
 
 e_stopwaveletcluster         = cfg_entry; %path
 e_stopwaveletcluster.name    = 'Stop Time (s)';
 e_stopwaveletcluster.tag     = 'e_stopwaveletcluster';       
 e_stopwaveletcluster.strtype = 's';
-e_stopwaveletcluster.num     = [1 Inf];     
+e_stopwaveletcluster.num     = [0 Inf];     
 e_stopwaveletcluster.val     = {'300'}; 
-e_stopwaveletcluster.help    = {['Stop time for wavelet decomposition']}; 
+e_stopwaveletcluster.help    = {['Stop time for wavelet decomposition, let it empty to use the whole dataset']}; 
+
+
+e_kcluster         = cfg_entry; %path
+e_kcluster.name    = 'kcluster';
+e_kcluster.tag     = 'e_kcluster';       
+e_kcluster.strtype = 's';
+e_kcluster.num     = [1 Inf];     
+e_kcluster.val     = {'10'}; 
+e_kcluster.help    = {['Select the number of cluster']}; 
+
 
 e_widthwaveletcluster         = cfg_entry; %path
 e_widthwaveletcluster.name    = 'Width morlet coefficient';
@@ -4019,10 +4029,24 @@ e_widthwaveletcluster.num     = [1 Inf];
 e_widthwaveletcluster.val     = {'3'}; 
 e_widthwaveletcluster.help    = {['Width parameter morlet coefficient']}; 
 
+
+e_waveletCOHmethod           = cfg_menu;
+e_waveletCOHmethod.tag       = 'e_waveletCOHmethod';
+e_waveletCOHmethod.name      = 'Method';
+e_waveletCOHmethod.labels    = {'wCOHERENCEavg','wCOHERENCEkmean' };
+e_waveletCOHmethod.values    = {1,2};
+e_waveletCOHmethod.val       = {1};
+e_waveletCOHmethod.help      = {['wCOHERENCE use the matlab fonction wcoherence' ...
+    '[1] Grinsted, A, J., C. Moore, and S. Jevrejeva. "Application of the cross wavelet transform and wavelet coherence to geophysical time series.. Nonlinear Processes in Geophysics. Vol. 11, Issue 5/6, 2004, pp. 561–566.',...
+    '[2] Maraun, D., J. Kurths, and M. Holschneider. "Nonstationary Gaussian processes in wavelet domain: Synthesis, estimation and significance testing." Physical Review E 75. 2007, pp. 016707-1–016707-14.',...
+    '[3] Torrence, C., and P. Webster. "Interdecadal changes in the ESNO-Monsoon System." Journal of Climate. Vol. 12, 1999, pp. 2679–2690.']};
+
+
+
 b_waveletcluster        = cfg_branch;
 b_waveletcluster.tag    = 'b_waveletcluster';
 b_waveletcluster.name   = 'Wavelet Coherence NOT TESTED';
-b_waveletcluster.val    = {e_startwaveletcluster,e_stopwaveletcluster,i_Freq_crossspectrum, e_widthwaveletcluster };
+b_waveletcluster.val    = {e_waveletCOHmethod, e_startwaveletcluster,e_stopwaveletcluster,i_Freq_crossspectrum,e_kcluster}; %  e_widthwaveletcluster 
 b_waveletcluster.help   = {''};
 
 

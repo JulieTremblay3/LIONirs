@@ -7,9 +7,13 @@ handles = varargin{1};
 if numel(varargin)>1; newfigure = varargin{2};else; newfigure = 0;end 
 if newfigure ==0
     axes(handles.axes_AJD);cla;hold on
+      colormap(parula)
 else
     figure;hold on
     colormap(jet)
+
+     colormap(parula)
+
 end
 axis ij
 DATA = get(handles.GUI_LookMat,'UserData');
@@ -110,7 +114,7 @@ if get(handles.popupmenu_view,'value')==1%view zone
     %AFFICHAGE THRESHOLD 
     if ~isempty(idlist)
         tr = str2num(get(handles.edit_threshold,'string'));
-        if isempty(tr)
+        if isempty(tr) 
             tr = 0;
         end
         idtr = find(abs(MAT)<tr);

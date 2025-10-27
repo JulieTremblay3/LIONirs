@@ -347,7 +347,7 @@ for Idx_File=1:numel(job.inputSNIRF)
     %FIRST STEP OF PROCESSING PP1
     NIRS.Dt.fir.pp(1).p{Idx_File,1} = fileOut_nir; 
     disp(['Save: ', fileOut_nir])
-    NIRS.Dt.fir.pp(1).pre = 'READ_RAW_NIRS';
+    NIRS.Dt.fir.pp(1).pre = 'READ SNIRF';
     NIRS.Dt.fir.pp(1).job = job;   
 end
 

@@ -231,11 +231,18 @@ listHBO = PMI{1}.plotLst;
                             wcoherence(x ,y,fs,'numscales',16)
                             
                             title(['COH ', num2str(listHBO(i)),' ' ,num2str(listHBO(j)), ' TIME:', num2str((PMI{1}.data(1).HRF.tHRF(tstart)))])
-                              [WCOH,WCS,F,COI,WTX,WTY]  = wcoherence(St(i,:)',St(j,:)',fs,'numscales',16);
-                              figure;imagesc(t(idwindow),F,WCOH);axis xy  
-% theta = angle(WCS);
-% plotPhaseVectors(AX,theta,tax,pax,tspace,pspace);
-% 
+                            xtick = get(gca,'xtick')
+                            xticklabelsec = [];
+                            for itick=1:numel(xtick)
+                                xticklabelsec =  [xticklabelsec, {num2str(xtick(itick)*60)}];
+                            end
+                         
+                              set(gca,'xticklabels',xticklabelsec)
+                              xlabel('time  min')
+
+                                 [WCOH,WCS,F,COI,WTX,WTY]  = wcoherence(St(i,:)',St(j,:)',fs,'numscales',16);
+                              % figure;imagesc(t(idwindow),F,WCOH);axis xy  
+
 % arrowpatch = [-1 0 0 1 0 0 -1; 0.1 0.1 0.5 0 -0.5 -0.1 -0.1]';
 % for ii=numel(tgrid):-1:1
 %     % Multiply each arrow by the rotation matrix for the given theta

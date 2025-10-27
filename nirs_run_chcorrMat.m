@@ -1053,17 +1053,225 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
 %             
             
         elseif isfield(job.I_chcorrlist_type, 'b_waveletcluster')
+            fs = NIRS.Cf.dev.fs;
+             nmax = size(d1,2);
+            t = 1/fs:1/fs:(1/fs*nmax);
+            tstart = str2num(job.I_chcorrlist_type.b_waveletcluster.e_startwaveletcluster);
+            tstop = str2num(job.I_chcorrlist_type.b_waveletcluster.e_stopwaveletcluster);
+            freqinterest = job.I_chcorrlist_type.b_waveletcluster.i_Freq_crossspectrum;
+            if isempty(tstart)|isempty(tstop)
+                idwindow = 1:numel(t);
+            else
+                idwindow = find(t> tstart & t<tstop);
+            end
+          
+            St = d1(listHBO,idwindow); %prendre segment pour wavelet
+            plotone = 1;
+            if job.I_chcorrlist_type.b_waveletcluster.e_waveletCOHmethod==1
+             for i = 1:numel(listHBO) 
+                 disp(i);
+                    for j = 1:numel(listHBO)
+                        if ~(i==j) 
+                                                  
+                              [WCOH,WCS,F,COI,WTX,WTY]  = wcoherence(St(i,:)',St(j,:)',fs,'numscales',16);
+                              
+
+                              NANCOIx =  repmat(F,1,size(WCOH,2));
+                              NANCOIy =  repmat(COI,size(WCOH,1),1);
+                              NANCOI = NANCOIx<NANCOIy;
+                              WCOH(NANCOI)=nan;
+                                if isempty(freqinterest)
+                                    idfreq = 1:numel(F);
+                                else
+                                    idfreq  = find(F>freqinterest(1) & F<freqinterest(2));
+                                end
+                              matcorrHbOabs(i,j,1) = nanmean(nanmean(WCOH(idfreq,:)));
+
+                               theta = angle(WCS)*180/pi;
+                                theta(NANCOI) = nan;
+                                matcorrHbOph(i,j,1) = nanmean(nanmean(theta (idfreq,:)));
+                               if plotone == 1
+                                    figure;subplot(1,2,1);hold on;imagesc(t(idwindow),F,WCOH);axis xy 
+                                    plot([0,t(end)],[F(idfreq(1)),F(idfreq(1))],'k')
+                                    plot([0,t(end)],[F(idfreq(end)),F(idfreq(end))],'k')
+                                    plotone = 0;
+                                    title('Magnitude square coherence (wcoherence.m)')
+                                    subplot(1,2,2);hold on
+                                   
+                                    imagesc(t(idwindow),F,theta);axis xy
+                                    title('Phase (wcoherence.m)')
+                                end                       
+                        
+                      end
+
+                    end
+                end
+            elseif  job.I_chcorrlist_type.b_waveletcluster.e_waveletCOHmethod==2
+%kmean not average 
+
+            fs = NIRS.Cf.dev.fs;
+             nmax = size(d1,2);
+            t = 1/fs:1/fs:(1/fs*nmax);
+            tstart = str2num(job.I_chcorrlist_type.b_waveletcluster.e_startwaveletcluster);
+            tstop = str2num(job.I_chcorrlist_type.b_waveletcluster.e_stopwaveletcluster);
+            freqinterest = job.I_chcorrlist_type.b_waveletcluster.i_Freq_crossspectrum;
+            if isempty(tstart)|isempty(tstop)
+                idwindow = 1:numel(t);
+            else
+                idwindow = find(t> tstart & t<tstop);
+            end
+          
+            St = d1(listHBO,idwindow); %prendre segment pour wavelet
+            plotone = 1;
+            try
+                %load( 'E:\NIRSport_Analysed\Synchro\FE_enfant\Matrices\kMeanWAV\matcorrHBOabs.mat')
+                %load( 'E:\NIRSport_Analysed\Synchro\FE_enfant\Matrices\kMeanWAV\matcorrHBOph.mat')
+                pathout = job.I_chcorrlistoutpath;
+                fillouput = [job.I_ConnectivityMATName]
+                load(fullfile(pathout, ['wav', fillouput,'.mat']),'matcorrHbOabs','matcorrHbOph','-mat')
+            catch
+
+            matcorrHbOabs = nan(numel(idwindow),numel(listHBO),numel(listHBO));
+            matcorrHbOph = nan(numel(idwindow),numel(listHBO),numel(listHBO));  
+            tic
+             for i = 1:numel(listHBO) 
+                 disp(i);
+                  j = 1;
+                    while j < i
+                        if ~(i==j) 
+                                                  
+                              [WCOH,WCS,F,COI,WTX,WTY]  = wcoherence(St(i,:)',St(j,:)',fs,'numscales',16);
+                            %  figure;subplot(1,2,1);hold on;imagesc(WCOH);
+                              NANCOIx =  repmat(F,1,size(WCOH,2));
+                              NANCOIy =  repmat(COI,size(WCOH,1),1);
+                              NANCOI = NANCOIx<NANCOIy;
+                              WCOH(NANCOI)=nan;
+                                if isempty(freqinterest)
+                                    idfreq = 1:numel(F);
+                                else
+                                    idfreq  = find(F>freqinterest(1) & F<freqinterest(2));
+                                end
+                              matcorrHbOabs(:,i,j) =nanmean(WCOH(idfreq,:),1);
+                              
+                               theta = angle(WCS)*180/pi;
+                                theta(NANCOI) = nan;
+                                matcorrHbOph(:,i,j) =nanmean(theta(idfreq,:),1);
+
+                               if plotone == 1
+                                  % figure;
+                                   wcoherence(St(i,:)',St(j,:)',fs,'numscales',16)
+                                   hold on
+                                   % figure;subplot(1,2,1);hold on;imagesc(t(idwindow),F,WCOH);axis xy 
+%                                     plot([0,t(end)],[F(idfreq(1)),F(idfreq(1))],'k')
+%                                     plot([0,t(end)],[F(idfreq(end)),F(idfreq(end))],'k')
+                                    plotone = 0;
+                                    title(['Magnitude square coherence (wcoherence.m)', num2str(F(idfreq(1))),'to', num2str(F(idfreq(end)))]);
+                                   
+                               end
+                          
+                        end    
+                          j = j + 1;
+                    end 
+             end
+
+            pathout = job.I_chcorrlistoutpath;
+            save(fullfile(pathout, ['wav', fillouput,'.mat']),'matcorrHbOabs','matcorrHbOph','job','-mat')
+             toc
+            end
+
+ id = 1;
+for ielex=1:numel(listHBO)  
+    ielex;
+    ieley = 1;
+    while ieley < ielex 
+        matid(ielex,ieley)=id;
+        ieley = ieley + 1;
+        id = id + 1;
+    end
+end
+idhalf = find(matid);
+matid(idhalf);
+trig = NIRS.Dt.fir.aux5{1};% aux5;    
+halfMAT = matcorrHbOabs(:,idhalf);
+halfph = matcorrHbOph(:,idhalf);
+X = [halfMAT];
+%[idx,C,sumd,D] =kmeans(X,4);
+X = [halfMAT, abs(halfph)/180 ];
+
+if 0
+        for icluster= 4:10
+            icluster
+            [C{icluster}.IDX,C{icluster}.mean,sumd,D] = kmeans(X,icluster);
+            distsum(icluster) = sum(sumd);
+            C{icluster}.sumd = sumd;
+        end
+         h = figure
+        plot(distsum)
+        xlabel('Nb Cluster')
+        ylabel('Error')
+end
+
+        ncluster = str2num(job.I_chcorrlist_type.b_waveletcluster.e_kcluster);
+% 
+%          matcorr = matcorrHbOabs;
+%         meancorr = matcorrHbOabs;
+%         save(fullfile(pathout,[filloutput,'_HBO','abs_wv','.mat']),'ZoneList','matcorr','meancorr', 'idwindow','fs','job'  );
+%         disp(['Save crosspectrum matrix: ', fullfile(pathout,[filloutput,'_HBO','abs_wv','.mat'])]);
+%        save(fullfile(pathout,[filloutput,'_HBO','abs_wv','.mat']),'ZoneList','matcorr','meancorr', 'idwindow','fs','job'  );
+%         disp(['Save crosspectrum matrix: ', fullfile(pathout,[filloutput,'_HBO','abs_wv','.mat'])]);
+
+[idx,C,sumd,D] =kmeans(X,ncluster);
+
+%trig tache FE projet Synchro
+startrest = trig(find(trig(:,1)==1),2);
+stoprest = trig(find(trig(:,1)==1)+1,2);
+idx(startrest:stoprest)
+
+starttask2 = trig(find(trig(:,1)==2),2); %sorting card
+stoptask2 = trig(find(trig(:,1)==2)+1,2);
+
+starttask3 = trig(find(trig(:,1)==3),2); %GoNoGo fish
+stoptask3 = trig(find(trig(:,1)==3)+1,2);
+
+starttask4 = trig(find(trig(:,1)==4),2); %spin the pot
+stoptask4 = trig(find(trig(:,1)==4)+1,2);
+
+for idcluster= 1:ncluster
+    percenttask(1,idcluster) = sum(idx(startrest(1):stoprest(end))==idcluster) / numel(idx(startrest(1):stoprest(end)));
+    percenttask(2,idcluster) = sum(idx(starttask2(1):stoptask2(end))==idcluster) / numel(idx(starttask2(1):stoptask2(end)));
+    percenttask(3,idcluster) = sum(idx(starttask3(1):stoptask3(end))==idcluster) / numel(idx(starttask3(1):stoptask3(end)));
+    percenttask(4,idcluster) = sum(idx(starttask4(1):stoptask4(end))==idcluster) / numel(idx(starttask4(1):stoptask4(end)));
+
+end 
+
+hfig = figure; plot(t,idx,'x');
+hold on
+for itrig = 1:size(trig)
+    plot([t(trig(itrig,2)), t(trig(itrig,2))],[0,4],'displayname', num2str(trig(itrig,1)))
+end
+
+ 
+
+
+
+
+            elseif 0
             disp('WARNING NOT TESTED')
             nmax = size(d1,2);
             fs = NIRS.Cf.dev.fs;
             t = 1/fs:1/fs:(1/fs*nmax);
             tstart = str2num(job.I_chcorrlist_type.b_waveletcluster.e_startwaveletcluster);
-            tstop = str2num(job.I_chcorrlist_type.b_waveletcluster.e_stopwaveletcluster);
-            idwindow = find(t> tstart & t<tstop);
+            tstop = str2num(job.I_chcorrlist_type.b_waveletcluster.e_stopwaveletcluster);            
+            if isempty(tstart)|isempty(tstop)
+                idwindow = 1:numel(t);
+            else
+                idwindow = find(t> tstart & t<tstop);
+            end
+
             if 1
                 St = d1(listHBO,idwindow); %prendre segment pour wavelet
                 figure;plot(t (idwindow),St')
-                
+                 
                 %from Thierry Beausoleil
                 Args.dt = t(2)-t(1);
                 Args.Pad = 1;
@@ -1090,10 +1298,10 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                 %CHECK COH 
                 x =  St(10,:);
                      y =  St(15,:);
-                     figure; subplot(2,1,2); plot(x)
-                varargout=wtc(x,y,Args)
-                figure
-                imagesc(varargout)
+%                      figure; subplot(2,1,2); plot(x)
+%                 varargout=wtc(x,y,Args)
+%                 figure
+%                 imagesc(varargout)
                 
                 
                             id = 1;
@@ -1105,7 +1313,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                         j = j+1;
                     end
                 end
-                 i = 15; 
+                 i = 15;   
                     j = 20;
                      samplemat = 1:size(Gxy,1);
                     in1 =  TFR(:,:,i);
@@ -1305,7 +1513,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
             subplot(3,1,3)
             plot(tot);hold on
             plot(LIST,tot(LIST),'x','markersize',4,'color','r','linewidth',6)
-            
+        end
         end
     end
     
@@ -1349,7 +1557,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
         zone.plotLst = plotLst;
         zone.label = ZoneLabel;
         zone.color = zone.color;
-        zone.ml = MLfake;
+        zone.ml = MLfake; 
         zone.chMAT = plotLst;
         save(fullfile(pathout,['avg',filezone,'.zone']),'zone','-mat')
         disp(['Save avg zone: ',  fullfile(pathout,['avg',filezone,'.zone'])])
@@ -1427,14 +1635,44 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
         %          save(fullfile(pathout,['WAV_' filloutput,'_HBO.mat']), 'TFR', 'sTFR','Args','job')
         
         %wavelet Eduardo sum...
-        matcorr = matcorrHbO;
-        meancorr = matcorrHbO;
-        save(fullfile(pathout,[filloutput,'_HBO','_COH FFT','.mat']),'ZoneList','matcorr','meancorr', 'idwindow','fs'  );
-        saveas(hfig,fullfile(pathout,[filloutput,'_WAV','.fig']))
-        matcorr = matcorrHbR;
-        meancorr = matcorrHbR;
-        save(fullfile(pathout,[filloutput,'_HBR','_COH FFT','.mat']),'ZoneList','matcorr','meancorr', 'idwindow','fs'  );
-       
+        if job.I_chcorrlist_type.b_waveletcluster.e_waveletCOHmethod==1
+        matcorr = matcorrHbOabs;
+        meancorr = matcorrHbOabs;
+        save(fullfile(pathout,[filloutput,'_HBO','abs_wv','.mat']),'ZoneList','matcorr','meancorr', 'idwindow','fs','job'  );
+        disp(['Save crosspectrum matrix: ', fullfile(pathout,[filloutput,'_HBO','abs_wv','.mat'])]);
+
+        elseif job.I_chcorrlist_type.b_waveletcluster.e_waveletCOHmethod==2
+            infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
+            for itask = 1:4
+               [val,id] = sort(percenttask(itask,:),'descend')
+                for ival = 1:numel(val)                
+                    if val(ival)>0.20 %plus de 10 % de la tache
+                        tmpabs = C(id(ival),1:end/2)  
+                        tmpph = C(id(ival),(end/2+1):end)
+                        meancorr = halfmat2mat(tmpabs,idhalf, numel(listHBO) );
+                        file = [filloutput,'task',num2str(itask),' ',sprintf('%2.0f',percenttask(itask,id(ival))*100),'C',num2str(id(ival)), '_HBO','_abs' ,   '.mat']
+                        save(fullfile(pathout,file),'ZoneList','meancorr')
+                        new = [{pathout},{file}, {'ROI_86channel_Connectogram.zone'},{itask} ];
+                        infonew = [infonew;new];
+                        file = [filloutput,'task',num2str(itask),' ',sprintf('%2.0f',percenttask(itask,id(ival))*100),'C',num2str(id(ival)), '_HBO','_ph' , '.mat']
+                        new = [{pathout},{file}, {'ROI_86channel_Connectogram.zone'},{itask} ];
+                        meancorr = halfmat2mat(tmpph,idhalf, numel(listHBO) );
+                        save(fullfile(pathout,file),'ZoneList','meancorr' )
+                        infonew = [infonew;new];
+                    end  
+                end
+            end
+            saveas(hfig,  fullfile(pathout,[filloutput,'Cluster','.jpg']))
+             saveas(hfig,  fullfile(pathout,[filloutput,'Cluster','.fig']))
+            save(fullfile(pathout,[filloutput, 'percenttask.mat']),'percenttask','-mat') 
+              xlswrite(fullfile(pathout,['Cluster',filloutput,'.xlsx']),infonew);
+              disp(['Result .xlsx file saved: ' fullfile(pathout,['Cluster',filloutput,'.xlsx'])]);
+                                
+        end
+        %         matcorr=matcorrHbOph;
+%         meancorr=matcorrHbOph;
+%         save(fullfile(pathout,[filloutput,'_HBO','ph_wv','.mat']),'ZoneList','matcorr','meancorr', 'idwindow','fs');
+%         
         %msgbox('Wavelet decomposition is save, use checkcluster.m to create connectivity matrix for cluster window')
     end
     
@@ -2726,4 +2964,12 @@ sigma0 = sigma;
 sigma0(sigma0==0) = 1;
 z = bsxfun(@minus,x, mu);
 z = bsxfun(@rdivide, z, sigma0);
+end
+function mat = halfmat2mat(halfmat,idhalf, n)
+%fonction pour remettre la demi matrice en colonne en matrice carré
+%symétrique en faisant attention de ne pas doublé la diagonale.
+mat = zeros(n,n);
+mat(idhalf)=squeeze(halfmat);
+mat = mat+flipud(rot90(mat));
+mat =  mat.*(ones(n,n)-eye(n)*0.5 );  %ajustement pour ne pas doublé la diagonale dans l'addition .
 end
