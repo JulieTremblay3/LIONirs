@@ -148,7 +148,7 @@ if strcmp(temp(end-3:end),'zone')% USE ZONE TEMPLATE FIRST TO LOOK IN OTHER FILE
         if isfield(NIRS.Dt.fir,'pp')
             NIRS.Dt.fir = rmfield(NIRS.Dt.fir, 'pp');
             NIRS.Dt.fir.pp(1).p = {outfile};
-            NIRS.Dt.fir.pp(1).pre = 'Concatenate File';
+            NIRS.Dt.fir.pp(1).pre = 'Concatenate nirs.mat Files';
             NIRS.Dt.fir.pp(1).job = job;   
          end
          if isfield(NIRS.Dt.fir,'aux5')

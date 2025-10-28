@@ -21,19 +21,15 @@ function out = nirs_run_writeSNIRF(job)
         dall = [];
         Sessionid = numel(NIRS.Dt.fir.pp); %prendre la dernière session
     try %create a defauld batchHistory file with lionirs pipeline used
-    if 1 %printsession
+    if 1 %print session history a .m not a step could be save... 
     fid = fopen(fullfile(job.f_writeNIRSdir{1},'BatchHistory.m'),'w');
     for ibatch=1:numel(NIRS.Dt.fir.pp)
         jobinstruction = convertpretobatchname(NIRS.Dt.fir.pp(ibatch).pre);
-        jobtext = ['matlabbatch{',num2str(ibatch),'}.',jobinstruction,'.'];
-
-       
-         fieldlist = fieldnames(NIRS.Dt.fir.pp(ibatch).job);
+        jobtext = ['matlabbatch{',num2str(ibatch),'}.',jobinstruction,'.'];       
+        fieldlist = fieldnames(NIRS.Dt.fir.pp(ibatch).job);
         for idjob = 1:numel( fieldlist)
-            id = 1
-             
-                if ~isstruct(eval(['NIRS.Dt.fir.pp(', num2str(ibatch),').job.' fieldlist{idjob}]))
-                                      
+            id = 1;             
+                if ~isstruct(eval(['NIRS.Dt.fir.pp(', num2str(ibatch),').job.' fieldlist{idjob}]))                                   
                     if iscell(eval(['NIRS.Dt.fir.pp(', num2str(ibatch),').job.' fieldlist{idjob}]))
                         logjob=    [jobtext, [fieldlist{idjob}],'={''',   eval(['NIRS.Dt.fir.pp(', num2str(ibatch),').job.' fieldlist{idjob}]),'''}'];
                         fprintf(fid,'%s',string(logjob));
@@ -45,7 +41,7 @@ function out = nirs_run_writeSNIRF(job)
                          fprintf(fid,'\n');
                          %sprintf('%sn',string(logjob))
                     elseif isnumeric(eval(['NIRS.Dt.fir.pp(', num2str(ibatch),').job.' fieldlist{idjob}]))
-                        tmp = eval(['NIRS.Dt.fir.pp(', num2str(ibatch),').job.' fieldlist{idjob}])
+                        tmp = eval(['NIRS.Dt.fir.pp(', num2str(ibatch),').job.' fieldlist{idjob}]);
                         if numel(tmp) == 1 
                          logjob=    [jobtext, [fieldlist{idjob}],'=',   num2str(tmp)];
                          fprintf(fid,'%s',string(logjob));
@@ -59,7 +55,6 @@ function out = nirs_run_writeSNIRF(job)
                             fprintf(fid,'%s',string(logjob));
                             fprintf(fid,'\n');
                         end
-                         %sprintf('%s',string(logjob))
                     end
                 elseif isstruct(eval(['NIRS.Dt.fir.pp(', num2str(ibatch),').job.' fieldlist{idjob}]))
                     firstpart = ['NIRS.Dt.fir.pp(', num2str(ibatch),').job.' ];
@@ -68,8 +63,7 @@ function out = nirs_run_writeSNIRF(job)
                      temp = [temp '.' fieldlist2{1}];
                     while isstruct(eval([firstpart,temp])) & isempty(isstruct(eval([firstpart,temp])));
                         fieldlist2 = fieldnames( eval([firstpart,temp]));
-                        temp = [temp '.' fieldlist2{1}];
-                         
+                        temp = [temp '.' fieldlist2{1}];                         
                     end
                            
                 
@@ -97,18 +91,13 @@ function out = nirs_run_writeSNIRF(job)
                              logjob=    [jobtext, [temp],'= [',   num2str(tmp'),']'];
                             fprintf(fid,'%s',string(logjob));
                             fprintf(fid,'\n');
-                        end
-                         %sprintf('%s',string(logjob))
-                    end
-
-
+                        end                   
+                     end
                     end
         end
-    end
-            
-  
+    end           
      fclose(fid);
-     disp(['Create log LIONirs: ', fullfile(job.f_writeNIRSdir{1},'BatchHistory.m')])
+     disp(['Create log LIONirs as a Batch.m file : ', fullfile(job.f_writeNIRSdir{1},'BatchHistory.m') ])
     end
         catch
             
@@ -156,100 +145,118 @@ function out = nirs_run_writeSNIRF(job)
             
              %need to have and aux file
             aux = zeros(size(d,1),1);
-    if ~isfield(SD,'SpatialUnit')
-        if mean(abs(SD.SrcPos(1,:)))>1 & mean(abs(SD.SrcPos(1,:)))<10 %probablement en cm
-            SD.SpatialUnit = 'cm';  %or mm depending on your probe design
-            disp(['Warning spatial unit field is missing , coordinate :',num2str(SD.SrcPos(1,:)),' seem to be in cm unit please verify your design.']);
-        elseif mean(abs(SD.SrcPos(1,:)))>10 & mean(abs(SD.SrcPos(1,:)))<100 %probablement en mm
-            SD.SpatialUnit = 'mm';  %or mm depending on your probe design
-            disp(['Warning spatial unit field is missing , coordinate :',num2str(SD.SrcPos(1,:)),' seem to be in mm unit please verify your design.']);
-        elseif mean(abs(SD.SrcPos(1,:)))<1
-            SD.SpatialUnit = 'm';  %or mm depending on your probe design
-            disp(['Warning spatial unit field is missing , coordinate :',num2str(SD.SrcPos(1,:)),' seem to be in meter unit please verify your design.']);
+        if ~isfield(SD,'SpatialUnit')
+            if mean(abs(SD.SrcPos(1,:)))>1 & mean(abs(SD.SrcPos(1,:)))<10 %probablement en cm
+                SD.SpatialUnit = 'cm';  %or mm depending on your probe design
+                disp(['Warning spatial unit field is missing , coordinate :',num2str(SD.SrcPos(1,:)),' seem to be in cm unit please verify your design.']);
+            elseif mean(abs(SD.SrcPos(1,:)))>10 & mean(abs(SD.SrcPos(1,:)))<100 %probablement en mm
+                SD.SpatialUnit = 'mm';  %or mm depending on your probe design
+                disp(['Warning spatial unit field is missing , coordinate :',num2str(SD.SrcPos(1,:)),' seem to be in mm unit please verify your design.']);
+            elseif mean(abs(SD.SrcPos(1,:)))<1
+                SD.SpatialUnit = 'm';  %or mm depending on your probe design
+                disp(['Warning spatial unit field is missing , coordinate :',num2str(SD.SrcPos(1,:)),' seem to be in meter unit please verify your design.']);
+            end
         end
-    end
-        
-   SD.Landmarks3D.pos = NIRS.Cf.H.F.r.o.mm;
-   SD.Landmarks3D.labels =  {'Nz'        
+        try
+            SD.Landmarks3D.pos = NIRS.Cf.H.F.r.o.mm;
+            SD.Landmarks3D.labels =  {'Nz'        
+                                    'LPA'
+                                    'RPA'};
+        catch %error compatibility mne si champs vide
+            SD.Landmarks3D.pos = [1 0 0;
+                                  0 -1 0;
+                                  0 1 0];
+            SD.Landmarks3D.labels =  {'Nz'        
                               'LPA'
                               'RPA'};
+        end
 
-   nirs= struct('d',d,'SD',SD,'t',t','s',s,'aux',aux);
+        nirs= struct('d',d,'SD',SD,'t',t','s',s,'aux',aux);
         % Save SNIRF: Convert .nirs format data to SnirfClass object, save it to .snirf file (HDF5)
         fprintf('Saving %s ...\n', outfile);
-        %VERIFY IF 'ModifyBeerLambertLaw' WHERE APPLY
+        
    
-     snirf_saved= SnirfClass(nirs);      
-         
-    %change if unit DataType in measurementList when concentration when
-    %beer lambert law were apply 
+        snirf_saved= SnirfClass(nirs);      
+ 
+    %VERIFY IF 'ModifyBeerLambertLaw' WHERE APPLY
+    %Change if unit DataType in measurementList when concentration when
     for i=1:numel(NIRS.Dt.fir.pp)
         if strcmp(NIRS.Dt.fir.pp(i).pre,'ModifyBeerLambertLaw')
           for k=1:numel(snirf_saved.data.measurementList) 
              if snirf_saved.data.measurementList(k).wavelengthIndex==1
-                 SetDataType(snirf_saved.data.measurementList(k),1,'hbo') 
+                 SetDataType(snirf_saved.data.measurementList(k),1,'hbo'); 
              elseif snirf_saved.data.measurementList(k).wavelengthIndex==2
-                 SetDataType(snirf_saved.data.measurementList(k),1,'hbr')
+                 SetDataType(snirf_saved.data.measurementList(k),1,'hbr');
              end
           end
-          disp('ModifyBeerLambertLaw apply data type change to hbo and hbr')
+          disp('ModifyBeerLambertLaw apply data type change to hbo and hbr');
         end
     end
 
         tic; snirf_saved.Save(outfile); toc  
-        disp(['Save: ', outfile])
+        disp(['Save: ', outfile]);
     end
     end
 
-out.NIRSmat = job.NIRSmat;
+    out.NIRSmat = job.NIRSmat;
 
 end
 
 
 function batchname = convertpretobatchname(pre)
-    disp('Not finish for all case')
-    if strcmp(pre,'READ_RAW_NIRxScout')
+  
+    if strcmp(pre,'READ_RAW_NIRxScout') %READDATA
         batchname = 'spm.tools.nirsHSJ.M_readNIRS.E_readNIRxscout';
-
-     elseif strcmp(pre,'READ_RAW_NIRSport') 
+    elseif strcmp(pre,'READ_RAW_NIRSport'); 
         batchname =  'spm.tools.nirsHSJ.M_readNIRS.E_readNIRSport';
-    elseif strcmp(pre,'READ_RAW_NIRS') %.nirs 
+    elseif strcmp(pre,'READ_RAW_NIRS'); 
         batchname = 'spm.tools.nirsHSJ.M_readNIRS.E_rawhomer';
     elseif strcmp(pre,'READ SNIRF');
         batchname ='spm.tools.nirsHSJ.M_readNIRS.E_readSNIRF';
     elseif strcmp(pre,'readBOXY');
          batchname = 'spm.tools.nirsHSJ.M_readNIRS.boxy1';
     elseif strcmp(pre,'READ_RAW_BrainVision');
-         batchname = 'spm.tools.nirsHSJ.M_readNIRS.E_GenericDataExportBV'; %nirs_run_readGenericDataExportBV
-    elseif 0
-        batchname = 'spm.tools.nirsHSJ.M_readNIRS.M_readMultimodal.E_readEEG';%function nirs_run_readEEG
-    elseif 0
-
-
+         batchname = 'spm.tools.nirsHSJ.M_readNIRS.E_GenericDataExportBV'; 
+    elseif 0 %multimodal missing no pre... 
+        batchname = 'spm.tools.nirsHSJ.M_readNIRS.M_readMultimodal.E_readEEG';          
+    elseif strcmp(pre,'Concatenate nirs.mat Files')
+        batchname = 'spm.tools.nirsHSJ.M_Segment.E_Concatenate_nirsmat'; %SEGMENT ONSET
     elseif strcmp(pre,'Concatenate File')
-        batchname = 'spm.tools.nirsHSJ.M_Segment.E_Concatenate_nirsmat';
-  
-
-   
+        batchname = 'spm.tools.nirsHSJ.M_Segment.E_Concatenate_file';   
     elseif strcmp(pre,'Segmentation')
         batchname =  'spm.tools.nirsHSJ.M_Segment.segment';
-    elseif strcmp(pre,'Manual Gui')
-        batchname =  'spm.tools.nirsHSJ.E_GUI';
-     elseif strcmp(pre,'Manual Gui Segmentation')
-        batchname =  'spm.tools.nirsHSJ.E_GUI';
-    elseif strcmp(pre,'Nullify Bad Intervals')
-        batchname = 'spm.tools.nirsHSJ.M_preprocessing.nullifybad';
-    elseif strcmp(pre, 'Normalization')
-        batchname = 'spm.tools.nirsHSJ.M_preprocessing.normalization';
-
+    elseif strcmp(pre,'Step Detection') %PREPROCESSING 
+        batchname = 'spm.tools.nirsHSJ.M_preprocessing.E_artefactdetection';
     elseif strcmp(pre,'Filtered')
         batchname ='spm.tools.nirsHSJ.M_preprocessing.bpfilt';
+    elseif strcmp(pre, 'Normalization')
+        batchname = 'spm.tools.nirsHSJ.M_preprocessing.normalization';
+    elseif strcmp(pre,'Nullify Bad Intervals')
+        batchname = 'spm.tools.nirsHSJ.M_preprocessing.nullifybad';
     elseif strcmp(pre,'ModifyBeerLambertLaw')
         batchname ='spm.tools.nirsHSJ.M_preprocessing.ODtoHbOHbR';
+    elseif strcmp(pre,'Epoch averaging')|strcmp(pre,'Epoch averaging (multiple files)')
+         batchname ='spm.tools.nirsHSJ.M_preprocessing.E_average';
+    elseif strcmp(pre, 'Prewhitened')    
+         batchname ='spm.tools.nirsHSJ.M_preprocessing.E_prewhitening';
+    elseif strcmp(pre, 'Detrend')  
+         batchname ='spm.tools.nirsHSJ.M_preprocessing.E_detrend';
+    elseif strcmp(pre, 'Cardiac')  %cardiac control pas de trace juste des canaux enlevé dans le nirs.mat 
+         batchname ='spm.tools.nirsHSJ.M_preprocessing.E_chcardiaccontrol';
+    elseif strcmp(pre,'Manual Gui')
+        batchname =  'spm.tools.nirsHSJ.E_GUI';
+    elseif strcmp(pre,'Manual Gui Segmentation')
+        batchname =  'spm.tools.nirsHSJ.E_GUI';
+    elseif strcmp(pre,'HyperScanCombine')
+        batchname =  'pm.tools.nirsHSJ.M_Utility.M_HyperScanNIRS.E_HyperScanCombineNIRS';
+    elseif strcmp(pre,'MarkCorrectedInYellow')
+        batchname = 'spm.tools.nirsHSJ.M_dataComponent.E_MarkCorrectionAsNoise';
+
+    
+
     elseif strcmp(pre,'Manual Gui Substract Component ')
          batchname ='spm.tools.nirsHSJ.M_dataComponent.E_substractcomponent';
-    elseif strcmp(pre,'Epoch averaging')
-         batchname ='spm.tools.nirsHSJ.M_preprocessing.E_average';
+
 
     else
         batchname = pre;
