@@ -260,7 +260,7 @@ if get(handles.radiobutton_hold,'value')
         set(h,'LineStyle','--')
 
         if ~newfigure
-            set(h,'uicontextmenu',handles.remove_bad_ch)
+            set(h,'uicontextmenu',handles.remove_bad_ch);
         end        
     end  
     for i=1:numel(plotLst) 
@@ -359,7 +359,7 @@ elseif get(handles.popup_view,'value')==2
         end
         set(h,'Displayname',['ch',num2str(plotLst(i)),'_',srs, '_', det]);
         if ~newfigure
-            set(h,'uicontextmenu',handles.remove_bad_ch)
+            set(h,'uicontextmenu',handles.remove_bad_ch);
         end
         set(h,'color',PMI{currentsub}.color(idxc,:));
         %Afficher en gras les parties à renormaliser
@@ -372,10 +372,10 @@ elseif get(handles.popup_view,'value')==2
                 h3 = plot(t,x,'Tag',num2str(plotLst(i)),'line','none','linewidth',2,'color','k','marker','v');   
             end
         end
-        set(h,'Tag',num2str(plotLst(i)))
+        set(h,'Tag',num2str(plotLst(i)));
         set(h,'Displayname',['ch',num2str(plotLst(i)),'_',srs, '_', det]);
         if ~newfigure
-            set(h,'uicontextmenu',handles.remove_bad_ch)
+            set(h,'uicontextmenu',handles.remove_bad_ch);
         end
         
         
@@ -394,7 +394,7 @@ elseif get(handles.popup_view,'value')==2
         set(h,'Tag',num2str(plotLst(i)))
         set(h,'Displayname',['ch',num2str(plotLst(i)),'_',srs, '_', det]);
         if ~newfigure
-            set(h,'uicontextmenu',handles.remove_bad_ch)
+            set(h,'uicontextmenu',handles.remove_bad_ch);
         end
         offset = offset + dyoffset;
     end
@@ -442,17 +442,17 @@ elseif get(handles.popup_view,'value')==3 %HbO HbR or 830 690 nm sans le step av
             set(h,'Tag',num2str(plotLst(i)));
             set(h,'Displayname',['ch',num2str(plotLst(i)),'_',srs, '_', det]);
             if ~newfigure
-                set(h,'uicontextmenu',handles.remove_bad_ch)
+                set(h,'uicontextmenu',handles.remove_bad_ch);
             end
         %Affichage error bar
         if get(handles.popup_average,'value')==2
                 AvgStdErr = PMI{currentsub}.data(cf).HRF.AvgStdErr(:,plotLst(i));
                 he = errorbar(PMI{currentsub}.data(cf).HRF.tHRF, d1+offset,AvgStdErr );
                 set(he,'color',PMI{currentsub}.color(idxc,:));
-                set(he,'Tag',num2str(plotLst(i)))
+                set(he,'Tag',num2str(plotLst(i)));
                 set(he,'Displayname',['ch',num2str(plotLst(i)),'_',srs, '_', det]);
                 if ~newfigure
-                    set(he,'uicontextmenu',handles.remove_bad_ch)
+                    set(he,'uicontextmenu',handles.remove_bad_ch);
                 end
             end
         elseif get(handles.radio_showrejectedchannels,'value') %Show bad channels (bad channels are in dotted line)
@@ -467,10 +467,10 @@ elseif get(handles.popup_view,'value')==3 %HbO HbR or 830 690 nm sans le step av
                 AvgStdErr = PMI{currentsub}.data(cf).HRF.AvgStdErr(:,plotLst(i))+offset;
                 he = errorbar(PMI{currentsub}.data(cf).HRF.tHRF, d1,AvgStdErr );
                 set(he,'color',PMI{currentsub}.color(idxc,:));
-                set(he,'Tag',num2str(plotLst(i)))
+                set(he,'Tag',num2str(plotLst(i)));
                 set(he,'Displayname',['ch',num2str(plotLst(i)),'_',srs, '_', det]);
                 if ~newfigure
-                    set(he,'uicontextmenu',handles.remove_bad_ch)
+                    set(he,'uicontextmenu',handles.remove_bad_ch);
                 end
             end
         else
@@ -480,7 +480,7 @@ elseif get(handles.popup_view,'value')==3 %HbO HbR or 830 690 nm sans le step av
         set(h,'Tag',num2str(plotLst(i)));
         set(h,'Displayname',['ch',num2str(plotLst(i)),'_',srs, '_', det]);
         if ~newfigure
-            set(h,'uicontextmenu',handles.remove_bad_ch)
+            set(h,'uicontextmenu',handles.remove_bad_ch);
         end
         
         
@@ -499,7 +499,7 @@ elseif get(handles.popup_view,'value')==3 %HbO HbR or 830 690 nm sans le step av
         set(h,'Tag',num2str(plotLst(i)));
         set(h,'Displayname',['ch',num2str(plotLst(i)),'_',srs, '_', det]);
         if ~newfigure
-            set(h,'uicontextmenu',handles.remove_bad_ch)
+            set(h,'uicontextmenu',handles.remove_bad_ch);
         end
     end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -549,7 +549,7 @@ elseif get(handles.popup_view,'value')==4 %830 et 690 avec step between
             set(h,'Tag',num2str(plotLst(i)));
             set(h,'Displayname',['ch',num2str(plotLst(i)),'_',srs, '_', det]);
             if ~newfigure
-                set(h,'uicontextmenu',handles.remove_bad_ch)
+                set(h,'uicontextmenu',handles.remove_bad_ch);
             end
             %Affichage error bar
             if get(handles.popup_average,'value')==2
@@ -559,7 +559,7 @@ elseif get(handles.popup_view,'value')==4 %830 et 690 avec step between
                 set(he,'Tag',num2str(plotLst(i)))
                 set(he,'Displayname',['ch',num2str(plotLst(i)),'_',srs, '_', det]);
                 if ~newfigure
-                    set(he,'uicontextmenu',handles.remove_bad_ch)
+                    set(he,'uicontextmenu',handles.remove_bad_ch);
                 end
             end
         elseif get(handles.radio_showrejectedchannels,'value') %Show bad channels (bad channels are in dotted line)
@@ -577,7 +577,7 @@ elseif get(handles.popup_view,'value')==4 %830 et 690 avec step between
                 set(he,'Tag',num2str(plotLst(i)))
                 set(he,'Displayname',['ch',num2str(plotLst(i)),'_',srs, '_', det]);
                 if ~newfigure
-                    set(he,'uicontextmenu',handles.remove_bad_ch)
+                    set(he,'uicontextmenu',handles.remove_bad_ch);
                 end
             end
         else
@@ -587,7 +587,7 @@ elseif get(handles.popup_view,'value')==4 %830 et 690 avec step between
         set(h,'Tag',num2str(plotLst(i)));
         set(h,'Displayname',['ch',num2str(plotLst(i)),'_',srs, '_', det]);
         if ~newfigure
-            set(h,'uicontextmenu',handles.remove_bad_ch)
+            set(h,'uicontextmenu',handles.remove_bad_ch);
         end
         
         
@@ -606,7 +606,7 @@ elseif get(handles.popup_view,'value')==4 %830 et 690 avec step between
         set(h,'Tag',num2str(plotLst(i)));
         set(h,'displayname',['ch',num2str(plotLst(i)),'_',srs, '_', det]);
         if ~newfigure
-            set(h,'uicontextmenu',handles.remove_bad_ch)
+            set(h,'uicontextmenu',handles.remove_bad_ch);
         end
     end
     plot([PMI{currentsub}.data(cf).HRF.tHRF(1),PMI{currentsub}.data(cf).HRF.tHRF(end)],[0,0],'k')
@@ -813,8 +813,9 @@ if isfield(handles,'selected_trig')
            comments = (handles.NIRS.Dt.fir.comments{1});
                 for i = 2:size(comments ,1)
                     try
-                    text(PMI{currentsub}.data(cf).HRF.tHRF(comments{i,2}),-0.01,comments{i,1})
-                    plot([PMI{currentsub}.data(cf).HRF.tHRF(comments{i,2}),PMI{currentsub}.data(cf).HRF.tHRF(comments{i,2}+comments{i,3}) ], [-0.01 -0.01],'linestyle','-','marker','+','color','k','displayname',num2str(i),'uicontextmenu',handles.Context_removecomment)
+                    h= text(PMI{currentsub}.data(cf).HRF.tHRF(comments{i,2}),-0.01,comments{i,1});
+                    set(h,'Rotation',60);
+                    plot([PMI{currentsub}.data(cf).HRF.tHRF(comments{i,2}),PMI{currentsub}.data(cf).HRF.tHRF(comments{i,2}+comments{i,3}) ], [-0.01 -0.01],'linestyle','-','marker','+','color','k','displayname',num2str(i),'uicontextmenu',handles.Context_removecomment);
                     catch
                     end
                 end

@@ -68,7 +68,7 @@ for filenb = 1:size(job.NIRSmat,1)
         try
         if isfield(NIRS.Dt,'AUX')            
             for iaux = 1:numel(NIRS.Dt.AUX)               
-                fileaux = NIRS.Dt.AUX(iaux).pp(moduleaux).p{f}; %OPEN EEG HERE
+                fileaux = NIRS.Dt.AUX(iaux).pp(moduleaux).p{f}; %OPEN AUX HERE
                 AUX(iaux).file = fileaux;
                 [AUX(iaux).data,AUX(iaux).infoBV,AUX(iaux).marker,AUX(iaux).ind_dur_ch]=fopen_EEG(fileaux);
             end
@@ -124,7 +124,7 @@ for filenb = 1:size(job.NIRSmat,1)
                 elseif job.m_SegmentTrig==1 % use first trig
                     indstim = indstim(1);
                    disp(['Use only first trig ', num2str(trigger(1)) ,' to segment at Time: ', sprintf('%.2f ',1/fs*indstim) ])
-                end
+                end 
                   
             end
              catch
@@ -447,7 +447,7 @@ for filenb = 1:size(job.NIRSmat,1)
                         offset = 0;
                     end 
                     if isempty(trigger)
-                        %Video were alredy synchronised only adjust to the new comment reference. 
+                        %Video were allready synchronised only adjust to the new comment reference. 
                          NIRS.Dt.Video.pp(moduleVideo).sync_timesec{f} =  NIRS.Dt.Video.pp(moduleVideo).sync_timesec{f}+indstim*1/fs
                     else
 
@@ -459,7 +459,7 @@ for filenb = 1:size(job.NIRSmat,1)
                             catch
                                 disp('Error Video segmentation could not be done using EEG trigger')                                
                             end
-                      
+                       
                         case 'NIRS'
                             try 
                             NIRS.Dt.Video.pp(moduleVideo+1).p{ifile} = NIRS.Dt.Video.pp(moduleVideo).p{f};
@@ -641,6 +641,40 @@ for filenb = 1:size(job.NIRSmat,1)
             end      
          end
       end
+         if isfield(job,'c_SegmentAUDIO')
+             try
+             [dir1,fil1,ext] = fileparts(rDtp{f,1});
+            if isfield(job.c_SegmentAUDIO, 'b_SegmentAUDIOYes')                             
+              infovideo =   audioinfo(NIRS.Dt.Video.pp(end).p{f});              
+              idstart = round((NIRS.Dt.Video.pp(end).sync_timesec{f})*infovideo.SampleRate); 
+              idstop = round(idstart + (pretime/fs + posttime/fs) *infovideo.SampleRate);        
+            [yaudio,Fsaudio] = audioread(NIRS.Dt.Video.pp(end).p{f}, [idstart idstop]);
+            disp(['Write audio...']) 
+            if ~isempty(job.c_SegmentAUDIO.b_SegmentAUDIOYes.e_SegmentAUDIOpath)
+                pathaudioout =  job.c_SegmentAUDIO.b_SegmentAUDIOYes.e_SegmentAUDIOpath;
+            else
+                 pathaudioout = dir1;
+
+            end
+            
+            
+            tic
+            if job.c_SegmentAUDIO.b_SegmentAUDIOYes.m_SegmentAUDIOformat==0 %mp3
+                fileoutaudio = fullfile(pathaudioout, [fil1,'.mp3']) ;           
+            elseif job.c_SegmentAUDIO.b_SegmentAUDIOYes.m_SegmentAUDIOformat==1 %wav
+               fileoutaudio = fullfile(pathaudioout, [fil1,'.wav']) ; 
+            end                       
+            audiowrite(fileoutaudio, yaudio,Fsaudio);
+            toc
+            disp(['File create:', fileoutaudio])
+
+            end 
+             catch ME                  
+                   disp(ME)
+                   disp('WARNING NO AUDIO CREATE')
+             end
+         end 
+
 
     end
     NIRS.Dt.fir.pp(lst+1).pre = 'Segmentation';

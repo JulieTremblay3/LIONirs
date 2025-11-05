@@ -10837,13 +10837,16 @@ end
    end
    
    [y,Fs] = audioread(filenameaudio,round(([time_start time_stop] +offset)*info.SampleRate));
-   sound(y,Fs);
+  % sound(y,Fs);
+
+   gong = audioplayer(y,Fs);
+   play(gong);
    axes(handles.display_axes);
    for i=time_start:0.25:time_stop
          t = (i);
          if i==time_start
              hline = plot([time_start time_start],[0,1],'k');
-         else
+         else 
             set(hline, 'xdata',[t t]);
          end
          pause(0.25);

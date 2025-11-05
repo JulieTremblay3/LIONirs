@@ -98,7 +98,7 @@ for ifile =1:numel(rDtp)
         HRFcurve.infoBV.coor_phi = 45; 
         HRFcurve.infoBV.DataPoints = numel(Scn);
         [pathstr, name, ext] = fileparts(filedata);
-        if isempty(job.c_createAUXauto.b_HRFtriggeronset.e_AUXdir)
+        if isempty(job.c_createAUXauto.b_HRFtriggeronset.e_AUXdir{1})
             fileoutHRFcurve = fullfile(pathstr, [label,name,'.dat']);
         else
             fileoutHRFcurve = fullfile(job.c_createAUXauto.b_HRFtriggeronset.e_AUXdir{1}, [label,name,'.dat']);

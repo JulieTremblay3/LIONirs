@@ -445,13 +445,18 @@ elseif strcmp(listoption{idval},'Audio .wav (sum mel coefficients)')
     %figure;plot(trigMel)
     %AFFICHAGE AVEC OFFSET 
     SUMMEL= EEG;
+    try
      if ~isempty(outlist)
         SUMMEL.marker(outlist,:) = [];
         SUMMEL.ind_dur_ch(outlist,:) = [];
      end
     SUMMEL.ind_dur_ch(:,1)=find(trigMel);
      %EEG POUR LE MEL SUM 
-    SUMMEL.data = sumMel';
+    catch
+        SUMMEL.ind_dur_ch = [];
+    end
+    SUMMEL.ind_dur_ch = EEG.ind_dur_ch;
+     SUMMEL.data = sumMel';
     SUMMEL.infoBV = EEG.infoBV;
     SUMMEL.infoBV.DataType = 'TIMEDOMAIN';
     SUMMEL.infoBV.NumberOfChannels = '1';

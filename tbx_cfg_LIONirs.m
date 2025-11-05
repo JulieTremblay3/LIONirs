@@ -1297,11 +1297,52 @@ m_SegmentTrig.val      = {0};
 m_SegmentTrig.help     = {'By defaults, use all trig to segment. However, in some cases use only first trig to segment the whole bloc of the data'};
 
 
+%path structure
+e_SegmentAUDIOpath         = cfg_entry; %path
+e_SegmentAUDIOpath.name    = 'Save export audio file';
+e_SegmentAUDIOpath.tag     = 'e_SegmentAUDIOpath';       
+e_SegmentAUDIOpath.strtype = 's';
+e_SegmentAUDIOpath.num     = [0 Inf];     
+e_SegmentAUDIOpath.val     = {''}; 
+e_SegmentAUDIOpath.help    = {'Path for output audio files let it empty if you like save at the defauld segment location.'}; 
+
+
+m_SegmentAUDIOformat          = cfg_menu;
+m_SegmentAUDIOformat.tag      = 'm_SegmentAUDIOformat';
+m_SegmentAUDIOformat.name     = 'Audio format';
+m_SegmentAUDIOformat.labels   = {'.mp3','.wav'};
+m_SegmentAUDIOformat.values   = {0,1};
+m_SegmentAUDIOformat.val      = {0};
+m_SegmentAUDIOformat.help     = {'SAve in .mp3 or .wav if the codec is not present'};
+
+
+b_SegmentAUDIOYes         = cfg_branch; 
+b_SegmentAUDIOYes.tag     = 'b_SegmentAUDIOYes';
+b_SegmentAUDIOYes.name    = 'Segment AUDIO';
+b_SegmentAUDIOYes.val     = {e_SegmentAUDIOpath, m_SegmentAUDIOformat};
+b_SegmentAUDIOYes.help    = {'Import a project file that already exists'};
+
+
+b_SegmentAUDIONo         = cfg_branch; 
+b_SegmentAUDIONo.tag     = 'b_SegmentAUDIONo';
+b_SegmentAUDIONo.name    = 'No';
+b_SegmentAUDIONo.val     = {};
+b_SegmentAUDIONo.help    = {'Create a new project file from the .snirf file.'};
+
+% Create an option on wether a project file should be created or imported.
+c_SegmentAUDIO          = cfg_choice;
+c_SegmentAUDIO.tag      = 'c_SegmentAUDIO';
+c_SegmentAUDIO.name     = 'Export segmented audio file from video';
+c_SegmentAUDIO.values   = {b_SegmentAUDIONo, b_SegmentAUDIOYes};
+c_SegmentAUDIO.val      = {b_SegmentAUDIONo};
+c_SegmentAUDIO.help     = {'If the video are present and synchronised you could export .mp3 file to use audio transcription of the recording on the segmented file.'}';
+
+
 % Executable Branch
 segment      = cfg_exbranch;
 segment.name = 'Segment';
 segment.tag  = 'segment';
-segment.val  = {NIRSmat DelPreviousData trigger pretime posttime m_SegmentTrig };
+segment.val  = {NIRSmat DelPreviousData trigger pretime posttime m_SegmentTrig c_SegmentAUDIO};
 segment.prog = @nirs_run_segment;
 segment.vout = @nirs_cfg_vout_segment;
 segment.help = {'This module segments data around triggers (defining pretime and post time). This step is essential to synchronize multimodal data such as EEG, auxiliary (AUX)  or video. '};
@@ -1313,6 +1354,34 @@ vout.sname      = 'NIRS.mat';
 vout.src_output = substruct('.','NIRSmat'); 
 vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
 end
+
+
+f_filetsv        = cfg_files;
+f_filetsv.name    = 'Enter tsv time definition'; 
+f_filetsv.tag     = 'f_filetsv';       %file names
+f_filetsv.filter  = {'tsv'};
+f_filetsv.ufilter = '.*';    
+f_filetsv.num     = [1 Inf];     % Number of inputs required 
+f_filetsv.help    = {'Open tsv file as whisper package transcription of mp3 in text and time stamp sentence, add a colunm to specify custum trigger '}; 
+
+
+% Executable Branch
+E_import_tsv      = cfg_exbranch;
+E_import_tsv.name = 'Import tsv';
+E_import_tsv.tag  = 'E_import_tsv';
+E_import_tsv.val  = {NIRSmat, f_filetsv};
+E_import_tsv.prog = @nirs_run_import_tsv;
+E_import_tsv.vout = @nirs_cfg_vout_import_tsv;
+E_import_tsv.help = {'This module use the whisper output to enter all sentence time as a comment. An additionnal column could be use as to add trigger trigger'};
+%make NIRS.mat available as a dependency
+
+function vout = nirs_cfg_vout_import_tsv(job)
+vout = cfg_dep;                    
+vout.sname      = 'NIRS.mat';       
+vout.src_output = substruct('.','NIRSmat'); 
+vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
+end
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%MODULE 4a Artifact detection Step Detection
@@ -4683,7 +4752,7 @@ M_readNIRS.help   = {'These modules read NIRS data in different formats.'};
 M_Segment        =   cfg_choice; 
 M_Segment.name   =  'Segment/Onset';
 M_Segment.tag    = 'M_Segment';
-M_Segment.values = {segment ,E_Concatenate_nirsmat,E_Concatenate_file,E_aux2manualtrig,E_manualtriglsl, E_manualtrig,E_createonset_correlationsignal }; 
+M_Segment.values = {segment ,E_Concatenate_nirsmat,E_Concatenate_file,E_aux2manualtrig,E_manualtriglsl, E_manualtrig,E_createonset_correlationsignal, E_import_tsv}; 
 M_Segment.help   = {'These modules segment or combine data.'};
 
 
