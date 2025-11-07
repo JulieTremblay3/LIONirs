@@ -24,7 +24,7 @@ else
     text(-2,-1.2, listfile{value},'fontsize',10)
     text(-2,-1.3, filefrom,'fontsize',10)
     climvalue = get( handles.axes_AJD,'clim')
-    colormap(jet)
+   
     set(gca, 'clim',  climvalue)
     hbar = colorbar 
     set(hbar, 'position' , [0.787878787685267,0.191256830601093,0.014581909318751,0.648087431693989])
@@ -302,10 +302,70 @@ elseif get(handles.popup_ConnectogramColor,'value')==6 %winter
      colorMatrix = colorMatrix(idlist,idlist);
      colormap( colorMap);
      caxis([cmin,cmax]);
+elseif get(handles.popup_ConnectogramColor,'value')==7 %PARULA
+    colorMap =parula(100) ;
+      cmin = str2num(get(handles.edit_cmin,'string'));
+    cmax = str2num(get(handles.edit_cmax,'string'));
+    cstep = (cmax-cmin)/100;
+    cf=cmin:cstep:cmax-cstep;
+    for i=1:size(MAT,1)
+        for j = 1:size(MAT,2)
+        colorMatrix(i,j) = sum(cf<MAT(i,j));
+        end
+    end
+     colorMatrix = colorMatrix(idlist,idlist);
+     colormap( colorMap);
+     caxis([cmin,cmax]);
+
+elseif get(handles.popup_ConnectogramColor,'value')==8 %PARULA and mask
+   if maskcolor
+    cmin = str2num(get(handles.edit_cmin,'string'));
+    cmax = str2num(get(handles.edit_cmax,'string'));
+    cstep = (cmax-cmin)/100;
+    cf=cmin:cstep:cmax-cstep;
+    for i=1:size(MAT,1)
+        for j = 1:size(MAT,2)
+        colorMatrix(i,j) = sum(cf<MAT(i,j));
+        end
+    end
+     5
+     colorMatrix = colorMatrix(idlist,idlist);
+        % idlabelall(idzone(find(idzone)))
+     %use definition xls color to find all not define ROI combinaision
+    colorMatrixmask= ones(numel(idlist));
+    idMap = 1;
+    colorMap = zeros((size(rawzonecolor,1)-1)^2,3) ;
+    actualzonelist = idzone(find(idzone))
+    for i=2:size(rawzonecolor,1)
+       for j=2:size(rawzonecolor,1)
+           try
+                colorMap(idMap,:) = str2num(rawzonecolor{i,j})./255;    
+           catch
+               colorMap(idMap,:) = nan;
+           end
+        i_id = find(idzonecolor==actualzonelist(i-1));
+        j_id = find(idzonecolor==actualzonelist(j-1));
+        if isnan(colorMap(idMap,:))
+            colorMatrix(i_id,j_id) = nan;
+        end
+        idMap = idMap+1;
+        end
+    end
+     if get(handles.radio_negativemap,'value')
+        colorMap = flipud(parula(100));
+    else
+        colorMap = parula(100);
+     end
+    else
+        msgbox('Define zone x zone matrix color or mask to use this mode')
+        return
+    end
+   
+
 end
 %figure;imagesc(colorMatrix)
 
-
+ colormap(colorMap)
 colorlistline = zeros(size(MAT,1),3);
 
 tmp = [find(idzone), numel(idzone)];

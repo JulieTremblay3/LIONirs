@@ -7,13 +7,8 @@ handles = varargin{1};
 if numel(varargin)>1; newfigure = varargin{2};else; newfigure = 0;end 
 if newfigure ==0
     axes(handles.axes_AJD);cla;hold on
-      colormap(parula)
 else
     figure;hold on
-    colormap(jet)
-
-     colormap(parula)
-
 end
 axis ij
 DATA = get(handles.GUI_LookMat,'UserData');
@@ -255,4 +250,23 @@ elseif  get(handles.popupmenu_view,'value')==2%view avg zone
     caxis([cmin cmax]);
     colorbar
 end %POUR AFFICHAGE DES ZONES SELECTIONNÉES
-
+%colormap
+if get(handles.popup_ConnectogramColor,'value')==1 %jet colormap list only no mask need1
+    colormap("jet")
+elseif get(handles.popup_ConnectogramColor,'value')==2 %jet colormap mask/color needed  
+    colormap("jet")
+elseif    get(handles.popup_ConnectogramColor,'value')==3   %color by zone mask/color needed
+    colormap("jet") 
+    disp('to be improve when necessary')
+elseif get(handles.popup_ConnectogramColor,'value')==4   %black
+    %no sense keep jet
+     colormap("jet") 
+elseif get(handles.popup_ConnectogramColor,'value')==5   %cool
+    colormap('cool')
+elseif get(handles.popup_ConnectogramColor,'value')==6  %winter
+    colormap('winter')
+elseif get(handles.popup_ConnectogramColor,'value')==7  %parula
+     colormap('parula')
+elseif get(handles.popup_ConnectogramColor,'value')==8  %parula
+    colormap('parula')
+end
