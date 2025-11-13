@@ -21,8 +21,20 @@ function out = nirs_run_writeSNIRF(job)
         dall = [];
         Sessionid = numel(NIRS.Dt.fir.pp); %prendre la dernière session
     try %create a defauld batchHistory file with lionirs pipeline used
-    if 1 %print session history a .m not a step could be save... 
-    fid = fopen(fullfile(job.f_writeNIRSdir{1},'BatchHistory.m'),'w');
+    if isfield(job,'m_SNIRFBATCHhistory') %print session history a .m not a step could be save... 
+        if job.m_SNIRFBATCHhistory
+     if isfield(job,'c_SNIRFname')
+            if isfield(job.c_SNIRFname,'b_SNIRFnamespecific')
+                  name =  job.c_SNIRFname.b_SNIRFnamespecific.e_SNIRFnamespecific ;
+                  outfilebatch= [job.f_writeNIRSdir{1},filesep,name,'BatchHistory.m']   ;     
+            else
+                outfilebatch= fullfile(job.f_writeNIRSdir{1},'BatchHistory.m');
+            end
+        else
+            outfilebatch= fullfile(job.f_writeNIRSdir{1},'BatchHistory.m');
+     end
+
+    fid = fopen(outfilebatch,'w');
     for ibatch=1:numel(NIRS.Dt.fir.pp)
         jobinstruction = convertpretobatchname(NIRS.Dt.fir.pp(ibatch).pre);
         jobtext = ['matlabbatch{',num2str(ibatch),'}.',jobinstruction,'.'];       
@@ -97,7 +109,8 @@ function out = nirs_run_writeSNIRF(job)
         end
     end           
      fclose(fid);
-     disp(['Create log LIONirs as a Batch.m file : ', fullfile(job.f_writeNIRSdir{1},'BatchHistory.m') ])
+     disp(['Create log LIONirs as a Batch.m file : ', outfilebatch ])
+        end
     end
         catch
             
@@ -110,10 +123,25 @@ function out = nirs_run_writeSNIRF(job)
         if ~isdir(job.f_writeNIRSdir{1})
            mkdir(job.f_writeNIRSdir{1});
        end
-       if ~isdir([job.f_writeNIRSdir{1},filesep,name])
-           mkdir([job.f_writeNIRSdir{1},filesep,name]);
-       end       
-        outfile= [job.f_writeNIRSdir{1},filesep,name,filesep,name,'.snirf'];
+          
+        if isfield(job,'c_SNIRFname')
+            if isfield(job.c_SNIRFname,'b_SNIRFnamespecific')
+                  name =  job.c_SNIRFname.b_SNIRFnamespecific.e_SNIRFnamespecific; 
+                  outfile= [job.f_writeNIRSdir{1},filesep,name,'.snirf'];        
+            else
+                 if ~isdir([job.f_writeNIRSdir{1},filesep,name])
+                     mkdir([job.f_writeNIRSdir{1},filesep,name]);
+                 end 
+                outfile= [job.f_writeNIRSdir{1},filesep,name,filesep,name,'.snirf'];
+            end
+        else
+            outfile= [job.f_writeNIRSdir{1},filesep,name,filesep,name,'.snirf'];
+             if ~isdir([job.f_writeNIRSdir{1},filesep,name])
+                mkdir([job.f_writeNIRSdir{1},filesep,name]);
+            end 
+        end
+
+       
         d = d'; %data time point x channels
 
             SD = [];
@@ -189,7 +217,7 @@ function out = nirs_run_writeSNIRF(job)
                  SetDataType(snirf_saved.data.measurementList(k),1,'hbr');
              end
           end
-          disp('ModifyBeerLambertLaw apply data type change to hbo and hbr');
+          disp('ModifyBeerLambertLaw applied data type is define as HbO and HbR');
         end
     end
 

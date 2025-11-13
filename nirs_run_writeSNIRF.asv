@@ -97,7 +97,7 @@ function out = nirs_run_writeSNIRF(job)
         end
     end           
      fclose(fid);
-     disp(['Create log LIONirs as a Batch.m file : ', fullfile(job.f_writeNIRSdir{1},'BatchHistory.m')])
+     disp(['Create log LIONirs as a Batch.m file : ', fullfile(job.f_writeNIRSdir{1},'BatchHistory.m') ])
     end
         catch
             
@@ -112,8 +112,21 @@ function out = nirs_run_writeSNIRF(job)
        end
        if ~isdir([job.f_writeNIRSdir{1},filesep,name])
            mkdir([job.f_writeNIRSdir{1},filesep,name]);
-       end       
-        outfile= [job.f_writeNIRSdir{1},filesep,name,filesep,name,'.snirf'];
+       end     
+        if isfield(job,'c_SNIRFname')
+            if isfield(job.c_SNIRFname,'b_SNIRFnamespecific')
+                  name =  job.c_SNIRFname.b_SNIRFnamespecific.e_SNIRFnamespecific 
+                   outfile= [job.f_writeNIRSdir{1},filesep,name,'.snirf']
+
+        
+            else
+                outfile= [job.f_writeNIRSdir{1},filesep,name,filesep,name,'.snirf'];
+            end
+        else
+            outfile= [job.f_writeNIRSdir{1},filesep,name,filesep,name,'.snirf'];
+        end
+
+       
         d = d'; %data time point x channels
 
             SD = [];
@@ -145,30 +158,38 @@ function out = nirs_run_writeSNIRF(job)
             
              %need to have and aux file
             aux = zeros(size(d,1),1);
-    if ~isfield(SD,'SpatialUnit')
-        if mean(abs(SD.SrcPos(1,:)))>1 & mean(abs(SD.SrcPos(1,:)))<10 %probablement en cm
-            SD.SpatialUnit = 'cm';  %or mm depending on your probe design
-            disp(['Warning spatial unit field is missing , coordinate :',num2str(SD.SrcPos(1,:)),' seem to be in cm unit please verify your design.']);
-        elseif mean(abs(SD.SrcPos(1,:)))>10 & mean(abs(SD.SrcPos(1,:)))<100 %probablement en mm
-            SD.SpatialUnit = 'mm';  %or mm depending on your probe design
-            disp(['Warning spatial unit field is missing , coordinate :',num2str(SD.SrcPos(1,:)),' seem to be in mm unit please verify your design.']);
-        elseif mean(abs(SD.SrcPos(1,:)))<1
-            SD.SpatialUnit = 'm';  %or mm depending on your probe design
-            disp(['Warning spatial unit field is missing , coordinate :',num2str(SD.SrcPos(1,:)),' seem to be in meter unit please verify your design.']);
+        if ~isfield(SD,'SpatialUnit')
+            if mean(abs(SD.SrcPos(1,:)))>1 & mean(abs(SD.SrcPos(1,:)))<10 %probablement en cm
+                SD.SpatialUnit = 'cm';  %or mm depending on your probe design
+                disp(['Warning spatial unit field is missing , coordinate :',num2str(SD.SrcPos(1,:)),' seem to be in cm unit please verify your design.']);
+            elseif mean(abs(SD.SrcPos(1,:)))>10 & mean(abs(SD.SrcPos(1,:)))<100 %probablement en mm
+                SD.SpatialUnit = 'mm';  %or mm depending on your probe design
+                disp(['Warning spatial unit field is missing , coordinate :',num2str(SD.SrcPos(1,:)),' seem to be in mm unit please verify your design.']);
+            elseif mean(abs(SD.SrcPos(1,:)))<1
+                SD.SpatialUnit = 'm';  %or mm depending on your probe design
+                disp(['Warning spatial unit field is missing , coordinate :',num2str(SD.SrcPos(1,:)),' seem to be in meter unit please verify your design.']);
+            end
         end
-    end
-        
-   SD.Landmarks3D.pos = NIRS.Cf.H.F.r.o.mm;
-   SD.Landmarks3D.labels =  {'Nz'        
+        try
+            SD.Landmarks3D.pos = NIRS.Cf.H.F.r.o.mm;
+            SD.Landmarks3D.labels =  {'Nz'        
+                                    'LPA'
+                                    'RPA'};
+        catch %error compatibility mne si champs vide
+            SD.Landmarks3D.pos = [1 0 0;
+                                  0 -1 0;
+                                  0 1 0];
+            SD.Landmarks3D.labels =  {'Nz'        
                               'LPA'
                               'RPA'};
+        end
 
-   nirs= struct('d',d,'SD',SD,'t',t','s',s,'aux',aux);
+        nirs= struct('d',d,'SD',SD,'t',t','s',s,'aux',aux);
         % Save SNIRF: Convert .nirs format data to SnirfClass object, save it to .snirf file (HDF5)
         fprintf('Saving %s ...\n', outfile);
         
    
-     snirf_saved= SnirfClass(nirs);      
+        snirf_saved= SnirfClass(nirs);      
  
     %VERIFY IF 'ModifyBeerLambertLaw' WHERE APPLY
     %Change if unit DataType in measurementList when concentration when
@@ -181,7 +202,7 @@ function out = nirs_run_writeSNIRF(job)
                  SetDataType(snirf_saved.data.measurementList(k),1,'hbr');
              end
           end
-          disp('ModifyBeerLambertLaw apply data type change to hbo and hbr');
+          disp('ModifyBeerLambertLaw applied data type is define as HbO and HbR');
         end
     end
 
@@ -190,7 +211,7 @@ function out = nirs_run_writeSNIRF(job)
     end
     end
 
-out.NIRSmat = job.NIRSmat;
+    out.NIRSmat = job.NIRSmat;
 
 end
 
