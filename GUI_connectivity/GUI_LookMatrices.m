@@ -146,23 +146,46 @@ for isubject=2:size(info,1)
                 DATA{id}.MAT = MAT.meancorr;
             end
         catch
-            disp(['ERROR loading' ,fullfile(info{isubject,1}, info{isubject,2}),'.mat G',num2str(info{isubject,4})]);
-            DATA{id}.MAT = nan(size(DATA{1,1}.MAT));
-            DATA{id}.ZoneList  = DATA{1,1}.ZoneList;
+            info{isubject,1};
+            %try in load in the current drive windows only
+            pathmat = info{isubject,1};
+            try
+                MAT = load(fullfile([filepath(1),pathmat(2:end)],info{isubject,2}));
+                disp(['Load ' ,fullfile([filepath(1),pathmat(2:end)],info{isubject,2})])
+                if isfield(MAT,'ZoneList')
+                    DATA{id}.ZoneList = MAT.ZoneList;
+                    DATA{id}.MAT = MAT.meancorr;
+                end
+            catch
+                disp(['ERROR loading' ,fullfile(info{isubject,1}, info{isubject,2}),'.mat G',num2str(info{isubject,4})]);
+                DATA{id}.MAT = nan(size(DATA{1,1}.MAT));
+                DATA{id}.ZoneList  = DATA{1,1}.ZoneList;
+            end
         end
-    else
+    else 
         try
+        
             MAT = load(fullfile(info{isubject,1}, [info{isubject,2},'.mat']));
             disp(['Load ' ,fullfile(info{isubject,1}, info{isubject,2}),'.mat']);
             if isfield(MAT,'ZoneList') 
                 DATA{id}.ZoneList = MAT.ZoneList;
                 DATA{id}.MAT = MAT.meancorr;
             end
-        catch EM
-            %disp(['ERROR loading ' ,fullfile(info{isubject,1}, info{isubject,2}),'.mat']);
-            disp(EM.message)
-            DATA{id}.MAT = nan(size(DATA{1,1}.MAT));
-            DATA{id}.ZoneList  = DATA{1,1}.ZoneList; %probleme si 1 is  missing
+        catch          
+               try
+                pathmat = info{isubject,1};
+                MAT = load(fullfile([filepath(1),pathmat(2:end)],[info{isubject,2},'.mat']));
+                disp(['Load ' ,fullfile([filepath(1),pathmat(2:end)],[info{isubject,2},'.mat'])]);
+                if isfield(MAT,'ZoneList')
+                    DATA{id}.ZoneList = MAT.ZoneList;
+                    DATA{id}.MAT = MAT.meancorr;
+                end
+               catch EM            
+                    %disp(['ERROR loading ' ,fullfile(info{isubject,1}, info{isubject,2}),'.mat']);
+                    disp(EM.message)
+                    DATA{id}.MAT = nan(size(DATA{1,1}.MAT));
+                    DATA{id}.ZoneList  = DATA{1,1}.ZoneList; %probleme si 1 is  missing
+               end
         end
     end
 
