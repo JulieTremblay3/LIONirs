@@ -1009,20 +1009,28 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
 % figure;plot( d1(tmpGLM.indt(1):tmpGLM.indt(end),:))
         %add labelisbad
         pourcentagenoise = sum(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:)))./numel(d1(tmpGLM.indt(1):tmpGLM.indt(end),:));
-        if pourcentagenoise > (job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_labelbad_threshold/100)
-            labelisbad = 'bad';
+        if isfield(job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport,'c_extractglmlist_autoexport_no')
+            labelisbad = '';
         else
-             labelisbad = 'ok';
+            if pourcentagenoise > (job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_labelbad_threshold/100)
+                labelisbad = 'bad';
+            else
+                 labelisbad = 'ok';
+            end
         end
         pourcentagenoisebychHbO = sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),1:end/2))./numel(tmpGLM.indt(1):tmpGLM.indt(end))*100;
         pourcentagenoisebychHbR = sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),end/2+1:end))./numel(tmpGLM.indt(1):tmpGLM.indt(end))*100;
 
         pourcentagenoise = pourcentagenoise*100;
+        if isfield(job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport,'c_extractglmlist_autoexport_no')
+        
+        else
         if job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_nan_chrejected==1
             %(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:))./numel(d1(tmpGLM.indt(1):tmpGLM.indt(end),1)))
             ch_remove_for_int =(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:))./numel(d1(tmpGLM.indt(1):tmpGLM.indt(end),1)))< (job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_labelbad_threshold/100);
             %reshape(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:)),NC/2 ,2) 
         end 
+        end
             iRegressor =  2; 
         if isfield(NIRS.Dt,'AUX')
             for iAUX = 1:numel(NIRS.Dt.AUX)
