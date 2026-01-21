@@ -16,7 +16,7 @@ elseif strcmp(ext,'.txt')
 end
 
 for icol=1:size(rawData,2)
-        if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat folder')))
+        if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat')))
             id.NIRSDtp = icol;
         elseif strcmp(upper(deblank(rawData{1,icol})),upper('Type'))
             id.typeDtp =  icol;

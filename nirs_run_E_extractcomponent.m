@@ -891,7 +891,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
         id.Regressor = [];
     end
     for icol=1:size(rawData,2)
-        if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat folder')))
+        if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat')))
             id.NIRSDtp = icol;
         elseif strcmp(upper(deblank(rawData{1,icol})),upper('File'))
             id.fileDtp =  icol;
@@ -906,7 +906,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
             if strcmp(upper(deblank(rawData{1,icol})),upper(['X',num2str(i-1)]))
                 id.Regressor = [id.Regressor,icol];
             end
-        end
+        end 
     end
     try
         NIRSDtp = rawData(2:end,id.NIRSDtp );
@@ -919,7 +919,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
         AUXid = rawData(2:end,id.Regressor );
     catch
         msgbox(['Please verify the GLM extract xls file : ', job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile},...
-            ' have the following column information : NIRS.mat folder, File, tStart, tStop, label and Xn regressors'])
+            ' have the following column information : NIRS.mat, File, tStart, tStop, label and Xn regressors'])
     end
     
     try
@@ -1386,13 +1386,15 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
     end
     try
         filenamexls = fullfile(NIRSDtp{ievent},['Export ', labelid,'.xlsx']);  
-        A = {'NIRS.mat folder', 'Type', 'Label', 'Channel List','Name'};
+        A = {'NIRS.mat', 'Type', 'Label', 'Channel List','Name'};
         %CREATE XLS here
         namefilter=[labelid,'_',Regressorlist{1}]; 
         disp(['Suggested filter name ',  namefilter,' to export'])
         VAL = {NIRSDtp{ievent},'GLM', namefilter, [NIRSDtp{ievent}, 'channellist.txt'],namefilter};
         try
-        xlswrite(filenamexls,[A;VAL]);
+    %    xlswrite(filenamexls,[A;VAL]);
+        writecell([A;VAL],filenamexls)
+
         disp(['Create xls example file: ',filenamexls,' to help you to configure the Export list function to export component'])
         catch
         writetxtfile(filenamexls,[A;VAL]);
@@ -1414,7 +1416,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_PARAFAC')
     end
     
     for icol=1:size(rawData,2)
-        if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat folder')))
+        if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat')))
             id.NIRSDtp = icol;
         elseif strcmp(upper(deblank(rawData{1,icol})),upper('File'))
             id.fileDtp =  icol;
@@ -1605,7 +1607,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_AVG')
     end
     
     for icol=1:size(rawData,2)
-        if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat folder')))
+        if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat')))
             id.NIRSDtp = icol;
         elseif strcmp(upper(deblank(rawData{1,icol})),upper('File'))
             id.fileDtp =  icol;

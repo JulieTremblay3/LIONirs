@@ -253,7 +253,7 @@ end
 
     if isfield(job.c_createAUXauto,'b_HRFtriggeronset')
     if ~isfield(job.c_createAUXauto.b_HRFtriggeronset,'e_HRF_SDmodel')
-        A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0'};
+        A = {'NIRS.mat','File','Trig', 'tStart','tStop','label','X0'};
         VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-pretime),...
             num2cell(onsetall+postime), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1)  ];
         if isempty(raw);raw = [A;VAL];else; raw = [raw;VAL];end
@@ -262,7 +262,7 @@ end
              [pathdefault, ~,~]= fileparts(NIRS.Dt.fir.pp(1).p{1});
              disp(['Use default :',fullfile(pathdefault,'Global.zone'),' in the regression'])
              job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel = fullfile(pathdefault,'Global.zone');
-             A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0', 'X1'};
+             A = {'NIRS.mat','File','Trig', 'tStart','tStop','label','X0', 'X1'};
             nameSDfile =job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel;
             VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-pretime),...
             num2cell(onsetall+postime), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1),repmat({nameSDfile},numel(onsetall),1)  ];
@@ -272,20 +272,20 @@ end
              [pathdefault, ~,~]= fileparts(NIRS.Dt.fir.pp(1).p{1});
              disp(['Use default :',fullfile(pathdefault,'AllShortDistance.zone'),' in the regression'])
              job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel = fullfile(pathdefault,'AllShortDistance.zone');
-             	A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0', 'X1'};
+             	A = {'NIRS.mat','File','Trig', 'tStart','tStop','label','X0', 'X1'};
             nameSDfile =job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel; 
             VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-pretime),...
             num2cell(onsetall+postime), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1),repmat({nameSDfile},numel(onsetall),1)  ];
             if isempty(raw);raw = [A;VAL];else; raw = [raw;VAL];end
 
         elseif isfile(job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel)
-           	A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0', 'X1'};
+           	A = {'NIRS.mat','File','Trig', 'tStart','tStop','label','X0', 'X1'};
             nameSDfile =job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel; %'C:\data\FRESH\Analyzed\STAT_Motor\MotorSD.zone'
             VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-pretime),...
             num2cell(onsetall+postime), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1),repmat({nameSDfile},numel(onsetall),1)  ];
             if isempty(raw);raw = [A;VAL];else; raw = [raw;VAL];end
         else  % no additional regressor strcmp(job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel, 'No') | strcmp(job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel, ' ')
-            A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0'};
+            A = {'NIRS.mat','File','Trig', 'tStart','tStop','label','X0'};
             if isempty(pretime);pretime = 0;end
             if isempty(postime);postime = 0;end
             VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-pretime),...
@@ -295,7 +295,7 @@ end
     end
     elseif isfield(job.c_createAUXauto,'b_HRFxlsonset')
         if ~isfield(job.c_createAUXauto.b_HRFxlsonset,'e_HRF_SDmodel')
-            A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0'};
+            A = {'NIRS.mat','File','Trig', 'tStart','tStop','label','X0'};
             VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-pretime),...
                 num2cell(onsetall+postime), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1)  ];
             if isempty(raw);raw = [A;VAL];else; raw = [raw;VAL];end
@@ -304,7 +304,7 @@ end
                 [pathdefault, ~,~]= fileparts(NIRS.Dt.fir.pp(1).p{1});
                 disp(['Use default :',fullfile(pathdefault,'Global.zone'),' in the regression'])
                 job.c_createAUXauto.b_HRFxlsonset.e_HRF_SDmodel = fullfile(pathdefault,'Global.zone');
-                A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0', 'X1'};
+                A = {'NIRS.mat','File','Trig', 'tStart','tStop','label','X0', 'X1'};
                 nameSDfile =job.c_createAUXauto.b_HRFxlsonset.e_HRF_SDmodel;
                 VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-pretime),...
                     num2cell(onsetall+postime), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1),repmat({nameSDfile},numel(onsetall),1)  ];
@@ -314,21 +314,21 @@ end
                 [pathdefault, ~,~]= fileparts(NIRS.Dt.fir.pp(1).p{1});
                 disp(['Use default :',fullfile(pathdefault,'AllShortDistance.zone'),' in the regression'])
                 job.c_createAUXauto.b_HRFxlsonset.e_HRF_SDmodel = fullfile(pathdefault,'AllShortDistance.zone');
-                A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0', 'X1'};
+                A = {'NIRS.mat','File','Trig', 'tStart','tStop','label','X0', 'X1'};
                 nameSDfile =job.c_createAUXauto.b_HRFxlsonset.e_HRF_SDmodel;
                 VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-pretime),...
                     num2cell(onsetall+postime), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1),repmat({nameSDfile},numel(onsetall),1)  ];
                 if isempty(raw);raw = [A;VAL];else; raw = [raw;VAL];end
 
             elseif isfile(job.c_createAUXauto.b_HRFxlsonset.e_HRF_SDmodel) %isfile(job.c_createAUXauto.b_HRFxlsonset.e_HRF_SDmodel)
-                A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0', 'X1'};
+                A = {'NIRS.mat','File','Trig', 'tStart','tStop','label','X0', 'X1'};
                  disp(['Use default :',job.c_createAUXauto.b_HRFxlsonset.e_HRF_SDmodel,' in the regression'])
                 nameSDfile =job.c_createAUXauto.b_HRFxlsonset.e_HRF_SDmodel; %'C:\data\FRESH\Analyzed\STAT_Motor\MotorSD.zone'
                 VAL = [repmat(job.NIRSmat,numel(onsetall),1),  num2cell(fileall), num2cell(onsetall), num2cell(onsetall-pretime),...
                     num2cell(onsetall+postime), repmat({label},numel(onsetall),1) , repmat({label},numel(onsetall),1),repmat({nameSDfile},numel(onsetall),1)  ];
                 if isempty(raw);raw = [A;VAL];else; raw = [raw;VAL];end
             else  % no additional regressor strcmp(job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel, 'No') | strcmp(job.c_createAUXauto.b_HRFtriggeronset.e_HRF_SDmodel, ' ')
-                A = {'NIRS.mat folder','File','Trig', 'tStart','tStop','label','X0'};
+                A = {'NIRS.mat','File','Trig', 'tStart','tStop','label','X0'};
                 disp(['No additional regressor'])
                 if isempty(pretime);pretime = 0;end
                 if isempty(postime);postime = 0;end
@@ -350,7 +350,7 @@ catch
 end
 
 save(job.NIRSmat{1},'NIRS');
-
+ 
 out.NIRSmat = job.NIRSmat;
 
 

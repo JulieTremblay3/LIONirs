@@ -25,7 +25,7 @@ end
     rawxlsoutHBR = [{'Dir'},{'Observation'},{'ROI zone or ChannelList'},{'Label'} ]; % file to help to organised your statistics
     rawxlsoutHBRmean = [{'Dir'},{'Observation'},{'ROI zone or ChannelList'},{'Label'} ];
 for icol = 1:size(rawData,2)
-    if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat folder')))
+    if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat')))
         id.NIRSDtp = icol;
     elseif strcmp(upper(deblank(rawData{1,icol})),upper('Type'))
         id.typeDtp = icol;
