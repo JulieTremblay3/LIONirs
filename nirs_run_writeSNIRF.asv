@@ -21,8 +21,20 @@ function out = nirs_run_writeSNIRF(job)
         dall = [];
         Sessionid = numel(NIRS.Dt.fir.pp); %prendre la dernière session
     try %create a defauld batchHistory file with lionirs pipeline used
-    if 1 %print session history a .m not a step could be save... 
-    fid = fopen(fullfile(job.f_writeNIRSdir{1},'BatchHistory.m'),'w');
+    if isfield(job,'m_SNIRFBATCHhistory') %print session history a .m not a step could be save... 
+        if job.m_SNIRFBATCHhistory
+     if isfield(job,'c_SNIRFname')
+            if isfield(job.c_SNIRFname,'b_SNIRFnamespecific')
+                  name =  job.c_SNIRFname.b_SNIRFnamespecific.e_SNIRFnamespecific ;
+                  outfilebatch= [job.f_writeNIRSdir{1},filesep,name,'BatchHistory.m']   ;     
+            else
+                outfilebatch= fullfile(job.f_writeNIRSdir{1},'BatchHistory.m');
+            end
+        else
+            outfilebatch= fullfile(job.f_writeNIRSdir{1},'BatchHistory.m');
+     end
+
+    fid = fopen(outfilebatch,'w');
     for ibatch=1:numel(NIRS.Dt.fir.pp)
         jobinstruction = convertpretobatchname(NIRS.Dt.fir.pp(ibatch).pre);
         jobtext = ['matlabbatch{',num2str(ibatch),'}.',jobinstruction,'.'];       
@@ -97,7 +109,8 @@ function out = nirs_run_writeSNIRF(job)
         end
     end           
      fclose(fid);
-     disp(['Create log LIONirs as a Batch.m file : ', fullfile(job.f_writeNIRSdir{1},'BatchHistory.m') ])
+     disp(['Create log LIONirs as a Batch.m file : ', outfilebatch ])
+        end
     end
         catch
             
@@ -110,20 +123,22 @@ function out = nirs_run_writeSNIRF(job)
         if ~isdir(job.f_writeNIRSdir{1})
            mkdir(job.f_writeNIRSdir{1});
        end
-       if ~isdir([job.f_writeNIRSdir{1},filesep,name])
-           mkdir([job.f_writeNIRSdir{1},filesep,name]);
-       end     
+          
         if isfield(job,'c_SNIRFname')
             if isfield(job.c_SNIRFname,'b_SNIRFnamespecific')
-                  name =  job.c_SNIRFname.b_SNIRFnamespecific.e_SNIRFnamespecific 
-                   outfile= [job.f_writeNIRSdir{1},filesep,name,'.snirf']
-
-        
+                  name =  job.c_SNIRFname.b_SNIRFnamespecific.e_SNIRFnamespecific; 
+                  outfile= [job.f_writeNIRSdir{1},filesep,name,'.snirf'];        
             else
+                 if ~isdir([job.f_writeNIRSdir{1},filesep,name])
+                     mkdir([job.f_writeNIRSdir{1},filesep,name]);
+                 end 
                 outfile= [job.f_writeNIRSdir{1},filesep,name,filesep,name,'.snirf'];
             end
         else
             outfile= [job.f_writeNIRSdir{1},filesep,name,filesep,name,'.snirf'];
+             if ~isdir([job.f_writeNIRSdir{1},filesep,name])
+                mkdir([job.f_writeNIRSdir{1},filesep,name]);
+            end 
         end
 
        
@@ -149,6 +164,12 @@ function out = nirs_run_writeSNIRF(job)
              %Trig 2 sample of time 2 et 1733, 
              %Trig 1 sample 
              nbmaxtrig =  max(aux5(:,1));
+             if min(aux5(:,1))==0
+                 disp(['WARNING TRIG 0 could not be indexed in S structure in .snirf file, it will be replace as additional trig of value =', num2str(nbmaxtrig+1)])
+                aux5(aux5(:,1)==0,1) = nbmaxtrig+1;
+             end
+
+
              s = zeros(numel(t), nbmaxtrig);
              for i = 1:size(aux5,1)
                  s(aux5(i,2),aux5(i,1))=1;

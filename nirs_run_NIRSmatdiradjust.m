@@ -1,10 +1,17 @@
 function out = nirs_run_NIRSmatdiradjust(job)
 for imat =1:numel(job.NIRSmat)
-load(job.NIRSmat{imat,1});
-[NIRSmatnewdir,name,ext] = fileparts(job.NIRSmat{imat,1});
+    %linux mac compatibility check '/' et '\' and use filesep
+
+    filenameNIRSmat = job.NIRSmat{imat,1};
+    idbackslash = strfind(filenameNIRSmat,'\');
+    idslach = strfind(filenameNIRSmat,'/');
+    filenameNIRSmat([idbackslash,idslach ])=filesep;
+    load(filenameNIRSmat);
+
+[NIRSmatnewdir,name,ext] = fileparts(filenameNIRSmat);
 
 for imodule = numel(NIRS.Dt.fir.pp):-1:1
-    if imodule == 2
+    if imodule == 2 
         1;
     end
     for ifile = 1:numel(NIRS.Dt.fir.pp(imodule).p) 
@@ -96,7 +103,7 @@ if isfield(job.c_MultimodalPath,'b_MultimodalPath_yes')
     end
 end
 
-save(job.NIRSmat{imat,1},'NIRS');
+save(filenameNIRSmat ,'NIRS');
 clear NIRS
 end
-out.NIRSmat = job.NIRSmat;
+out.NIRSmat = {filenameNIRSmat};

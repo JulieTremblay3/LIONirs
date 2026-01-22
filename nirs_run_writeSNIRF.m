@@ -164,6 +164,12 @@ function out = nirs_run_writeSNIRF(job)
              %Trig 2 sample of time 2 et 1733, 
              %Trig 1 sample 
              nbmaxtrig =  max(aux5(:,1));
+             if min(aux5(:,1))==0
+                 disp(['WARNING TRIG 0 could not be indexed in S structure in .snirf file, it will be replace as additional trig of value =', num2str(nbmaxtrig+1)])
+                aux5(aux5(:,1)==0,1) = nbmaxtrig+1;
+             end
+
+
              s = zeros(numel(t), nbmaxtrig);
              for i = 1:size(aux5,1)
                  s(aux5(i,2),aux5(i,1))=1;
