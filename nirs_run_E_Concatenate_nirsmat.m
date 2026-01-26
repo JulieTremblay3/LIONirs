@@ -17,27 +17,50 @@ if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
             disp(['Could not open file: ', job.f_nirsmatinfo{1}])
         end
     end
-elseif strcmp(ext,'.txt')
+elseif strcmp(ext,'.txt')|strcmp(ext,'.csv')
     [data, text, rawData] = readtxtfile_asxlsread(job.f_nirsmatinfo{1});
 end
   idok = 0; 
 NIRSDtp = rawData(2:end,1);
 ListDtp = rawData(2:end,2);
+
+%linux mac compatibility
+for ifilenb = 1:numel(NIRSDtp)
+    filenameNIRSmat = NIRSDtp{ifilenb};
+    idbackslash = strfind(filenameNIRSmat,'\');
+    idslach = strfind(filenameNIRSmat,'/');
+    filenameNIRSmat([idbackslash,idslach ])=filesep;
+    NIRSDtp{ifilenb} = filenameNIRSmat;
+end
+
+
 [pathoutlist, namelist, ext] = fileparts(job.f_nirsmatinfo{1});
   fidtxt = fopen(fullfile(pathoutlist,'report.txt'),'w');fs=0;
 fprintf(fidtxt,'Nb\tFile\tsamplestart\tsamplestop\ttstart\ttstop\r\n');
 
-temp = ListDtp{1}
+temp = ListDtp{1};
 if strcmp(temp(end-3:end),'zone')% USE ZONE TEMPLATE FIRST TO LOOK IN OTHER FILE    
     dall = [];
     ind_dur_chtmp =[];
     labeltmp=[] ;
     aux5 = []; %keep as important structure built in trigger
     sizebloc = 0;
-    for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat file
-        NIRS = [];       
-        try
-        load(fullfile(NIRSDtp{filenb},'NIRS.mat'));    
+for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat file
+    NIRS = [];       
+    try
+       tmp = NIRSDtp{filenb};
+       if strcmp(tmp(end-7:end),'NIRS.mat')
+            load(fullfile(NIRSDtp{filenb}));    
+       else 
+           try
+            load(fullfile(NIRSDtp{filenb},'NIRS.mat'));    
+           catch
+            disp(['Could not open file: ',  fullfile(NIRSDtp{filenb},'NIRS.mat')] )
+           end
+
+       end
+     
+        try       
         lst = length(NIRS.Dt.fir.pp);
         NC = NIRS.Cf.H.C.N;
         fs = NIRS.Cf.dev.fs; 
@@ -133,6 +156,7 @@ if strcmp(temp(end-3:end),'zone')% USE ZONE TEMPLATE FIRST TO LOOK IN OTHER FILE
         end 
      
     end
+end
         newsizebloc = size(dall,2);
         [dir1,fil1,ext1] = fileparts(rDtp{1,1});
         fil1 = namelist;                
@@ -176,16 +200,10 @@ if strcmp(temp(end-3:end),'zone')% USE ZONE TEMPLATE FIRST TO LOOK IN OTHER FILE
             '',... %Channel Units
             NIRS.Cf.H.C.n,... %names given as a column of cells
             1/NIRS.Cf.dev.fs*1e6,... %SamplingInterval in microseconds
-            NIRS.Dt.fir.sizebloc); %SamplingInterval in microseconds 
+            NIRS.Dt.fir.sizebloc); %SamplingInterval in microseconds    
+
     
-    
-    
-    
-else %CASE LIST CHANNEL 
-    
-    
-    
-    
+else %CASE LIST CHANNEL    
 
 dall = [];
 ind_dur_chtmp =[];
@@ -198,8 +216,13 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
        tmp = NIRSDtp{filenb};
        if strcmp(tmp(end-7:end),'NIRS.mat')
             load(fullfile(NIRSDtp{filenb}));    
-       else
+       else 
+           try
             load(fullfile(NIRSDtp{filenb},'NIRS.mat'));    
+           catch
+            disp(['Could not open file: ',  fullfile(NIRSDtp{filenb},'NIRS.mat')] )
+           end
+
        end
  
     lst = length(NIRS.Dt.fir.pp);
@@ -321,10 +344,7 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
        elseif job.m_Concatenate_Exclude == 1 %keep all
            
        end
-       
-       
-       
-       
+
        if job.m_Concatenate_Normalized==0 %noting
     
             dall = [dall, d(chlst,:)];
@@ -345,13 +365,10 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
            stdval = nanstd(tmp(:));
            dzscore= (d(chlst,:)-meanval)./ stdval;
            dall = [dall, dzscore];
-       end
-            
-         
-         
+       end          
+                 
         [label_all,ind_dur_ch_all] = read_vmrk_all(infilevmrk);   
-        %transfert in matrix to adjust channel
-        
+        %transfert in matrix to adjust channel        
         ind_dur_ch_all(:,1)=ind_dur_ch_all(:,1)+ sizebloc;       
         ind_dur_chtmp = [ind_dur_chtmp;ind_dur_ch_all];
         labeltmp = [labeltmp;label_all];
@@ -374,7 +391,7 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
         samplestart = [0];
          sampleend = [0];
          fprintf(fidtxt,'%s\t','ND'); 
-    end 
+    end  
      
     fprintf(fidtxt,'%s\t%6.0f\t%6.0f\t%6.2f\t%6.2f\r\n', NIRSDtp{filenb}, samplestart, sampleend, samplestart/fs, sampleend/fs);
 end
@@ -434,12 +451,7 @@ if isfield(NIRS.Dt,'Video')
 end
 if isfield(NIRS.Dt,'Audio')
    NIRS.Dt = rmfield(NIRS.Dt,'Audio') ;
-end
-
-
-          
+end         
         job.NIRSmat{1} =fullfile(pathoutlist,'NIRS.mat');          
         save(fullfile(pathoutlist,'NIRS.mat'),'NIRS')
         out.NIRSmat = job.NIRSmat;
-
-

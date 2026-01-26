@@ -1133,7 +1133,7 @@ end
 f_nirsmatinfo         = cfg_files;
 f_nirsmatinfo.name    = 'Enter NIRS.mat list to group (xls)'; 
 f_nirsmatinfo.tag     = 'f_nirsmatinfo';       %file names
-f_nirsmatinfo.filter  = {'xlsx','xls','txt'};
+f_nirsmatinfo.filter  = {'xlsx','xls','txt','csv'};
 f_nirsmatinfo.ufilter = '.*';    
 f_nirsmatinfo.num     = [1 Inf];     % Number of inputs required 
 f_nirsmatinfo.help    = {'Create the list of subjects to group in a new folder example: ./GrandAverage/List.xlsx.',...

@@ -17,12 +17,23 @@ if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
             disp(['Could not open file: ', job.f_nirsmatinfo{1}])
         end
     end
-elseif strcmp(ext,'.txt')
+elseif strcmp(ext,'.txt')|strcmp(ext,'.csv')
     [data, text, rawData] = readtxtfile_asxlsread(job.f_nirsmatinfo{1});
 end
   idok = 0; 
 NIRSDtp = rawData(2:end,1);
 ListDtp = rawData(2:end,2);
+
+%linux mac compatibility
+for ifilenb = 1:numel(NIRSDtp)
+    filenameNIRSmat = NIRSDtp{ifilenb};
+    idbackslash = strfind(filenameNIRSmat,'\');
+    idslach = strfind(filenameNIRSmat,'/');
+    filenameNIRSmat([idbackslash,idslach ])=filesep;
+    NIRSDtp{ifilenb} = filenameNIRSmat;
+end
+
+
 [pathoutlist, namelist, ext] = fileparts(job.f_nirsmatinfo{1});
   fidtxt = fopen(fullfile(pathoutlist,'report.txt'),'w');fs=0;
 fprintf(fidtxt,'Nb\tFile\tsamplestart\tsamplestop\ttstart\ttstop\r\n');
@@ -148,7 +159,7 @@ if strcmp(temp(end-3:end),'zone')% USE ZONE TEMPLATE FIRST TO LOOK IN OTHER FILE
         if isfield(NIRS.Dt.fir,'pp')
             NIRS.Dt.fir = rmfield(NIRS.Dt.fir, 'pp');
             NIRS.Dt.fir.pp(1).p = {outfile};
-            NIRS.Dt.fir.pp(1).pre = 'Concatenate File';
+            NIRS.Dt.fir.pp(1).pre = 'Concatenate nirs.mat Files';
             NIRS.Dt.fir.pp(1).job = job;   
          end
          if isfield(NIRS.Dt.fir,'aux5')
@@ -198,8 +209,13 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
        tmp = NIRSDtp{filenb};
        if strcmp(tmp(end-7:end),'NIRS.mat')
             load(fullfile(NIRSDtp{filenb}));    
-       else
+       else 
+           try
             load(fullfile(NIRSDtp{filenb},'NIRS.mat'));    
+           catch
+            disp(['Could not open file: ',  fullfile(NIRSDtp{filenb},'NIRS.mat')] )
+           end
+
        end
  
     lst = length(NIRS.Dt.fir.pp);
@@ -373,9 +389,9 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
         linereport = ['Missing file:', NIRSDtp{filenb}];
         samplestart = [0];
          sampleend = [0];
-         fprintf(fidtxt,'%s\t','ND');
-    end
-    
+         fprintf(fidtxt,'%s\t','ND'); 
+    end  
+     
     fprintf(fidtxt,'%s\t%6.0f\t%6.0f\t%6.2f\t%6.2f\r\n', NIRSDtp{filenb}, samplestart, sampleend, samplestart/fs, sampleend/fs);
 end
         fclose(fidtxt);
