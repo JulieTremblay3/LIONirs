@@ -74,6 +74,20 @@ end
      A = N_events;
      save(fullfile(dir1,['ONESAMPLE_N_events_',  num2str(alphatr),'.mat']),'A','zonelist')
      disp(['Save: ',fullfile(dir1,['ONESAMPLE_N_events_',  num2str(alphatr),'.mat'])]);
+        try
+            namech = info.zonelistG1{1};
+            for i=1:size(info.AllG1,1)
+                tmp =[num2str(i),'_', namech{i,1}];
+                tmp(isspace( tmp ))=[];
+                label{1,i}=tmp;
+            end
+                 raw = [[{'Subject '},label];
+                [info.G1, num2cell(info.AllG1',[size(info.AllG1')])]];
+                writetxtfile_asxlswrite(fullfile(dir1,['listevents','.csv']),raw);
+                disp(['Save: ',fullfile(dir1,['listevents','.csv'])]);
+                disp('Useful for external statistic')
+        catch
+        end 
 elseif isfield(job.c_statcomponent,'b_Ttestpaired')   
     if job.c_statcomponent.b_Ttestpaired.m_TtestOneSample == 1
         info.tail = 'both';
