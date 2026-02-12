@@ -35,7 +35,7 @@ end
 
 
 [pathoutlist, namelist, ext] = fileparts(job.f_nirsmatinfo{1});
-  fidtxt = fopen(fullfile(pathoutlist,'report.txt'),'w');fs=0;
+  fidtxt = fopen(fullfile(pathoutlist,'report.txt'),'w');%fs=0;
 fprintf(fidtxt,'Nb\tFile\tsamplestart\tsamplestop\ttstart\ttstop\r\n');
 
 temp = ListDtp{1};
@@ -156,6 +156,11 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
         end 
      
     end
+    samplestart =   size(dall,2) -  size(dzone,2)+1;
+     sampleend = size(dall,2);
+        fprintf(fidtxt,'%s\t%6.0f\t%6.0f\t%6.2f\t%6.2f\r\n', NIRSDtp{filenb}, samplestart, sampleend, samplestart/fs, sampleend/fs);
+
+
 end
         newsizebloc = size(dall,2);
         [dir1,fil1,ext1] = fileparts(rDtp{1,1});
@@ -202,7 +207,6 @@ end
             1/NIRS.Cf.dev.fs*1e6,... %SamplingInterval in microseconds
             NIRS.Dt.fir.sizebloc); %SamplingInterval in microseconds    
 
-    
 else %CASE LIST CHANNEL    
 
 dall = [];
@@ -212,7 +216,7 @@ aux5 = []; %keep as important structure built in trigger
 sizebloc = 0;
 for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat file
     NIRS = [];       
-    try
+ %   try
        tmp = NIRSDtp{filenb};
        if strcmp(tmp(end-7:end),'NIRS.mat')
             load(fullfile(NIRSDtp{filenb}));    
@@ -385,19 +389,19 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
      sampleend = size(dall,2);
      idok = idok  + 1;
       fprintf(fidtxt,'%d\t',idok);
-    catch
-        disp(['Missing file:', NIRSDtp{filenb}]);
-        linereport = ['Missing file:', NIRSDtp{filenb}];
-        samplestart = [0];
-         sampleend = [0];
-         fprintf(fidtxt,'%s\t','ND'); 
-    end  
+  %  catch
+        % disp(['Missing file:', NIRSDtp{filenb}]);
+        % linereport = ['Missing file:', NIRSDtp{filenb}];
+        % samplestart = [0];
+        %  sampleend = [0];
+        %  fprintf(fidtxt,'%s\t','ND'); 
+   % end  
      
     fprintf(fidtxt,'%s\t%6.0f\t%6.0f\t%6.2f\t%6.2f\r\n', NIRSDtp{filenb}, samplestart, sampleend, samplestart/fs, sampleend/fs);
 end
         fclose(fidtxt);
         newsizebloc = size(dall,2);
-        [dir1,fil1,ext1] = fileparts(rDtp{1,1});
+        [dir1,fil1,ext1] = fileparts(rDtp{1,1}); 
         fil1 = namelist;                
         outfile = fullfile(pathoutlist,[prefix fil1 ext1]);
         outfilevmrk = fullfile(pathoutlist,[prefix fil1 '.vmrk']);

@@ -1397,7 +1397,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
 
         disp(['Create xls example file: ',filenamexls,' to help you to configure the Export list function to export component'])
         catch
-        writetxtfile(filenamexls,[A;VAL]);
+        writetxtfile_asxlswrite(filenamexls,[A;VAL]);
         disp(['Create xls example file: ',filenamexls,' to help you to configure the Export list function to export component'])
         end
     catch

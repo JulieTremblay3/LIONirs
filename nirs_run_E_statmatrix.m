@@ -498,20 +498,14 @@ elseif isfield(job.c_statmatrix,'b_TtestOneSamplematrix')
     catch
     end
     %  dir1 = job.e_statmatrixPath{1};
-    try
-        if ismac
-            % Code to run on Mac platform problem with xlswrite
-            writetxtfile(fullfile(dir1,[name,labelnode,GRname,'SimpleTtest.txt']),infonew);
-            disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'SimpleTtest.txt'])]);
-        else
+    try      
             try
                 xlswrite(fullfile(dir1,[name,labelnode,GRname,'SimpleTtest.xlsx']),infonew);
                 disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,'SimpleTtest.xlsx'])]);
             catch
-                writetxtfile(fullfile(dir1,[name,labelnode,'SimpleTtest.txt']),infonew);
+                writetxtfile_asxlswrite(fullfile(dir1,[name,labelnode,'SimpleTtest.txt']),infonew);
                 disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,GRname,'SimpleTtest.txt'])]);
-            end
-        end
+            end    
     catch
         disp(['Error could not save .xlsx file: ' fullfile(dir1,[name,labelnode,GRname 'SimpleTtest.xlsx'])]);
     end
@@ -763,19 +757,13 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
     end
     %  dir1 = job.e_statmatrixPath{1};
     try
-        if ismac
-            % Code to run on Mac platform problem with xlswrite
-            writetxtfile(fullfile(dir1,[name,labelnode,GRname,'UnpairedTtest.txt']),infonew);
-            disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,GRname,'UnpairedTtest.txt'])]);
-        else
-            try
+           try
                 xlswrite(fullfile(dir1,[name,labelnode,GRname,'UnpairedTtest.xlsx']),infonew);
                 disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,GRname,'UnpairedTtest.xlsx'])]);
             catch
-                writetxtfile(fullfile(dir1,[name,labelnode,GRname,'UnpairedTtest.txt']),infonew);
+                writetxtfile_asxlswrite(fullfile(dir1,[name,labelnode,GRname,'UnpairedTtest.txt']),infonew);
                 disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,GRname,'UnpairedTtest.txt'])]);
-            end
-        end
+           end        
     catch
         disp(['Error could not save .xlsx file: ' fullfile(dir1,[name,labelnode,GRname 'UnpairedTtest.xlsx'])]);
     end
@@ -965,23 +953,16 @@ elseif isfield(job.c_statmatrix,'b_PermutationTest')
         end
     catch
     end
-    if ismac
-        % Code to run on Mac platform problem with xlswrite
-        [filepath,name,ext] = fileparts(xlslistfile);
-        writetxtfile(fullfile(dir1,[name,GRname,labelnode,num2str(NPERM),'PermutationTtest.txt']),infonew);
-        disp(['Result .txt file saved: ' fullfile(dir1,[name,'_',labelnode,num2str(NPERM),'PermutationTtest.txt'])]);
-
-    else
+   
         [filepath,name,ext] = fileparts(xlslistfile);
         try
             xlswrite(fullfile(dir1,[name,GRname,labelnode,num2str(NPERM),'PermutationTtest.xlsx']),infonew);
             disp(['Result .xlsx file saved ' fullfile(dir1,[name,'_',labelnode,num2str(NPERM),'PermutationTtest.xlsx'])]);
         catch
-            writetxtfile(fullfile(dir1,[name,GRname,labelnode,num2str(NPERM),'PermutationTtest.txt']),infonew);
+            writetxtfile_asxlswrite(fullfile(dir1,[name,GRname,labelnode,num2str(NPERM),'PermutationTtest.txt']),infonew);
             disp(['Result .xlsx file saved ' fullfile(dir1,[name,'_',labelnode,num2str(NPERM),'PermutationTtest.txt'])]);
         end
-    end
-
+    
 elseif isfield(job.c_statmatrix,'b_exportNBSformat')%
     dir1 = job.e_statmatrixPath{1};
     if ~isdir(dir1)
@@ -1099,21 +1080,16 @@ elseif isfield(job.c_statmatrix,'b_PearsonCorr_Mat')
         copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
     catch
     end
-    if ismac
-        % Code to run on Mac platform problem with xlswrite
-        [filepath,name,ext] = fileparts(xlslistfile);
-        writetxtfile(fullfile(dir1,['PearsonCorrelation.txt']),infonew);
-        disp(['Result .txt file saved: ' fullfile(dir1,['PearsonCorrelation.txt'])])
-    else
+
         [filepath,name,ext] = fileparts(xlslistfile);
         try
             xlswrite(fullfile(dir1,['PearsonCorrelation.xlsx']),infonew);
             disp(['Result .xlsx file saved ' fullfile(dir1,['PearsonCorrelationPermutationTtest.xlsx'])]);
         catch
-            writetxtfile(fullfile(dir1,['PearsonCorrelation.txt']),infonew);
+            writetxtfile_asxlswrite(fullfile(dir1,['PearsonCorrelation.txt']),infonew);
             disp(['Result .xlsx file saved ' fullfile(dir1,['PearsonCorrelationPermutationTtest.xlsx'])]);
         end
-    end
+   
 elseif isfield(job.c_statmatrix,'b_GLM_Mat')
 
     dir1 = job.e_statmatrixPath{1};
@@ -1381,21 +1357,16 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
             copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
         catch
         end
-        if ismac
-            % Code to run on Mac platform problem with xlswrite
-            [filepath,name,ext] = fileparts(xlslistfile);
-            writetxtfile(fullfile(dir1,['GLM.txt']),infonew);
-            disp(['Result .txt file saved: ' fullfile(dir1,['GLM.txt'])]);
-        else
+       
             [filepath,name,ext] = fileparts(xlslistfile);
             try
                 xlswrite(fullfile(dir1,['GLM.xlsx']),infonew);
                 disp(['Result .xlsx file saved ' fullfile(dir1,['GLM.xlsx'])]);
             catch
-                writetxtfile(fullfile(dir1,['GLM.txt']),infonew);
+                 writetxtfile_asxlswrite(fullfile(dir1,['GLM.txt']),infonew);
                 disp(['Result .txt file saved: ' fullfile(dir1,['GLM.txt'])]);
             end
-        end
+        
     elseif isfield(job.c_statmatrix.b_GLM_Mat.c_statpermutation,'b_permutation')
         'WARNING NO TESTED !'
 
@@ -1586,7 +1557,7 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
             xlswrite(fullfile(dir1,['CLUSTER.xlsx']),infonew);
             disp(['Result .xlsx file saved ' fullfile(dir1,['CLUSTER.xlsx'])]);
         catch
-            writetxtfile(fullfile(dir1,['CLUSTER.xlsx']),infonew);
+             writetxtfile_asxlswrite(fullfile(dir1,['CLUSTER.xlsx']),infonew);
             disp(['Result .xlsx file saved ' fullfile(dir1,['CLUSTER.xlsx'])]);
         end
 
@@ -1685,7 +1656,7 @@ elseif isfield(job.c_statmatrix,'b_LM_Mat')
             xlswrite(fullfile(dir1,['lm', LMformula, '.xlsx']),infonew);
             disp(['Result .xlsx file saved ' fullfile(dir1,['lm', LMformula, '.xlsx'])]);
         catch
-            writetxtfile(fullfile(dir1,['lm', LMformula, '.xlsx']),infonew)
+            writetxtfile_asxlswrite(fullfile(dir1,['lm', LMformula, '.xlsx']),infonew)
             disp(['Result .xlsx file saved ' fullfile(dir1,['lm', LMformula, '.xlsx'])]);
         end
     end
@@ -1830,7 +1801,7 @@ elseif isfield(job.c_statmatrix,'b_LM_Mat')
             xlswrite(fullfile(dir1,['CLUSTER',neighbourdist,'_',minnbchan,'_',num2str(alpha_threshold),' .xlsx']),infonew);
             disp(['Result .xlsx file saved ' fullfile(dir1,['CLUSTER',neighbourdist,'_',minnbchan,'_',num2str(alpha_threshold),'.xlsx'])]);
         catch
-            writetxtfile(fullfile(dir1,['CLUSTER',neighbourdist,'_',minnbchan,'_',num2str(alpha_threshold),'.xlsx']),infonew);
+             writetxtfile_asxlswrite(fullfile(dir1,['CLUSTER',neighbourdist,'_',minnbchan,'_',num2str(alpha_threshold),'.xlsx']),infonew);
             disp(['Result .xlsx file saved ' fullfile(dir1,['CLUSTER',neighbourdist,'_',minnbchan,'_',num2str(alpha_threshold),'.xlsx'])]);
         end
     end
@@ -2005,7 +1976,7 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
             xlswrite(fullfile(dir1,['lme', 'model', '.xlsx']),infonew);
             disp(['Result .xlsx file saved ' fullfile(dir1,['lme', LMEformula, '.xlsx'])]);
         catch
-            writetxtfile(fullfile(dir1,['lme', 'model', '.xlsx']),infonew)
+             writetxtfile_asxlswrite(fullfile(dir1,['lme', 'model', '.xlsx']),infonew)
             disp(['Result .xlsx file saved ' fullfile(dir1,['lme', LMEformula, '.xlsx'])]);
         end
     end %use precomputed value to speed up test
@@ -2134,7 +2105,7 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
             xlswrite(fullfile(dir1,['CLUSTER.xlsx']),infonew);
             disp(['Result .xlsx file saved ' fullfile(dir1,['CLUSTER.xlsx'])]);
         catch
-            writetxtfile(fullfile(dir1,['CLUSTER.xlsx']),infonew);
+             writetxtfile_asxlswrite(fullfile(dir1,['CLUSTER.xlsx']),infonew);
             disp(['Result .xlsx file saved ' fullfile(dir1,['CLUSTER.xlsx'])]);
         end
     end
@@ -2413,19 +2384,14 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest')
     end
     %  dir1 = job.e_statmatrixPath{1};
     try
-        if ismac
-            % Code to run on Mac platform problem with xlswrite
-            writetxtfile(fullfile(dir1,[name,labelnode,GRname,'PAIREDTtest.txt']),infonew);
-            disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'PAIREDTtest.txt'])]);
-        else
             try
                 xlswrite(fullfile(dir1,[name,labelnode,GRname,'PAIREDTtest.xlsx']),infonew);
                 disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,'PAIREDTtest.xlsx'])]);
             catch
-                writetxtfile(fullfile(dir1,[name,labelnode,GRname,'PAIREDTtest.txt']),infonew);
+                 writetxtfile_asxlswrite(fullfile(dir1,[name,labelnode,GRname,'PAIREDTtest.txt']),infonew);
                 disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,GRname,'PAIREDTtest.txt'])]);
             end
-        end
+      
     catch
         disp(['Error could not save .xlsx file: ' fullfile(dir1,[name,labelnode,GRname,'PAIREDTtest.xlsx'])]);
     end
@@ -2457,19 +2423,15 @@ elseif isfield(job.c_statmatrix,'b_zscore_Mat')
     end
     %  dir1 = job.e_statmatrixPath{1};
     try
-        if ismac
-            % Code to run on Mac platform problem with xlswrite
-            writetxtfile(fullfile(dir1,[name,labelnode,'zscore.txt']),infonew);
-            disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'zscore.txt'])]);
-        else
+
             try
                 xlswrite(fullfile(dir1,[name,labelnode,'zscore.xlsx']),infonew);
                 disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,'zscore.xlsx'])]);
             catch
-                writetxtfile(fullfile(dir1,[name,labelnode,'zscore.txt']),infonew);
+                writetxtfile_asxlswrite(fullfile(dir1,[name,labelnode,'zscore.txt']),infonew);
                 disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'zscore.txt'])]);
             end
-        end
+       
     catch
         disp(['Error could not save .xlsx file: ' fullfile(dir1,[name,labelnode,'zscore.xlsx'])]);
     end
@@ -2811,20 +2773,15 @@ elseif isfield(job.c_statmatrix,'b_anova1_Mat')
     catch
     end
     
-
-    if ismac
-        % Code to run on Mac platform problem with xlswrite
-        writetxtfile(fullfile(dir1,[name,labelnode,'GR ',num2str(GROUPELIST),' Anova.txt']),infonew);
-        disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'GR ',num2str(GROUPELIST),' Anova.txt'])]);
-    else
+  
         try
             xlswrite(fullfile(dir1,[name,labelnode,'GR ',num2str(GROUPELIST),' Anova.xlsx']),infonew);
             disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,'GR ',num2str(GROUPELIST),' Anova.xlsx'])]);
         catch
-            writetxtfile(fullfile(dir1,[name,labelnode,'GR ',num2str(GROUPELIST),' Anova.txt']),infonew);
+            writetxtfile_asxlswrite(fullfile(dir1,[name,labelnode,'GR ',num2str(GROUPELIST),' Anova.txt']),infonew);
             disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'GR ',num2str(GROUPELIST),' Anova.txt'])]);
         end
-    end
+   
 elseif isfield(job.c_statmatrix,'b_ANCOVA_Mat') %version de matlab juste une covariable abandonné remplacé par mancovan
     dir1 = job.e_statmatrixPath{1};
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
@@ -3037,19 +2994,15 @@ elseif isfield(job.c_statmatrix,'b_ANCOVA_Mat') %version de matlab juste une cov
     if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
         copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid))
     end
-    if ismac
-        % Code to run on Mac platform problem with xlswrite
-        writetxtfile(fullfile(dir1,[name,labelnode,'Ancova', 'GR ',num2str(GROUPELIST), '.txt']),infonew);
-        disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'Ancova', 'GR ',num2str(GROUPELIST), '.txt'])]);
-    else
+   
         try
             xlswrite(fullfile(dir1,[name,labelnode,'Ancova', ' GR ',num2str(GROUPELIST), '.xlsx']),infonew);
             disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,'Ancova', ' GR ',num2str(GROUPELIST), '.xlsx'])]);
         catch
-            writetxtfile(fullfile(dir1,[name,labelnode,'Ancova', ' GR ',num2str(GROUPELIST), '.txt']),infonew);
+            writetxtfile_asxlswrite(fullfile(dir1,[name,labelnode,'Ancova', ' GR ',num2str(GROUPELIST), '.txt']),infonew);
             disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'Ancova', ' GR ',num2str(GROUPELIST), '.txt'])]);
         end
-    end
+   
 
 
 
@@ -3246,20 +3199,14 @@ elseif isfield(job.c_statmatrix,'b_anovarep_Mat')
     end
     catch
     end
-
-    if ismac
-        % Code to run on Mac platform problem with xlswrite
-        writetxtfile(fullfile(dir1,[name,labelnode,'RepAnova.txt']),infonew);
-        disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'RepAnova.txt'])]);
-    else
         try
             xlswrite(fullfile(dir1,[name,labelnode,'RepAnova.xlsx']),infonew);
             disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,'RepAnova.xlsx'])]);
         catch
-            writetxtfile(fullfile(dir1,[name,labelnode,'RepAnova.txt']),infonew);
+             writetxtfile_asxlswrite(fullfile(dir1,[name,labelnode,'RepAnova.txt']),infonew);
             disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'RepAnova.txt'])]);
         end
-    end
+  
 elseif isfield(job.c_statmatrix,'b_NWayANOVA_Mat')
 
      GROUPE =  str2num(job.c_statmatrix.b_NWayANOVA_Mat.e_NWayANOVA_model_GR);          
@@ -3333,19 +3280,14 @@ T = readtable(xlslistfile);
 
    end
 
-    if ismac
-        % Code to run on Mac platform problem with xlswrite
-        writetxtfile(fullfile(dir1,[name,labelnode,'NWAYAnova.txt']),infonew);
-        disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'NWAYAnova.txt'])]);
-    else
         try
             xlswrite(fullfile(dir1,[name,labelnode,'NWAYAnova.xlsx']),infonew);
             disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,'NWAYAnova.xlsx'])]);
         catch
-            writetxtfile(fullfile(dir1,[name,labelnode,'NWAYAnova.txt']),infonew);
+             writetxtfile_asxlswrite(fullfile(dir1,[name,labelnode,'NWAYAnova.txt']),infonew);
             disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'NWAYAnova.txt'])]);
         end
-    end
+   
 
 elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
     AllC = [];
@@ -3634,19 +3576,14 @@ elseif isfield(job.c_statmatrix,'b_kruskalwallis_Mat')
             disp(['Could not copy file: ',  fullfile(info{isubject,1}, ZONEid)])
         end
     end
-    if ismac
-        % Code to run on Mac platform problem with xlswrite
-        writetxtfile(fullfile(dir1,[name,labelnode,'GR ',num2str(GROUPELIST),' KruskalWallis.txt']),infonew);
-        disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'GR ',num2str(GROUPELIST),' KruskalWallis.txt'])]);
-    else
-        try
+         try
             xlswrite(fullfile(dir1,[name,labelnode,'GR ',num2str(GROUPELIST),' KruskalWallis.xlsx']),infonew);
             disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,'GR ',num2str(GROUPELIST),' KruskalWallis.xlsx'])]);
         catch
-            writetxtfile(fullfile(dir1,[name,labelnode,'GR ',num2str(GROUPELIST),' KruskalWallis.txt']),infonew);
+            writetxtfile_asxlswrite(fullfile(dir1,[name,labelnode,'GR ',num2str(GROUPELIST),' KruskalWallis.txt']),infonew);
             disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'GR ',num2str(GROUPELIST),' KruskalWallis.txt'])]);
         end
-    end
+ 
 elseif isfield(job.c_statmatrix,'b_manova1_Mat')
     disp('not tested');
     return
@@ -3862,19 +3799,15 @@ elseif isfield(job.c_statmatrix,'b_manova1_Mat')
     if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
         copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid))
     end
-    if ismac
-        % Code to run on Mac platform problem with xlswrite
-        writetxtfile(fullfile(dir1,[name,labelnode,'Ancova', 'GR ',num2str(GROUPELIST), '.txt']),infonew);
-        disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'Ancova', 'GR ',num2str(GROUPELIST), '.txt'])]);
-    else
+  
         try
             xlswrite(fullfile(dir1,[name,labelnode,'Ancova', ' GR ',num2str(GROUPELIST), '.xlsx']),infonew);
             disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,'Ancova', ' GR ',num2str(GROUPELIST), '.xlsx'])]);
         catch
-            writetxtfile(fullfile(dir1,[name,labelnode,'Ancova', ' GR ',num2str(GROUPELIST), '.txt']),infonew);
+            writetxtfile_asxlswrite(fullfile(dir1,[name,labelnode,'Ancova', ' GR ',num2str(GROUPELIST), '.txt']),infonew);
             disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'Ancova', ' GR ',num2str(GROUPELIST), '.txt'])]);
         end
-    end
+
 elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
     dir1 = job.e_statmatrixPath{1};
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
@@ -4230,20 +4163,14 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
     end
     if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
         copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid))
-    end
-    if ismac
-        % Code to run on Mac platform problem with xlswrite
-        writetxtfile(fullfile(dir1,[name,labelnode,'MANCOVAN.txt']),infonew);
-        disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'MANCOVAN.txt'])]);
-    else
+    end   
         try
             xlswrite(fullfile(dir1,[name,labelnode,'MANCOVAN.xlsx']),infonew);
             disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,'MANCOVAN.xlsx'])]);
         catch
-            writetxtfile(fullfile(dir1,[name,labelnode,'MANCOVAN.txt']),infonew);
+            writetxtfile_asxlswrite(fullfile(dir1,[name,labelnode,'MANCOVAN.txt']),infonew);
             disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'MANCOVAN.txt'])]);
-        end
-    end
+        end   
 end
 disp('Visualize the results using: GUI_LookMatrices')
 out='Stat tests';

@@ -1,13 +1,13 @@
-function writetxtfile_asxlswrite(filename,trialbysubjectbyele)
-%CONVERT CELL INTO A TAB SPACE SEPARATED TXT FILE 
-%input similar as xlswrite 
+function writetxtfile_asxlswrite(filename,raw)
+%CONVERT CELL INTO A CVS file separate by semicolon ; 
+%input similar as xlsx spreadsheet in windows
 fid = fopen(filename,'w');
-for iline = 1:size(trialbysubjectbyele,1)
-    for jcol =  1:size(trialbysubjectbyele,2)
-    if  ischar(trialbysubjectbyele{iline ,jcol})
-        fprintf(fid,'%s\t',trialbysubjectbyele{iline ,jcol});
+for iline = 1:size(raw,1)
+    for jcol =  1:size(raw,2)
+    if  ischar(raw{iline ,jcol})
+        fprintf(fid,'%s;',raw{iline ,jcol});
     else
-       fprintf(fid,'%d\t', trialbysubjectbyele{iline ,jcol});
+       fprintf(fid,'%d;', raw{iline ,jcol});
     end
     end
      fprintf(fid,'%s\r','');

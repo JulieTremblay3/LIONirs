@@ -166,7 +166,7 @@ end
       try
         xlswrite(fullfile(pathout,file),rawxls)
       catch
-        writetxtfile(fullfile(pathout,file),rawxls);
+        writetxtfile_asxlswrite(fullfile(pathout,file),rawxls);
         disp(['Result .txt file saved: ', fullfile(pathout,file)]);
       end
     end

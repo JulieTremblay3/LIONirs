@@ -1,5 +1,6 @@
  function [num,txt,raw] =readtxtfile_asxlsread(filename)
-%Opem tab separated txt file and return input similar to xlsread function
+%Open txt or csv file separated by ; and return input similar to xlsread function
+
 irow = 1;
 num = [];
 txt = [];
@@ -10,12 +11,12 @@ icol = 1;
     line = fgetl(fid);  
     while ~isempty(line)
         if line(1:1)==char(9)&  icol==1%start with a blank 
-            token = ' ';
+            token = ';';
             line = line(2:end);
         else
-            [token, line] = strtok(line,{char(9),' ',',' });
+            [token, line] = strtok(line,{char(9),';' });
         end
-    numtoken=str2num(token);
+    numtoken=str2num(token); 
     if isempty(numtoken)|numel(numtoken)>1
         raw{irow,icol} = token;
     else

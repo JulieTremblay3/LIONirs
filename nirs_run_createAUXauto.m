@@ -203,7 +203,7 @@ for ifile =1:numel(rDtp)
     end
 end
 %create defaults xls to help building extract configuration.
-
+ 
 [filepath,name,ext] = fileparts(job.NIRSmat{1});
 filenamexls = fullfile(filepath,'ExtractHRF.xlsx');
 try
@@ -345,7 +345,7 @@ try
     xlswrite(filenamexls,raw)
     disp(['Create default xls config to GLM ', label, ' extract to visualized open : winopen ', filenamexls ]);
 catch
-    writetxtfile(filenamexls,raw);
+    writetxtfile_asxlswrite(filenamexls,raw);
     disp(['Create default xls config to GLM ', label, ' extract to visualized open : winopen ', filenamexls ]);
 end
 

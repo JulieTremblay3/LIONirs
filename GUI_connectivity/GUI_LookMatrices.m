@@ -1188,14 +1188,15 @@ end
 %     end
 %     icol = icol + 1;
 % end
- if ismac
-     
-    writetxtfile_asxlswrite(fullfile(path,[file(1:end-3),'txt']), xlssheet);
-    disp(['Create: ', fullfile(path,[file(1:end-3),'txt'])]);
- else
+  
+
+try
     xlswrite(fullfile(path,file), xlssheet);
     disp(['Create: ', fullfile(path,file)]);
- end
+catch %semi colon text file
+    writetxtfile_asxlswrite(fullfile(path,[file(1:end-3),'txt']), xlssheet);
+    disp(['Create: ', fullfile(path,[file(1:end-3),'txt'])]);
+end
 
 %msgbox('DONE')
 

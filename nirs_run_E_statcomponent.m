@@ -64,13 +64,16 @@ end
      A = pval
       save(fullfile(dir1,['ONESAMPLE_pval_',  num2str(alphatr),'unc.mat']),'A','zonelist')
      disp(['Save: ',fullfile(dir1,['ONESAMPLE_pval_',  num2str(alphatr),'unc.mat'])]);
+     try
      [FDR,Q] = mafdr(pval); %establish fdr among all channels results         
      A = mval.*double(Q<alphatr);
      save(fullfile(dir1,['ONESAMPLE_mean_',  num2str(alphatr),'fdr.mat']),'A','zonelist')
-     disp(['Save: ',fullfile(dir1,['ONESAMPLE_mean_',  num2str(alphatr),'fdr.mat'])]);
+     disp(['Save: ',fullfile(dir1,['ONESAMPLE_mean_',  num2str(alphatr),'fdr.mat'])]);     
      A = Q;
      save(fullfile(dir1,['ONESAMPLE_Q_',  num2str(alphatr),'fdr.mat']),'A','zonelist')
      disp(['Save: ',fullfile(dir1,['ONESAMPLE_mean_',  num2str(alphatr),'fdr.mat'])]);
+     catch
+     end
      A = N_events;
      save(fullfile(dir1,['ONESAMPLE_N_events_',  num2str(alphatr),'.mat']),'A','zonelist')
      disp(['Save: ',fullfile(dir1,['ONESAMPLE_N_events_',  num2str(alphatr),'.mat'])]);
