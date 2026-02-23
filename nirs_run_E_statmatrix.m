@@ -278,6 +278,9 @@ elseif  job.m_nodeunit==2 %use by zone
         chanposzone(izone,:) = mean(zone.pos(idlisti,:));
     end
 
+elseif  job.m_nodeunit==3 %use by zone
+
+1
 end
 
 if ~isdir(dir1)

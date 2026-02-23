@@ -209,24 +209,29 @@ function out = nirs_run_writeSNIRF(job)
         % Save SNIRF: Convert .nirs format data to SnirfClass object, save it to .snirf file (HDF5)
         fprintf('Saving %s ...\n', outfile);
         
-   
-        snirf_saved= SnirfClass(nirs);      
+    
  
     %VERIFY IF 'ModifyBeerLambertLaw' WHERE APPLY
     %Change if unit DataType in measurementList when concentration when
+    snirf_saved= SnirfClass(nirs);
     for i=1:numel(NIRS.Dt.fir.pp)
         if strcmp(NIRS.Dt.fir.pp(i).pre,'ModifyBeerLambertLaw')
           for k=1:numel(snirf_saved.data.measurementList) 
              if snirf_saved.data.measurementList(k).wavelengthIndex==1
-                 SetDataType(snirf_saved.data.measurementList(k),1,'hbo'); 
+               %  SetDataType(snirf_saved.data.measurementList(k),1,'hbo'); 
+                 SetDataType(snirf_saved.data.measurementList(k),99999,'HbO')
              elseif snirf_saved.data.measurementList(k).wavelengthIndex==2
-                 SetDataType(snirf_saved.data.measurementList(k),1,'hbr');
+                % SetDataType(snirf_saved.data.measurementList(k),1,'hbr');
+                 SetDataType(snirf_saved.data.measurementList(k),99999,'HbR');
              end
           end
           disp('ModifyBeerLambertLaw applied data type is define as HbO and HbR');
         end
     end
+    
 
+
+             
         tic; snirf_saved.Save(outfile); toc  
         disp(['Save: ', outfile]);
     end

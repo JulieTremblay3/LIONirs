@@ -4321,13 +4321,20 @@ m_fishertransform.val       = {1};
 m_fishertransform.help      = {'Use the fisher transform 1/2 ln((1+p)/(1-p)), when the transformation is applied to the sample correlation coefficient, the sampling distribution of the resulting variable is approximately normal, with a variance that is stable over different values of the underlying true correlation.'};
 
 
+
+
+
+
 m_nodeunit           = cfg_menu;
 m_nodeunit.tag       = 'm_nodeunit';
 m_nodeunit.name      = 'Nodes';
-m_nodeunit.labels    = {'Channels', 'Zones'};
-m_nodeunit.values    = {1,2};
+m_nodeunit.labels    = {'Channels', 'Zones', 'Zones p05 ch only'};
+m_nodeunit.values    = {1,2,3};
 m_nodeunit.val       = {1};
-m_nodeunit.help      = {'Apply the statistics on each node. Define nodes as each channel or each average of zone channels.'};
+m_nodeunit.help      = {['Apply the statistics on each node. Define nodes as each channel or each average of zone channels.' ...
+                        'Channels: the univariate stat and average will be apply on each channel separatly',...
+                        'Zones: the univatiate stat will be apply on the average of each zone',...
+                        'Zones: the zone will be define if the one sample ttest among each bloc of the bootstrap calculate (MATCORR) is significant.']};
 
 %use for stat matrice
 e_minnbchan         =  cfg_entry;
