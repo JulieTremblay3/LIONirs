@@ -275,7 +275,7 @@ fprintf('%s\n','File processed');
     NIRS.Cf.H.D.N = SD.n_Det;
     NIRS.Cf.H.D.r.o.mm.p = SD.DetPos';
     %channels
-    NIRS.Cf.H.C.n = [SD.ChannelLabels; SD.ChannelLabels];
+    NIRS.Cf.H.C.n = [SD.ChannelLabels];
     NIRS.Cf.H.C.N = size(SD.ml,1);
     NIRS.Cf.H.C.id = [1:size(SD.ml,1); SD.ml(:,1:2)'];
     NIRS.Cf.H.C.wl =SD.ml(:,4)';

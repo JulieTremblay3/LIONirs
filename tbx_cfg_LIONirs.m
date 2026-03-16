@@ -2199,11 +2199,11 @@ m_SNIRFBATCHhistory.val       = {1};
 m_SNIRFBATCHhistory.help      = {'Save the batch history use in lion nirs to keep track of the option used  to create the snirf file'};
 
 
-e_SNIRFnamespecific         = cfg_entry;
+e_SNIRFnamespecific         = cfg_entry; 
 e_SNIRFnamespecific.name    = 'Enter name';
 e_SNIRFnamespecific.tag     = 'e_SNIRFnamespecific';       
 e_SNIRFnamespecific.strtype = 's';
-e_SNIRFnamespecific.num     = [1 Inf];;
+e_SNIRFnamespecific.num     = [1 Inf];
 e_SNIRFnamespecific.val     = {}; 
 e_SNIRFnamespecific.help    = {'SNIRFnamespecific'}; 
 
@@ -2220,21 +2220,52 @@ b_SNIRFnamedefault.name    = 'Default';
 b_SNIRFnamedefault.val     = {};
 b_SNIRFnamedefault.help    = {'Use default name for the .snirf file.'};
 
+
+
+
+
 % Create an option on wether a project file should be created or imported.
 c_SNIRFname          = cfg_choice;
 c_SNIRFname.tag      = 'c_SNIRFname';
-c_SNIRFname.name     = 'Export segmented audio file from video';
+c_SNIRFname.name     = 'Specify a file name';
 c_SNIRFname.values   = {b_SNIRFnamedefault, b_SNIRFnamespecific};
 c_SNIRFname.val      = {b_SNIRFnamedefault};
 c_SNIRFname.help     = {'Define snirf file name'};
 
 
+e_SNIRFrawname        = cfg_entry;
+e_SNIRFrawname.name    = 'Enter name';
+e_SNIRFrawname.tag     = 'e_SNIRFrawname';       
+e_SNIRFrawname.strtype = 's';
+e_SNIRFrawname.num     = [1 Inf];
+e_SNIRFrawname.val     = {}; 
+e_SNIRFrawname.help    = {'SNIRF raw file name'}; 
+
+b_SNIRFraw         = cfg_branch; 
+b_SNIRFraw.tag     = 'b_SNIRFraw';
+b_SNIRFraw.name    = 'Name raw snirf';
+b_SNIRFraw.val     = {e_SNIRFrawname};
+b_SNIRFraw.help    = {'Define manualy the name of the snirf file'};
+
+
+b_SNIRFrawNo         = cfg_branch; 
+b_SNIRFrawNo.tag     = 'b_SNIRFrawNo';
+b_SNIRFrawNo.name    = 'No';
+b_SNIRFrawNo.val     = {};
+b_SNIRFrawNo.help    = {'Use the snirf of the original recording to keep default auxiliairy and parameter'};
+
+c_SNIRFraw          = cfg_choice;
+c_SNIRFraw.tag      = 'c_SNIRFraw';
+c_SNIRFraw.name     = 'Specify a file name';
+c_SNIRFraw.values   = {b_SNIRFraw, b_SNIRFrawNo};
+c_SNIRFraw.val      = {b_SNIRFrawNo};
+c_SNIRFraw.help     = {'Option define raw snirf file name to keep defaults recording parameter'};
 
 % Executable Branch
 E_writeSNIRF      = cfg_exbranch;
 E_writeSNIRF.name = 'Write .snirf';
 E_writeSNIRF.tag  = 'E_writeSNIRF';
-E_writeSNIRF.val  = {NIRSmat,f_writeNIRSdir,c_SNIRFname, m_SNIRFBATCHhistory};
+E_writeSNIRF.val  = {NIRSmat,f_writeNIRSdir,c_SNIRFname,c_SNIRFraw, m_SNIRFBATCHhistory};
 E_writeSNIRF.prog = @nirs_run_writeSNIRF;
 E_writeSNIRF.vout = @nirs_cfg_vout_writeSNIRF;
 E_writeSNIRF.help = {'This toolbox enables you to export your data as .snirf files. A description of this format is available here https://github.com/fNIRS/snirf/blob/master/snirf_specification.md. LIONirs uses the class develop in Homer3 to save .snirf format please refer and install  https://github.com/fNIRS/snirf_homer3. A similar data structure to .nirs are used to save the .snirf format the export will contain : data: ''d''; probe coordinate: ''SD''; sample time: ''t''; stim trigger: ''s''; auxiliary export are not well-supported: ''aux''.'};

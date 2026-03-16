@@ -143,15 +143,45 @@ function out = nirs_run_writeSNIRF(job)
 
        
         d = d'; %data time point x channels
-
+if isfield(job.c_SNIRFraw,'b_SNIRFraw') %use original snirf to conserve metadata and additional paramenter in the export need to be add in the interface
+    
+    [filepath,name,ext] =fileparts(job.c_SNIRFraw.b_SNIRFraw.e_SNIRFrawname);
+    if strcmp(ext,'.nirs')
+        MRO=  load(job.c_SNIRFraw.b_SNIRFraw.e_SNIRFrawname, '-mat');
+        SD.Lambda = MRO.SD.Lambda;
+        SD.SrcPos = MRO.SD.SrcPos;
+        SD.DetPos = MRO.SD.DetPos;
+        SD.nSrcs = MRO.SD.nSrcs;
+        SD.nDets = MRO.SD.nDets;
+        SD.SpatialUnit = MRO.SD.SpatialUnit
+    elseif  strcmp(ext,'.snirf')
+          snirf_raw = SnirfClass(job.c_SNIRFraw.b_SNIRFraw.e_SNIRFrawname); %gerer rimport auxiliairy si segmenter... 
+          %2d coordinate definition to create snirf struct
+            SD = []; 
+            SD.Lambda =  snirf_raw.probe.wavelengths; 
+            SD.SrcPos = snirf_raw.probe.sourcePos2D;
+            SD.DetPos = snirf_raw.probe.detectorPos2D;           
+            SD.nSrcs = size(SD.SrcPos,1);
+            SD.nDets = size(SD.DetPos,1);   
+    else
+        disp(['Invalid file: ',job.c_SNIRFraw.b_SNIRFraw.e_SNIRFrawname, ' use default coordinate '])
             SD = [];
             SD.Lambda = NIRS.Cf.dev.wl;
             SD.SrcPos = NIRS.Cf.H.S.r.o.mm.p';
-            SD.DetPos = NIRS.Cf.H.D.r.o.mm.p';
-            
-
+            SD.DetPos = NIRS.Cf.H.D.r.o.mm.p';           
             SD.nSrcs = size(SD.SrcPos,1);
-            SD.nDets = size(SD.DetPos,1);
+            SD.nDets = size(SD.DetPos,1);   
+    end
+     %add aux... accc
+else 
+            SD = [];
+            SD.Lambda = NIRS.Cf.dev.wl;
+            SD.SrcPos = NIRS.Cf.H.S.r.o.mm.p';
+            SD.DetPos = NIRS.Cf.H.D.r.o.mm.p';           
+            SD.nSrcs = size(SD.SrcPos,1);
+            SD.nDets = size(SD.DetPos,1);           
+end
+
             if numel(NIRS.Cf.H.C.id(2,:)) == size(d,2)
                 ml = [NIRS.Cf.H.C.id(2,:)',NIRS.Cf.H.C.id(3,:)', ones(numel(NIRS.Cf.H.C.id(2,:)),1),NIRS.Cf.H.C.wl']; %srs,det,1,wav
                 t = 1/NIRS.Cf.dev.fs:1/NIRS.Cf.dev.fs:size(d,1)*1/NIRS.Cf.dev.fs;
@@ -205,6 +235,7 @@ function out = nirs_run_writeSNIRF(job)
                               'RPA'};
         end
 
+
         nirs= struct('d',d,'SD',SD,'t',t','s',s,'aux',aux);
         % Save SNIRF: Convert .nirs format data to SnirfClass object, save it to .snirf file (HDF5)
         fprintf('Saving %s ...\n', outfile);
@@ -214,24 +245,30 @@ function out = nirs_run_writeSNIRF(job)
     %VERIFY IF 'ModifyBeerLambertLaw' WHERE APPLY
     %Change if unit DataType in measurementList when concentration when
     snirf_saved= SnirfClass(nirs);
+if isfield(job.c_SNIRFraw,'b_SNIRFraw') %use complete 2d and 3 d coordinate
+    if strcmp(ext,'.snirf')
+       snirf_saved.probe= snirf_raw.probe;
+       disp(['Raw snirf file probe will be used:', job.c_SNIRFraw.b_SNIRFraw.e_SNIRFrawname]  )
+    end
+end
+
     for i=1:numel(NIRS.Dt.fir.pp)
-        if strcmp(NIRS.Dt.fir.pp(i).pre,'ModifyBeerLambertLaw')
+        if strcmp(NIRS.Dt.fir.pp(i).pre,'ModifyBeerLambertLaw') 
+            %convert concentration in uM to be in mole                 
+            snirf_saved.data.dataTimeSeries = snirf_saved.data.dataTimeSeries * 1e-6 ;
           for k=1:numel(snirf_saved.data.measurementList) 
              if snirf_saved.data.measurementList(k).wavelengthIndex==1
-               %  SetDataType(snirf_saved.data.measurementList(k),1,'hbo'); 
+               %  SetDataType(snirf_saved.data.measurementList(k),1,'hbo');         
                  SetDataType(snirf_saved.data.measurementList(k),99999,'HbO')
              elseif snirf_saved.data.measurementList(k).wavelengthIndex==2
-                % SetDataType(snirf_saved.data.measurementList(k),1,'hbr');
+                % SetDataType(snirf_saved.data.measurementList(k),1,'hbr');                
                  SetDataType(snirf_saved.data.measurementList(k),99999,'HbR');
              end
           end
           disp('ModifyBeerLambertLaw applied data type is define as HbO and HbR');
         end
     end
-    
-
-
-             
+              
         tic; snirf_saved.Save(outfile); toc  
         disp(['Save: ', outfile]);
     end

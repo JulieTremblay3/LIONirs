@@ -90,8 +90,11 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
              else
                disp(['No markers artifact found']);
             end
-            
-
+            %also set remove channel as nan           
+           idbad= find(NIRS.Cf.H.C.ok == 0); 
+          if ~isempty(idbad)
+            d(idbad,:)=nan;
+          end
 
                 [dir1,fil1,ext1] = fileparts(rDtp{f});
                  infilevmrk = fullfile(dir1,[fil1 '.vmrk']);
