@@ -21,7 +21,7 @@ function out = nirs_run_writeSNIRF(job)
         dall = [];
         Sessionid = numel(NIRS.Dt.fir.pp); %prendre la dernière session
     try %create a defauld batchHistory file with lionirs pipeline used
-    if isfield(job,'m_SNIRFBATCHhistory') %print session history a .m not a step could be save... 
+    if isfield(job,'m_SNIRFBATCHhistory') %print session history a .m not all step could be save... 
         if job.m_SNIRFBATCHhistory
      if isfield(job,'c_SNIRFname')
             if isfield(job.c_SNIRFname,'b_SNIRFnamespecific')
@@ -114,7 +114,7 @@ function out = nirs_run_writeSNIRF(job)
     end
         catch
             
-        end
+    end 
 
   
     for i = 1:numel(NIRS.Dt.fir.pp(1,Sessionid).p)
@@ -155,7 +155,7 @@ if isfield(job.c_SNIRFraw,'b_SNIRFraw') %use original snirf to conserve metadata
         SD.nDets = MRO.SD.nDets;
         SD.SpatialUnit = MRO.SD.SpatialUnit
     elseif  strcmp(ext,'.snirf')
-          snirf_raw = SnirfClass(job.c_SNIRFraw.b_SNIRFraw.e_SNIRFrawname); %gerer rimport auxiliairy si segmenter... 
+          snirf_raw = SnirfClass(job.c_SNIRFraw.b_SNIRFraw.e_SNIRFrawname{1}); %gerer rimport auxiliairy si segmenter... 
           %2d coordinate definition to create snirf struct
             SD = []; 
             SD.Lambda =  snirf_raw.probe.wavelengths; 

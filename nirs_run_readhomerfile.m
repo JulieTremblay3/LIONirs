@@ -114,7 +114,7 @@ for Idx_File=1:numel(job.inputrawhomer)
     end
     [val,id] = sort(DATA.ml(:,4));     
     DATA.ml = DATA.ml(id,:); %Wavelenght 1 et wavelength 2
-    DATA.d = DATA.d(:,id);
+    DATA.d = DATA.d(:,id); 
     NIRS.Cf.dev.wl = DATA.SD.Lambda;
     NIRS.Cf.dev.fs = 1/(DATA.t(2)-DATA.t(1));
 

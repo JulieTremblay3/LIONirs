@@ -28,6 +28,34 @@ for Idx=1:size(job.NIRSmat,1)
         lst = length(NIRS.Dt.fir.pp);
         rDtp = NIRS.Dt.fir.pp(lst).p; % path for files to be processed
         Cgp = NIRS.Cf.H.C.gp;
+        
+        %in this fonction geometric distance gp is expected to be in cm, optimum distance on the scalp is around 2 to 5 cm in fNIRS
+        % otherwise coordinate are probably in an other unit add a warning
+        % and adjust to meaningfull geometric distance in cm. 
+        if mean(Cgp)> 1 & mean(Cgp)< 10
+            disp('Geometric distance are scaled as exepected in cm')
+             disp(['Average geometric distance:', num2str(mean(Cgp)),'cm'])
+        elseif mean(Cgp)> 10 & mean(Cgp)< 100 %coordinate seem to be in cm
+            disp('Warning geometric distance seem to be in mm but are expected to be in cm to calculate the concentration')
+            disp('Scaling will be adjusted for the BeerLambertLaw operation')
+             Cgp = Cgp./10;
+             disp(['After adjustment average geometric distance:', num2str(mean(Cgp)),'cm'])
+        elseif mean(Cgp)>0.01 &  mean(Cgp)<0.1  %coordinate seem to be in meter
+            disp('Warning geometric distance seem to be in meter but are expected to be in cm to calculate the concentration')
+            disp('After adjustment scaling will be adjusted for the BeerLambertLaw operation')
+             Cgp = Cgp*100;
+             disp(['Average geometric distance:', num2str(mean(Cgp)),'cm'])
+        elseif mean(Cgp)>100 & mean(Cgp)<1000 
+            disp('Warning geometric distance are expected to be in cm to calculate the concentration')
+            disp('After adjustment scaling will be adjusted for the BeerLambertLaw operation')
+             Cgp = Cgp./100;
+             disp(['After adjustment average geometric distance:', num2str(mean(Cgp)),'cm'])
+        else
+             disp('Warning unexpected geometric distance; uM/L unit could be wrong.')
+             disp(['After adjustment average geometric distance:', num2str(mean(Cgp)),'cm'])
+        end
+
+
         Cwl = NIRS.Cf.H.C.wl;
         try 
             rNC = NIRS.Dt.fir.pp(lst).kept;

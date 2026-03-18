@@ -564,7 +564,7 @@ for filenb = 1:size(job.NIRSmat,1)
                 
                 rDtptmp{ifile} = rDtp{f};   %Nom temporaire pour gere la division du fichier et garder la trace du fichier original
                 auxraw{ifile} = NIRS.Dt.fir.aux5{f};
-                chok(:,ifile) = NIRS.Cf.H.C.ok(:, f);
+                chok(:,ifile) = NIRS.Cf.H.C.ok(:,f);
                 %reajuster tout les trigs between pretime and postime of the
                 %selected segment
                 aux5all = NIRS.Dt.fir.aux5{f};

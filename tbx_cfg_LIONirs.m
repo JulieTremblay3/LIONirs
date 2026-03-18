@@ -2126,11 +2126,70 @@ f_writeNIRSdir.ufilter = '.*';
 f_writeNIRSdir.num     = [1 1];      % Number of inputs required 
 f_writeNIRSdir.help    = {'Select the output folder where to export data. Data will be placed in a subfolder with the subject name to facilitate the organization.'}; 
 
+m_NIRSBATCHhistory           = cfg_menu;
+m_NIRSBATCHhistory.tag       = 'm_NIRSBATCHhistory';
+m_NIRSBATCHhistory.name      = 'Save history batch';     
+m_NIRSBATCHhistory.labels    = {'Yes','No'}; 
+m_NIRSBATCHhistory.values    = {1,2};
+m_NIRSBATCHhistory.val       = {1};
+m_NIRSBATCHhistory.help      = {'Save the batch history use in LIONIRS to keep track of the option used  to create the .nirs file'};
+
+e_NIRSnamespecific         = cfg_entry; 
+e_NIRSnamespecific.name    = 'Enter name';
+e_NIRSnamespecific.tag     = 'e_NIRSnamespecific';       
+e_NIRSnamespecific.strtype = 's';
+e_NIRSnamespecific.num     = [1 Inf];
+e_NIRSnamespecific.val     = {}; 
+e_NIRSnamespecific.help    = {'Define output file name'}; 
+
+b_NIRSnamespecific        = cfg_branch; 
+b_NIRSnamespecific.tag     = 'b_NIRSnamespecific';
+b_NIRSnamespecific.name    = 'Name';
+b_NIRSnamespecific.val     = {e_NIRSnamespecific};
+b_NIRSnamespecific.help    = {'Define manualy the name of the nirs file'};
+
+
+b_NIRSnamedefault         = cfg_branch; 
+b_NIRSnamedefault.tag     = 'b_NIRSnamedefault';
+b_NIRSnamedefault.name    = 'Default';
+b_NIRSnamedefault.val     = {};
+b_NIRSnamedefault.help    = {'Use default name for the .nirs file.'};
+
+c_NIRSname          = cfg_choice;
+c_NIRSname.tag      = 'c_NIRSname';
+c_NIRSname.name     = 'Specify a file name';
+c_NIRSname.values   = {b_NIRSnamedefault, b_NIRSnamespecific };
+c_NIRSname.val      = {b_NIRSnamedefault};
+c_NIRSname.help     = {'Define NIRS file name'};
+
+
+f_NIRSchannellist         = cfg_files; %path
+f_NIRSchannellist.name     = 'Enter Channel List'; 
+f_NIRSchannellist.tag      = 'f_NIRSchannellist';
+f_NIRSchannellist.filter   = {'txt'};
+f_NIRSchannellist.ufilter  = '.txt';    %
+f_NIRSchannellist.num      = [0 1];     % Number of inputs required 
+f_NIRSchannellist.help     = {'Channel list is important to ensure channel order is repected if different project configuration are used (source and detector position). If you let this field empty a default channel list for this data file will be create'};    
+
+
+b_NIRSchannellist        = cfg_branch; 
+b_NIRSchannellist.tag     = 'b_NIRSchannellist';
+b_NIRSchannellist.name    = 'ChannelList';
+b_NIRSchannellist.val     = {f_NIRSchannellist};
+b_NIRSchannellist.help    = {'Define channel list to organise data channel order.'};
+
+c_NIRSchannellist          = cfg_choice;
+c_NIRSchannellist.tag      = 'c_NIRSchannellist';
+c_NIRSchannellist.name     = 'Optional define channel list';
+c_NIRSchannellist.values   = {b_NIRSnamedefault, b_NIRSchannellist};
+c_NIRSchannellist.val      = {b_NIRSnamedefault};
+c_NIRSchannellist.help     = {'Define channel list in case the montage is different among participant'};
+
 % Executable Branch
 E_writeNIRSHomer      = cfg_exbranch;
 E_writeNIRSHomer.name = 'Write .nirs homer';
 E_writeNIRSHomer.tag  = 'E_writeNIRSHomer';
-E_writeNIRSHomer.val  = {NIRSmat,f_writeNIRSdir};
+E_writeNIRSHomer.val  = {NIRSmat, m_NIRSBATCHhistory,c_NIRSname,c_NIRSchannellist, f_writeNIRSdir};
 E_writeNIRSHomer.prog = @nirs_run_writenirshomer;
 E_writeNIRSHomer.vout = @nirs_cfg_vout_writenirshomer;
 E_writeNIRSHomer.help = {'Write in .nirs format for Homer.'};
@@ -2196,7 +2255,7 @@ m_SNIRFBATCHhistory.name      = 'Save history batch';
 m_SNIRFBATCHhistory.labels    = {'Yes','No'}; 
 m_SNIRFBATCHhistory.values    = {1,2};
 m_SNIRFBATCHhistory.val       = {1};
-m_SNIRFBATCHhistory.help      = {'Save the batch history use in lion nirs to keep track of the option used  to create the snirf file'};
+m_SNIRFBATCHhistory.help      = {'Save the batch history use in LIONIRS to keep track of the option used  to create the snirf file'};
 
 
 e_SNIRFnamespecific         = cfg_entry; 
@@ -2227,18 +2286,18 @@ b_SNIRFnamedefault.help    = {'Use default name for the .snirf file.'};
 % Create an option on wether a project file should be created or imported.
 c_SNIRFname          = cfg_choice;
 c_SNIRFname.tag      = 'c_SNIRFname';
-c_SNIRFname.name     = 'Specify a file name';
+c_SNIRFname.name     = 'Specify output snirf file';
 c_SNIRFname.values   = {b_SNIRFnamedefault, b_SNIRFnamespecific};
 c_SNIRFname.val      = {b_SNIRFnamedefault};
-c_SNIRFname.help     = {'Define snirf file name'};
+c_SNIRFname.help     = {'Define the output .snirf file name'};
 
 
-e_SNIRFrawname        = cfg_entry;
+e_SNIRFrawname        = cfg_files;
 e_SNIRFrawname.name    = 'Enter name';
 e_SNIRFrawname.tag     = 'e_SNIRFrawname';       
-e_SNIRFrawname.strtype = 's';
-e_SNIRFrawname.num     = [1 Inf];
-e_SNIRFrawname.val     = {}; 
+e_SNIRFrawname.filter   = {'snirf'};
+e_SNIRFrawname.ufilter  = '.snirf';    %
+e_SNIRFrawname.num     = [0 Inf];
 e_SNIRFrawname.help    = {'SNIRF raw file name'}; 
 
 b_SNIRFraw         = cfg_branch; 
@@ -2256,7 +2315,7 @@ b_SNIRFrawNo.help    = {'Use the snirf of the original recording to keep default
 
 c_SNIRFraw          = cfg_choice;
 c_SNIRFraw.tag      = 'c_SNIRFraw';
-c_SNIRFraw.name     = 'Specify a file name';
+c_SNIRFraw.name     = 'Optional raw snirf';
 c_SNIRFraw.values   = {b_SNIRFraw, b_SNIRFrawNo};
 c_SNIRFraw.val      = {b_SNIRFrawNo};
 c_SNIRFraw.help     = {'Option define raw snirf file name to keep defaults recording parameter'};
@@ -2268,7 +2327,8 @@ E_writeSNIRF.tag  = 'E_writeSNIRF';
 E_writeSNIRF.val  = {NIRSmat,f_writeNIRSdir,c_SNIRFname,c_SNIRFraw, m_SNIRFBATCHhistory};
 E_writeSNIRF.prog = @nirs_run_writeSNIRF;
 E_writeSNIRF.vout = @nirs_cfg_vout_writeSNIRF;
-E_writeSNIRF.help = {'This toolbox enables you to export your data as .snirf files. A description of this format is available here https://github.com/fNIRS/snirf/blob/master/snirf_specification.md. LIONirs uses the class develop in Homer3 to save .snirf format please refer and install  https://github.com/fNIRS/snirf_homer3. A similar data structure to .nirs are used to save the .snirf format the export will contain : data: ''d''; probe coordinate: ''SD''; sample time: ''t''; stim trigger: ''s''; auxiliary export are not well-supported: ''aux''.'};
+E_writeSNIRF.help = {['This toolbox enables you to export your data as .snirf files. A description of this format is available here https://github.com/fNIRS/snirf/blob/master/snirf_specification.md. LIONirs uses the class develop in Homer3 to save .snirf format please refer and install https://github.com/BUNPC/Homer3. ' ...
+    '. A similar data structure to .nirs are used to save the .snirf format the export will contain : data: ''d''; probe coordinate: ''SD''; sample time: ''t''; stim trigger: ''s''; auxiliary export are not well-supported: ''aux''.']};
 
 function vout = nirs_cfg_vout_writeSNIRF(job)
     vout = cfg_dep;                    
