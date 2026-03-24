@@ -141,8 +141,8 @@ pourcentagetr = job.i_minch_cardiac/100;
             stopF = (interval(id))+nbpoint;
             plot([f_fft(startF),f_fft(startF)],[minval,maxval],'k')
             plot([f_fft(stopF),f_fft(stopF)],[minval,maxval],'k')
-            listHBO = 1:size(d1)/2;
-            listHBR = (size(d1)/2+1) : size(d1);
+            listHBO = 1:size(d1,1)/2; 
+            listHBR = (size(d1,1)/2+1) : size(d1,1);
             if SNRfft
                 figure;plot(squeeze(mean(abs(yall),2)));hold on
                 plot(startF:stopF,squeeze(mean(abs(yall(startF:stopF,:,:)),2)),'x')
@@ -189,7 +189,13 @@ pourcentagetr = job.i_minch_cardiac/100;
            else 
                startF = (interval(ideach))-nbpoint; %fine tuning take peak on channel individual
                 stopF = (interval(ideach))+nbpoint;
-           end 
+            end 
+            startF = floor(mean(startF));
+            stopF = ceil(mean(stopF));
+            disp([num2str(f_fft(startF)), 'to',num2str(f_fft(stopF)) ])
+            startF = repmat( startF,size(yall,2),1);
+            stopF = repmat( stopF,size(yall,2),1);
+
          figure(hfig)
             for i=1:numel(listHBO)
                 if listHBO(i)
@@ -241,10 +247,10 @@ pourcentagetr = job.i_minch_cardiac/100;
             for i=1:numel(listHBR)
                 if listHBR(i)
                     j = 1;
-                    in1 =  nanmean(yall(startF:stopF,listHBR(i),:),1);
+                    in1 =  nanmean(yall(startF(i):stopF(i),listHBR(i),:),1);
                     while j<i %1:numel(listelectrode)
                         if listHBR(j)
-                            in2 = nanmean(yall(startF:stopF ,listHBR(j),:),1);
+                            in2 = nanmean(yall(startF(i):stopF(i) ,listHBR(j),:),1);
                             COVC1C2  = nansum(in1.*conj(in2),3);
                             COVC1 =nansum(in1.*conj(in1),3);
                             COVC2 =nansum(in2.*conj(in2),3);
@@ -263,19 +269,23 @@ pourcentagetr = job.i_minch_cardiac/100;
                  measlistok = sum([matcorr(:,:,f)>COHtr])>(nbch*pourcentagetr )
                  measlistok = reshape(measlistok,1,numel(measlistok));
                  disp([num2str(sum( measlistok)),'/', num2str(numel( measlistok)),' good channels on first wavelenghts'])
-
+                disp(find(measlistok==0))
             elseif job.m_cardiacwavelenght==2  %only second wavelenght
                 measlistok =  sum([matcorrHbR(:,:,f)>COHtr])>(nbch*pourcentagetr );
                  measlistok = reshape(measlistok,1,numel(measlistok));
                  disp([num2str(sum( measlistok)),'/', num2str(numel( measlistok)),' good channels on seconds wavelenghts'])
+                 disp(find(measlistok==0))
             elseif  job.m_cardiacwavelenght==3  %both wavelenght
                  measlistok = sum([matcorr(:,:,f)>COHtr])>(nbch*pourcentagetr )& sum([matcorrHbR(:,:,f)>COHtr])>(nbch*pourcentagetr );
                  measlistok = reshape(measlistok,1,numel(measlistok));
                  disp([num2str(sum( measlistok)),'/', num2str(numel( measlistok)),' good channels on both wavelenghts'])
+                 disp(find(measlistok==0));
+
              elseif  job.m_cardiacwavelenght ==4
                  measlistok = sum([matcorr(:,:,f)>COHtr])>(nbch*pourcentagetr )| sum([matcorrHbR(:,:,f)>COHtr])>(nbch*pourcentagetr );
                  measlistok = reshape(measlistok,1,numel(measlistok));
                  disp([num2str(sum( measlistok)),'/', num2str(numel( measlistok)),' good channels on one or the other wavelenghts'])
+                 disp(find(measlistok==0));
             end
               measlistok = sum([matcorr(:,:,f)>COHtr])>(nbch*pourcentagetr )& sum([matcorrHbR(:,:,f)>COHtr])>(nbch*pourcentagetr );
              subplot(5,4, [13,14,17,18]);hold on

@@ -25,8 +25,8 @@ NIRS1 = NIRS;
     lst = length(NIRS1.Dt.fir.pp);
     rDtp1 = NIRS1.Dt.fir.pp(lst).p; % path for files to be processed
     NC1 = NIRS1.Cf.H.C.N;
-    fs = NIRS1.Cf.dev.fs;
-
+    fs = NIRS1.Cf.dev.fs; 
+    lst = length(NIRS2.Dt.fir.pp);
     rDtp2 = NIRS2.Dt.fir.pp(lst).p; % path for files to be processed
     NC2 = NIRS2.Cf.H.C.N;
     if fs~= NIRS2.Cf.dev.fs;

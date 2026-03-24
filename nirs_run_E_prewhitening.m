@@ -24,10 +24,11 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
     for f=1:size(rDtp,1) %Loop over all files of a NIRS.mat 
 
         d = fopen_NIR(rDtp{f,1},NC);
-
+        
         LogL = nan(pmax,NC);
         BIC = nan(pmax,NC);
         for i = 1:NC
+            try
             disp(i)
             y = d(i,:)';
             for p = 1:pmax
@@ -42,16 +43,23 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 end
                 toc
             end
+            catch
+                BIC(:,i) = nan;
+            end
         end
 
         dw = nan(size(d));
         for i = 1:NC
+            try
             disp(i)
             y = d(i,:)';
             p = find(min(BIC(:,i)));
             mdl = regARIMA(p,0,0);
             estMdl = estimate(mdl,y,'Display','off');
             dw(i,:) = infer(estMdl,y);
+            catch
+                dw(i,:)=nan;
+            end
         end
         
         [dir1,fil1,ext1] = fileparts(rDtp{f});

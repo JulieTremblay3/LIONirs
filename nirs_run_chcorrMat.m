@@ -2,9 +2,9 @@ function out = nirs_run_chcorrMat(job)
 %Look for the correlation matrix ch per ch if we use patch place over same
 %brain area or use label per label zone if you brain area are under zone
 %definition.
-
+ 
   
-NIRS = []; 
+NIRS = [];  
 
 
 for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
@@ -111,7 +111,17 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                     end
                 end
                 %close(hwaitbar);
-             else
+
+                %do not consider full channel rejected to reject bloc with
+                %noise marking
+                chbad = find(sum(isnan(dnan),2) == size(dnan,2));
+                if ~isempty(chbad)
+                dnan(find(sum(isnan(dnan),2) == size(dnan,2)),:)=1;
+                end
+                disp([num2str(numel(chbad)),'/',num2str(size(dnan,1)),' were rejected completly'])
+                disp(num2str(chbad'))
+            else 
+                dnan(:) = 1 ;
                 disp(['Unable to nullify bad intervals for Subject ',int2str(filenb),', file ',int2str(f),'. No markers found in the .vmrk file. If you have already used the Step Detection function, your data may have no bad steps in it.']);
             end
         
@@ -275,8 +285,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                         tR_BPM = time(ipeak(idok)); %time where the respiration beat by minute is measure s
                         valR_BPM  =(1./(deltapeak(idok).*0.002)*60);
                         byminute = (1./(deltapeak(idok).*0.002)*60);
-                        for i=1:numel(byminute)-100
-                            
+                        for i=1:numel(byminute)-100                            
                             rolldeltapeak(i) = nanmean(byminute(i:i+40));
                         end
                         title(' beat by minute');
