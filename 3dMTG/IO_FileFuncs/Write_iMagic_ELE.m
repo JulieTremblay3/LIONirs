@@ -10,7 +10,7 @@ function Write_iMagic_ELE( oHelmet, oMRI, PathFileName,projection  )
     sMtg = get_Mtg( oHelmet );
     
     %pElems = vecteur d'indices lineaires correspondants aux src/dets
-    %utilises
+    %utilises   
     pElems = [ sMtg.v_pDet(find(sMtg.v_pDet)), sMtg.v_pSrc(find(sMtg.v_pSrc)) ];
     
     %Fonction de transfert des coordonnees de trous en voxel-space du MRI:
@@ -26,7 +26,7 @@ function Write_iMagic_ELE( oHelmet, oMRI, PathFileName,projection  )
     for( iElem=1:numel(pElems) )
        v_Labels(iElem,:) = sprintf( '%-10s', cell2mat(strread(get_HoleFiberID(oHelmet,pElems(iElem)), '%s', 1)) );
     end
-    
+     
     fid_ele = fopen( PathFileName, 'w' );
     
     for( iLine=1:size(mat_Positions,1) )
@@ -40,5 +40,5 @@ function Write_iMagic_ELE( oHelmet, oMRI, PathFileName,projection  )
     end
   
         
-
-    fclose(fid_ele);
+ disp(['File create: ' PathFileName])
+fclose(fid_ele);

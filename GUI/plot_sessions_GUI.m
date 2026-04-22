@@ -397,7 +397,7 @@ catch
     set(handles.popupmenu_zone,'string',{''});
     set(handles.popupmenu_zone,'value',1);
 end
-
+ 
 set(guiHOMER,'UserData',PMI);
 updatedata(handles,1,1);
 updatedisplay(handles);

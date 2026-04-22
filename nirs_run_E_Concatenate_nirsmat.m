@@ -23,7 +23,12 @@ end
   idok = 0; 
 NIRSDtp = rawData(2:end,1);
 ListDtp = rawData(2:end,2);
-
+try %normalised with many condition 
+NIRSDtp3 = rawData(2:end,3);
+NIRSDtp4 = rawData(2:end,4);
+NIRSDtp5 = rawData(2:end,5);
+catch
+end
 %linux mac compatibility
 for ifilenb = 1:numel(NIRSDtp)
     filenameNIRSmat = NIRSDtp{ifilenb};
@@ -37,6 +42,7 @@ end
 [pathoutlist, namelist, ext] = fileparts(job.f_nirsmatinfo{1});
   fidtxt = fopen(fullfile(pathoutlist,'report.txt'),'w');%fs=0;
 fprintf(fidtxt,'Nb\tFile\tsamplestart\tsamplestop\ttstart\ttstop\r\n');
+disp(sprintf('Nb\tFile\tsamplestart\tsamplestop\ttstart\ttstop'));
 
 temp = ListDtp{1};
 if strcmp(temp(end-3:end),'zone')% USE ZONE TEMPLATE FIRST TO LOOK IN OTHER FILE    
@@ -54,6 +60,16 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
        else 
            try
             load(fullfile(NIRSDtp{filenb},'NIRS.mat'));    
+
+
+            try %normalised with many condition 
+                NIRS3= load(fullfile(NIRSDtp3{filenb},'NIRS.mat'));  
+                NIRS4 = load(fullfile(NIRSDtp4{filenb},'NIRS.mat'));  
+                NIRS5 = load(fullfile(NIRSDtp5{filenb},'NIRS.mat'));  
+            catch
+            end
+
+            
            catch
             disp(['Could not open file: ',  fullfile(NIRSDtp{filenb},'NIRS.mat')] )
            end
@@ -65,6 +81,12 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
         NC = NIRS.Cf.H.C.N;
         fs = NIRS.Cf.dev.fs; 
         rDtp = NIRS.Dt.fir.pp(lst).p; % path for files to be processed
+            try %normalised with many condition 
+                rDtp3= NIRS3.NIRS.Dt.fir.pp(lst).p; 
+                rDtp4= NIRS4.NIRS.Dt.fir.pp(lst).p; 
+                rDtp5= NIRS5.NIRS.Dt.fir.pp(lst).p; 
+            catch
+            end
       
     if strfind(NIRS.Dt.fir.pp(lst).pre,'Epoch averaging') %do only first file %use average chok
         nmax =1; 
@@ -90,7 +112,14 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
 
      for f=1:nmax %for each bloc of the NIRS.mat file (last processing step)
          try
-        d = fopen_NIR(rDtp{f,1},NC); %Load whole bloc   
+        d = fopen_NIR(rDtp{f,1},NC); %Load whole bloc
+          try
+             d3 = fopen_NIR(rDtp3{f,1},NC); %Load whole bloc 
+             d4 = fopen_NIR(rDtp4{f,1},NC); %Load whole bloc 
+             d5 = fopen_NIR(rDtp5{f,1},NC); %Load whole bloc   
+         catch
+         end
+
          catch
              job.NIRSmat = {fullfile(NIRSDtp{filenb},'NIRS.mat')};
              job.c_MultimodalPath = []; %no adjustement for multimodal file            
@@ -99,6 +128,7 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
              rDtp = NIRS.Dt.fir.pp(lst).p;
              d = fopen_NIR(rDtp{f,1},NC); %Load whole bloc   
              disp(['Folder adjustement :',job.NIRSmat ])
+
          end
          dzone = zeros(NCTemplate,size(d,2));
         [pathstr,name,ext]=fileparts(rDtp{f,1});
@@ -112,10 +142,18 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
             A = reshape(X,numel(X),1)*reshape( Mb1,1,numel(Mb1)) +ones(numel(X),1)*reshape( Mb2,1,numel(Mb2));
             d = (intensnorm - A)';       
         end
-        
+                chlst = []; %list finale for this subject using channel list
+                chzoneHbO = [];
+                chzoneHbR = [];
+                 chlstHbO = [];
+                chlstHbR = [];
         for izone = 1:numel(ZoneTemplate.zone.label)
             chtemplateHbO = ZoneTemplate.zone.plotLst{izone};
             chtemplateHbR = ZoneTemplate.zone.plotLst{izone}+NCTemplate/2;
+            chzoneHbO = [chzoneHbO,chtemplateHbO(1) ];
+            chzoneHbR  = [chzoneHbR ,chtemplateHbR(1) ];
+            chlstHbO =  [chlstHbO, chtemplateHbO];
+            chlstHbR = [chlstHbR ,chtemplateHbR ]; 
             for izonenow = 1:numel(ZoneHoy.zone.label)
                 if strcmp(ZoneTemplate.zone.label{izone},ZoneHoy.zone.label{izonenow})
                     chHbO = ZoneHoy.zone.plotLst{izonenow};
@@ -125,8 +163,45 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
             end
             dzone(chtemplateHbO,:) = ones(numel(chtemplateHbO),1)*nanmean(d(chHbO,:),1);
             dzone(chtemplateHbR,:) = ones(numel(chtemplateHbR),1)*nanmean(d(chHbR,:),1);
-
+            try
+                dzone3(chtemplateHbO,:)= ones(numel(chtemplateHbO),1)*nanmean(d3(chHbO,:),1);
+                dzone3(chtemplateHbR,:) = ones(numel(chtemplateHbR),1)*nanmean(d3(chHbR,:),1);
+                dzone4(chtemplateHbO,:)= ones(numel(chtemplateHbO),1)*nanmean(d4(chHbO,:),1);
+                dzone4(chtemplateHbR,:)= ones(numel(chtemplateHbR),1)*nanmean(d4(chHbR,:),1);
+                dzone5(chtemplateHbO,:)= ones(numel(chtemplateHbO),1)*nanmean(d5(chHbO,:),1);
+                dzone5(chtemplateHbR,:)= ones(numel(chtemplateHbR),1)*nanmean(d5(chHbR,:),1);
+            catch
+            end  
         end
+
+       if job.m_Concatenate_Normalized==0 %noting
+            %disp('No normalization')
+    
+       elseif job.m_Concatenate_Normalized==1 %minmax  
+            % figure;plot(dminmax');
+           %  disp('not available')
+            
+       elseif job.m_Concatenate_Normalized==2 %zscore
+           disp('Apply Zscore')          
+           tmp= dzone(chzoneHbO,:);
+           try 
+            tmpHBO= [dzone(chzoneHbO,:),dzone3(chzoneHbO,:),dzone4(chzoneHbO,:),dzone5(chzoneHbO,:)];
+            tmpHBR= [dzone(chzoneHbR,:),dzone3(chzoneHbR,:),dzone4(chzoneHbR,:),dzone5(chzoneHbR,:)];
+           end
+           meanvalHbO = nanmean(tmpHBO(:));
+           stdvalHbO = nanstd(tmpHBO(:));
+            meanvalHbR = nanmean(tmpHBR(:));
+           stdvalHbR = nanstd(tmpHBR(:));
+
+
+           dzscoreHbO= (dzone(chlstHbO,:)-meanvalHbO)./ stdvalHbO;
+           dzscoreHbR=(dzone(chlstHbR,:)-meanvalHbR)./ stdvalHbR;
+           dzone(chlstHbO,:) = dzscoreHbO;
+           dzone(chlstHbR,:) = dzscoreHbR;
+       end  
+
+
+
         dall = [dall, dzone];
         %figure;plot(dzone')
        find(double(sum(abs(dall),2)>0));
@@ -159,9 +234,15 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
     samplestart =   size(dall,2) -  size(dzone,2)+1;
      sampleend = size(dall,2);
         fprintf(fidtxt,'%s\t%6.0f\t%6.0f\t%6.2f\t%6.2f\r\n', NIRSDtp{filenb}, samplestart, sampleend, samplestart/fs, sampleend/fs);
-
-
+        disp(sprintf('%s\t%6.0f\t%6.0f\t%6.2f\t%6.2f', NIRSDtp{filenb}, samplestart, sampleend, samplestart/fs, sampleend/fs));
 end
+
+
+
+
+
+
+
         newsizebloc = size(dall,2);
         [dir1,fil1,ext1] = fileparts(rDtp{1,1});
         fil1 = namelist;                
@@ -216,7 +297,7 @@ aux5 = []; %keep as important structure built in trigger
 sizebloc = 0;
 for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat file
     NIRS = [];       
- %   try
+   try
        tmp = NIRSDtp{filenb};
        if strcmp(tmp(end-7:end),'NIRS.mat')
             load(fullfile(NIRSDtp{filenb}));    
@@ -388,17 +469,21 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
      samplestart =   size(dall,2) -  size(d,2)+1;
      sampleend = size(dall,2);
      idok = idok  + 1;
-      fprintf(fidtxt,'%d\t',idok);
-  %  catch
-        % disp(['Missing file:', NIRSDtp{filenb}]);
-        % linereport = ['Missing file:', NIRSDtp{filenb}];
-        % samplestart = [0];
-        %  sampleend = [0];
-        %  fprintf(fidtxt,'%s\t','ND'); 
-   % end  
+     fprintf(fidtxt,'%d\t',idok);
+     disp(sprintf('%d\t%s\t%6.0f\t%6.0f\t%6.2f\t%6.2f',idok, NIRSDtp{filenb}, samplestart, sampleend, samplestart/fs, sampleend/fs));
+
+   catch
+        disp(['Missing file:', NIRSDtp{filenb}]);
+        linereport = ['Missing file:', NIRSDtp{filenb}];
+        samplestart = [0];
+         sampleend = [0];
+         fprintf(fidtxt,'%s\t','ND'); 
+         disp(sprintf('%s\t%s\t%6.0f\t%6.0f\t%6.2f\t%6.2f','ND', NIRSDtp{filenb}, samplestart, sampleend, samplestart/fs, sampleend/fs));
+   end  
      
     fprintf(fidtxt,'%s\t%6.0f\t%6.0f\t%6.2f\t%6.2f\r\n', NIRSDtp{filenb}, samplestart, sampleend, samplestart/fs, sampleend/fs);
 end
+        disp(['Detail info save in: ', fullfile(pathoutlist,'report.txt')]);
         fclose(fidtxt);
         newsizebloc = size(dall,2);
         [dir1,fil1,ext1] = fileparts(rDtp{1,1}); 

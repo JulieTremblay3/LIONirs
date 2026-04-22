@@ -70,13 +70,15 @@ function strFib = get_Mtg_nFib2strFib( obj, nFib )
                     strFib = sprintf( '' );
                 else 
                     strFib = sprintf( 'D%d', Det_Code );
+                    strFib = sprintf( 'D%02.0f', Det_Code);
                 end
             else
             %Sources        
             %E1 a1b2 iss number 018001, 
             %E2 a3b4 iss number 020003
             %E3 a5b6 iss number 022005
-            strFib = ISSIDnumber2Imaginc(nFib);
+               % strFib = ISSIDnumber2Imaging(nFib);
+            strFib = ISSIDnumber2NIRx(nFib);
             end
         case 'IMAGINCHUBERT'
             if( nFib >= 1000000 )        

@@ -31,7 +31,7 @@ end
     end  
     save(fullfile(dir1,'MatricebyChannel.mat'), 'AllC','-mat')
     disp(fullfile(dir1,'MatricebyChannel.mat'))
-    info.AllG1 = AllC;
+    info.AllG1 = AllC';
     info.G1 = job.c_statcomponent.b_TtestOneSample.f_component;
      for ich=1:size(AllC,1)       
         if 1
@@ -50,7 +50,7 @@ end
             
         end
      end
-     N_events=sum(~isnan(AllC),2)
+     N_events=sum(~isnan(AllC),2);
      NBSUJET = numel(job.c_statcomponent.b_TtestOneSample.f_component);
      A = mval;
      save(fullfile(dir1,['ONESAMPLE_Mean n=',num2str(NBSUJET),'.mat']),'A','zonelist')  
@@ -61,7 +61,7 @@ end
      A = mval.*double(pval<alphatr);
      save(fullfile(dir1,['ONESAMPLE_mean_',  num2str(alphatr),'unc.mat']), 'A','zonelist')  
      disp(['Save: ',fullfile(dir1,['ONESAMPLE_mean_',  num2str(alphatr),'unc.mat'])]);
-     A = pval
+     A = pval;
       save(fullfile(dir1,['ONESAMPLE_pval_',  num2str(alphatr),'unc.mat']),'A','zonelist')
      disp(['Save: ',fullfile(dir1,['ONESAMPLE_pval_',  num2str(alphatr),'unc.mat'])]);
      try
@@ -332,7 +332,7 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
      
      zonelist = tmp.zonelist(idactual);
      
-     A = AllCOM'
+     A = AllCOM';
      save(fullfile(dir1,'databychannel.mat'), 'A', 'zonelist')
      disp(['Save ', fullfile(dir1,'databychannel.mat')])
     groupcell = raw(2:end, 4:end);

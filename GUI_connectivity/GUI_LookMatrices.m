@@ -22,7 +22,7 @@ function varargout = GUI_LookMatrices(varargin)
 
 % Edit the above text to modify the response to help GUI_LookMatrices
 
-% Last Modified by GUIDE v2.5 08-Apr-2025 10:44:29
+% Last Modified by GUIDE v2.5 20-Apr-2026 11:42:37
 
 % Begin initialization code - DO NOT EDITspm
 gui_Singleton = 1;
@@ -396,7 +396,7 @@ for igroupe = 0:max(groupeall)
         end
    end
        %Entrer les valeurs moyenne du groupe comme un sujet, les nouveaux canaux sont faux, 
-       %il sont la pour l'uniformiter des données afin référer au zone.           
+       %il sont la pour l'uniformiter des donnÃ©es afin rÃ©fÃ©rer au zone.           
        ZoneList = [];
        plot= [];
        plotLst = [];
@@ -2364,7 +2364,7 @@ end
 linkijcluster = [];
 linkROIall = [];
 linkobj = get(handles.axes_viewlink,'children');
-for iobj = 1:numel(linkobj) %RETROUVER JUSTE LES LIEN nommées (i,j)
+for iobj = 1:numel(linkobj) %RETROUVER JUSTE LES LIEN nommÃ©es (i,j)
     linkselected = get(linkobj(iobj),'DisplayName');
   if numel(linkselected)>4 
       if strcmp(linkselected(1:5), '(i,j)')  
@@ -2456,3 +2456,106 @@ if get(handles.radio_Applymask,'value')
 else
 end
 
+
+
+% --------------------------------------------------------------------
+function context_connection_Neuronic_Callback(hObject, eventdata, handles)
+% hObject    handle to context_connection_Neuronic (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+DATA = get(handles.GUI_LookMat,'UserData'); 
+id = get(handles.popup_listsujet, 'value'); 
+Name = get(handles.popup_listsujet, 'string'); 
+[~,ConnectionName, ~] = fileparts(Name{id});
+MAT = DATA{id}.MAT;
+if get(handles.radio_fisher,'value')
+    disp('Apply fisher transform')
+end
+ 
+
+
+linkijcluster = [];
+linkobj = get(handles.axes_viewlink,'children');
+for iobj = 1:numel(linkobj) %RETROUVER JUSTE LES LIEN nommÃ©es (i,j)
+    linkselected = get(linkobj(iobj),'DisplayName');
+  if numel(linkselected)>4 
+      if strcmp(linkselected(1:5), '(i,j)')  
+
+           [tok,rem] = strtok(linkselected,'=');
+            [linkij,rem] = strtok(rem,'=');
+            [linkname,rem] = strtok(rem,'=');
+            [linkval,rem] = strtok(rem,' ');
+             linkROI = rem(2:end);
+      
+            [itmp,jtmp] =  strtok(linkij,',');
+            inum = str2num(itmp(2:end)); 
+            jnum= str2num(jtmp(2:end-1));
+             new = MAT(inum,jnum);
+             if get(handles.radio_fisher,'value')
+                disp('Fisher transform is apply to connectivity value')
+                new =1/2*(log((1+new )./(1-new )));           
+            else
+            end
+          linkijcluster = [linkijcluster; inum, jnum, new ];
+      end
+  end
+end
+
+
+
+ [FILENAME, PATHNAME, FILTERINDEX] =uiputfile(['Connection',ConnectionName,'.txt']);
+
+fid = fopen(fullfile(PATHNAME, FILENAME),'w');
+for ilink=1:size(linkijcluster,1)
+    fprintf(fid, '%d %d %f\r\n', linkijcluster(ilink,1), linkijcluster(ilink,2),linkijcluster(ilink,3));
+end
+
+
+fclose(fid);
+
+disp(['File created: ', fullfile(PATHNAME, FILENAME) ])
+
+
+% --------------------------------------------------------------------
+function context_index_Neuronic_Callback(hObject, eventdata, handles)
+% hObject    handle to context_index_Neuronic (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[filename, pathname, filterindex] = uigetfile('.ele','OPEN the ele file of the mtg coordinate could be create using 3DMTG montage configuration if you have create your prj using the NEURONIC MRI skin or cortical .srx surface and .vox file, you can export directly using file export project data create imagic .ele file ');
+%load('E:\NIRx-actiCHAMP_Analysed\CINC4_3a\Rest\Matrice\Pearson30Sec_MARS2026\C08_HBO_Pearson.mat')
+DATA = get(handles.GUI_LookMat,'UserData'); 
+id = get(handles.popup_listsujet, 'value'); 
+ZoneList=DATA{id}.ZoneList; 
+[name_ele,x,y,z]=readelefile(fullfile(pathname,filename));
+index = zeros(numel(ZoneList),3);
+for inode = 1:numel(ZoneList)
+    labelzonelist= ZoneList{inode};   
+    for iele=1:numel(name_ele)
+    if strcmp(labelzonelist(1:3), name_ele{iele})
+        xyzDET = [x(iele),y(iele),z(iele)];       
+    end
+
+    if strcmp(labelzonelist(5:end), name_ele{iele})
+        xyzSRS = [x(iele),y(iele),z(iele)];
+    end
+      
+    end
+      index(inode,:) = round(xyzDET-(xyzDET-xyzSRS)/2);   
+end
+[filename, pathname]= uiputfile('index.txt');
+fid = fopen(fullfile(pathname,filename),'w');
+for inode=1:size(index,1);
+    fprintf(fid,'%d %d %d\r\n',index(inode,1), index(inode,2),index(inode,3));
+end
+fclose(fid);
+
+
+
+fid = fopen(fullfile(pathname,'Magnitude.txt'),'w');
+for inode=1:size(index,1)
+    fprintf(fid,'%d %d\r\n',inode, 1);
+end
+fclose(fid);
+disp(['Magnitude file create: ', fullfile(pathname,'Magnitude.txt')]);
+disp(['Index file create: ', fullfile(pathname,filename)]);

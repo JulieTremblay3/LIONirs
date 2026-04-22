@@ -1183,7 +1183,11 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                             beta(:,idch) = nan; % 0;
                             bstd(:,idch) = nan; % 0;
                             R2(:,idch) = nan; %0
-                        else
+                        elseif num(y(:))==0 %all zero replace by nan do avoid estimation be 0
+                            beta(:,idch) = nan;
+                            bstd(:,idch) = nan;
+                            R2(:,idch) = nan; 
+                        elseif 
                             [b,bint,r,rint,stats]=  regress(y,X);
                             beta(:,idch) = b;
                             bstd(:,idch) = stats(4);
@@ -1209,15 +1213,20 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                 %figure;plot(PMI{1}.tmpGLM.spar)
                 if sum(isnan(y))
                     b = zeros(size(X,2),1);
-                    beta(:,idch) = 0;
-                    bstd(:,idch) = 0;
-                    R2(:,idch) = 0; 
+                    beta(:,idch) = nan;
+                    bstd(:,idch) = nan;
+                    R2(:,idch) = nan; 
+                elseif sum(y(:))==0 %all zero replace by nan do avoid estimation be 0
+                     beta(:,idch) = nan;
+                    bstd(:,idch) = nan;
+                    R2(:,idch) = nan; 
                 else
                     [b,bint,r,rint,stats]=  regress(y,X);
                     beta(:,idch) = b;
                     bstd(:,idch) = stats(4);
                     R2(:,idch) =  stats(1);
                 end
+        
                 
             end
             

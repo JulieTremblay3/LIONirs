@@ -24,7 +24,7 @@ pourcentagetr = job.i_minch_cardiac/100;
         d1 = fopen_NIR(rDtp{f,1},NC);       
         [pathstrtmp, nametmp, ext] = fileparts(NIRS.Dt.fir.pp(lst).p{f});
        fs = NIRS.Cf.dev.fs;                         % Sample frequency (Hz)
-       tseg = 20;
+       tseg = 20; %segment 20 seconde
        t = 0:1/fs:tseg;
        Bsize = numel(t);
         n = size(d1',1);
@@ -45,7 +45,7 @@ pourcentagetr = job.i_minch_cardiac/100;
             for ibloc = 1:size(Bloc,1)
                 dat = d1(:,Bloc(ibloc,1):Bloc(ibloc,2));
                 dat=dat - mean(dat,2)*ones(1,Bsize+1) ;
-                if sum(isnan(dat(:)))
+                if sum(isnan(dat(:)))> 0.5*numel(dat) %more than 50 % of noise
                     removetrial = [removetrial,ibloc];
                 else
                     [y, f_fft]= fft_EEGseries(dat,fs);
@@ -59,7 +59,7 @@ pourcentagetr = job.i_minch_cardiac/100;
                 totaltrialgood = size(yall,3);
             end
             %Load zone for display spectrum
-            
+             
           
             power = yall.*conj(yall)/n;   
             idHBO = 1:size(power,2)/2;
