@@ -99,6 +99,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                     SamplingInterval,...
                     size(dw,2)); %SamplingInterval in microseconds
         catch
+              'ERROR CH'  
         end
 
         if DelPreviousData

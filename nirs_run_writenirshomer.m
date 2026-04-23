@@ -249,6 +249,7 @@ for Idx=1:size(job.NIRSmat,1)
         %force channel list order 
         %not change position or optode,  change channel order and ml
         if  isfield(job.c_NIRSchannellist,'b_NIRSchannellist')
+                disp(['Channel list : ' , job.c_NIRSchannellist.b_NIRSchannellist.f_NIRSchannellist{1}, ' will be apply to the export'])
                % ML_new         
                 d1ok = nan(size(d,1),numel(listname)*2);        
                d1ok(:,find(listHBO)) = d(:,listHBO(find(listHBO))); 
@@ -256,6 +257,9 @@ for Idx=1:size(job.NIRSmat,1)
                d1ok(:,idHBR)= d(:,listHBR(find(listHBR))); 
                SD.MeasList = ML_new ;            
                 d = d1ok;
+        else
+            disp(['Normal export'])
+
         end
 
 
