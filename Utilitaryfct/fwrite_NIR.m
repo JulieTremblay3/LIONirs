@@ -7,7 +7,7 @@ try
     d = varargin{2};
 
     [dummy,dummy2,ext1] = fileparts(deblank(location));
-    if strcmp(ext1,'.nirs')
+    if strcmp(ext1,'.nirs')axis equal
         d = d';
         save(location,'d','-mat');
     else

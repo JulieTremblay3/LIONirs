@@ -113,6 +113,7 @@ cmin = str2num(get(handles.edit_climmin,'string'));
 cmax = str2num(get(handles.edit_climmax,'string'));
 caxis([cmin,cmax]);
 axes(handles.axes_Mtg2);
+ set(handles.axes_Mtg2,'XTickMode' ,'auto')
 c = colorbar;
 set(c,'fontsize',14)
 guidata(hObject, handles);

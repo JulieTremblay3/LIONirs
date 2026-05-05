@@ -1187,7 +1187,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                             beta(:,idch) = nan;
                             bstd(:,idch) = nan;
                             R2(:,idch) = nan; 
-                        elseif 
+                        else 
                             [b,bint,r,rint,stats]=  regress(y,X);
                             beta(:,idch) = b;
                             bstd(:,idch) = stats(4);
