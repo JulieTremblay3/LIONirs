@@ -43,7 +43,7 @@ function Obj = UpdateHelmetVisibility( Obj, oDispOpt, oHelmet )
             iNumBegin = find( (int8(strLbl) >= int8('0')) & (int8(strLbl) <= int8('9')) );
 
             if( iNumBegin )
-                strNum = strLbl( iNumBegin:numel(strLbl) );
+                strNum = strLbl(1,iNumBegin(1):numel(strLbl) );
                 iNumEnd = find( ( int8(strNum) < int8('0') ) | ( int8(strNum) > int8('9') ) )-1;
 
                 if( iNumEnd )

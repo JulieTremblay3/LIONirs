@@ -97,7 +97,15 @@ lst = numel(handles.module_list);
 %NewDirCopyNIRS = 0
 [dir1,fil1,ext1] = fileparts(NIRS.Dt.fir.pp(s).p{1});
 [dir2,fil2,ext2] = fileparts(handles.NIRSpath{handles.subjectnb,1});
-        
+set(handles.listbox_CorrectionDecomposition,'value',1)       
+set(handles.listbox_Component,'value',1)    
+set(handles.popupmenu_zone,'value',1) 
+set(handles.popupmenu_file,'value',1) 
+set(handles.edit_nirsmat,'value',1) 
+set(handles.popupmenu_module,'value',1)
+set(handles.popupauxnb,'value',1)
+set(handles.popupmenu_module_hold,'value',1)
+
 if isempty(strfind(NIRS.Dt.fir.pp(s).pre,'Manual Gui'))|~strcmp(upper(dir1),upper(dir2)) %create a new manual field of data where modification will be saved
     NC = NIRS.Cf.H.C.N;
     rDtp = NIRS.Dt.fir.pp(s).p;
@@ -2198,7 +2206,7 @@ try
     [label,ind_dur_ch] = read_vmrk_all(fileOutRoot_vmrk);
     %also in multimodal file  
     aux5 = handles.NIRS.Dt.fir.aux5{1};
-    for itrig = 1:size(aux5)
+    for itrig = 1:size(aux5,1)
         labelnew{itrig,1} = 'trigger';
          labelnew{itrig,2} = ['S  ',num2str(aux5(itrig,1))];
          ind_dur_chnew(itrig,1)= aux5(itrig,2);
@@ -4191,6 +4199,7 @@ for idROI = 1:numel(Channel)
         zone.label{izone} = Channel(1,idROI).Name{1};
         zone.plot{izone} = [ml(plotLst,1), ml(plotLst,2)];
         zone.color(izone,:) = Channel(1,idROI).color;
+        zone.label{izone} = num2str(idROI)
     end
 end
 

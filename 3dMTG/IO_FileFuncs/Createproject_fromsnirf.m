@@ -17,7 +17,7 @@ elseif strcmp(ext, '.snirf')
         disp('Please install https://github.com/fNIRS/snirf_homer3 to support snirf class compatibility ')
         return
     end
-    [filepath,name,ext] = fileparts(FileName)
+    
     %try 
         if ~isempty(snirf.probe)
         if ~isempty(snirf.probe.sourcePos2D)
@@ -33,14 +33,47 @@ elseif strcmp(ext, '.snirf')
             NIRS.SD.SpatialUnit = 'mm';
              disp('Use coordinate embedded in snirf class soucrePos3D and detectorPos3D')
         end
-        else isfile(fullfile(filepath, [name,'_probeInfo.mat'])) %nirsport probeinfo format
+        elseif isfile(fullfile(filepath, [name,'_probeInfo.mat'])) %nirsport probeinfo format filepath,name
+            disp(['No embedded coordinate in snirf  use : ',fullfile(filepath, [name,'_probeInfo.mat'])])
             load(fullfile(filepath, [name,'_probeInfo.mat'])) ;
-            [filepath,name,ext]  = fileparts(mfilename("fullpath"));
-            Lambda = load(fullfile(filepath(1:end-19),'DefaultWavelengthLambda.txt'));
+            [filepathcode,~,~]  = fileparts(mfilename("fullpath"));
+            Lambda = load(fullfile(filepathcode(1:end-19),'DefaultNIRxWavelengthLambda.txt'));
+             disp(['No embedded lambda in snirf  use : ',fullfile(filepathcode(1:end-19),'DefaultNIRxWavelengthLambda.txt')])
+             disp(num2str(Lambda))
             NIRS.SD.Lambda = Lambda;
             NIRS.SD.SrcPos = probeInfo.probes.coords_s3; %sourcePos2D;
             NIRS.SD.DetPos = probeInfo.probes.coords_d3;
             NIRS.SD.SpatialUnit = 'mm';
+        elseif isfile(fullfile(filepath, [name,'_optodes.tsv'])) 
+             disp(['No embedded coordinate in snirf  use : ',fullfile(filepath, [name,'_optodes.tsv'])])
+            %NIRSTORM TSV optode coordinate information
+             %   name          type          x          y         z   
+             %  {'D1' }    {'detector'}    62.333        -57        31
+             %  {'D2' }    {'detector'}        36        -75    50.061  
+            %attribute in Chronological order
+                T = readtable(fullfile(filepath, [name,'_optodes.tsv']), 'FileType', 'text', 'Delimiter', '\t');
+               DetPos = zeros(size(T,1),3);
+               SrcPos = zeros(size(T,1),3);
+                for i=1:size(T,1)  
+                    if strcmp(T(i,:).type,'detector') 
+                        label = T(i,:).name{1};
+                        str2num(label(2:end));
+                        DetPos(str2num(label(2:end)),:) = [T(i,:).x,T(i,:).y,T(i,:).z];
+                    end
+                    if strcmp(T(i,:).type,'source')
+                           label = T(i,:).name{1};
+                        str2num(label(2:end));
+                        SrcPos(str2num(label(2:end)),:) = [T(i,:).x,T(i,:).y,T(i,:).z];
+                    end
+                end        
+                 [filepathcode,~,~]  = fileparts(mfilename("fullpath"));
+                Lambda = load(fullfile(filepathcode(1:end-19),'DefaultNIRxWavelengthLambda.txt'));
+                disp(['No embedded lambda in snirf  use : ',fullfile(filepathcode(1:end-19),'DefaultNIRxWavelengthLambda.txt')])
+                 disp(num2str(Lambda))
+                 NIRS.SD.Lambda = Lambda;
+                 NIRS.SD.SrcPos = SrcPos;
+                 NIRS.SD.DetPos = DetPos;
+                 NIRS.SD.SpatialUnit = 'mm';
         end 
         %NIRSport snirf have external probeINFO.mat file
         %try to load probe info

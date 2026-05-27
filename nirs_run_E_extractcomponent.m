@@ -1183,7 +1183,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
                             beta(:,idch) = nan; % 0;
                             bstd(:,idch) = nan; % 0;
                             R2(:,idch) = nan; %0
-                        elseif num(y(:))==0 %all zero replace by nan do avoid estimation be 0
+                        elseif sum(y(:))==0 %all zero replace by nan do avoid estimation be 0
                             beta(:,idch) = nan;
                             bstd(:,idch) = nan;
                             R2(:,idch) = nan; 

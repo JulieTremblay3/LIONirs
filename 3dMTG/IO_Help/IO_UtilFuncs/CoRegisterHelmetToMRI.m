@@ -72,12 +72,15 @@ function [Helm_MRI_Coords, Helm_MRI_Norms ] = CoRegisterHelmetToMRI( oHelmet, oM
     %(anisotropiques??).
     Helm_MRI_Norms = matNormalsH*Create_3DOF_CoRegistration_Matrix( matHelmetRefs,                matMRIRefs, ...
         IsHelmetRH,                   IsMRIRH );
-    
-
+          
     
     %Normales unitaires (en voxel-space)
     for( iNorm=1:size(Helm_MRI_Norms,1) )
-        if( norm(Helm_MRI_Norms(iNorm,1:3)) )
-            Helm_MRI_Norms(iNorm,1:3) = Helm_MRI_Norms(iNorm,1:3) / norm(Helm_MRI_Norms(iNorm,1:3));
-        end
-    end
+        try
+            if( norm(Helm_MRI_Norms(iNorm,1:3)) )           
+                Helm_MRI_Norms(iNorm,1:3) = Helm_MRI_Norms(iNorm,1:3) / norm(Helm_MRI_Norms(iNorm,1:3));           
+            end
+         catch
+                 Helm_MRI_Norms(iNorm,1:3) = 0;
+         end
+    end 

@@ -1,4 +1,4 @@
-function out = nirs_run_readSNIRF(job)
+function out=nirs_run_readSNIRF(job)
 %NIRS_RUN_READSNIRF This function takes in a job and creates an analysis
 %step from it. It will read the snirf file and write a NIRS.mat construct
 %that can be used in the next steps of an analysis.
@@ -12,9 +12,9 @@ function out = nirs_run_readSNIRF(job)
 % from readNIRxscout has the DATA.d variable transposed (and the size
 % function has the 1 argument switched to 2).
 
-%PARAMETRE D'AQUISITION
+%PARAMETRE D'AQUISITION 
 NIRS.Cf.dev.n = 'snirf';
-disp('note improve snirf trigger info')
+%disp('note improve snirf trigger info')
 NIRS.Cf.H.n = 'SainteJustine prj';
 
 inputsnirf = job.inputSNIRF;
@@ -44,16 +44,17 @@ inputsnirf = job.inputSNIRF;
 
     %Create or load a .prj file
 if isfield(job.c_createImportProjectSnirf,'b_createProject')
-    try
+   % try
         LoadedStruct = Createproject_fromsnirf(inputsnirf{1});
         SaveStruct = Create_PrjStruct( LoadedStruct );
         [filepath,name,ext] =fileparts(inputsnirf{1});
         save(fullfile(dirout,[name,'.prj']), 'SaveStruct');
         prjfile = fullfile(dirout ,[name,'.prj']);
         disp(['Create automatic : ', prjfile])
-    catch
-         disp('Warning no optode coordinate information')
-    end
+   % catch
+         %disp('Warning no optode coordinate information')
+
+    %end
 elseif isfield(job.c_createImportProjectSnirf,'b_importProject')
     prjfile = job.c_createImportProjectSnirf.b_importProject.prjfile{1};
     LoadedStruct = load( prjfile,'-mat');
@@ -75,88 +76,118 @@ catch
     disp('Please install https://github.com/fNIRS/snirf_homer3 to support snirf class compatibility ')
     return
 end
+
 %use field as in .nirs file... 
 DATA.d = snirf.data.dataTimeSeries;
 DATA.t = snirf.data.time;
 fq=1/(DATA.t(2)-DATA.t(1));
-try
-if ~isempty(snirf.stim)
-    DATA.s = zeros(size(DATA.d,1), numel(snirf.stim));
-    for istim = 1 : numel(snirf.stim)
-        for idata=1:size(snirf.stim(istim).data,1)
-            snirf.stim(1,istim).name;
-            round(fq*snirf.stim(1,istim).data(idata,1));
-            DATA.s(round(fq*snirf.stim(1,istim).data(idata,1)),istim) = 1;
-        end
-    end
-else
-    DATA.s = zeros(size(DATA.d,1),1);
-end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Load stim from file and extract it for display
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    fprintf('    Stim (.snirf-style display):\n');
-    for ii=1:length(snirf.stim)
-        fprintf('        stim(%d): {name = ''%s'', data = [', ii, snirf.stim(ii).name);
-        for jj=1:size(snirf.stim(ii).data,1)
-            if jj==size(snirf.stim(ii).data,1)
-                fprintf('%0.1f', snirf.stim(ii).data(jj,1));
-            else
-                fprintf('%0.1f, ', snirf.stim(ii).data(jj,1));
+
+    % first choice use snirf stim embedded
+    try 
+        DATA.s = zeros(size(DATA.d,1), numel(snirf.stim));
+        fprintf('    Stim (.snirf-style display):\n');
+        for ii=1:length(snirf.stim)
+            fprintf('        stim(%d): {name = ''%s'', data = [', ii, snirf.stim(ii).name);
+            try
+                istim = str2num(snirf.stim(ii).name);
+            catch
+                istim = 1;
             end
+            for jj=1:size(snirf.stim(ii).data,1)
+                DATA.s(round(fq*snirf.stim(ii).data(jj)),istim) =  istim;
+                if jj==size(snirf.stim(ii).data,1)
+                    fprintf('%0.1f', snirf.stim(ii).data(jj,1));                  
+                else
+                    fprintf('%0.1f, ', snirf.stim(ii).data(jj,1));
+                end
+            end
+            fprintf(']}\n');
         end
-        fprintf(']}\n');
+        fprintf('\n');
+   
+    catch
+       disp('Could not read snirf.stim event')  
     end
-    fprintf('\n');
+
+    if sum(DATA.s(:))==0 %if not trig check for .tsv file... 
+        [Pathname,Filename,~] = fileparts(inputsnirf{1}); 
+        eventstsv = fullfile(Pathname,[Filename,'_events.tsv']);
+        if isfile(eventstsv)          
+           T = readtable(eventstsv, 'FileType', 'text', 'Delimiter', '\t');
+           %exepect time onset tsv
+             DATA.s = zeros(size(DATA.d,1),1);
+            for i=1:size(T,1)
+                 DATA.s( sum(snirf.data.time<T(i,:).onset))=1;
+            end
+            disp(['Event found in file:' eventstsv])
+        else
+            disp(['No event tsv:', eventstsv])
+        end
+    end
+    if sum(DATA.s(:))==0 %if not trig check for ._lsl.tri file'... 
+        fileeventlsl = fullfile(Pathname,[Filename,'_lsl.tri']);
+        if isfile(fileeventlsl)
+        
+            evtLSL = load(fileeventlsl);
+            evt = evtLSL(:,[3,2]);
+              DATA.s = zeros(size(DATA.d,1),max(evt(:,1))); ;
+             
+            for i=1:numel(evt)
+                try
+                DATA.s(evt(i,2),evt(i,1))= 1;
+                catch
+                end
+            end
+        
+            disp(['trig fund in file : ', fileeventlsl])
+        end
+    end
+
+
+    try
     for i = 1:size(snirf.aux,2)
         aux(:,i) = snirf.aux(i).dataTimeSeries;
     end
-catch %for FRESH data format
-    try
-    FileName= inputsnirf{1}
-    Events = importdata([FileName(1:end-10),'events.tsv']);
-    DATA.s = zeros(size(DATA.d,1),1);
-    DATA.s(Events.data(:,2))=Events.data(:,1);
     catch
-        disp('No event imported')
+        disp('No aux event found in the snirf file')
     end
-end
 
 
+% try
+%     DATA.SD.Lambda = snirf.probe.wavelengths; 
+%     DATA.SD.SrcPos = snirf.probe.sourcePos2D;
+%     DATA.SD.DetPos = snirf.probe.detectorPos2D;
+%     DATA.SD.nSrc = size(snirf.probe.sourcePos2D,1);
+%     DATA.SD.nDets = size(snirf.probe.detectorPos2D,1);
+%     DATA.SD.SpatialUnit = 'mm';
+% catch %Ajustement for FRESH snirf data coordinate are not embended in sNIRF format use tsv optode file 
+%           try
+%         %  disp('WARNING snirf format missing field adjust for FRESH project only')
+%           A = importdata([FileName(1:end-26),'optodes.tsv'])
+%           disp([FileName(1:end-26),'optodes.tsv'])
+%           for ich=1:size(A.data,1)
+%               label = A.textdata{ich+1,1};
+%               if strcmp(label(1),'S')
+%                 sourcePos(str2num(label(2:end)),:)=A.data(ich,:);
+%               elseif strcmp(label(1),'D')
+%                 detectorPos(str2num(label(2:end)),:)=A.data(ich,:);
+%               end
+%           end
+% 
+%            DATA.SD.SrcPos =  sourcePos;
+%            DATA.SD.DetPos = detectorPos;
+%            DATA.SD.SpatialUnit = 'm';
+%            Channels = importdata([FileName(1:end-10),'channels.tsv']);
+%           DATA.SD.Lambda = [760,850];
+% 
+%            DATA.SD.nSrc = size(sourcePos,1);
+%            DATA.SD.nDets = size(detectorPos,1);
+%           catch
+%               disp('Warning : No optode coordinated')
+%           end
+% end
 
-try
-    DATA.SD.Lambda = snirf.probe.wavelengths; 
-    DATA.SD.SrcPos = snirf.probe.sourcePos2D;
-    DATA.SD.DetPos = snirf.probe.detectorPos2D;
-    DATA.SD.nSrc = size(snirf.probe.sourcePos2D,1);
-    DATA.SD.nDets = size(snirf.probe.detectorPos2D,1);
-    DATA.SD.SpatialUnit = 'mm';
-catch %Ajustement for FRESH snirf data coordinate are not embended in sNIRF format use tsv optode file 
-          try
-          disp('WARNING snirf format missing field adjust for FRESH project only')
-          A = importdata([FileName(1:end-26),'optodes.tsv'])
-          for ich=1:size(A.data,1)
-              label = A.textdata{ich+1,1};
-              if strcmp(label(1),'S')
-                sourcePos(str2num(label(2:end)),:)=A.data(ich,:);
-              elseif strcmp(label(1),'D')
-                detectorPos(str2num(label(2:end)),:)=A.data(ich,:);
-              end
-          end
-           
-           DATA.SD.SrcPos =  sourcePos;
-           DATA.SD.DetPos = detectorPos;
-           DATA.SD.SpatialUnit = 'm';
-           Channels = importdata([FileName(1:end-10),'channels.tsv']);
-          DATA.SD.Lambda = [760,850];
-           
-           DATA.SD.nSrc = size(sourcePos,1);
-           DATA.SD.nDets = size(detectorPos,1);
-          catch
-              disp('Warning : No optode coordinated')
-          end
-end
 
 
 source_lst = [];
@@ -192,6 +223,8 @@ listsrs = [018001,020003,022005,024007,026009,028011,030013,032015,017002,019004
 82065,84067,86069,88071,90073,92075,94077,96079,81066,83068,85070,87072,89074,91076,93078,95080,...
 114097,116099,118101,120103,122105,124107,126109,128111,113098,115100,117102,119104,121106,123108,125110,127112];
 
+
+%use project coordinate
 NIRS.Cf.H.S.N =[Nb_Sources_Disp]; %Nb of source
 for i=1:Nb_Sources_Disp
     p = find(listsrs(i)==sMtg.v_HolesMtg);
@@ -243,15 +276,21 @@ for Idx_File=1:numel(job.inputSNIRF)
     [val,id] = sort(DATA.ml(:,4));     
     DATA.ml = DATA.ml(id,:); %Wavelenght 1 et wavelength 2
     DATA.d = DATA.d(:,id);
-   if isfield(DATA.SD,'Lambda')  
-    NIRS.Cf.dev.wl = DATA.SD.Lambda; 
-   else
-       disp(['Warning: Wavelengt device SD.Lambda is missing the in the .SNIRF information']);
-       [filepath,name,ext]  = fileparts(mfilename("fullpath"));
-       Lambda = load(fullfile(filepath,'DefaultWavelengthLambda.txt'));
-       NIRS.Cf.dev.wl = Lambda;
-       disp(['By default information from the file ', fullfile(filepath,'DefaultWavelengthLambda.txt')]);
-       disp(['Lambda ',  num2str( NIRS.Cf.dev.wl ) ,' will be used verify if this information is correct in your case else add the correct information in the snirf file']);
+
+       try %try to get wavelenght info from the snirf structure
+             NIRS.Cf.dev.wl = snirf.probe.wavelengths;
+       catch
+           try 
+                NIRS.Cf.dev.wl = DATA.SD.Lambda; 
+           catch
+               disp(['Warning: Wavelengt device SD.Lambda is missing the in the .SNIRF information']);
+               [filepath,name,ext]  = fileparts(mfilename("fullpath"));
+               Lambda = load(fullfile(filepath,'DefaultNIRxWavelengthLambda.txt'));
+               NIRS.Cf.dev.wl = Lambda;
+               disp(['By default information from the file ', fullfile(filepath,'DefaultWavelengthLambda.txt')]);
+               disp(['Lambda ',  num2str( NIRS.Cf.dev.wl ) ,' will be used verify if this information is correct in your case else add the correct information in the snirf file']);
+           end
+       end
    end
     NIRS.Cf.dev.fs = 1/(DATA.t(2)-DATA.t(1));
 
@@ -287,7 +326,7 @@ for Idx_File=1:numel(job.inputSNIRF)
     aux5 = [];
    if isfield(DATA, 's')
        for i=1:size(DATA.s,2)
-          timesample= find(DATA.s(:,i));
+          timesample= find(DATA.s(:,i));      %timesample= find(DATA.s(:,9));
           for js = 1:numel(timesample)
             aux5 = [aux5; DATA.s(timesample(js),i),timesample(js)];
            
@@ -349,7 +388,7 @@ for Idx_File=1:numel(job.inputSNIRF)
     disp(['Save: ', fileOut_nir])
     NIRS.Dt.fir.pp(1).pre = 'READ SNIRF';
     NIRS.Dt.fir.pp(1).job = job;   
-end
+
 
    %DISTANCE GEOMETRIQUE
    %channel in measure list format
