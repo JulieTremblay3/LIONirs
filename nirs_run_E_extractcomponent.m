@@ -2,12 +2,12 @@ function out = nirs_run_E_extractcomponent(job)
 % Batch detection of the components
 if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
     NIRSmatlst = job.c_extractcomponent.b_extractcomponent_PCA.NIRSmat;
-    try 
-         pca(rand(10)); %is pca function is install ?
+    try
+        pca(rand(10)); %is pca function is install ?
     catch
-         disp('Uncomplete Extract PCA, Please Install Matlab Statistics and Machine Learning Toolbox')
-         out.NIRSmat = job.c_extractcomponent.b_extractcomponent_PCA.NIRSmat;
-         return
+        disp('Uncomplete Extract PCA, Please Install Matlab Statistics and Machine Learning Toolbox')
+        out.NIRSmat = job.c_extractcomponent.b_extractcomponent_PCA.NIRSmat;
+        return
     end
     i_extract_pourcentagech= job.c_extractcomponent.b_extractcomponent_PCA.i_extract_pourcentagech;
     m_extractcomponentfigure= job.c_extractcomponent.b_extractcomponent_PCA.m_extractcomponentfigure;
@@ -18,8 +18,8 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
         NIRS = [];
         NIRSmat= NIRSmatlst{filenb,1};
         load(NIRSmat);
-        
-        
+
+
         [dirout,~,~] = fileparts(NIRSmat);
         lst = length(NIRS.Dt.fir.pp);
         rDtp = NIRS.Dt.fir.pp(lst).p; % path for files to be processed
@@ -30,7 +30,7 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
         fprintf('%s\n','File processed');
         %Open file 1 and check where are the noise marked.
         for f = 1:size(rDtp,1)
-            
+
             d = fopen_NIR(rDtp{f,1},NC)';
             [dir1,fil1,ext1] = fileparts(rDtp{f});
             vmrk_path = fullfile(dir1,[fil1,'.vmrk']);
@@ -59,13 +59,13 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
                                 noise(ind(i):indf(i),Idx) = 1;
                             end
                         catch
-                           disp('Noise reading problem')
+                            disp('Noise reading problem')
                         end
                     end
                 end
             end
-            
-            
+
+
             % ici group channel with the same noise latency
             figureon = m_extractcomponentfigure;
             ind = find((sum(noise,2)./size(noise,2))>nbchminimum );
@@ -84,9 +84,9 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
                 idstop =  [ind(idsep(1:end)-1);ind(end)];
             end
             eventbadstartstop = [idstart,idstop] ;
-            
+
             for ievent=1:size(eventbadstartstop,1)
-                
+
                 %listchannel to find component
                 indt = [eventbadstartstop(ievent,1):eventbadstartstop(ievent,2)];
                 if numel(indt)>1
@@ -99,7 +99,7 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
                         plot(indt(round(numel(indt)/2)),1,'x');
                         title(fil1)
                     end
-                    
+
                     plotLst= find(sum(noise(indt,:),1)>0);
                     listok=  find(NIRS.Cf.H.C.ok(plotLst,f)); %bon canaux ?
                     plotLst = plotLst(listok);
@@ -124,7 +124,7 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
                     spar = intensnorm - A;
                     % figure;plot(intensnorm )
                     %    figure;plot( spar)
-                    spar = cat(3,spar(:,1:end/2),spar(:,end/2+1:end)); 
+                    spar = cat(3,spar(:,1:end/2),spar(:,end/2+1:end));
                     spartmp = spar(:,listgood,:);
                     listgood = find(MeasListActplotLst);
                     %PCA first component !
@@ -132,13 +132,13 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
                         idwhile = 1;
                         nbPCA= 2; %maximal number of iteration
                         while idwhile==1  %find(std(data(:,listgood,1)./mean(data(:,listgood,1))>0.1))
-                            
+
                             d1 = cat(2,spartmp(:,:,1),spartmp(:,:,2));
                             c = d1'*d1;
-                            
+
                             [coeff,score,latent,tsquared,explained] = pca(c);
-                            
-                             
+
+
                             iscumlowerthantop = cumsum(explained)<job.c_extractcomponent.b_extractcomponent_PCA.i_extractnoiseupto_nbPCA;
                             ishigherthanmin = explained>job.c_extractcomponent.b_extractcomponent_PCA.i_extractnoise_nbPCA;
                             atleastone = zeros(size(explained));
@@ -152,7 +152,7 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
                             svs = diag(s);
                             u = d1*v*inv(s);
                             Xm =  u(:,lstSV)*s(lstSV,lstSV)*v(:,lstSV)';
-                            
+
                             try
                                 load(fullfile(dirout,'SelectedFactors.mat'))
                                 newfile = 0;
@@ -201,23 +201,23 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
                             end
                             %figure;plot(d(indt,listgoodPCA));
                             idwhile=0;  %no loop
-                            
+
                             if 0
                                 if nbPCA==1 %reference zscore on the first loop
                                     zmean = mean(d1(:));
                                     zstd = std(d1(:));
                                 end
                                 tmp = (d1(:)-zmean)./zstd;
-                                
+
                                 spartmp = spartmp - reshape(Xm,size(Xm,1),size(Xm,2)/2,2);
-                                
+
                                 zscorecorr = (spartmp(:)-zmean)/zstd;
                                 if figureon
                                     figure;
                                     subplot(3,2,1)
                                     plot(time(indt), reshape(d1,size(d1)));
                                     title([num2str(indt(1)),'to',num2str(indt(end))])
-                                    
+
                                     subplot(3,2,2)
                                     plot(time(indt),reshape(tmp,size(d1)))
                                     title(['zscore > 3'] )
@@ -250,12 +250,12 @@ if isfield(job.c_extractcomponent,'b_extractcomponent_PCA')
                     end
                 end
             end
-            
+
         end
     end
 elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
     NIRSmatlst = job.c_extractcomponent.b_extractnoise_PARAFAC.NIRSmat;
-    
+
     i_extract_pourcentagech= job.c_extractcomponent.b_extractnoise_PARAFAC.i_extract_pourcentagech;
     m_extractcomponentfigure= job.c_extractcomponent.b_extractnoise_PARAFAC.m_extractcomponentfigure;
     for filenb=1:size(NIRSmatlst,1) %Loop over all subjects
@@ -274,7 +274,7 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
         fprintf('%s\n','File processed');
         %Open file 1 and check where are the noise marked.
         for f = 1:size(rDtp,1)
-            
+
             d = fopen_NIR(rDtp{f,1},NC)';
             [dir1,fil1,ext1] = fileparts(rDtp{f});
             vmrk_path = fullfile(dir1,[fil1,'.vmrk']);
@@ -309,10 +309,10 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                 end
             end
             % figure;imagesc(noise)
-            
+
             % ici group channel with the same noise latency
             figureon = m_extractcomponentfigure;
-            
+
             % figure;imagesc(noise')
             % figure;plot(sum(noise,2))
             ind = find((sum(noise,2)./size(noise,2))>nbchminimum );
@@ -323,14 +323,14 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                 break
             end
             try
-            idsep = find(inddiff>indconsecutifthreshold);
-            if isempty(idsep)
-                idstart  =[ind(1)];
-                idstop = [ind(end)];
-            else
-                idstart  =[ind(1);ind(idsep(1:end)+1)];
-                idstop =  [ind(idsep(1:end)-1);ind(end)];
-            end
+                idsep = find(inddiff>indconsecutifthreshold);
+                if isempty(idsep)
+                    idstart  =[ind(1)];
+                    idstop = [ind(end)];
+                else
+                    idstart  =[ind(1);ind(idsep(1:end)+1)];
+                    idstop =  [ind(idsep(1:end)-1);ind(end)];
+                end
             catch
                 1
             end
@@ -348,7 +348,7 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                         plot(indt(round(numel(indt)/2)),1,'x');
                         title(fil1)
                     end
-                    
+
                     plotLst= find(sum(noise(indt,:),1)>0);
                     listok=  find(NIRS.Cf.H.C.ok(plotLst,f)); %bon canaux ?
                     plotLst = plotLst(listok);
@@ -439,10 +439,10 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                                     xlabel('Nb components')
                                 end
                                 %try multiple nc
-                                
-                                
-                                
-                                
+
+
+
+
                                 %evaluate factor for best concordia and smallest
                                 %error
                                 for itry=1:size(Factorsall,1)
@@ -454,7 +454,7 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                                     sumA(itry,:) = abs(sum(A));
                                 end
                                 %Choose among try the smallest time course and the largest sum distance
-                                
+
                                 rejeterhightimecourse =(mean(sumA(:)))<= sumA';
                                 rejectwavelengthdistance = mean(abs(distC(:))) >= abs(distC)';
                                 oneortheother = rejeterhightimecourse|rejectwavelengthdistance;
@@ -468,7 +468,7 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                                     plot([1,numel(oneortheother)],[mean(abs(distC(:))),mean(abs(distC(:)))] )
                                     title('Distance between wavelength')
                                     xlabel('iteration')
-                                    
+
                                     xlim([0 ,size(distC,2)+1])
                                     subplot(3,2,4);hold on
                                     plot(1:numel(oneortheother),(sumA),'x','color','k')
@@ -493,15 +493,15 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                                 end
                                 clear rejeterhightimecourse rejectwavelengthdistance distC sumA
                             end
-                            
+
                             %                             if 1 %minimal distance between wavelenght et maximum event amplitude
                             %                                 [val,ComponentToKeep]=max([1-abs(C(1,:)-C(2,:)) + sum(A)]);
                             %                             end
                             try
-                            Ac = A(:,ComponentToKeep); Bc = B(:,ComponentToKeep); Cc = C(:,ComponentToKeep);
-                            [Xm]=nmodel(({Ac,Bc,Cc}));
-                            data = cat(3,d(indt,1:end/2),d(indt,end/2+1:end));
-                            data(:,listgood,:) = data(:,listgood,:)-Xm;
+                                Ac = A(:,ComponentToKeep); Bc = B(:,ComponentToKeep); Cc = C(:,ComponentToKeep);
+                                [Xm]=nmodel(({Ac,Bc,Cc}));
+                                data = cat(3,d(indt,1:end/2),d(indt,end/2+1:end));
+                                data(:,listgood,:) = data(:,listgood,:)-Xm;
                             catch
                                 1
                             end
@@ -513,7 +513,7 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                             %             %Optimise the component to keep as lowest distance between wavelength.
                             %figure;plot(std(data(:,listgood,1)./mean(data(:,listgood,1))))
                             %decomposed until zscore
-                           
+
                             if 0 %sum(std(data(:,listgood,1)),1)./mean(data(:,listgood,1))>0.1 & mean(data(:,listgood,1))> max(data(:))*0.05 %test when not much variation except for low intensity channel
                                 idwhile = 1; %continue add other parafac not clean yet
                                 spartmp = spartmp - Xm;
@@ -569,10 +569,10 @@ elseif isfield(job.c_extractcomponent,'b_extractnoise_PARAFAC')
                                 PARCOMP(id+1).type = job.c_extractcomponent.b_extractnoise_PARAFAC.i_extractnoise_labelPARAFAC; %'PARAFAC';
                                 B = Factors{2};
                                 PARCOMP(id+1).topo =  B(:,ComponentToKeep);
-                                
+
                             end
-                            
-                            
+
+
                             save(fullfile(dirout,'SelectedFactors.mat'),'PARCOMP');
                         end
                     end
@@ -632,10 +632,10 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
                 end
             end
         end
-        
-        
+
+
         % ici group channel with the same noise latency
-        
+
         ind = find((sum(noise,2)./size(noise,2))>nbchminimum );
         inddiff = diff(ind);
         % %              if isempty(ind)    %%%LAURA A MIS EN COMMENTAIRE VOIR  PROPOSITION JUSTE PLUS BAS
@@ -657,7 +657,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
         %           temp= [1;temp(:); size(noise,1)];
         %           eventint=  reshape(temp,2,numel(temp)/2)
         %           eventgoodstartstop=permute(eventint, [2,1])
-        
+
         if isempty(ind)
             disp(['No noisy event found in file ', fil1])
             temp= [1; size(noise,1)];
@@ -672,7 +672,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
                 idstart  =[ind(1);ind(idsep(1:end)+1)];
                 idstop =  [ind(idsep(1:end)-1);ind(end)];
             end
-            
+
             % add event start
             eventbadstartstop = [idstart,idstop] ;
             temp =   permute(eventbadstartstop, [2,1]);
@@ -681,26 +681,26 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
             eventgoodstartstop=permute(eventint, [2,1]);
         end
         %%%%%%%jusqu'ici proposition Laura
-        
+
         if 0
             figure;subplot(3,2,[1,2]); plot(sum(noise,2)/size(noise,2));hold on
             for i=1:size(eventbadstartstop,1)
                 plot([eventbadstartstop(i,1),eventbadstartstop(i,1)],[0, 1],'b')
                 plot([eventbadstartstop(i,2),eventbadstartstop(i,2)],[0, 1],'r')
             end
-            
+
             figure;subplot(3,2,[1,2]); plot(sum(noise,2)/size(noise,2));hold on
             for i=1:size(eventbadstartstop,1)
                 plot([eventgoodstartstop(i,1),eventgoodstartstop(i,1)],[0, 1],'b')
                 plot([eventgoodstartstop(i,2),eventgoodstartstop(i,2)],[0, 1],'r')
             end
             title('Event form blue to red')
-            
+
         end
-        
-        
+
+
         load(job.c_extractcomponent.b_extractcomponent_phys.f_extractcomponent_physzone{1}   ,'-mat');
-        
+
         Regressorzone = 1;
         ListRegressorZone= [];
         ListChannelZone= [];%(first column regresor channel to average, second row column ch to apply)
@@ -712,7 +712,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
                 end
             end
         end
-        
+
         for iRegressor = 1:numel(ListRegressorZone)
             tmp = upper(zone.label{ListRegressorZone(iRegressor)});
             zoneidentification = tmp(10:end);
@@ -727,7 +727,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
             msgbox('Regressor Zone and Zone must be in equal number in the zone list')
             return
         end
-        
+
         %Do the regression for each event
         for ievent=1:size( eventgoodstartstop,1)
             if eventgoodstartstop(ievent,2) -eventgoodstartstop(ievent,1) > 10 %don't consider intervall less then a sample
@@ -743,7 +743,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
                 if badch==0 %if all channels are bad, switch to next block! %%ADDED BY LAURA
                     continue %%ADDED BY LAURA
                 end %%ADDED BY LAURA
-                
+
                 for izoneRegressor = 1:numel(ListRegressorZone)
                     %do the wavelength 1
                     chlistRegressor = zone.plotLst{ListRegressorZone(izoneRegressor)};
@@ -768,7 +768,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
                         Xm =  u(:,lstSV)*s(lstSV,lstSV)*v(:,lstSV)';
                         XmeanSD = Xm(:,1)-mean(Xm(:,1));
                     end
-                    
+
                     for ich = 1:numel(chlistApply)
                         Xlong = tmpGLM.spar(:,chlistApply(ich));
                         tmpGLM.beta(idorder) = dot(XmeanSD ,Xlong)/dot(XmeanSD ,XmeanSD );
@@ -793,7 +793,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
                         Xm =  u(:,lstSV)*s(lstSV,lstSV)*v(:,lstSV)';
                         XmeanSD = Xm(:,1)-mean(Xm(:,1));
                     end
-                    
+
                     for ich = 1:numel(chlistApply)
                         Xlong = tmpGLM.spar(:,chlistApply(ich)); -mean( tmpGLM.spar(:,chlistApply(ich)));
                         tmpGLM.beta(idorder) = dot(XmeanSD ,Xlong)/dot(XmeanSD ,XmeanSD );  %b = regress( Xlong , XmeanSD) identique
@@ -803,14 +803,14 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
                         tmpGLM.Xm(:,idorder) = tmpGLM.beta(idorder).*XmeanSD;
                         idorder = idorder + 1;
                     end
-                    
+
                 end
-                
+
                 tmpGLM.idreg = 1;
                 tmpGLM.selected  = 1;
                 label = 'SHORTGLM';
                 tmpGLM.listgood =  idchgood ;
-                
+
                 try
                     load(fullfile(dirout,'SelectedFactors.mat'));
                     newfile = 0;
@@ -828,7 +828,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
                     PARCOMP.indt = tmpGLM.indt(1):tmpGLM.indt(end); %indice de temps.
                     PARCOMP.data = d(tmpGLM.indt(1):tmpGLM.indt(end),tmpGLM.listgood) ;%data(:,listgood,:);
                     PARCOMP.Xm = tmpGLM.Xm;
-                    
+
                     PARCOMP.ComponentToKeep = tmpGLM.selected;
                     PARCOMP.idreg = tmpGLM.idreg;
                     PARCOMP.label= ['GLM',label , sprintf('%03.0f',size(PARCOMP,2))];
@@ -861,569 +861,569 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_phys')
             end
         end
     end
-    
-    
+
+
 elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
-  for ixlsfile = 1:size(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist,1)
-       [currentpath,~,~] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.NIRSmat{1});
-      if isempty(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile})         
-          job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile} = fullfile(currentpath,'ExtractHRF.xlsx');
-      end
-    [~,~,ext] =fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
-    if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
-        try
-            [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
-            [dirxls,filexls,extxls] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
-            id.Regressor = [];
-        catch
+    for ixlsfile = 1:size(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist,1)
+        [currentpath,~,~] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.NIRSmat{1});
+        if isempty(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile})
+            job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile} = fullfile(currentpath,'ExtractHRF.xlsx');
+        end
+        [~,~,ext] =fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
+        if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
             try
+                [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
+                [dirxls,filexls,extxls] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
+                id.Regressor = [];
+            catch
+                try
+                    [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
+                    [dirxls,filexls,extxls] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
+                    id.Regressor = [];
+                catch
+                    disp(['Could not open: ', job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile}]);
+                end
+            end
+
+        elseif strcmp(ext,'.txt')
             [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
             [dirxls,filexls,extxls] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
-            id.Regressor = []; 
-            catch
-                disp(['Could not open: ', job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile}]);
+            id.Regressor = [];
+        end
+        for icol=1:size(rawData,2)
+            if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat')))
+                id.NIRSDtp = icol;
+            elseif strcmp(upper(deblank(rawData{1,icol})),upper('File'))
+                id.fileDtp =  icol;
+            elseif strcmp(upper(deblank(rawData{1,icol})),upper('tStart'))
+                id.startDtp =  icol;
+            elseif strcmp(upper(deblank(rawData{1,icol})),upper('tStop'))
+                id.stopDtp  =  icol;
+            elseif strcmp(upper(deblank(rawData{1,icol})),upper('Label'))
+                id.labelDtp =  icol;
+            end
+            for i=1:21 %up to a max of 20 regressor
+                if strcmp(upper(deblank(rawData{1,icol})),upper(['X',num2str(i-1)]))
+                    id.Regressor = [id.Regressor,icol];
+                end
             end
         end
-        
-    elseif strcmp(ext,'.txt')
-        [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
-        [dirxls,filexls,extxls] = fileparts(job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile});
-        id.Regressor = [];
-    end
-    for icol=1:size(rawData,2)
-        if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat')))
-            id.NIRSDtp = icol;
-        elseif strcmp(upper(deblank(rawData{1,icol})),upper('File'))
-            id.fileDtp =  icol;
-        elseif strcmp(upper(deblank(rawData{1,icol})),upper('tStart'))
-            id.startDtp =  icol;
-        elseif strcmp(upper(deblank(rawData{1,icol})),upper('tStop'))
-            id.stopDtp  =  icol;
-        elseif strcmp(upper(deblank(rawData{1,icol})),upper('Label'))
-            id.labelDtp =  icol;
-        end
-        for i=1:21 %up to a max of 20 regressor
-            if strcmp(upper(deblank(rawData{1,icol})),upper(['X',num2str(i-1)]))
-                id.Regressor = [id.Regressor,icol];
-            end
-        end 
-    end
-    try
-        NIRSDtp = rawData(2:end,id.NIRSDtp );
-        fileDtp = rawData(2:end,2);
-        chDtp = 'HBO' ; rawData(2:end,3); %do both to modify except ....
-        % trigDtp = rawData(2:end,4); non utilisé
-        startDtp = rawData(2:end,id.startDtp);
-        stopDtp = rawData(2:end,id.stopDtp);
-        labelDtp = rawData(2:end,id.labelDtp);
-        AUXid = rawData(2:end,id.Regressor );
-    catch
-        msgbox(['Please verify the GLM extract xls file : ', job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile},...
-            ' have the following column information : NIRS.mat, File, tStart, tStop, label and Xn regressors'])
-    end
-    
-    try
-       regress(ones(10,1),ones(10,1));
-    catch
-        disp('Uncomplete Extract GLM, Please Install Matlab Statistics and Machine Learning Toolbox or regress.m function')
-        NIRSmat = fullfile(NIRSDtp{1},'NIRS.mat');
-        out.NIRSmat = {NIRSmat};
-        return
-    end
-    %Load data and aux for regression
-    for ievent=1:size(NIRSDtp,1)
-        %try
-        warning off
-        tmp=NIRSDtp{ievent};
         try
-        if strcmp(tmp(end-7:end),'NIRS.mat')
-            NIRSmat = NIRSDtp{ievent};
-            NIRSDtp{ievent} = tmp(1:end-8);
-        else
-            NIRSmat = fullfile(NIRSDtp{ievent},'NIRS.mat');
-        end
+            NIRSDtp = rawData(2:end,id.NIRSDtp );
+            fileDtp = rawData(2:end,2);
+            chDtp = 'HBO' ; rawData(2:end,3); %do both to modify except ....
+            % trigDtp = rawData(2:end,4); non utilisé
+            startDtp = rawData(2:end,id.startDtp);
+            stopDtp = rawData(2:end,id.stopDtp);
+            labelDtp = rawData(2:end,id.labelDtp);
+            AUXid = rawData(2:end,id.Regressor );
         catch
-            NIRSmat = fullfile(NIRSDtp{ievent},'NIRS.mat');
+            msgbox(['Please verify the GLM extract xls file : ', job.c_extractcomponent.b_extractcomponent_glm.f_extractcomponent_glmlist{ixlsfile},...
+                ' have the following column information : NIRS.mat, File, tStart, tStop, label and Xn regressors'])
         end
-        %try
-       
-        disp(['load',NIRSmat])
-        load(NIRSmat);
-        
-           
-       
-        Regressorlist=AUXid{ievent,:};
-        disp(NIRSmat);
-        NC = NIRS.Cf.H.C.N;
-        fDtp = NIRS.Dt.fir.pp(end).p;
-        d1 = fopen_NIR(fDtp{fileDtp{ievent}},NC)';
-        [dir1,fil1,ext] = fileparts(fDtp{fileDtp{ievent}});
-        vmrk_path = fullfile(dir1,[fil1,'.vmrk']);
-        %         handles.file_vmrk = handles.NIRS.Dt.fir.pp(end).p{idfile}; %used
-        %         in save noise
-        mrk_type_arr = cellstr('bad_step');
-        mrks = [];
-        ind = [];
-        noise =  logical(zeros(size(d1)));
-        [ind_dur_ch] = read_vmrk_find(vmrk_path,mrk_type_arr);
-        if ~isempty(ind_dur_ch)
-            maxpoint  = ind_dur_ch(:,1)+ind_dur_ch(:,2);
-            badind = find(maxpoint>size(noise,1));
-            if ~isempty(badind)
-                disp(['Warning file ' vmrk_path ' marker : ' num2str(badind') ' are out of range in the data file']);
-                ind_dur_ch(badind,2)=size(noise,2)- ind_dur_ch(badind,1);
-            end
-            for Idx = 1:size(noise,2)
-                mrks = find(ind_dur_ch(:,3)==Idx);
-                ind = ind_dur_ch(mrks,1);
-                indf = ind + ind_dur_ch(mrks,2) - 1;
-                if ~isempty(ind)
-                    try
-                        for i = 1:numel(ind)
-                            noise(ind(i):indf(i),Idx) = 1;
-                        end
-                    catch
-                        disp('Noise reading problem')
-                    end
-                end
-            end
-        end
-        if 1 %trcmp(upper(chDtp{ievent}),'HBO')
-            tmpGLM.listgood = 1:NC; %do all
-        elseif strcmp(upper(chDtp{ievent}),'HBR')
-            tmpGLM.listgood = (1:(NC/2)) + NC/2;
-        end
-        
-        tHRF = 1/NIRS.Cf.dev.fs:1/NIRS.Cf.dev.fs:size(d1,1)*1/NIRS.Cf.dev.fs;
-        fsNIRS = NIRS.Cf.dev.fs;
-        tstart = find(tHRF<=startDtp{ievent});
-        
-        if isempty(tstart) 
-            tstart = 1;
-        end
-        tstop = find(tHRF<= stopDtp{ievent});
-        tmpGLM.indt = [tstart(end),tstop(end)];%Time indice
-        tmpGLM.spar = d1(tmpGLM.indt(1):tmpGLM.indt(end),:); %fix weard edge offset by detrending first
-%         tmpGLM.spar = tmpGLM.spar - detrend(tmpGLM.spar);
-%         figure;plot(tmpGLM.spar)
-% figure;plot( d1(tmpGLM.indt(1):tmpGLM.indt(end),:))
-        %add labelisbad
-        pourcentagenoise = sum(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:)))./numel(d1(tmpGLM.indt(1):tmpGLM.indt(end),:));
-        if isfield(job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport,'c_extractglmlist_autoexport_no')
-            labelisbad = '';
-        else
-            if pourcentagenoise > (job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_labelbad_threshold/100)
-                labelisbad = 'bad';
-            else
-                 labelisbad = 'ok';
-            end
-        end
-        pourcentagenoisebychHbO = sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),1:end/2))./numel(tmpGLM.indt(1):tmpGLM.indt(end))*100;
-        pourcentagenoisebychHbR = sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),end/2+1:end))./numel(tmpGLM.indt(1):tmpGLM.indt(end))*100;
 
-        pourcentagenoise = pourcentagenoise*100;
-        if isfield(job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport,'c_extractglmlist_autoexport_no')
-        
-        else
-        if job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_nan_chrejected==1
-            %(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:))./numel(d1(tmpGLM.indt(1):tmpGLM.indt(end),1)))
-            ch_remove_for_int =(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:))./numel(d1(tmpGLM.indt(1):tmpGLM.indt(end),1)))< (job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_labelbad_threshold/100);
-            %reshape(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:)),NC/2 ,2) 
-        end 
+        try
+            regress(ones(10,1),ones(10,1));
+        catch
+            disp('Uncomplete Extract GLM, Please Install Matlab Statistics and Machine Learning Toolbox or regress.m function')
+            NIRSmat = fullfile(NIRSDtp{1},'NIRS.mat');
+            out.NIRSmat = {NIRSmat};
+            return
         end
-            iRegressor =  2; 
-        if isfield(NIRS.Dt,'AUX')
-            for iAUX = 1:numel(NIRS.Dt.AUX)
-                nameAUX = NIRS.Dt.AUX(iAUX).pp(end).p{fileDtp{ievent}};
-                if isfield(NIRS.Dt.AUX(iAUX).pp(end),'sync_timesec')
-                    tstartf = NIRS.Dt.AUX(iAUX).pp(end).sync_timesec{fileDtp{ievent}};
+        %Load data and aux for regression
+        for ievent=1:size(NIRSDtp,1)
+            %try
+            warning off
+            tmp=NIRSDtp{ievent};
+            try
+                if strcmp(tmp(end-7:end),'NIRS.mat')
+                    NIRSmat = NIRSDtp{ievent};
+                    NIRSDtp{ievent} = tmp(1:end-8);
                 else
-                    tstartf = 0;
-                    disp('No segmentation have been made ensure that aux synchronisation are ok')
+                    NIRSmat = fullfile(NIRSDtp{ievent},'NIRS.mat');
                 end
-                tstopf = tstartf+tHRF(end);
-                [pathtmp,filetmp,exttmp]=fileparts(nameAUX);
-                [data,infoBV,label,ind_dur_ch] = fopen_EEG(nameAUX, tstartf, tstopf);
-                
-                %             [pathtmp,filetmp,exttmp]=fileparts(nameAUX);
-                %             [data,infoBV,label,ind_dur_ch] = fopen_EEG(nameAUX);
-                for ich=1:numel(infoBV.name_ele)
-                    tmpGLM.AUX.label{iRegressor} =[filetmp,' ',infoBV.name_ele{ich}];
-                    fsAUX =1/(infoBV.SamplingInterval/1000000); %Frequence echantillonage Hz
-                    tmp = data(:,ich);
-                    [p,q] = rat(fsNIRS/fsAUX,0.0001);
-                    
-                    %tmpr=resample( tmp , p, q); %ancien Julie - a cause
-                    %d'un jump au début fin, Laura l'a modifie par
-                    %downsample - environ le meme fonctionnement - voir la
-                    %photo Guide DownsampleEEgdata dans GITHUB student
-                    
-                    %not always integer factor then resample is be back as
-                    %default option it crash with downsample %Julie
-                   if ~isempty(tmp)
-                    tmpr=resample( tmp , p, q); %copy resample function here to avoid using different version of the resample function which have change with years... 
-                   end
-                    
-                    % we cut aux to the data initial size
-                    if numel(tmpr)<numel(tHRF)
-                        nplus = numel(tHRF)-numel(tmpr);
+            catch
+                NIRSmat = fullfile(NIRSDtp{ievent},'NIRS.mat');
+            end
+            %try
+
+            disp(['load',NIRSmat])
+            load(NIRSmat);
+
+
+
+            Regressorlist=AUXid{ievent,:};
+            disp(NIRSmat);
+            NC = NIRS.Cf.H.C.N;
+            fDtp = NIRS.Dt.fir.pp(end).p;
+            d1 = fopen_NIR(fDtp{fileDtp{ievent}},NC)';
+            [dir1,fil1,ext] = fileparts(fDtp{fileDtp{ievent}});
+            vmrk_path = fullfile(dir1,[fil1,'.vmrk']);
+            %         handles.file_vmrk = handles.NIRS.Dt.fir.pp(end).p{idfile}; %used
+            %         in save noise
+            mrk_type_arr = cellstr('bad_step');
+            mrks = [];
+            ind = [];
+            noise =  logical(zeros(size(d1)));
+            [ind_dur_ch] = read_vmrk_find(vmrk_path,mrk_type_arr);
+            if ~isempty(ind_dur_ch)
+                maxpoint  = ind_dur_ch(:,1)+ind_dur_ch(:,2);
+                badind = find(maxpoint>size(noise,1));
+                if ~isempty(badind)
+                    disp(['Warning file ' vmrk_path ' marker : ' num2str(badind') ' are out of range in the data file']);
+                    ind_dur_ch(badind,2)=size(noise,2)- ind_dur_ch(badind,1);
+                end
+                for Idx = 1:size(noise,2)
+                    mrks = find(ind_dur_ch(:,3)==Idx);
+                    ind = ind_dur_ch(mrks,1);
+                    indf = ind + ind_dur_ch(mrks,2) - 1;
+                    if ~isempty(ind)
                         try
-                            tmpr = [tmpr;tmpr(end-nplus:end) ];
+                            for i = 1:numel(ind)
+                                noise(ind(i):indf(i),Idx) = 1;
+                            end
                         catch
-                            msgbox('Too short regressor')
+                            disp('Noise reading problem')
                         end
-                    elseif numel(tmpr)>numel(tHRF)
-                        tmpr = tmpr(1:numel(tHRF));
                     end
-                    %we cut to fit the spar selection
-                    tmpGLM.AUX.fs{iRegressor} = fsNIRS;
-                    tmpGLM.AUX.data{iRegressor} = tmpr(tmpGLM.indt(1):tmpGLM.indt(end));
-                    clear tmpr
-                    tmpGLM.AUX.view{iRegressor} = 1;
-                    iRegressor = iRegressor +1;
                 end
             end
-        end
-        tmpGLM.AUX.label{1} = 'Constant';
-        tmpGLM.AUX.fs{1} = fsNIRS;
-        tmpGLM.AUX.data{1} = ones(numel(tmpGLM.indt(1):tmpGLM.indt(end) ),1);
-        tmpGLM.AUX.view{1} = 1;
-        Regressorlist = AUXid(ievent,:)';
-        idreg = [];
-        ListRegressorZone = [];
-        for iReg = 1:numel(Regressorlist)
-            for ilist = 1:numel(tmpGLM.AUX.label)
-                if numel(strfind(tmpGLM.AUX.label{ilist},Regressorlist{iReg})) %strcmp(tmpGLM.AUX.label{ilist},Regressorlist{iReg})
-                    idreg = [idreg,ilist];
-                    disp([Regressorlist{iReg},' AUX regressor find'])
-                end
+            if 1 %trcmp(upper(chDtp{ievent}),'HBO')
+                tmpGLM.listgood = 1:NC; %do all
+            elseif strcmp(upper(chDtp{ievent}),'HBR')
+                tmpGLM.listgood = (1:(NC/2)) + NC/2;
             end
-            
-            if numel(Regressorlist{iReg})>4
-                checkzone = Regressorlist{iReg};
-                if strcmp(upper(checkzone(end-3:end)),'ZONE')
-                    try
-                        load(Regressorlist{iReg} ,'-mat'); %try the fullfile correct
-                        disp([Regressorlist{iReg},' zone regressor find'])
-                    catch
-                        try
-                            load(fullfile(dirxls, Regressorlist{iReg} ),'-mat'); %try in the excel folder
-                        catch
-                            disp(['Regressor zone :',  Regressorlist{iReg} ,' or ',fullfile(dirxls,Regressorlist{iReg}) , ' could not be load'])
-                            return
-                        end
-                    end
-                    idreg = [idreg,0]; %if idreg = 0 regressor is a zone of the current channel
-                end
+
+            tHRF = 1/NIRS.Cf.dev.fs:1/NIRS.Cf.dev.fs:size(d1,1)*1/NIRS.Cf.dev.fs;
+            fsNIRS = NIRS.Cf.dev.fs;
+            tstart = find(tHRF<=startDtp{ievent});
+
+            if isempty(tstart)
+                tstart = 1;
             end
-        end
-        
-        %PERFORM REGRESSION
-        tmpGLM.idreg = idreg;
-        X = [];%ones(size(PMI{1}.tmpGLM.spar,1),1);
-        Regressorzone = 0;
-        for ireg = 1:numel(idreg)
-            if idreg(ireg)==0
-                Regressorzone = 1;
-                ListRegressorZone= [];
-                ListChannelZone= [];%(first column regresor channel to average, second row column ch to apply)
-                for izone =1:numel(zone.label)
-                    tmp = upper(zone.label{izone});
-                    if numel(tmp)>9
-                        if strcmp(tmp(1:9),'REGRESSOR')
-                            ListRegressorZone = [ListRegressorZone,izone];
-                        end
-                    end
-                end
-                
-                for iRegressor = 1:numel(ListRegressorZone)
-                    tmp = upper(zone.label{ListRegressorZone(iRegressor)});
-                    zoneidentification = tmp(10:end);
-                    for izone = 1:numel(zone.label)
-                        tmpzone = upper(zone.label{izone});
-                        if strcmp( strtrim(zoneidentification), strtrim(tmpzone))
-                            ListChannelZone = [ListChannelZone,izone];
-                        end
-                    end
-                end
-                if numel(ListChannelZone) ~= numel(ListRegressorZone)
-                    msgbox('Regressor Zone and Zone must be in equal number in the zone list')
-                    return
-                end
-                
+            tstop = find(tHRF<= stopDtp{ievent});
+            tmpGLM.indt = [tstart(end),tstop(end)];%Time indice
+            tmpGLM.spar = d1(tmpGLM.indt(1):tmpGLM.indt(end),:); %fix weard edge offset by detrending first
+            %         tmpGLM.spar = tmpGLM.spar - detrend(tmpGLM.spar);
+            %         figure;plot(tmpGLM.spar)
+            % figure;plot( d1(tmpGLM.indt(1):tmpGLM.indt(end),:))
+            %add labelisbad
+            pourcentagenoise = sum(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:)))./numel(d1(tmpGLM.indt(1):tmpGLM.indt(end),:));
+            if isfield(job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport,'c_extractglmlist_autoexport_no')
+                labelisbad = '';
             else
-                X = [X,    tmpGLM.AUX.data{idreg(ireg)}];
+                if pourcentagenoise > (job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_labelbad_threshold/100)
+                    labelisbad = 'bad';
+                else
+                    labelisbad = 'ok';
+                end
             end
-        end
-        
-        
-        Xtmp = X;
-        XmRegressor = zeros(size(tmpGLM.spar));
-        if numel(ListRegressorZone)
-            beta = zeros(size(X,2)+1,numel(tmpGLM.listgood));
-            bstd = zeros(size(X,2)+1,numel(tmpGLM.listgood));
-            for izoneRegressor = 1:numel(ListRegressorZone)
-                for iconc = 1:2 %HbO and HbR
-                    chlistRegressor = zone.plotLst{ListRegressorZone(izoneRegressor)};
-                    chlistApply = zone.plotLst{ListChannelZone(izoneRegressor)};
-                    if iconc==2
-                        chlistRegressor =  chlistRegressor+ NC/2;
-                        chlistApply = chlistApply + NC/2;
+            pourcentagenoisebychHbO = sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),1:end/2))./numel(tmpGLM.indt(1):tmpGLM.indt(end))*100;
+            pourcentagenoisebychHbR = sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),end/2+1:end))./numel(tmpGLM.indt(1):tmpGLM.indt(end))*100;
+
+            pourcentagenoise = pourcentagenoise*100;
+            if isfield(job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport,'c_extractglmlist_autoexport_no')
+
+            else
+                if job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_nan_chrejected==1
+                    %(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:))./numel(d1(tmpGLM.indt(1):tmpGLM.indt(end),1)))
+                    ch_remove_for_int =(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:))./numel(d1(tmpGLM.indt(1):tmpGLM.indt(end),1)))< (job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_labelbad_threshold/100);
+                    %reshape(sum(noise(tmpGLM.indt(1):tmpGLM.indt(end),:)),NC/2 ,2)
+                end
+            end
+            iRegressor =  2;
+            if isfield(NIRS.Dt,'AUX')
+                for iAUX = 1:numel(NIRS.Dt.AUX)
+                    nameAUX = NIRS.Dt.AUX(iAUX).pp(end).p{fileDtp{ievent}};
+                    if isfield(NIRS.Dt.AUX(iAUX).pp(end),'sync_timesec')
+                        tstartf = NIRS.Dt.AUX(iAUX).pp(end).sync_timesec{fileDtp{ievent}};
+                    else
+                        tstartf = 0;
+                        disp('No segmentation have been made ensure that aux synchronisation are ok')
                     end
-                    Xmean = nanmean(tmpGLM.spar(:,chlistRegressor),2);% -  nanmean(nanmean(tmpGLM.spar(:,chlistRegressor),2)); %center to zero
-                    % figure;plot(Xmean)
-                    X = [Xtmp,    Xmean];
-                    for ich = 1:numel(chlistApply)
-                        idch = chlistApply(ich);
-                        y = tmpGLM.spar(:,idch);
-                        %figure;plot(PMI{1}.tmpGLM.spar)
-                        if sum(isnan(y))
-                            b = zeros(size(X,2),1);
-                            b = nan(size(X,2),1);
-                            beta(:,idch) = nan; % 0;
-                            bstd(:,idch) = nan; % 0;
-                            R2(:,idch) = nan; %0
-                        elseif sum(y(:))==0 %all zero replace by nan do avoid estimation be 0
-                            beta(:,idch) = nan;
-                            bstd(:,idch) = nan;
-                            R2(:,idch) = nan; 
-                        else 
-                            [b,bint,r,rint,stats]=  regress(y,X);
-                            beta(:,idch) = b;
-                            bstd(:,idch) = stats(4);
-                            R2(:,idch) =  stats(1);
+                    tstopf = tstartf+tHRF(end);
+                    [pathtmp,filetmp,exttmp]=fileparts(nameAUX);
+                    [data,infoBV,label,ind_dur_ch] = fopen_EEG(nameAUX, tstartf, tstopf);
+
+                    %             [pathtmp,filetmp,exttmp]=fileparts(nameAUX);
+                    %             [data,infoBV,label,ind_dur_ch] = fopen_EEG(nameAUX);
+                    for ich=1:numel(infoBV.name_ele)
+                        tmpGLM.AUX.label{iRegressor} =[filetmp,' ',infoBV.name_ele{ich}];
+                        fsAUX =1/(infoBV.SamplingInterval/1000000); %Frequence echantillonage Hz
+                        tmp = data(:,ich);
+                        [p,q] = rat(fsNIRS/fsAUX,0.0001);
+
+                        %tmpr=resample( tmp , p, q); %ancien Julie - a cause
+                        %d'un jump au début fin, Laura l'a modifie par
+                        %downsample - environ le meme fonctionnement - voir la
+                        %photo Guide DownsampleEEgdata dans GITHUB student
+
+                        %not always integer factor then resample is be back as
+                        %default option it crash with downsample %Julie
+                        if ~isempty(tmp)
+                            tmpr=resample( tmp , p, q); %copy resample function here to avoid using different version of the resample function which have change with years...
                         end
-                        XmRegressor(:,idch) = Xmean*b(end);
+
+                        % we cut aux to the data initial size
+                        if numel(tmpr)<numel(tHRF)
+                            nplus = numel(tHRF)-numel(tmpr);
+                            try
+                                tmpr = [tmpr;tmpr(end-nplus:end) ];
+                            catch
+                                msgbox('Too short regressor')
+                            end
+                        elseif numel(tmpr)>numel(tHRF)
+                            tmpr = tmpr(1:numel(tHRF));
+                        end
+                        %we cut to fit the spar selection
+                        tmpGLM.AUX.fs{iRegressor} = fsNIRS;
+                        tmpGLM.AUX.data{iRegressor} = tmpr(tmpGLM.indt(1):tmpGLM.indt(end));
+                        clear tmpr
+                        tmpGLM.AUX.view{iRegressor} = 1;
+                        iRegressor = iRegressor +1;
                     end
                 end
             end
-        elseif ~numel(ListRegressorZone) %pas de zone de regression juste des auxiliaires
+            tmpGLM.AUX.label{1} = 'Constant';
+            tmpGLM.AUX.fs{1} = fsNIRS;
+            tmpGLM.AUX.data{1} = ones(numel(tmpGLM.indt(1):tmpGLM.indt(end) ),1);
+            tmpGLM.AUX.view{1} = 1;
+            Regressorlist = AUXid(ievent,:)';
+            idreg = [];
+            ListRegressorZone = [];
+            for iReg = 1:numel(Regressorlist)
+                for ilist = 1:numel(tmpGLM.AUX.label)
+                    if numel(strfind(tmpGLM.AUX.label{ilist},Regressorlist{iReg})) %strcmp(tmpGLM.AUX.label{ilist},Regressorlist{iReg})
+                        idreg = [idreg,ilist];
+                        disp([Regressorlist{iReg},' AUX regressor find'])
+                    end
+                end
+
+                if numel(Regressorlist{iReg})>4
+                    checkzone = Regressorlist{iReg};
+                    if strcmp(upper(checkzone(end-3:end)),'ZONE')
+                        try
+                            load(Regressorlist{iReg} ,'-mat'); %try the fullfile correct
+                            disp([Regressorlist{iReg},' zone regressor find'])
+                        catch
+                            try
+                                load(fullfile(dirxls, Regressorlist{iReg} ),'-mat'); %try in the excel folder
+                            catch
+                                disp(['Regressor zone :',  Regressorlist{iReg} ,' or ',fullfile(dirxls,Regressorlist{iReg}) , ' could not be load'])
+                                return
+                            end
+                        end
+                        idreg = [idreg,0]; %if idreg = 0 regressor is a zone of the current channel
+                    end
+                end
+            end
+
             %PERFORM REGRESSION
             tmpGLM.idreg = idreg;
             X = [];%ones(size(PMI{1}.tmpGLM.spar,1),1);
+            Regressorzone = 0;
             for ireg = 1:numel(idreg)
-                tmpGLM.AUX.label{idreg(ireg)};
-                X = [X,    tmpGLM.AUX.data{idreg(ireg)}];
-            end
-            beta = zeros(size(X,2),numel(tmpGLM.listgood));
-            bstd = zeros(size(X,2),numel(tmpGLM.listgood));
-            for ich = 1:numel(tmpGLM.listgood)
-                idch = tmpGLM.listgood(ich);
-                y = tmpGLM.spar(:,idch);
-                %figure;plot(PMI{1}.tmpGLM.spar)
-                if sum(isnan(y))
-                    b = zeros(size(X,2),1);
-                    beta(:,idch) = nan;
-                    bstd(:,idch) = nan;
-                    R2(:,idch) = nan; 
-                elseif sum(y(:))==0 %all zero replace by nan do avoid estimation be 0
-                     beta(:,idch) = nan;
-                    bstd(:,idch) = nan;
-                    R2(:,idch) = nan; 
+                if idreg(ireg)==0
+                    Regressorzone = 1;
+                    ListRegressorZone= [];
+                    ListChannelZone= [];%(first column regresor channel to average, second row column ch to apply)
+                    for izone =1:numel(zone.label)
+                        tmp = upper(zone.label{izone});
+                        if numel(tmp)>9
+                            if strcmp(tmp(1:9),'REGRESSOR')
+                                ListRegressorZone = [ListRegressorZone,izone];
+                            end
+                        end
+                    end
+
+                    for iRegressor = 1:numel(ListRegressorZone)
+                        tmp = upper(zone.label{ListRegressorZone(iRegressor)});
+                        zoneidentification = tmp(10:end);
+                        for izone = 1:numel(zone.label)
+                            tmpzone = upper(zone.label{izone});
+                            if strcmp( strtrim(zoneidentification), strtrim(tmpzone))
+                                ListChannelZone = [ListChannelZone,izone];
+                            end
+                        end
+                    end
+                    if numel(ListChannelZone) ~= numel(ListRegressorZone)
+                        msgbox('Regressor Zone and Zone must be in equal number in the zone list')
+                        return
+                    end
+
                 else
-                    [b,bint,r,rint,stats]=  regress(y,X);
-                    beta(:,idch) = b;
-                    bstd(:,idch) = stats(4);
-                    R2(:,idch) =  stats(1);
+                    X = [X,    tmpGLM.AUX.data{idreg(ireg)}];
                 end
-        
-                
             end
-            
-        end
-        tmpGLM.beta = beta;
-        tmpGLM.std = bstd;
-        tmpGLM.R2 = R2;
-        
-        
-        if  Regressorzone==1
-            XmRegressorgood = XmRegressor(:,tmpGLM.listgood);
-        end
-        
-        %Save in the comp list
-        for iselected = 1:size(beta,1)
-            beta =tmpGLM.beta ;
-            idreg = tmpGLM.idreg;
-            tmpGLM.selected  = iselected;
-            if idreg(iselected)==0
-                % Xmean(:) =1
-                Xm = XmRegressorgood;
-                label = Regressorlist{iselected};
-                [filepath,name,ext] = fileparts(Regressorlist{iselected});
-                label =  [name,ext];                
-            else
-               % Xm = tmpGLM.AUX.data{idreg(iselected)}*beta(iselected,:);
-                Xm = tmpGLM.AUX.data{idreg(iselected)}; %compress multiply by beta later
-                label = tmpGLM.AUX.label{idreg(iselected)};
-            end
-            try
-                if isfield(job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport,'b_extractglmlist_autoexport_yes')                  
-                   if job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.m_replaceglmlist == 1;
-                         delete(fullfile(NIRSDtp{ievent},'SelectedFactors.mat'));
-                         job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.m_replaceglmlist = 0;
-                   end
+
+
+            Xtmp = X;
+            XmRegressor = zeros(size(tmpGLM.spar));
+            if numel(ListRegressorZone)
+                beta = zeros(size(X,2)+1,numel(tmpGLM.listgood));
+                bstd = zeros(size(X,2)+1,numel(tmpGLM.listgood));
+                for izoneRegressor = 1:numel(ListRegressorZone)
+                    for iconc = 1:2 %HbO and HbR
+                        chlistRegressor = zone.plotLst{ListRegressorZone(izoneRegressor)};
+                        chlistApply = zone.plotLst{ListChannelZone(izoneRegressor)};
+                        if iconc==2
+                            chlistRegressor =  chlistRegressor+ NC/2;
+                            chlistApply = chlistApply + NC/2;
+                        end
+                        Xmean = nanmean(tmpGLM.spar(:,chlistRegressor),2);% -  nanmean(nanmean(tmpGLM.spar(:,chlistRegressor),2)); %center to zero
+                        % figure;plot(Xmean)
+                        X = [Xtmp,    Xmean];
+                        for ich = 1:numel(chlistApply)
+                            idch = chlistApply(ich);
+                            y = tmpGLM.spar(:,idch);
+                            %figure;plot(PMI{1}.tmpGLM.spar)
+                            if sum(isnan(y))
+                                b = zeros(size(X,2),1);
+                                b = nan(size(X,2),1);
+                                beta(:,idch) = nan; % 0;
+                                bstd(:,idch) = nan; % 0;
+                                R2(:,idch) = nan; %0
+                            elseif sum(y(:))==0 %all zero replace by nan do avoid estimation be 0
+                                beta(:,idch) = nan;
+                                bstd(:,idch) = nan;
+                                R2(:,idch) = nan;
+                            else
+                                [b,bint,r,rint,stats]=  regress(y,X);
+                                beta(:,idch) = b;
+                                bstd(:,idch) = stats(4);
+                                R2(:,idch) =  stats(1);
+                            end
+                            XmRegressor(:,idch) = Xmean*b(end);
+                        end
+                    end
                 end
-                load(fullfile(NIRSDtp{ievent},'SelectedFactors.mat'));
-                newfile = 0;
-            catch
-                clear PARCOMP
-                %donot exist create the stucture
-                PARCOMP.file= fileDtp{ievent};
-                PARCOMP.filestr =  sprintf('Bloc%03.0f',fileDtp{ievent});
-                PARCOMP.module  = numel(NIRS.Dt.fir.pp);
-                PARCOMP.modulestr = NIRS.Dt.fir.pp(end).pre;
-                PARCOMP.listgood =  tmpGLM.listgood;
-                PARCOMP.beta = tmpGLM.beta;
-                PARCOMP.std =  tmpGLM.std;
-                PARCOMP.R2 = tmpGLM.R2;
-                PARCOMP.AUX =  tmpGLM.AUX;
-                PARCOMP.indt = tmpGLM.indt(1):tmpGLM.indt(end); %indice de temps.
-                PARCOMP.data = [];%d1(tmpGLM.indt(1):tmpGLM.indt(end),tmpGLM.listgood) ;%data(:,listgood,:);
-                PARCOMP.Xm = Xm;
-                %to large data file with data and xm remove them
-                PARCOMP.ComponentToKeep = tmpGLM.selected;
-                PARCOMP.idreg = tmpGLM.idreg;
-                labelid  = labelDtp{ievent} ;
-                PARCOMP.label= [ labelisbad, labelid,'_', label,'GLM', sprintf('%03.0f',size(PARCOMP,2))];
-                disp([ labelisbad, labelid,'_',label, 'GLM', sprintf('%03.0f',size(PARCOMP,2))]);
-                PARCOMP.type = 'GLM';
-                PARCOMP.topo =  beta(iselected,:);
-                newfile = 1;
+            elseif ~numel(ListRegressorZone) %pas de zone de regression juste des auxiliaires
+                %PERFORM REGRESSION
+                tmpGLM.idreg = idreg;
+                X = [];%ones(size(PMI{1}.tmpGLM.spar,1),1);
+                for ireg = 1:numel(idreg)
+                    tmpGLM.AUX.label{idreg(ireg)};
+                    X = [X,    tmpGLM.AUX.data{idreg(ireg)}];
+                end
+                beta = zeros(size(X,2),numel(tmpGLM.listgood));
+                bstd = zeros(size(X,2),numel(tmpGLM.listgood));
+                for ich = 1:numel(tmpGLM.listgood)
+                    idch = tmpGLM.listgood(ich);
+                    y = tmpGLM.spar(:,idch);
+                    %figure;plot(PMI{1}.tmpGLM.spar)
+                    if sum(isnan(y))
+                        b = zeros(size(X,2),1);
+                        beta(:,idch) = nan;
+                        bstd(:,idch) = nan;
+                        R2(:,idch) = nan;
+                    elseif sum(y(:))==0 %all zero replace by nan do avoid estimation be 0
+                        beta(:,idch) = nan;
+                        bstd(:,idch) = nan;
+                        R2(:,idch) = nan;
+                    else
+                        [b,bint,r,rint,stats]=  regress(y,X);
+                        beta(:,idch) = b;
+                        bstd(:,idch) = stats(4);
+                        R2(:,idch) =  stats(1);
+                    end
+
+
+                end
+
             end
-            if newfile == 0
-                id = numel(PARCOMP);
-                %donot exist create the stucture
-                %donot exist create the stucture
-                PARCOMP(id+1).file= fileDtp{ievent};
-                PARCOMP(id+1).filestr =  sprintf('Bloc%03.0f',fileDtp{ievent});
-                PARCOMP(id+1).module  = numel(NIRS.Dt.fir.pp);
-                PARCOMP(id+1).modulestr = NIRS.Dt.fir.pp(end).pre;
-                PARCOMP(id+1).listgood =  tmpGLM.listgood;
-                PARCOMP(id+1).beta = tmpGLM.beta;
-                PARCOMP(id+1).std =  tmpGLM.std;
-                PARCOMP(id+1).R2 = tmpGLM.R2;
-                PARCOMP(id+1).AUX =  tmpGLM.AUX;
-                PARCOMP(id+1).indt = tmpGLM.indt(1):tmpGLM.indt(end); %indice de temps.
-                PARCOMP(id+1).data = [];%d1(tmpGLM.indt(1):tmpGLM.indt(end),tmpGLM.listgood) ;%data(:,listgood,:);
-                PARCOMP(id+1).Xm = Xm;
-                PARCOMP(id+1).ComponentToKeep = tmpGLM.selected;
-                PARCOMP(id+1).idreg = tmpGLM.idreg;
-                labelid  = labelDtp{ievent} ;
-                PARCOMP(id+1).label= [ labelisbad, labelid,'_',label,'GLM', sprintf('%03.0f',size(PARCOMP,2))];
-                disp([ labelisbad, labelid,'_',label ,'GLM', sprintf('%03.0f',size(PARCOMP,2))]);
-                PARCOMP(id+1).type = 'GLM';
-                PARCOMP(id+1).topo =  beta(iselected,:);
-                newfile = 1;
+            tmpGLM.beta = beta;
+            tmpGLM.std = bstd;
+            tmpGLM.R2 = R2;
+
+
+            if  Regressorzone==1
+                XmRegressorgood = XmRegressor(:,tmpGLM.listgood);
             end
-            save(fullfile(NIRSDtp{ievent},'SelectedFactors.mat'),'PARCOMP');
-            try 
-                if isfield(job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport,'b_extractglmlist_autoexport_yes')                 
-                    srsfile = NIRSmat;
-                  
-                    listgood=PARCOMP(end).listgood;
-                      listbad_ch = ones(numel(listgood),1);
-                     listbad_trial = ones(numel(listgood),1);
-                    if job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_nan_chrejected == 1
-                        listbad_ch=  NIRS.Cf.H.C.ok(listgood);
+
+            %Save in the comp list
+            for iselected = 1:size(beta,1)
+                beta =tmpGLM.beta ;
+                idreg = tmpGLM.idreg;
+                tmpGLM.selected  = iselected;
+                if idreg(iselected)==0
+                    % Xmean(:) =1
+                    Xm = XmRegressorgood;
+                    label = Regressorlist{iselected};
+                    [filepath,name,ext] = fileparts(Regressorlist{iselected});
+                    label =  [name,ext];
+                else
+                    % Xm = tmpGLM.AUX.data{idreg(iselected)}*beta(iselected,:);
+                    Xm = tmpGLM.AUX.data{idreg(iselected)}; %compress multiply by beta later
+                    label = tmpGLM.AUX.label{idreg(iselected)};
+                end
+                try
+                    if isfield(job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport,'b_extractglmlist_autoexport_yes')
+                        if job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.m_replaceglmlist == 1;
+                            delete(fullfile(NIRSDtp{ievent},'SelectedFactors.mat'));
+                            job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.m_replaceglmlist = 0;
+                        end
                     end
-                    if job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_nan_int_rejected == 1
-                      if sum(~ch_remove_for_int)>0
-                        disp(['Event ', num2str(ievent),' Reject ', num2str(sum(~ch_remove_for_int)),'/',num2str(numel(ch_remove_for_int)), 'CH  noise  >' ,num2str(job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_labelbad_threshold),'%']);
-                        listbad_trial =ch_remove_for_int(listgood)';
-                      end
-                    end 
-                    
-                    topo = PARCOMP(end).topo;
-                    pathoutlist = job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.f_extractglmlist_autoexport_yes{1};
-                    if ~isdir(pathoutlist)
-                        mkdir(pathoutlist);
-                        disp(['Create ' pathoutlist])
-                    end
-                    if isempty(job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.f_extractglmlist_autoexport_yes_ChannelList{1})
-                        job.NIRSmat = job.c_extractcomponent.b_extractcomponent_glm.NIRSmat;
-                        nirs_run_createseedlist(job);
-                        job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.f_extractglmlist_autoexport_yes_ChannelList{1} = fullfile(currentpath,'channellist.txt');
-                    end
-                    ChannelListfile = job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.f_extractglmlist_autoexport_yes_ChannelList{1};
-                    [listHBOch, listHBRch, listnameHbO, listnameHbR , zonelist]= findchinChannelList(NIRS, ChannelListfile,PARCOMP(end).listgood);
-                    Xiselected = job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_Xi + 1;
-                     listbad = listbad_trial(:)&listbad_ch(:);
-                    if job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.m_glmlist_autoexport_HbO==1
-                          if find(iselected==Xiselected) %only beta 1
+                    load(fullfile(NIRSDtp{ievent},'SelectedFactors.mat'));
+                    newfile = 0;
+                catch
+                    clear PARCOMP
+                    %donot exist create the stucture
+                    PARCOMP.file= fileDtp{ievent};
+                    PARCOMP.filestr =  sprintf('Bloc%03.0f',fileDtp{ievent});
+                    PARCOMP.module  = numel(NIRS.Dt.fir.pp);
+                    PARCOMP.modulestr = NIRS.Dt.fir.pp(end).pre;
+                    PARCOMP.listgood =  tmpGLM.listgood;
+                    PARCOMP.beta = tmpGLM.beta;
+                    PARCOMP.std =  tmpGLM.std;
+                    PARCOMP.R2 = tmpGLM.R2;
+                    PARCOMP.AUX =  tmpGLM.AUX;
+                    PARCOMP.indt = tmpGLM.indt(1):tmpGLM.indt(end); %indice de temps.
+                    PARCOMP.data = [];%d1(tmpGLM.indt(1):tmpGLM.indt(end),tmpGLM.listgood) ;%data(:,listgood,:);
+                    PARCOMP.Xm = Xm;
+                    %to large data file with data and xm remove them
+                    PARCOMP.ComponentToKeep = tmpGLM.selected;
+                    PARCOMP.idreg = tmpGLM.idreg;
+                    labelid  = labelDtp{ievent} ;
+                    PARCOMP.label= [ labelisbad, labelid,'_', label,'GLM', sprintf('%03.0f',size(PARCOMP,2))];
+                    disp([ labelisbad, labelid,'_',label, 'GLM', sprintf('%03.0f',size(PARCOMP,2))]);
+                    PARCOMP.type = 'GLM';
+                    PARCOMP.topo =  beta(iselected,:);
+                    newfile = 1;
+                end
+                if newfile == 0
+                    id = numel(PARCOMP);
+                    %donot exist create the stucture
+                    %donot exist create the stucture
+                    PARCOMP(id+1).file= fileDtp{ievent};
+                    PARCOMP(id+1).filestr =  sprintf('Bloc%03.0f',fileDtp{ievent});
+                    PARCOMP(id+1).module  = numel(NIRS.Dt.fir.pp);
+                    PARCOMP(id+1).modulestr = NIRS.Dt.fir.pp(end).pre;
+                    PARCOMP(id+1).listgood =  tmpGLM.listgood;
+                    PARCOMP(id+1).beta = tmpGLM.beta;
+                    PARCOMP(id+1).std =  tmpGLM.std;
+                    PARCOMP(id+1).R2 = tmpGLM.R2;
+                    PARCOMP(id+1).AUX =  tmpGLM.AUX;
+                    PARCOMP(id+1).indt = tmpGLM.indt(1):tmpGLM.indt(end); %indice de temps.
+                    PARCOMP(id+1).data = [];%d1(tmpGLM.indt(1):tmpGLM.indt(end),tmpGLM.listgood) ;%data(:,listgood,:);
+                    PARCOMP(id+1).Xm = Xm;
+                    PARCOMP(id+1).ComponentToKeep = tmpGLM.selected;
+                    PARCOMP(id+1).idreg = tmpGLM.idreg;
+                    labelid  = labelDtp{ievent} ;
+                    PARCOMP(id+1).label= [ labelisbad, labelid,'_',label,'GLM', sprintf('%03.0f',size(PARCOMP,2))];
+                    disp([ labelisbad, labelid,'_',label ,'GLM', sprintf('%03.0f',size(PARCOMP,2))]);
+                    PARCOMP(id+1).type = 'GLM';
+                    PARCOMP(id+1).topo =  beta(iselected,:);
+                    newfile = 1;
+                end
+                save(fullfile(NIRSDtp{ievent},'SelectedFactors.mat'),'PARCOMP');
+                try
+                    if isfield(job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport,'b_extractglmlist_autoexport_yes')
+                        srsfile = NIRSmat;
+
+                        listgood=PARCOMP(end).listgood;
+                        listbad_ch = ones(numel(listgood),1);
+                        listbad_trial = ones(numel(listgood),1);
+                        if job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_nan_chrejected == 1
+                            listbad_ch=  NIRS.Cf.H.C.ok(listgood);
+                        end
+                        if job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_nan_int_rejected == 1
+                            if sum(~ch_remove_for_int)>0
+                                disp(['Event ', num2str(ievent),' Reject ', num2str(sum(~ch_remove_for_int)),'/',num2str(numel(ch_remove_for_int)), 'CH  noise  >' ,num2str(job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_labelbad_threshold),'%']);
+                                listbad_trial =ch_remove_for_int(listgood)';
+                            end
+                        end
+
+                        topo = PARCOMP(end).topo;
+                        pathoutlist = job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.f_extractglmlist_autoexport_yes{1};
+                        if ~isdir(pathoutlist)
+                            mkdir(pathoutlist);
+                            disp(['Create ' pathoutlist])
+                        end
+                        if isempty(job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.f_extractglmlist_autoexport_yes_ChannelList{1})
+                            job.NIRSmat = job.c_extractcomponent.b_extractcomponent_glm.NIRSmat;
+                            nirs_run_createseedlist(job);
+                            job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.f_extractglmlist_autoexport_yes_ChannelList{1} = fullfile(currentpath,'channellist.txt');
+                        end
+                        ChannelListfile = job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.f_extractglmlist_autoexport_yes_ChannelList{1};
+                        [listHBOch, listHBRch, listnameHbO, listnameHbR , zonelist]= findchinChannelList(NIRS, ChannelListfile,PARCOMP(end).listgood);
+                        Xiselected = job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.i_glmlist_autoexport_Xi + 1;
+                        listbad = listbad_trial(:)&listbad_ch(:);
+                        if job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.m_glmlist_autoexport_HbO==1
+                            if find(iselected==Xiselected) %only beta 1
                                 A = nan(size(listHBOch,1),1);
-                                idok = find(listbad(listHBOch)); 
+                                idok = find(listbad(listHBOch));
                                 A(idok,1) = topo(listHBOch(idok));
                                 save(fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile', 'pourcentagenoise', 'pourcentagenoisebychHbO' );
                                 disp(['Create export: load(''', fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat'')'])]);
-                          end
-                    elseif job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.m_glmlist_autoexport_HbO==2
-                          if find(iselected==Xiselected) %only beta 1
-                            A = nan(size(listHBRch,1),1);
-                            idok = find(listbad(listHBRch));
-                            A(idok,1) = topo(listHBRch(idok));
-                            save(fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile', 'pourcentagenoise','pourcentagenoisebychHbR' );
-                            disp(['Create export: load(''', fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat'')'])])
-                          end
-                    elseif job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.m_glmlist_autoexport_HbO==3
-                        
-                          if find(iselected==Xiselected) %only beta 1
+                            end
+                        elseif job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.m_glmlist_autoexport_HbO==2
+                            if find(iselected==Xiselected) %only beta 1
+                                A = nan(size(listHBRch,1),1);
+                                idok = find(listbad(listHBRch));
+                                A(idok,1) = topo(listHBRch(idok));
+                                save(fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile', 'pourcentagenoise','pourcentagenoisebychHbR' );
+                                disp(['Create export: load(''', fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat'')'])])
+                            end
+                        elseif job.c_extractcomponent.b_extractcomponent_glm.c_extractglmlist_autoexport.b_extractglmlist_autoexport_yes.m_glmlist_autoexport_HbO==3
+
+                            if find(iselected==Xiselected) %only beta 1
                                 A = nan(size(listHBOch,1),1);
-                                idok = find(listbad(listHBOch)); 
+                                idok = find(listbad(listHBOch));
                                 A(idok,1) = topo(listHBOch(idok));
                                 save(fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile','pourcentagenoise', 'pourcentagenoisebychHbO' );
                                 disp(['Create export: load(''', fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat'')'])]);
-                          end
-                        
-                        
-                         if find(iselected==Xiselected) %only beta 1
-                            A = nan(size(listHBRch,1),1);
-                            idok = find(listbad(listHBRch));
-                            A(idok,1) = topo(listHBRch(idok));
-                            save(fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile','pourcentagenoise', 'pourcentagenoisebychHbR' );
-                            disp(['Create export: load(''', fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat'')'])])
-                          end
-                    end
-                end
-            catch
-                disp('WARNING topo could not be exported verify channel list')
-            end
-        end
-        %disp(['Error unable to GLM on ' , NIRSmat])
-%        catch
-%            disp('XLS line do not contain valid NIRS.mat file')
-%        end
-    end
-    try
-        filenamexls = fullfile(NIRSDtp{ievent},['Export ', labelid,'.xlsx']);  
-        A = {'NIRS.mat', 'Type', 'Label', 'Channel List','Name'};
-        %CREATE XLS here
-        namefilter=[labelid,'_',Regressorlist{1}]; 
-        disp(['Suggested filter name ',  namefilter,' to export'])
-        VAL = {NIRSDtp{ievent},'GLM', namefilter, [NIRSDtp{ievent}, 'channellist.txt'],namefilter};
-        try
-    %    xlswrite(filenamexls,[A;VAL]);
-        writecell([A;VAL],filenamexls)
+                            end
 
-        disp(['Create xls example file: ',filenamexls,' to help you to configure the Export list function to export component'])
-        catch
-        writetxtfile_asxlswrite(filenamexls,[A;VAL]);
-        disp(['Create xls example file: ',filenamexls,' to help you to configure the Export list function to export component'])
+
+                            if find(iselected==Xiselected) %only beta 1
+                                A = nan(size(listHBRch,1),1);
+                                idok = find(listbad(listHBRch));
+                                A(idok,1) = topo(listHBRch(idok));
+                                save(fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile','pourcentagenoise', 'pourcentagenoisebychHbR' );
+                                disp(['Create export: load(''', fullfile(pathoutlist,['TopoHbR',PARCOMP(end).label,'event', sprintf('%03.0f',ievent),'.mat'')'])])
+                            end
+                        end
+                    end
+                catch
+                    disp('WARNING topo could not be exported verify channel list')
+                end
+            end
+            %disp(['Error unable to GLM on ' , NIRSmat])
+            %        catch
+            %            disp('XLS line do not contain valid NIRS.mat file')
+            %        end
         end
-    catch
+        try
+            filenamexls = fullfile(NIRSDtp{ievent},['Export ', labelid,'.xlsx']);
+            A = {'NIRS.mat', 'Type', 'Label', 'Channel List','Name'};
+            %CREATE XLS here
+            namefilter=[labelid,'_',Regressorlist{1}];
+            disp(['Suggested filter name ',  namefilter,' to export'])
+            VAL = {NIRSDtp{ievent},'GLM', namefilter, [NIRSDtp{ievent}, 'channellist.txt'],namefilter};
+            try
+                %    xlswrite(filenamexls,[A;VAL]);
+                writecell([A;VAL],filenamexls)
+
+                disp(['Create xls example file: ',filenamexls,' to help you to configure the Export list function to export component'])
+            catch
+                writetxtfile_asxlswrite(filenamexls,[A;VAL]);
+                disp(['Create xls example file: ',filenamexls,' to help you to configure the Export list function to export component'])
+            end
+        catch
+        end
     end
-end
 elseif isfield(job.c_extractcomponent,'b_extractcomponent_PARAFAC')
     [~,~,ext] =fileparts(job.c_extractcomponent.b_extractcomponent_PARAFAC.f_component_PARAFAClist{1});
     if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
         try
-        [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_PARAFAC.f_component_PARAFAClist{1});
+            [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_PARAFAC.f_component_PARAFAClist{1});
         catch
-        [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_PARAFAC.f_component_PARAFAClist{1});
-        end 
+            [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_PARAFAC.f_component_PARAFAClist{1});
+        end
     elseif strcmp(ext,'.txt')
         [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_PARAFAC.f_component_PARAFAClist{1});
     end
-    
+
     for icol=1:size(rawData,2)
         if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat')))
             id.NIRSDtp = icol;
@@ -1437,7 +1437,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_PARAFAC')
             id.labelDtp =  icol;
         end
     end
-    
+
     NIRSDtp = rawData(2:end,id.NIRSDtp );
     fileDtp = rawData(2:end,2);
     chDtp = 'HBO' ; rawData(2:end,3); %do both to modify except ....
@@ -1447,8 +1447,8 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_PARAFAC')
     startDtp = rawData(2:end,id.startDtp);
     stopDtp = rawData(2:end,id.stopDtp);
     labelDtp = rawData(2:end,id.labelDtp);
-    
-    
+
+
     %Load data and aux for regression
     for ievent=1:size(NIRSDtp,1)
         NIRSDtp{ievent};
@@ -1457,16 +1457,16 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_PARAFAC')
         NC = NIRS.Cf.H.C.N;
         fDtp = NIRS.Dt.fir.pp(end).p;
         d = fopen_NIR(fDtp{fileDtp{ievent}},NC)';
-        
+
         listgood = 1:(NC/2);
-        
+
         tHRF = 1/NIRS.Cf.dev.fs:1/NIRS.Cf.dev.fs:size(d,1)*1/NIRS.Cf.dev.fs;
         fsNIRS = NIRS.Cf.dev.fs;
         tstart = find(tHRF<=startDtp{ievent});
         tstop = find(tHRF<= stopDtp{ievent});
         indt = [tstart(end),tstop(end)];%Time indice
         intensnorm = d(indt(1):indt(end),:);
-        
+
         %Detrent DATA segment for centrering
         X = 1:1:size(intensnorm,1);
         Mb1 =  ((intensnorm(end,:)-intensnorm(1,:))./numel(X))';
@@ -1487,13 +1487,13 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_PARAFAC')
         Oldload{2} = []; % rand(21,3);
         fixMode = [0 0 0]; %force 2 WAVELENGHT EQUAL %no fixe mode
         weights = []; %Mean for example put one at good time point and zero at noisy one
-        
+
         [Factors,it,err,corcondia] = parafac(spar,Nc,opt,const,Oldload,fixMode,weights);
-        
+
         PARAFAC.Factors = Factors;
         factorWavelength = Factors{3};
-        
-        
+
+
         A = Factors{1};
         B = Factors{2};
         C = Factors{3};
@@ -1506,7 +1506,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_PARAFAC')
         %Case C Sign A=1 B=-1 C=-1
         %Case D Sign A=-1  B=1 C=-1
         %on only one component
-        
+
         if C(1) > C(2)
             if mean(A)>0
                 cas = 'CaseA';
@@ -1521,7 +1521,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_PARAFAC')
                 cas = 'CaseD';
             end
         end
-        
+
         switch cas
             case 'CaseA'
             case 'CaseB'
@@ -1534,16 +1534,16 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_PARAFAC')
                 A = -A;
                 C = -C;
         end
-        
+
         %         figure;subplot(2,2,1);plot(A);subplot(2,2,2);plot(B);subplot(2,2,3);plot(C);
         %         title(cas)
-        
+
         ComponentToKeep=1;
-        
+
         Ac = A(:,ComponentToKeep); Bc = B(:,ComponentToKeep); Cc = C(:,ComponentToKeep);
         [Xm]=nmodel(({Ac,Bc,Cc}));
-        
-        
+
+
         %check the get PARAFAC
         try
             load(fullfile(NIRSDtp{ievent},'SelectedFactors.mat'));
@@ -1590,33 +1590,38 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_PARAFAC')
             FacSpatial = Factors{2};
             PARCOMP(id+1).topo = B(:,ComponentToKeep);
         end
-        
+
         save(fullfile(NIRSDtp{ievent},'SelectedFactors.mat'),'PARCOMP');
-        
+
     end
 elseif isfield(job.c_extractcomponent,'b_extractcomponent_AVG')
-    
-    %%
-    % 
-    % * ITEM1
-    % * ITEM2
-    % 
-    [~,~,ext] =fileparts(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
-    if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
-        [pathstr, name, ext]= fileparts(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
-         try
-        [data, text, rawData] = xlsread(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
-        catch
-        [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
-        end 
 
-    elseif strcmp(ext,'.txt')
-        [pathstr, name, ext]= fileparts(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
-        [data, text, rawData] = readtxtfile_asxlsread(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1});
+    %% Utilisé le fichier creer par défault Extract.xlsx en fonction de la position du NIRS.mat
+    if isempty(job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1})
+        job.c_extractcomponent.b_extractcomponent_AVG.NIRSmat
+        [pathnirsmat,~,~] = fileparts(job.c_extractcomponent.b_extractcomponent_AVG.NIRSmat)
+        fileextract = fullfile(pathnirsmat{1},'ExtractHRF.xlsx')
+        disp('Look default  Extract file')
+    else
+        fileextract=job.c_extractcomponent.b_extractcomponent_AVG.f_component_AVGlist{1}
     end
-    
+    %
+    [~,~,ext] =fileparts( fileextract);
+    if strcmp(ext,'.xlsx')|strcmp(ext,'.xls')
+        [pathstr, name, ext]= fileparts( fileextract);
+        try
+            [data, text, rawData] = xlsread( fileextract);
+        catch
+            [data, text, rawData] = readtxtfile_asxlsread( fileextract);
+        end
+
+    elseif strcmp(ext,'.txt') %csv or txt
+        [pathstr, name, ext]= fileparts( fileextract);
+        [data, text, rawData] = readtxtfile_asxlsread( fileextract);
+    end
+
     for icol=1:size(rawData,2)
-        if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat')))
+        if strcmp(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat'))) |strmatch(upper(deblank(rawData{1,icol})),deblank(upper('NIRS.mat folder')))
             id.NIRSDtp = icol;
         elseif strcmp(upper(deblank(rawData{1,icol})),upper('File'))
             id.fileDtp =  icol;
@@ -1632,40 +1637,77 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_AVG')
             id.stopwDtp =  icol;
         elseif strcmp(upper(deblank(rawData{1,icol})),upper('ZoneDisplay'))
             id.ZoneDisplay =  icol;
+        elseif strcmp(upper(deblank(rawData{1,icol})),upper('Trig'))
+            id.Trig =  icol;
         end
     end
     NIRSDtp = rawData(2:end,id.NIRSDtp );
     fileDtp = rawData(2:end,2);
     startDtp = rawData(2:end,id.startDtp);
     stopDtp = rawData(2:end,id.stopDtp);
-    startwDtp = rawData(2:end,id.startwDtp);
-    stopwDtp = rawData(2:end,id.stopwDtp);
-    labelDtp = rawData(2:end,id.labelDtp);
-    if isfield(id,'ZoneDisplay')
-        zoneDtp = rawData(2:end,id.ZoneDisplay);
-    else
-        zoneDtp = labelDtp;
+    try
+        startwDtp = rawData(2:end,id.startwDtp);
+        stopwDtp = rawData(2:end,id.stopwDtp);
+    catch
+        Trig = rawData(2:end,id.Trig);
+        for i = 1:numel(Trig)
+            startwDtp{i} =  Trig{i} + str2num(job.c_extractcomponent.b_extractcomponent_AVG.e_extractcomponent_AVGstartTrig);
+            stopwDtp{i}  = Trig{i} + str2num(job.c_extractcomponent.b_extractcomponent_AVG.e_extractcomponent_AVGstopTrig);
+        end
     end
-    
-    %Load data and aux for regression
+    labelDtp = rawData(2:end,id.labelDtp);
+    if isfield(id,'ZoneDisplay') %use zone in the xls file in priority
+        zoneDtp = rawData(2:end,id.ZoneDisplay);
+        disp('Use zone from the xlsx file definition') 
+    else %use definition in the batch
+        if ~isempty(job.c_extractcomponent.b_extractcomponent_AVG.f_zone_optional) ;
+        zoneDtp = cell(size(labelDtp));
+        for i=1:size(zoneDtp,1)
+            zoneDtp{i} = job.c_extractcomponent.b_extractcomponent_AVG.f_zone_optional{1};
+        end
+          disp(['Use zone: ', job.c_extractcomponent.b_extractcomponent_AVG.f_zone_optional{1}])
+        else
+        zoneDtp = labelDtp;
+        end
+    end
+
+    %Load data and for avg,
     for ievent=1:size(NIRSDtp,1)
         NIRSDtp{ievent};
-        NIRSmat = fullfile(NIRSDtp{ievent},'NIRS.mat');
         try
-            load(NIRSmat);
+            try
+                NIRSmat = fullfile(NIRSDtp{ievent},'NIRS.mat');
+                load(NIRSmat);
+                disp(['File: ', NIRSmat,' open'])
+            catch
+                try
+                    NIRSmat = fullfile(NIRSDtp{ievent});
+                    load(NIRSmat);
+                    NIRSDtp{ievent} = fileparts(NIRSDtp{ievent});
+                    disp(['File: ', NIRSmat,' open'])
+                catch
+                    NIRSmat = fullfile(pathstr,'NIRS.mat');
+                    load(NIRSmat);
+                    NIRSDtp{ievent} = pathstr;
+                    disp(['File: ', fullfile(pathstr,'NIRS.mat'),' open'])
+                end
+
+            end
             NC = NIRS.Cf.H.C.N;
             fDtp = NIRS.Dt.fir.pp(end).p;
             try
-                 d = fopen_NIR(fDtp{fileDtp{ievent}},NC)';
+                d = fopen_NIR(fDtp{fileDtp{ievent}},NC)';
             catch
                 jobfolderadjustment.NIRSmat = {fullfile(NIRSDtp{ievent},'NIRS.mat')};
                 jobfolderadjustment.c_MultimodalPath.b_MultimodalPath_no = struct([]);
                 outfolderadjustment = nirs_run_NIRSmatdiradjust(jobfolderadjustment)
-                load(fullfile(NIRSDtp{ievent},'NIRS.mat'));  
+                load(fullfile(NIRSDtp{ievent},'NIRS.mat'));
                 fDtp = NIRS.Dt.fir.pp(end).p;
-                d = fopen_NIR(fDtp{fileDtp{ievent}},NC)';  
+                d = fopen_NIR(fDtp{fileDtp{ievent}},NC)';
                 disp('Folder adjustement apply')
             end
+
+           [~,namenirs,~] =fileparts(fDtp{fileDtp{ievent}});
             listgood = 1:NC;
             tHRF = 1/NIRS.Cf.dev.fs:1/NIRS.Cf.dev.fs:size(d,1)*1/NIRS.Cf.dev.fs;
             fsNIRS = NIRS.Cf.dev.fs;
@@ -1676,87 +1718,160 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_AVG')
             tstop = find(tHRF<= stopDtp{ievent});
             indt = [tstart(end),tstop(end)];%Time indice
             intensnorm = d(indt(1):indt(end),:);
-            tstartw = find(tHRF<=startwDtp{ievent});
+            tstartw = find(tHRF<=startwDtp{ievent});          
             tstopw = find(tHRF<= stopwDtp{ievent});
-            try 
+            disp(['Window avg: ',  num2str(tHRF(tstartw(end))),' to ',  num2str(tHRF(tstopw(end)))])
+            zonelist=[];
+            try
                 load(zoneDtp{ievent},'-mat');
                 %
             catch
                 try
-                load(fullfile(pathstr,[zoneDtp{ievent},'.zone']),'-mat');
+                    load(fullfile(pathstr,[zoneDtp{ievent},'.zone']),'-mat'); 
                 catch
-                zone.plotLst{1} = 1;
+                    zone.plotLst{1} = 1;
                 end
             end
-            
-            Xm = zeros(size(intensnorm,1), numel(zone.plotLst));
-            AVG = zeros(NC,1 );
-            for izone = 1:numel(zone.plotLst)
-                plotLst = zone.plotLst{izone};
-                Xm(:,izone) = nanmean(intensnorm(:,plotLst),2);
-                AVG(plotLst,1) = nanmean(nanmean(intensnorm(:,plotLst),2));
-            end
+
+            % Xm = zeros(size(intensnorm,1), numel(zone.plotLst));
+            % AVG = zeros(NC,1 );
+            % for izone = 1:numel(zone.plotLst)
+            %     plotLst = zone.plotLst{izone};
+            %     Xm(:,izone) = nanmean(intensnorm(:,plotLst),2);
+            %     AVG(plotLst,1) = nanmean(nanmean(intensnorm(:,plotLst),2));
+            % end
             if isfield(job.c_extractcomponent.b_extractcomponent_AVG.c_extractAVGlist_autoexport,'b_extractAVGlist_autoexport_yes')
                 pathoutlist = job.c_extractcomponent.b_extractcomponent_AVG.c_extractAVGlist_autoexport.b_extractAVGlist_autoexport_yes.f_extractAVGlist_autoexport_yes{1};
                 %review to improve channel list
-                A = nanmean(d(tstartw(end) :tstopw(end),1:NC/2))';
-                zonelist = []
-                try
-                save(fullfile(pathoutlist,['TopoHbO',labelDtp{ievent},'event',sprintf('%03.0f',ievent),'.mat']),'A','zonelist' );
-                catch
-                    disp(['Error ',fullfile(pathoutlist,['TopoHbO',labelDtp{ievent},'event',sprintf('%03.0f',ievent),'.mat']),' could not be saved. Please verify that the output folder exists' ]);
-                end   
-                disp(['Save :', fullfile(pathoutlist,['TopoHbO',labelDtp{ievent},'event',sprintf('%03.0f',ievent),'.mat'])])
-                A = nanmean(d(tstartw(end) :tstopw(end),NC/2+1:end))';
-                save(fullfile(pathoutlist,['TopoHbR',labelDtp{ievent},'event',sprintf('%03.0f',ievent),'.mat']),'A','zonelist' );
-                disp(['Save :', fullfile(pathoutlist,['TopoHbR',labelDtp{ievent},'event',sprintf('%03.0f',ievent),'.mat'])])
+                if job.c_extractcomponent.b_extractcomponent_AVG.m_AVGorAUC == 1 %AVG by channel
+                    listCHok = find(NIRS.Cf.H.C.ok(1:NC/2)==0);
+                    A = nanmean(d(tstartw(end) :tstopw(end),1:NC/2))';         
+                    if ~isempty(listCHok)
+                        A(listCHok)=nan;
+                    end
+                    try
+                        save(fullfile(pathoutlist,['TopoHbOAVG',labelDtp{ievent},namenirs,'event',sprintf('%03.0f',ievent),'.mat']),'A','zonelist' );
+                    catch
+                        disp(['Error ',fullfile(pathoutlist,['TopoHbOAVG',labelDtp{ievent},namenirs,'event',sprintf('%03.0f',ievent),'.mat']),' could not be saved. Please verify that the output folder exists' ]);
+                    end
+                    disp(['Save :', fullfile(pathoutlist,['TopoHbOAVG',labelDtp{ievent},namenirs,'event',sprintf('%03.0f',ievent),'.mat'])])
+                    A = nanmean(d(tstartw(end) :tstopw(end),NC/2+1:end))';
+                    if ~isempty(listCHok)
+                        A(listCHok) = nan;
+                    end
+                    save(fullfile(pathoutlist,['TopoHbRAVG',labelDtp{ievent},'event',sprintf('%03.0f',ievent),'.mat']),'A','zonelist' );
+                    disp(['Save :', fullfile(pathoutlist,['TopoHbRAVG',labelDtp{ievent},namenirs,'event',sprintf('%03.0f',ievent),'.mat'])])
+                elseif job.c_extractcomponent.b_extractcomponent_AVG.m_AVGorAUC == 2 %AUC by channel
+                     A = trapz(tHRF(tstartw(end) :tstopw(end)),d(tstartw(end) :tstopw(end),1:NC/2));
+                     listCHok = find(NIRS.Cf.H.C.ok(1:NC/2)==0);
+                      if ~isempty(listCHok)
+                        A(listCHok)=nan;
+                    end
+                    try
+                        save(fullfile(pathoutlist,['TopoHbOAUC',labelDtp{ievent},namenirs,'event',sprintf('%03.0f',ievent),'.mat']),'A','zonelist' );
+                    catch
+                        disp(['Error ',fullfile(pathoutlist,['TopoHbOAUC',labelDtp{ievent},namenirs,'event',sprintf('%03.0f',ievent),'.mat']),' could not be saved. Please verify that the output folder exists' ]);
+                    end
+                    disp(['Save :', fullfile(pathoutlist,['TopoHbOAUC',labelDtp{ievent},namenirs,'event',sprintf('%03.0f',ievent),'.mat'])])
+                    A = trapz(tHRF(tstartw(end) :tstopw(end)),d(tstartw(end) :tstopw(end),NC/2+1:end));
+                     if ~isempty(listCHok)
+                        A(listCHok)=nan;
+                     end                     
+                    save(fullfile(pathoutlist,['TopoHbRAUC',labelDtp{ievent},namenirs,'event',sprintf('%03.0f',ievent),'.mat']),'A','zonelist' );
+                    disp(['Save :', fullfile(pathoutlist,['TopoHbRAUC',labelDtp{ievent},namenirs,'event',sprintf('%03.0f',ievent),'.mat'])])
+
+                  
+                elseif job.c_extractcomponent.b_extractcomponent_AVG.m_AVGorAUC == 3 %AVG by zone
+                    A = nan(NC/2,1);
+                    for izone=1:numel(zone.plotLst)
+                        %HbO
+                         listCHok = reshape(NIRS.Cf.H.C.ok,numel(NIRS.Cf.H.C.ok)/2,2);
+                         listCHokHbO = listCHok;
+                         listCHokHbO(:,2)=0;
+                         listCHHbO = [ones(NC/2,1), zeros(NC/2,1)];
+                         measlist = zeros(size( listCHok ));
+                         chLst = zone.plotLst{izone};
+                          measlist(chLst,:) = 1;
+                          chHbO = find(measlist(:)&  listCHokHbO(:)); 
+                          chHbOall = find(measlist(:)& listCHHbO(:));
+                          A(chHbOall)= nanmean(nanmean(d(tstartw(end) :tstopw(end),chHbO)))';                    
+                    end
+                    try
+                        save(fullfile(pathoutlist,['TopoHbOAVGz',labelDtp{ievent},namenirs,'event',sprintf('%03.0f',ievent),'.mat']),'A','zonelist' );
+                    catch
+                        disp(['Error ',fullfile(pathoutlist,['TopoHbOAVGz',labelDtp{ievent},namenirs,'event',sprintf('%03.0f',ievent),'.mat']),' could not be saved. Please verify that the output folder exists' ]);
+                    end
+                    disp(['Save :', fullfile(pathoutlist,['TopoHbOAVGz',labelDtp{ievent},namenirs,'event',sprintf('%03.0f',ievent),'.mat'])])
+                     
+                    A = nan(NC/2,1);
+                    for izone=1:numel(zone.plotLst)
+                        %HbO
+                         listCHok = reshape(NIRS.Cf.H.C.ok,numel(NIRS.Cf.H.C.ok)/2,2);
+                         listCHokHbR = listCHok;
+                         listCHokHbR(:,1)=0;
+                         listCHHbR = [ones(NC/2,1), zeros(NC/2,1)];
+                         measlist = zeros(size( listCHok ));
+                         chLst = zone.plotLst{izone};
+                         measlist(chLst,:) = 1; 
+                         chHbR = find(measlist(:)&  listCHokHbR(:)); 
+                         chHbRall = find(measlist(:)& listCHHbR(:));
+                         A(chHbRall)= nanmean(nanmean(d(tstartw(end) :tstopw(end),chHbR))');                    
+                    end
+                    try
+                        save(fullfile(pathoutlist,['TopoHbRAVGz',labelDtp{ievent},namenirs,'event',sprintf('%03.0f',ievent),'.mat']),'A','zonelist' );
+                    catch
+                        disp(['Error ',fullfile(pathoutlist,['TopoHbRAVGz',labelDtp{ievent},namenirs,'event',sprintf('%03.0f',ievent),'.mat']),' could not be saved. Please verify that the output folder exists' ]);
+                    end
+                    disp(['Save :', fullfile(pathoutlist,['TopoHbRAVGz',labelDtp{ievent},namenirs,'event',sprintf('%03.0f',ievent),'.mat'])])
+                
+                end
             end
-            
-            %check the get PARAFAC
-            try
-                load(fullfile(NIRSDtp{ievent},'SelectedFactors.mat'));                
-                newfile = 0;
-            catch
-                clear PARCOMP
-                %donot exist create the stucture
-                PARCOMP.file= fileDtp{ievent};
-                PARCOMP.filestr =  fprintf('Bloc%03.0f,',fileDtp{ievent});
-                PARCOMP.module  =numel(NIRS.Dt.fir.pp);
-                PARCOMP.modulestr = NIRS.Dt.fir.pp(end).pre;
-                PARCOMP.listgood =  listgood;
-                PARCOMP.indt = indt; %indice de temps.
-                PARCOMP.data =intensnorm;
-                PARCOMP.Xm = Xm;
-                labelid  = labelDtp{ievent} ;
-                PARCOMP.label= [labelid,'AVG', sprintf('%03.0f',size(PARCOMP,2))];
-                PARCOMP.type = 'AVG';
-                newfile = 1;
-                PARCOMP.topo = AVG;
-            end
-            if newfile == 0
-                id = numel(PARCOMP);
-                PARCOMP(id+1).file= fileDtp{ievent};
-                PARCOMP(id+1).filestr =  fprintf('Bloc%03.0f,',fileDtp{ievent});
-                PARCOMP(id+1).module  =numel(NIRS.Dt.fir.pp);
-                PARCOMP(id+1).modulestr = NIRS.Dt.fir.pp(end).pre;
-                PARCOMP(id+1).listgood =  listgood;
-                PARCOMP(id+1).indt = indt; %indice de temps.
-                PARCOMP(id+1).data =intensnorm;
-                PARCOMP(id+1).Xm = Xm;
-                labelid  = labelDtp{ievent} ;
-                PARCOMP(id+1).label= [labelid,'AVG', sprintf('%03.0f',size(PARCOMP,2))];
-                PARCOMP(id+1).type = 'AVG';
-                newfile = 1;
-                PARCOMP(id+1).topo = AVG;
-            end
-            
-            save(fullfile(NIRSDtp{ievent},'SelectedFactors.mat'),'PARCOMP');
+
+        %     %check the get AVG
+        %     try
+        %         load(fullfile(NIRSDtp{ievent},'SelectedFactors.mat'));
+        %         newfile = 0;
+        %     catch
+        %         clear PARCOMP
+        %         %donot exist create the stucture
+        %         PARCOMP.file= fileDtp{ievent};
+        %         PARCOMP.filestr =  fprintf('Bloc%03.0f,',fileDtp{ievent});
+        %         PARCOMP.module  =numel(NIRS.Dt.fir.pp);
+        %         PARCOMP.modulestr = NIRS.Dt.fir.pp(end).pre;
+        %         PARCOMP.listgood =  listgood;
+        %         PARCOMP.indt = indt; %indice de temps.
+        %         PARCOMP.data =intensnorm;
+        %         PARCOMP.Xm = Xm;
+        %         labelid  = labelDtp{ievent} ;
+        %         PARCOMP.label= [labelid,'AVG', sprintf('%03.0f',size(PARCOMP,2))];
+        %         PARCOMP.type = 'AVG';
+        %         newfile = 1;
+        %         PARCOMP.topo = AVG;
+        %     end
+        %     if newfile == 0
+        %         id = numel(PARCOMP);
+        %         PARCOMP(id+1).file= fileDtp{ievent};
+        %         PARCOMP(id+1).filestr =  fprintf('Bloc%03.0f,',fileDtp{ievent});
+        %         PARCOMP(id+1).module  =numel(NIRS.Dt.fir.pp);
+        %         PARCOMP(id+1).modulestr = NIRS.Dt.fir.pp(end).pre;
+        %         PARCOMP(id+1).listgood =  listgood;
+        %         PARCOMP(id+1).indt = indt; %indice de temps.
+        %         PARCOMP(id+1).data =intensnorm;
+        %         PARCOMP(id+1).Xm = Xm;
+        %         labelid  = labelDtp{ievent} ;
+        %         PARCOMP(id+1).label= [labelid,'AVG', sprintf('%03.0f',size(PARCOMP,2))];
+        %         PARCOMP(id+1).type = 'AVG';
+        %         newfile = 1;
+        %         PARCOMP(id+1).topo = AVG;
+        %     end
+        % 
+        %     save(fullfile(NIRSDtp{ievent},'SelectedFactors.mat'),'PARCOMP');
         catch
             disp(['Error unable to AVG on ' , NIRSmat])
-        end  
-        disp('Warning function to be revised')
+        end
+        %disp('Warning function to be revised')
     end
-    
+
 end
 out.NIRSmat = {NIRSmat};
 
@@ -1764,12 +1879,12 @@ out.NIRSmat = {NIRSmat};
 function  [y, h] = resample( x, p, q, N, bta )
 %RESAMPLE  Change the sampling rate of a signal.
 %   Y = RESAMPLE(X,P,Q) resamples the sequence in vector X at P/Q times
-%   the original sample rate using a polyphase implementation.  Y is P/Q 
-%   times the length of X (or the ceiling of this if P/Q is not an integer).  
+%   the original sample rate using a polyphase implementation.  Y is P/Q
+%   times the length of X (or the ceiling of this if P/Q is not an integer).
 %   P and Q must be positive integers.
 %
-%   RESAMPLE applies an anti-aliasing (lowpass) FIR filter to X during the 
-%   resampling process, and compensates for the filter's delay.  The filter 
+%   RESAMPLE applies an anti-aliasing (lowpass) FIR filter to X during the
+%   resampling process, and compensates for the filter's delay.  The filter
 %   is designed using FIRLS.  RESAMPLE provides an easy-to-use alternative
 %   to UPFIRDN, relieving the user of the need to supply a filter or
 %   compensate for the signal delay introduced by filtering.
@@ -1779,22 +1894,22 @@ function  [y, h] = resample( x, p, q, N, bta )
 %   deviations from zero at the end points of the sequence X can cause
 %   inaccuracies in Y at its end points.
 %
-%   Y = RESAMPLE(X,P,Q,N) uses a weighted sum of 2*N*max(1,Q/P) samples of X 
+%   Y = RESAMPLE(X,P,Q,N) uses a weighted sum of 2*N*max(1,Q/P) samples of X
 %   to compute each sample of Y.  The length of the FIR filter RESAMPLE applies
-%   is proportional to N; by increasing N you will get better accuracy at the 
+%   is proportional to N; by increasing N you will get better accuracy at the
 %   expense of a longer computation time.  If you don't specify N, RESAMPLE uses
 %   N = 10 by default.  If you let N = 0, RESAMPLE performs a nearest
 %   neighbor interpolation; that is, the output Y(n) is X(round((n-1)*Q/P)+1)
 %   ( Y(n) = 0 if round((n-1)*Q/P)+1 > length(X) ).
 %
-%   Y = RESAMPLE(X,P,Q,N,BTA) uses BTA as the BETA design parameter for the 
+%   Y = RESAMPLE(X,P,Q,N,BTA) uses BTA as the BETA design parameter for the
 %   Kaiser window used to design the filter.  RESAMPLE uses BTA = 5 if
 %   you don't specify a value.
 %
-%   Y = RESAMPLE(X,P,Q,B) uses B to filter X (after upsampling) if B is a 
+%   Y = RESAMPLE(X,P,Q,B) uses B to filter X (after upsampling) if B is a
 %   vector of filter coefficients.  RESAMPLE assumes B has odd length and
-%   linear phase when compensating for the filter's delay; for even length 
-%   filters, the delay is overcompensated by 1/2 sample.  For non-linear 
+%   linear phase when compensating for the filter's delay; for even length
+%   filters, the delay is overcompensated by 1/2 sample.  For non-linear
 %   phase filters consider using UPFIRDN.
 %
 %   [Y,B] = RESAMPLE(X,P,Q,...) returns in B the coefficients of the filter
@@ -1817,27 +1932,27 @@ if nargin < 4,   N = 10;   end
 if abs(round(p))~=p || p==0, error(generatemsgid('MustBePosInteger'),'P must be a positive integer.'), end
 if abs(round(q))~=q || q==0, error(generatemsgid('MustBePosInteger'),'Q must be a positive integer.'), end
 
-[p,q] = rat( p/q, 1e-12 );  %--- reduce to lowest terms 
-   % (usually exact, sometimes not; loses at most 1 second every 10^12 seconds)
+[p,q] = rat( p/q, 1e-12 );  %--- reduce to lowest terms
+% (usually exact, sometimes not; loses at most 1 second every 10^12 seconds)
 if (p==1) && (q==1)
-    y = x; 
+    y = x;
     h = 1;
     return
 end
 pqmax = max(p,q);
 if length(N)>1      % use input filter
-   L = length(N);
-   h = N;
+    L = length(N);
+    h = N;
 else                % design filter
-   if( N>0 )
-      fc = 1/2/pqmax;
-      L = 2*N*pqmax + 1;
-      h = p*firls( L-1, [0 2*fc 2*fc 1], [1 1 0 0]).*kaiser(L,bta)' ;
-      % h = p*fir1( L-1, 2*fc, kaiser(L,bta)) ;
-   else
-      L = p;
-      h = ones(1,p);
-   end
+    if( N>0 )
+        fc = 1/2/pqmax;
+        L = 2*N*pqmax + 1;
+        h = p*firls( L-1, [0 2*fc 2*fc 1], [1 1 0 0]).*kaiser(L,bta)' ;
+        % h = p*fir1( L-1, 2*fc, kaiser(L,bta)) ;
+    else
+        L = p;
+        h = ones(1,p);
+    end
 end
 
 Lhalf = (L-1)/2;
@@ -1854,7 +1969,7 @@ z = zeros(1,nz);
 h = [z h(:).'];  % ensure that h is a row vector.
 Lhalf = Lhalf + nz;
 
-% Number of samples removed from beginning of output sequence 
+% Number of samples removed from beginning of output sequence
 % to compensate for delay of linear phase filter:
 delay = floor(ceil(Lhalf)/q);
 
@@ -1881,8 +1996,8 @@ else
     y(Ly+1:end,:) = [];
 end
 
-h([1:nz (end-nz1+1):end]) = [];  % get rid of leading and trailing zeros 
-                                 % in case filter is output
+h([1:nz (end-nz1+1):end]) = [];  % get rid of leading and trailing zeros
+% in case filter is output
 function [h,a]=firls(N,F,M,W,ftype)
 % FIRLS Linear-phase FIR filter design using least-squares error minimization.
 %   B=FIRLS(N,F,A) returns a length N+1 linear phase (real, symmetric
@@ -1992,7 +2107,7 @@ if ~isempty(msg2),
     msg2 = sprintf([msg2,'\r',...
         '\nAlternatively, you can pass a trailing ''h'' argument,\r',...
         'as in firls(N,F,A,W,''h''), to design a type 4 linear phase filter.']);
-    warning(generatemsgid('OrderIncreasedByOne'),msg2); 
+    warning(generatemsgid('OrderIncreasedByOne'),msg2);
 end
 
 
@@ -2226,17 +2341,17 @@ end
 if rem(n,2) == 1,
     oddord = true; % Overwrite flag
 end
- 
+
 if (a(end) ~= 0) && Fend == 1 && oddord && ~exception,
     str = ['Odd order symmetric FIR filters must have a gain of zero \n'...
-     'at the Nyquist frequency. The order is being increased by one.'];
+        'at the Nyquist frequency. The order is being increased by one.'];
     msg2 = sprintf(str);
     n = n+1;
 end
 
 function y=sinc(x)
 %SINC Sin(pi*x)/(pi*x) function.
-%   SINC(X) returns a matrix whose elements are the sinc of the elements 
+%   SINC(X) returns a matrix whose elements are the sinc of the elements
 %   of X, i.e.
 %        y = sin(pi*x)/(pi*x)    if x ~= 0
 %          = 1                   if x == 0
@@ -2256,14 +2371,14 @@ function y=sinc(x)
 %   Copyright 1988-2004 The MathWorks, Inc.
 %   $Revision: 1.7.4.1 $  $Date: 2004/08/10 02:11:27 $
 
-i=find(x==0);                                                              
-x(i)= 1;      % From LS: don't need this is /0 warning is off                           
-y = sin(pi*x)./(pi*x);                                                     
-y(i) = 1;   
+i=find(x==0);
+x(i)= 1;      % From LS: don't need this is /0 warning is off
+y = sin(pi*x)./(pi*x);
+y(i) = 1;
 function w = kaiser(n_est,bta)
 %KAISER Kaiser window.
 %   W = KAISER(N) returns an N-point Kaiser window in the column vector W.
-% 
+%
 %   W = KAISER(N,BTA) returns the BETA-valued N-point Kaiser window.
 %       If omitted, BTA is set to 0.500.
 %
@@ -2276,7 +2391,7 @@ function w = kaiser(n_est,bta)
 error(nargchk(1,2,nargin,'struct'));
 
 % Default value for the BETA parameter.
-if nargin < 2 || isempty(bta), 
+if nargin < 2 || isempty(bta),
     bta = 0.500;
 end
 
@@ -2311,39 +2426,39 @@ end
 
 % Special case of negative orders:
 if n_in < 0,
-   error(generatemsgid('InvalidOrder'),'Order cannot be less than zero.');
+    error(generatemsgid('InvalidOrder'),'Order cannot be less than zero.');
 end
 
 % Check if order is already an integer or empty
 % If not, round to nearest integer.
 if isempty(n_in) | n_in == floor(n_in),
-   n_out = n_in;
+    n_out = n_in;
 else
-   n_out = round(n_in);
-   warning(generatemsgid('InvalidOrder'),'Rounding order to nearest integer.');
+    n_out = round(n_in);
+    warning(generatemsgid('InvalidOrder'),'Rounding order to nearest integer.');
 end
 
 % Special cases:
 if isempty(n_out) | n_out == 0,
-   w = zeros(0,1);               % Empty matrix: 0-by-1
-   trivalwin = 1; 
+    w = zeros(0,1);               % Empty matrix: 0-by-1
+    trivalwin = 1;
 elseif n_out == 1,
-   w = 1;
-   trivalwin = 1;   
+    w = 1;
+    trivalwin = 1;
 end
 % [EOF] kaiser.m
 function Y = upfirdn(x,h,varargin)
 %UPFIRDN  Upsample, apply a specified FIR filter, and downsample a signal.
 %   UPFIRDN(X,H,P,Q) is a cascade of three systems applied to input signal X:
-%         (1) Upsampling by P (zero insertion).  P defaults to 1 if not 
+%         (1) Upsampling by P (zero insertion).  P defaults to 1 if not
 %             specified.
-%         (2) FIR filtering with the filter specified by the impulse response 
+%         (2) FIR filtering with the filter specified by the impulse response
 %             given in H.
-%         (3) Downsampling by Q (throwing away samples).  Q defaults to 1 if not 
+%         (3) Downsampling by Q (throwing away samples).  Q defaults to 1 if not
 %             specified.
 %   UPFIRDN uses an efficient polyphase implementation.
 %
-%   Usually X and H are vectors, and the output is a (signal) vector. 
+%   Usually X and H are vectors, and the output is a (signal) vector.
 %   UPFIRDN permits matrix arguments under the following rules:
 %   If X is a matrix and H is a vector, each column of X is filtered through H.
 %   If X is a vector and H is a matrix, each column of H is used to filter X.
@@ -2351,8 +2466,8 @@ function Y = upfirdn(x,h,varargin)
 %      column of H is used to filter the i-th column of X.
 %
 %   Specifically, these rules are carried out as follows.  Note that the length
-%   of the output is Ly = ceil( ((Lx-1)*P + Lh)/Q ) where Lx = length(X) and 
-%   Lh = length(H). 
+%   of the output is Ly = ceil( ((Lx-1)*P + Lh)/Q ) where Lx = length(X) and
+%   Lh = length(H).
 %
 %      Input Signal X    Input Filter H    Output Signal Y   Notes
 %      -----------------------------------------------------------------
@@ -2365,7 +2480,7 @@ function Y = upfirdn(x,h,varargin)
 %                                                            used to filter i-th
 %                                                            column of X.
 %
-%   For an easy-to-use alternative to UPFIRDN, which does not require you to 
+%   For an easy-to-use alternative to UPFIRDN, which does not require you to
 %   supply a filter or compensate for the signal delay introduced by filtering,
 %   use RESAMPLE.
 %
@@ -2382,13 +2497,13 @@ function Y = upfirdn(x,h,varargin)
 %            y = upfirdn(x,h,L,M);               % 9408 samples, still 0.213 seconds
 %
 %            % Overlay original (48kHz) with resampled signal (44.1kHz) in red.
-%            stem(n(1:49)/Fs,x(1:49)); hold on 
-%            stem(n(1:45)/(Fs*L/M),y(12:56),'r','filled'); 
+%            stem(n(1:49)/Fs,x(1:49)); hold on
+%            stem(n(1:45)/(Fs*L/M),y(12:56),'r','filled');
 %            xlabel('Time (sec)');ylabel('Signal value');
-%    
+%
 %   See also RESAMPLE, INTERP, DECIMATE, FIR1, INTFILT, MFILT/FIRSRC in the
 %   Filter Design Toolbox.
-  
+
 %   Author(s): Paul Pacheco
 %   Copyright 1988-2008 The MathWorks, Inc.
 %   $Revision: 1.6.4.5 $  $Date: 2008/09/13 07:14:26 $
@@ -2402,7 +2517,7 @@ error(nargoutchk(0,1,nargout,'struct'));
 % Force to be a column if input is a vector
 [mx,nx] = size(x);
 if find([mx nx]==1),
-  x = x(:);  % columnize it.
+    x = x(:);  % columnize it.
 end
 [Lx,nChans] = size(x);
 
@@ -2446,9 +2561,9 @@ if isempty(h) || issparse(h) || ~isa(h,'double'),
     return;
 end
 
-% The following check is for case 4 (as seen on the reference page), i.e., 
+% The following check is for case 4 (as seen on the reference page), i.e.,
 % x and h are matrices, check that they both have the same number of
-% columns. 
+% columns.
 nChans = size(x, 2);
 hCols  = size(h, 2);
 if (nChans > 1) && (hCols > 1) && (hCols ~= nChans),
