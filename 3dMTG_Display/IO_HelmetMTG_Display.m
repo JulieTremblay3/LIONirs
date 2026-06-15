@@ -113,6 +113,7 @@ cmin = str2num(get(handles.edit_climmin,'string'));
 cmax = str2num(get(handles.edit_climmax,'string'));
 caxis([cmin,cmax]);
 axes(handles.axes_Mtg2);
+ set(handles.axes_Mtg2,'XTickMode' ,'auto')
 c = colorbar;
 set(c,'fontsize',14)
 guidata(hObject, handles);
@@ -971,7 +972,11 @@ elseif get(handles.radio_guiSPMnirsHSJ,'value')==2
              set(handles.popupmenu_display,'string',{'Current module',['Topo ',name1]});
          end
     elseif strcmp(typelabel{type}, 'Mean start stop time')  %Mean time start time stop 
+        try
     echantillon_timestart = find(str2num(get(HOMERhandles.edit_time_start,'string'))<=PMI{currentsub}.data(cf).HRF.tHRF);
+        catch
+            disp('Ensure to enter a time start and time stop using right click on the data')
+        end
     echantillon_timestop = find(str2num(get(HOMERhandles.edit_time_stop,'string'))<=PMI{currentsub}.data(cf).HRF.tHRF);
     echantillon_time = echantillon_timestart(1): echantillon_timestop(1) ;
        if dconc ==1 %HbO ou 830

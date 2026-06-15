@@ -23,12 +23,17 @@ end
   idok = 0; 
 NIRSDtp = rawData(2:end,1);
 ListDtp = rawData(2:end,2);
-try %normalised with many condition 
-NIRSDtp3 = rawData(2:end,3);
-NIRSDtp4 = rawData(2:end,4);
-NIRSDtp5 = rawData(2:end,5);
-catch
-end
+
+    %open additionnal column only to be include in to normalised the data  
+    iadd4zscore=1;
+    for i=3:size(rawData,2) %additionnal colum to be include just for the zscore normalisation
+        try
+        NIRSDtpZ{:,iadd4zscore} = rawData(2:end,i);
+        iadd4zscore = iadd4zscore+1;
+        catch
+        end
+    end
+
 %linux mac compatibility
 for ifilenb = 1:numel(NIRSDtp)
     filenameNIRSmat = NIRSDtp{ifilenb};
@@ -53,47 +58,44 @@ if strcmp(temp(end-3:end),'zone')% USE ZONE TEMPLATE FIRST TO LOOK IN OTHER FILE
     sizebloc = 0;
 for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat file
     NIRS = [];       
-    try
+    %try
        tmp = NIRSDtp{filenb};
        if strcmp(tmp(end-7:end),'NIRS.mat')
             load(fullfile(NIRSDtp{filenb}));    
        else 
-           try
+           try 
             load(fullfile(NIRSDtp{filenb},'NIRS.mat'));    
-
-
-            try %normalised with many condition 
-                NIRS3= load(fullfile(NIRSDtp3{filenb},'NIRS.mat'));  
-                NIRS4 = load(fullfile(NIRSDtp4{filenb},'NIRS.mat'));  
-                NIRS5 = load(fullfile(NIRSDtp5{filenb},'NIRS.mat'));  
-            catch
-            end
-
-            
+             disp(['To concatenate Load: ',fullfile(NIRSDtp{filenb},'NIRS.mat')]);
            catch
             disp(['Could not open file: ',  fullfile(NIRSDtp{filenb},'NIRS.mat')] )
-           end
-
+           end     
+                 try
+                 for izscore= 1 : size(NIRSDtpZ,2)
+                    try
+                        tmp = NIRSDtpZ{izscore};
+                        NIRSz{izscore} = load(fullfile(tmp{filenb},'NIRS.mat'));  
+                   %     disp(['Load for zscore: ',fullfile(tmp{filenb},'NIRS.mat')]);
+                    catch
+                    %    disp(['Error load for zscore: ',fullfile(tmp{filenb},'NIRS.mat')]);
+                    end
+                 end  
+                 catch
+                 end
        end
      
-        try       
+      
         lst = length(NIRS.Dt.fir.pp);
         NC = NIRS.Cf.H.C.N;
         fs = NIRS.Cf.dev.fs; 
-        rDtp = NIRS.Dt.fir.pp(lst).p; % path for files to be processed
-            try %normalised with many condition 
-                rDtp3= NIRS3.NIRS.Dt.fir.pp(lst).p; 
-                rDtp4= NIRS4.NIRS.Dt.fir.pp(lst).p; 
-                rDtp5= NIRS5.NIRS.Dt.fir.pp(lst).p; 
-            catch
-            end
+        rDtp = NIRS.Dt.fir.pp(lst).p; % path for files to be processed          
+           
       
     if strfind(NIRS.Dt.fir.pp(lst).pre,'Epoch averaging') %do only first file %use average chok
-        nmax =1; 
-        
+        nmax =1;         
     else
         nmax=numel(rDtp); %do all file
     end
+          disp(['Zone: ', ListDtp{filenb}])
        if filenb==1
             NIRSref = NIRS;        
             try
@@ -107,18 +109,25 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
             ZoneHoy = load(ListDtp{filenb},'-mat');
        catch
             ZoneHoy = load(fullfile(pathoutlist,ListDtp{filenb}),'-mat');
-
        end
 
      for f=1:nmax %for each bloc of the NIRS.mat file (last processing step)
          try
-        d = fopen_NIR(rDtp{f,1},NC); %Load whole bloc
-          try
-             d3 = fopen_NIR(rDtp3{f,1},NC); %Load whole bloc 
-             d4 = fopen_NIR(rDtp4{f,1},NC); %Load whole bloc 
-             d5 = fopen_NIR(rDtp5{f,1},NC); %Load whole bloc   
-         catch
-         end
+        d = fopen_NIR(rDtp{f,1},NC); %Load whole bloc     
+
+            d_4zscore = [];
+              for izscore = 1:numel(NIRSz)  %additionnal data file 
+                    try
+                        tmp =  NIRSz{izscore}.NIRS.Dt.fir.pp(end).p;
+                        dtemp = fopen_NIR(tmp{f,1},NC);                 
+                        d_4zscore = [d_4zscore,dtemp];
+                        disp(['Load 4zscore ', NIRSz{izscore}.NIRS.Dt.fir.pp(end).p{f,1}]);
+                    catch
+                        disp(['Error load 4zscore ', NIRSz{izscore}.NIRS.Dt.fir.pp(end).p{f,1}]);
+                    end
+                
+              end
+       
 
          catch
              job.NIRSmat = {fullfile(NIRSDtp{filenb},'NIRS.mat')};
@@ -163,37 +172,36 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
             end
             dzone(chtemplateHbO,:) = ones(numel(chtemplateHbO),1)*nanmean(d(chHbO,:),1);
             dzone(chtemplateHbR,:) = ones(numel(chtemplateHbR),1)*nanmean(d(chHbR,:),1);
-            try
-                dzone3(chtemplateHbO,:)= ones(numel(chtemplateHbO),1)*nanmean(d3(chHbO,:),1);
-                dzone3(chtemplateHbR,:) = ones(numel(chtemplateHbR),1)*nanmean(d3(chHbR,:),1);
-                dzone4(chtemplateHbO,:)= ones(numel(chtemplateHbO),1)*nanmean(d4(chHbO,:),1);
-                dzone4(chtemplateHbR,:)= ones(numel(chtemplateHbR),1)*nanmean(d4(chHbR,:),1);
-                dzone5(chtemplateHbO,:)= ones(numel(chtemplateHbO),1)*nanmean(d5(chHbO,:),1);
-                dzone5(chtemplateHbR,:)= ones(numel(chtemplateHbR),1)*nanmean(d5(chHbR,:),1);
+       
+            try 
+                 dzonezscore(chtemplateHbO,:)=  ones(numel(chtemplateHbO),1)*nanmean(d_4zscore(chtemplateHbO,:),1);
+                 dzonezscore(chtemplateHbR,:)=  ones(numel(chtemplateHbR),1)*nanmean(d_4zscore(chtemplateHbR,:),1);
             catch
-            end  
+            end 
         end
 
        if job.m_Concatenate_Normalized==0 %noting
-            %disp('No normalization')
+            disp('No normalization')
     
        elseif job.m_Concatenate_Normalized==1 %minmax  
-            % figure;plot(dminmax');
-           %  disp('not available')
-            
+
        elseif job.m_Concatenate_Normalized==2 %zscore
-           disp('Apply Zscore')          
-           tmp= dzone(chzoneHbO,:);
+           disp('Apply Zscore')                   
            try 
-            tmpHBO= [dzone(chzoneHbO,:),dzone3(chzoneHbO,:),dzone4(chzoneHbO,:),dzone5(chzoneHbO,:)];
-            tmpHBR= [dzone(chzoneHbR,:),dzone3(chzoneHbR,:),dzone4(chzoneHbR,:),dzone5(chzoneHbR,:)];
+                tmpHBO= [dzone(chzoneHbO,:),dzonezscore(chzoneHbO,:)];
+                tmpHBR= [dzone(chzoneHbR,:),dzonezscore(chzoneHbR,:)];
+                 disp('Aditionnal column data were use for the zscore normalization ')
+           catch
+                 tmpHBO= dzone(chzoneHbO,:);
+                 tmpHBR= dzone(chzoneHbR,:);
+                 disp('Only sessions data use for the zscore normalization ')
            end
            meanvalHbO = nanmean(tmpHBO(:));
            stdvalHbO = nanstd(tmpHBO(:));
             meanvalHbR = nanmean(tmpHBR(:));
            stdvalHbR = nanstd(tmpHBR(:));
 
-
+ 
            dzscoreHbO= (dzone(chlstHbO,:)-meanvalHbO)./ stdvalHbO;
            dzscoreHbR=(dzone(chlstHbR,:)-meanvalHbR)./ stdvalHbR;
            dzone(chlstHbO,:) = dzscoreHbO;
@@ -219,18 +227,18 @@ for filenb=1:size(NIRSDtp,1) %size(job.NIRSmat,1) %For every specified NIRS.mat 
        end
           sizebloc  = sizebloc + size(d,2);
      end
-       catch ME
-            if ispc
-                disp(['Verify xls definition : winopen ',job.f_nirsmatinfo{1}]);
-            else
-                disp(['Verify xls definition : ',job.f_nirsmatinfo{1}]);
-            end
-            disp(['Adjust first column NIRS.mat : ', fullfile(NIRSDtp{filenb},'NIRS.mat'), ' could not be open']);
-            %rethrow(ME)
-            
-        end 
+     %  catch ME
+        %     if ispc
+        %         disp(['Verify xls definition : winopen ',job.f_nirsmatinfo{1}]);
+        %     else
+        %         disp(['Verify xls definition : ',job.f_nirsmatinfo{1}]);
+        %     end
+        %     disp(['Adjust first column NIRS.mat : ', fullfile(NIRSDtp{filenb},'NIRS.mat'), ' could not be open']);
+        %     %rethrow(ME)
+        % 
+        % end 
      
-    end
+    %end
     samplestart =   size(dall,2) -  size(dzone,2)+1;
      sampleend = size(dall,2);
         fprintf(fidtxt,'%s\t%6.0f\t%6.0f\t%6.2f\t%6.2f\r\n', NIRSDtp{filenb}, samplestart, sampleend, samplestart/fs, sampleend/fs);

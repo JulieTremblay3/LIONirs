@@ -287,7 +287,6 @@ pourcentagetr = job.i_minch_cardiac/100;
                  disp([num2str(sum( measlistok)),'/', num2str(numel( measlistok)),' good channels on one or the other wavelenghts'])
                  disp(find(measlistok==0));
             end
-              measlistok = sum([matcorr(:,:,f)>COHtr])>(nbch*pourcentagetr )& sum([matcorrHbR(:,:,f)>COHtr])>(nbch*pourcentagetr );
              subplot(5,4, [13,14,17,18]);hold on
              xlabel('CH id','fontsize',12)
              ylabel('CH id','fontsize',12)

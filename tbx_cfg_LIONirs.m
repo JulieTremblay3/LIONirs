@@ -1137,7 +1137,8 @@ f_nirsmatinfo.filter  = {'xlsx','xls','txt','csv'};
 f_nirsmatinfo.ufilter = '.*';    
 f_nirsmatinfo.num     = [1 Inf];     % Number of inputs required 
 f_nirsmatinfo.help    = {'Create the list of subjects to group in a new folder example: ./GrandAverage/List.xlsx.',...
-    'The excel file must have 2 columns: first, the NIRS.mat subject location and second, the channel list order to respect or zone to use. The result will keep the same helmet of the first subject in the list.'}; 
+    ['The excel file must have 2 columns: first, the NIRS.mat subject location and second, the channel list order to respect or zone to use. The result will keep the same helmet of the first subject in the list.' ...
+    'If you like to use the zscore and add others data set to configure the zscore sush as other condition for the same subject you could add additional columns in the excel file']}; 
 
 m_Concatenate_Exclude           = cfg_menu;
 m_Concatenate_Exclude.tag       = 'm_Concatenate_Exclude';
@@ -1152,12 +1153,11 @@ m_Concatenate_Exclude.help      = {'Set excluded channels to NaN.',...
 m_Concatenate_Normalized        = cfg_menu; 
 m_Concatenate_Normalized.tag    = 'm_Concatenate_Normalized';
 m_Concatenate_Normalized.name   = 'Normalization';
-m_Concatenate_Normalized.labels = {'No normalization','Min-Max Normalization','z-score Normalization'};
-m_Concatenate_Normalized.values = {0,1,2};
+m_Concatenate_Normalized.labels = {'No normalization','z-score Normalization'};
+m_Concatenate_Normalized.values = {0,2};
 m_Concatenate_Normalized.val    = {0};
 m_Concatenate_Normalized.help   = {'Apply a normalization to reduce individual subject  variability. Only apply using the channel list.',...
-    'No normalization: does not apply any normalization. ',...
-    'Min-Max Normalization: applies min max normalization fixing boundary between 0 and 1.',... 
+    'No normalization: does not apply any normalization. ',...     
     'Z-score Normalization: applies z-score normalization.',... 
     'Moeller, J., 2015. A word on standardization in longitudinal studies: don’t. Front Psychol 6. https://doi.org/10.3389/fpsyg.2015.01389'};
 
@@ -2937,7 +2937,7 @@ f_extractcomponent_PARAFAClist.tag     = 'f_component_PARAFAClist';       %file 
 f_extractcomponent_PARAFAClist.filter  = {'xlsx','xls','txt'};
 f_extractcomponent_PARAFAClist.ufilter = '.*';    
 f_extractcomponent_PARAFAClist.num     = [1 Inf];     % Number of inputs required 
-f_extractcomponent_PARAFAClist.help    = {'Enter the list xls to extract PARAFAC, the list must include the following columns:',...
+f_extractcomponent_PARAFAClist.help    = {['Enter the list xls to extract PARAFAC, the list must include the following columns:'],...
     '''NIRS.mat'': directory of the NIRS.mat to use;',...
     '''file'': number to identify the file to use;',...
     '''tStart'': time start in seconds to define the beginning of the period where the GLM will be applies;',...
@@ -2978,7 +2978,7 @@ c_extractAVGlist_autoexport         = cfg_choice;
 c_extractAVGlist_autoexport.tag     = 'c_extractAVGlist_autoexport';
 c_extractAVGlist_autoexport.name    = 'Export in folder';
 c_extractAVGlist_autoexport.values  = {e_extractAVGlist_autoexport_no,b_extractAVGlist_autoexport_yes};
-c_extractAVGlist_autoexport.val     = {e_extractAVGlist_autoexport_no}; %Default option
+c_extractAVGlist_autoexport.val     = {b_extractAVGlist_autoexport_yes}; %Default option
 c_extractAVGlist_autoexport.help    = {'Export components directly in a specify folder.'};
 
 f_extractcomponent_AVGlist         = cfg_files;
@@ -2986,21 +2986,70 @@ f_extractcomponent_AVGlist.name    = 'List AVG to identify (xls)';
 f_extractcomponent_AVGlist.tag     = 'f_component_AVGlist';       %file names
 f_extractcomponent_AVGlist.filter  = {'xlsx','xls','txt'};
 f_extractcomponent_AVGlist.ufilter = '.*';    
-f_extractcomponent_AVGlist.num     = [1 Inf];     % Number of inputs required 
-f_extractcomponent_AVGlist.help    = {'NIRS.mat: Directory to locate the data to extract.',... 
+f_extractcomponent_AVGlist.num     = [0 Inf];     % Number of inputs required 
+f_extractcomponent_AVGlist.val     = {''};
+f_extractcomponent_AVGlist.help    = {'You could let empty to use ExtractHRF.xlsx at the NIRS.mat position that were created automaticly using Create AUX with triger information', ...
+    'Otherwise use an excel file with this columns:',...
+    'NIRS.mat: Directory to locate the data to extract.',... 
     '''File'': block in the NIRS.mat data file;',... 
-    '''tStart'': to get the curve start point;',... 
+    '''tStart'': to get the curve start point;',...  
     '''tStop: to get the curve stop point;',... 
     '''tStartavg'': to get the average starting point;',... 
     '''tStopavg'': to get the average stopping point;',... 
     '''Label'': Write label in the component name;',... 
     '''ZoneDisplay'': use the first zone channel to plot the average. Or let it empty Keep the zone file in the same folder as the excel ExtractAVG setting.'}; 
 
+f_zone_optional         = cfg_files;
+f_zone_optional.name    = 'Zone optional'; 
+f_zone_optional.tag     = 'f_zone_optional';       %file names
+f_zone_optional.filter  = {'zone'};
+f_zone_optional.ufilter = '.*';    
+f_zone_optional.num     = [0 Inf];     % Number of inputs required 
+f_zone_optional.val     = {''};
+f_zone_optional.help    = {'Let it empty to get the average time for each channel; use a zone to average channels in the same zone together.'};
+
+
+e_extractcomponent_AVGstartTrig         = cfg_entry;
+e_extractcomponent_AVGstartTrig.name    = 'Trig start';
+e_extractcomponent_AVGstartTrig.tag     = 'e_extractcomponent_AVGstartTrig';       
+e_extractcomponent_AVGstartTrig.strtype = 's';
+e_extractcomponent_AVGstartTrig.num     = [0 Inf];
+e_extractcomponent_AVGstartTrig.val     = {''}; 
+e_extractcomponent_AVGstartTrig.help    = {'Only use if you like to select time after trigger, else let it empty and use the value in the column tStartavg to define the time start.'};
+
+e_extractcomponent_AVGstopTrig         = cfg_entry;
+e_extractcomponent_AVGstopTrig.name    = 'Trig stop';
+e_extractcomponent_AVGstopTrig.tag     = 'e_extractcomponent_AVGstopTrig';       
+e_extractcomponent_AVGstopTrig.strtype = 's';
+e_extractcomponent_AVGstopTrig.num     = [0 Inf];
+e_extractcomponent_AVGstopTrig.val     = {''}; 
+e_extractcomponent_AVGstopTrig.help    = {'Only use if you like to select time after trigger, else let it empty and use the value in the column tStopavg to define the time stop.'};
+
+
+
+
+m_AVGorAUC       = cfg_menu;
+m_AVGorAUC.tag    = 'm_AVGorAUC';
+m_AVGorAUC.name   = 'Option';
+m_AVGorAUC.labels = {'AVG by channel' ,'AUC by channel', 'AVG by zone', 'AUC by zone'};
+m_AVGorAUC.values = {1,2,3};
+m_AVGorAUC.val    = {1}; 
+m_AVGorAUC.help   = {'Choice AVG by channel will create a topofile with the average time course by channel.',...
+                    'Choice AUC by channel will create a topofile with the area under the curve by channel using trapz.m function.',...
+                    'Choice AVG by zone will create a topofile with the average region.'};
+
+
+
+
 b_extractcomponent_AVG          = cfg_branch;
 b_extractcomponent_AVG.tag      = 'b_extractcomponent_AVG';
 b_extractcomponent_AVG.name     = 'Identify AVG';
-b_extractcomponent_AVG.val      = {f_extractcomponent_AVGlist, c_extractAVGlist_autoexport};
+b_extractcomponent_AVG.val      = {NIRSmat, f_extractcomponent_AVGlist,e_extractcomponent_AVGstartTrig  ,e_extractcomponent_AVGstopTrig  ,m_AVGorAUC ,f_zone_optional, c_extractAVGlist_autoexport};
 b_extractcomponent_AVG.help     = {'Find the average of a time period for each channel.'};
+
+
+
+
 
 i_extractnoise_labelPARAFAC         = cfg_entry;
 i_extractnoise_labelPARAFAC.name    = 'Extract';

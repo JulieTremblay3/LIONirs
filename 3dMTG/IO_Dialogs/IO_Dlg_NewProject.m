@@ -746,9 +746,15 @@ function handles = btn_BrowseVOX_Callback(hObject, eventdata, handles)
     a_line=fgets(fid_Hdr);
     if( a_line == -1 )
         warndlg('Error loading Volume Data File (ERR117)');
-        return;
+        return; 
     end
-    BytesPerPix=strread(a_line, '%d');
+   % BytesPerPix=strread(a_line, '%d');
+     BytesPerPix=strread(a_line, '%s');
+     if strcmp(BytesPerPix,'2S')
+         BytesPerPix = 2
+     elseif strcmp(BytesPerPix,'1')
+           BytesPerPix = 1
+     end
     handles.bpp = BytesPerPix;
                 
     %XZDim (vox dim inside a slice), in mm

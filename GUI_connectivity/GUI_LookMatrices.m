@@ -2504,9 +2504,9 @@ end
 
 
 
- [FILENAME, PATHNAME, FILTERINDEX] =uiputfile(['Connection',ConnectionName,'.txt']);
+ [FILENAME, PATHNAME, FILTERINDEX] =uiputfile(['.txt']);
 
-fid = fopen(fullfile(PATHNAME, FILENAME),'w');
+ fid = fopen(fullfile(PATHNAME, ['Connection',FILENAME]),'w');
 for ilink=1:size(linkijcluster,1)
     fprintf(fid, '%d %d %f\r\n', linkijcluster(ilink,1), linkijcluster(ilink,2),linkijcluster(ilink,3));
 end
@@ -2514,7 +2514,27 @@ end
 
 fclose(fid);
 
-disp(['File created: ', fullfile(PATHNAME, FILENAME) ])
+%Magnitude
+%only set used link 
+for ilink =1:size(MAT,2)
+   valuse=[linkijcluster(:,1); linkijcluster(:,2)]
+    if sum(ilink==valuse)
+        imagnitude(ilink) = 1;
+    else
+        imagnitude(ilink) = 0;
+    end
+
+end
+
+fid = fopen(fullfile(PATHNAME,['Magnitude', FILENAME]),'w');
+for inode=1:size(MAT,2)
+    if imagnitude(inode)
+    fprintf(fid,'%d %d\r\n',inode, imagnitude(inode));
+    end
+end
+fclose(fid);
+disp(['Magnitude file create: ', fullfile(PATHNAME,['Magnitude', FILENAME])]);
+
 
 
 % --------------------------------------------------------------------
