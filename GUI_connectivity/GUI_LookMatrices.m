@@ -2542,7 +2542,7 @@ for inode = 1:numel(ZoneList)
       
     end
       index(inode,:) = round(xyzDET-(xyzDET-xyzSRS)/2);   
-end
+end 
 [filename, pathname]= uiputfile('index.txt');
 fid = fopen(fullfile(pathname,filename),'w');
 for inode=1:size(index,1);
