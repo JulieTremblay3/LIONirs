@@ -1533,8 +1533,6 @@ E_artefactdetection.help = {'Automatic artifact detection modules apply automati
     'A more detailed description of each criterion is presented above.'};
 
 
-
-
 %make NIRS.mat available as a dependency
 function vout = nirs_run_vout_step_artefact_detection(job)
 vout = cfg_dep;                    
@@ -1543,8 +1541,50 @@ vout.src_output = substruct('.','NIRSmat');
 vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
 end
 
+e_ARrejectionThreshold         = cfg_entry;
+e_ARrejectionThreshold.name    = 'Rejection Threshold';
+e_ARrejectionThreshold.tag     = 'e_ARrejectionThreshold';
+e_ARrejectionThreshold.strtype = 'r';
+e_ARrejectionThreshold.num     = [1 1];
+e_ARrejectionThreshold.val     =  {0.3}; 
+e_ARrejectionThreshold.help    =  {'Ratio of noise allowed per channel (0 to 1).'};
 
 
+
+e_nbsampleprediction         = cfg_entry;
+e_nbsampleprediction.name    = 'Number of data sample use for prediction';
+e_nbsampleprediction.tag     = 'e_nbsampleprediction';
+e_nbsampleprediction.strtype = 'r';
+e_nbsampleprediction.num     = [1 1];
+e_nbsampleprediction.val     =  {80}; 
+e_nbsampleprediction.help    =  {''};
+
+e_autoregressivemodelorder         = cfg_entry;
+e_autoregressivemodelorder.name    = 'Order of the autoregressiveModel';
+e_autoregressivemodelorder.tag     = 'e_autoregressivemodelorder';
+e_autoregressivemodelorder.strtype = 'r';
+e_autoregressivemodelorder.num     = [1 1];
+e_autoregressivemodelorder.val     =  {80}; 
+e_autoregressivemodelorder.help    =  {''};
+
+
+% Executable Branch
+E_autoregressivemodel     = cfg_exbranch;
+E_autoregressivemodel.name = 'AutoregressiveModel';
+E_autoregressivemodel.tag  = 'E_autoregressivemodel';
+E_autoregressivemodel.val  = {NIRSmat DelPreviousData e_ARrejectionThreshold e_nbsampleprediction, e_autoregressivemodelorder};
+E_autoregressivemodel.prog = @nirs_run_E_autoregressivemodel;
+E_autoregressivemodel.vout = @nirs_run_vout_E_autoregressivemodel;
+E_autoregressivemodel.help = {['Apply autoregressive model on event identify as artifact (marking in yellow.)' ...
+                               'Use the matlab function FILLGAPS Fill gaps via autoregressive modeling',...
+                               ' and convert data in Delta Optical Density dod, using log(I/Io)']};
+
+function vout = nirs_run_vout_E_autoregressivemodel(job);
+    vout = cfg_dep;                    
+    vout.sname      = 'NIRS.mat';       
+    vout.src_output = substruct('.','NIRSmat'); 
+    vout.tgt_spec   = cfg_findspec({{'filter','mat','strtype','e'}});
+end
 
 
 %Input Frequency
@@ -4872,12 +4912,16 @@ b_manova1_Mat.name   = 'manova (manova1)' ;
 b_manova1_Mat.val    = {e_Anova1GR, b_manova1_Covariable};
 b_manova1_Mat.help   = {'Apply manova on specific groups.'};
 
-
+b_randompseudopair     = cfg_branch;
+b_randompseudopair.tag    = 'b_randompseudopair';
+b_randompseudopair.name   = 'TestRandomPseudoPair';
+b_randompseudopair.val    = {};
+b_randompseudopair.help   = {'Use The random pseudo pair as the null hypothesis.'};
 
 c_statmatrix         = cfg_choice;
 c_statmatrix.tag     = 'c_statmatrix';
 c_statmatrix.name    = 'Choose the statistical test';
-c_statmatrix.values  = {m_export_matrix, b_TtestOneSamplematrix,b_UnpairedTtest, b_PairedTtest, b_PearsonCorr_Mat, b_GLM_Mat,b_zscore_Mat,b_anova1_Mat,b_anovarep_Mat,b_NWayANOVA_Mat, b_kruskalwallis_Mat, b_fitMANCOVAN_Mat, b_exportNBSformat,b_PermutationTest, b_LME_Mat, b_fitLM_Mat};%b_ANCOVA_Mat aoctool remove,
+c_statmatrix.values  = {m_export_matrix, b_TtestOneSamplematrix,b_UnpairedTtest, b_PairedTtest, b_PearsonCorr_Mat, b_GLM_Mat,b_zscore_Mat,b_anova1_Mat,b_anovarep_Mat,b_NWayANOVA_Mat, b_kruskalwallis_Mat, b_fitMANCOVAN_Mat, b_exportNBSformat,b_PermutationTest, b_LME_Mat, b_fitLM_Mat, b_randompseudopair};%b_ANCOVA_Mat aoctool remove,
 c_statmatrix.val     = {b_TtestOneSamplematrix}; %Default option
 c_statmatrix.help    = {'Select one of the statistical tests.'};
 
@@ -4948,10 +4992,10 @@ M_Segment.help   = {'These modules segment or combine data.'};
 M_preprocessing        = cfg_choice; 
 M_preprocessing.name   = 'Preprocessing NIRS data';
 M_preprocessing.tag    = 'M_preprocessing'; 
-M_preprocessing.values = {E_artefactdetection E_chcardiaccontrol E_normalization E_filter E_prewhitening ODtoHbOHbR  E_detrend E_average E_nullifybad}; %preprocess enlever fast preprocessing JT
+M_preprocessing.values = {E_artefactdetection E_autoregressivemodel E_chcardiaccontrol E_normalization E_filter E_prewhitening ODtoHbOHbR  E_detrend E_average E_nullifybad}; %preprocess enlever fast preprocessing JT
 M_preprocessing.help   = {'These modules apply basic operations on fNIRS data'};
 
-
+%
 %Module Data Display GUI'
 M_GUI        = cfg_choice;
 M_GUI.name   = 'Data Display';
@@ -4992,6 +5036,61 @@ M_others.values = {E_markCardiac_TargetPCA, E_correctCardiac_TargetPCA, E_correc
 M_others.help   = {'These modules convert nir file in .nirs, last module of data export, support the export of field such as data (d),coordinate (SD), trigger (s), time (t),do not support noise artifact marking or aux export'};
 
 
+e_HyperSNIRFname1         = cfg_entry; 
+e_HyperSNIRFname1.name    = 'Enter name snirf sujet 1';
+e_HyperSNIRFname1.tag     = 'e_HyperSNIRFname1';       
+e_HyperSNIRFname1.strtype = 's';
+e_HyperSNIRFname1.num     = [1 Inf];
+e_HyperSNIRFname1.val     = {}; 
+e_HyperSNIRFname1.help    = {'SNIRF name diade one fullfile'}; 
+
+e_HyperSNIRFname2         = cfg_entry; 
+e_HyperSNIRFname2.name    = 'Enter name snirf sujet 2';
+e_HyperSNIRFname2.tag     = 'e_HyperSNIRFname2';       
+e_HyperSNIRFname2.strtype = 's';
+e_HyperSNIRFname2.num     = [1 Inf];
+e_HyperSNIRFname2.val     = {}; 
+e_HyperSNIRFname2.help    = {'SNIRF name diade 2 fullfile'}; 
+
+e_SegmentTIME         = cfg_entry; 
+e_SegmentTIME.name    = 'Enter start time for good segment (s)';
+e_SegmentTIME.tag     = 'e_SegmentTIME';       
+e_SegmentTIME.strtype = 's';
+e_SegmentTIME.num     = [1 Inf];
+e_SegmentTIME.val     = {}; 
+e_SegmentTIME.help    = {'Define a start time for a good segment for both diad'}; 
+
+e_SegmentDURATION         = cfg_entry; 
+e_SegmentDURATION.name    = 'Enter duration time for good segment (s)';
+e_SegmentDURATION.tag     = 'e_SegmentDURATION';       
+e_SegmentDURATION.strtype = 's';
+e_SegmentDURATION.num     = [1 Inf];
+e_SegmentDURATION.val     = {}; 
+e_SegmentDURATION.help    = {'Define a start time for a good segment for both diad'}; 
+
+
+b_HyperScanSNIRF        = cfg_branch; 
+b_HyperScanSNIRF.tag     = 'b_HyperScanSNIRF';
+b_HyperScanSNIRF.name    = 'Yes';
+b_HyperScanSNIRF.val     = {e_HyperSNIRFname1 ,e_HyperSNIRFname2 ,e_SegmentTIME ,e_SegmentDURATION };
+b_HyperScanSNIRF.help    = {'Define manualy the segment entry for the output snirf file. A trig of one will be add at the begining'};
+
+
+b_HyperScanNoSNIRF         = cfg_branch; 
+b_HyperScanNoSNIRF.tag     = 'b_HyperScanNoSNIRF';
+b_HyperScanNoSNIRF.name    = 'No';
+b_HyperScanNoSNIRF.val     = {};
+b_HyperScanNoSNIRF.help    = {'Do not save snirf file'};
+
+
+
+% Create an option on wether a project file should be created or imported.
+c_HyperScan_SNIRFsave         = cfg_choice;
+c_HyperScan_SNIRFsave.tag      = 'c_HyperScan_SNIRFsave';
+c_HyperScan_SNIRFsave.name     = 'Specify  output segment for snirf file';
+c_HyperScan_SNIRFsave.values   = {b_HyperScanNoSNIRF, b_HyperScanSNIRF};
+c_HyperScan_SNIRFsave.val      = {b_HyperScanNoSNIRF};
+c_HyperScan_SNIRFsave.help     = {'Define the output .snirf file name'};
 
 
 
@@ -5007,7 +5106,7 @@ f_HyperScan_outdir.help    = {'Select the output folder where to save data. By d
 E_HyperScanCombineNIRS    = cfg_exbranch;
 E_HyperScanCombineNIRS.name = 'HyperScan Combine';
 E_HyperScanCombineNIRS.tag  = 'E_HyperScanCombineNIRS';
-E_HyperScanCombineNIRS.val  = {NIRSmat, f_HyperScan_outdir};
+E_HyperScanCombineNIRS.val  = {NIRSmat, f_HyperScan_outdir,c_HyperScan_SNIRFsave};
 E_HyperScanCombineNIRS.prog = @nirs_run_E_HyperScanCombineNIRS;
 E_HyperScanCombineNIRS.vout = @nirs_cfg_vout_E_HyperScanCombineNIRS;
 E_HyperScanCombineNIRS.help = {['Combine the data of multiple subjects (NIRS.mat) in one file,  detector, and source label will be kept identical for the first-subject and replaced as additional sources and detectors for the second subject; for example, second-subject detectors 1-16 will become detectors 17 to 32,(if the first subject have 16 detectors... ']};

@@ -14,6 +14,8 @@ try
 catch
     disp('You must add 2 synchronized NIRS file to combine them for hyperscanning ')
 end
+
+
 NIRS2 = NIRS;
  NIRS = [];
 load(job.NIRSmat{1,1});
@@ -76,7 +78,7 @@ NIRS1 = NIRS;
         mkdir(dirout);
         disp(['Folder: ' ,dirout,' Created']);
     end
-    for f=1:numel(rDtp1) %Loop over all files of a NIRS.mat
+    for f=1: 1 %numel(rDtp1) %Loop over all files of a NIRS.mat suport only one file now
          [filepath,fil,ext]=fileparts(rDtp1{f});
          outfile = fullfile(dirout,[prefix fil ext]);
           outfile_vmrk = fullfile(dirout,[prefix fil '.vmrk']);
@@ -86,10 +88,20 @@ NIRS1 = NIRS;
         catch
             disp(['Failed to open file: ' rDtp1{f} ,' if you move directory location use utility folder adjustement '])      
         end
+
+        if numel(NIRS1.Cf.H.C.id(2,:)) == size(d1,1)
+                        ml1 = [NIRS1.Cf.H.C.id(2,:)',NIRS1.Cf.H.C.id(3,:)', ones(numel(NIRS1.Cf.H.C.id(2,:)),1),NIRS1.Cf.H.C.wl']; %srs,det,1,wav
+                        t1 = 1/NIRS1.Cf.dev.fs:1/NIRS1.Cf.dev.fs:size(d1,2)*1/NIRS1.Cf.dev.fs;
+        end 
+        
         d2 = fopen_NIR(rDtp2{f},NC2); 
         disp(['Open file A: ' rDtp1{f}])
         disp(['Open file B: ' rDtp2{f}])
 
+          if numel(NIRS2.Cf.H.C.id(2,:)) == size(d2,1)
+                        ml2 = [NIRS2.Cf.H.C.id(2,:)',NIRS2.Cf.H.C.id(3,:)', ones(numel(NIRS2.Cf.H.C.id(2,:)),1),NIRS2.Cf.H.C.wl']; %srs,det,1,wav
+                        t2 = 1/NIRS2.Cf.dev.fs:1/NIRS2.Cf.dev.fs:size(d2,2)*1/NIRS2.Cf.dev.fs;
+        end 
         nsample = min([size(d2,2), size(d1,2)]);
       
         d = [d1(:,1:nsample);d2(:,1:nsample)];
@@ -126,8 +138,7 @@ NIRS1 = NIRS;
                 label_all = [label1;label2];
                 write_vmrk_all( outfile_vmrk,ind_dur_ch_all,label_all);
                
-
-
+ 
                 % try 
                 %     info1 = read_vhdr_brainvision((fullfile(dir1,[fil1,'.vhdr'])));
                 %      info2 = read_vhdr_brainvision((fullfile(dir2,[fil2,'.vhdr'])));
@@ -151,14 +162,143 @@ NIRS1 = NIRS;
         %Video dual file not supported first file value by default 
         %Aux dual file not supported  first file value by default 
         %EEG dual file not supported  first file value by default 
-              
-              
+    
+        
+                      
     end
+
+    %lionirs create HyperScanCombine
     NIRS.Dt.fir.pp(lst+1).pre = 'HyperScanCombine';
     NIRS.Dt.fir.pp(lst+1).job = job;
     save(fullfile(dirout,'NIRS.mat'),'NIRS');
     job.NIRSmat{1} =fullfile(dirout,'NIRS.mat');
-
     out.NIRSmat = job.NIRSmat;
+
+    %export snirf segment 
+    if isfield(job.c_HyperScan_SNIRFsave,'b_HyperScanSNIRF')
+
+               %CHECK GOOD SEGMENT FOR BOTH
+               %write snirf for good segment
+              %write also snirf file
+              mat1 = ind_dur_ch2mat(ind_dur_ch1, size(d1,2),size(d1,1));
+              mat2 = ind_dur_ch2mat(ind_dur_ch2, size(d2,2),size(d2,1));
+             % figure;plot(t1,sum(mat1'),'DisplayName',job.NIRSmat{2,1});
+             % hold on
+             %  plot(t2,sum(mat2'),'DisplayName',job.NIRSmat{2,1})          
+            bothClean= sum(mat2(1:nsample,:)')==0   & sum(mat1(1:nsample,:)')==0   
+            [filepath,name,ext] = fileparts(job.c_HyperScan_SNIRFsave.b_HyperScanSNIRF.e_HyperSNIRFname1)
+            h = figure; plot(t1(1:nsample),bothClean)
+            ylim([-0.1,1.1])
+            xlabel('time s')
+            ylabel('0 bad,1 both good')
+            title(dirout)
+            saveas(h,fullfile(filepath,['ISBOTHGOOD',name,'.jpg']))
+            saveas(h,fullfile(filepath,['ISBOTHGOOD',name,'.fig']))
+
+           
+    
+           istart= (sum(t1<str2num(job.c_HyperScan_SNIRFsave.b_HyperScanSNIRF.e_SegmentTIME)));
+              nsampleevent=(sum(t1<str2num(job.c_HyperScan_SNIRFsave.b_HyperScanSNIRF.e_SegmentDURATION)));
+
+            SD = [];
+            SD.Lambda = NIRS.Cf.dev.wl;
+            SD.SrcPos = NIRS.Cf.H.S.r.o.mm.p';
+            SD.DetPos = NIRS.Cf.H.D.r.o.mm.p';           
+            SD.nSrcs = size(SD.SrcPos,1);
+            SD.nDets = size(SD.DetPos,1); 
+              SD.MeasList = ml1;
+              if ~isfield(SD,'SpatialUnit')
+                  if mean(abs(SD.SrcPos(1,:)))>1 & mean(abs(SD.SrcPos(1,:)))<10 %probablement en cm
+                      SD.SpatialUnit = 'cm';  %or mm depending on your probe design
+                      disp(['Warning spatial unit field is missing , coordinate :',num2str(SD.SrcPos(1,:)),' seem to be in cm unit please verify your design.']);
+                  elseif mean(abs(SD.SrcPos(1,:)))>10 & mean(abs(SD.SrcPos(1,:)))<100 %probablement en mm
+                      SD.SpatialUnit = 'mm';  %or mm depending on your probe design
+                      disp(['Warning spatial unit field is missing , coordinate :',num2str(SD.SrcPos(1,:)),' seem to be in mm unit please verify your design.']);
+                  elseif mean(abs(SD.SrcPos(1,:)))<1
+                      SD.SpatialUnit = 'm';  %or mm depending on your probe design
+                      disp(['Warning spatial unit field is missing , coordinate :',num2str(SD.SrcPos(1,:)),' seem to be in meter unit please verify your design.']);
+                  end
+              end
+
+            SD.Landmarks3D.pos = [1 0 0;
+                                  0 -1 0;
+                                  0 1 0];
+            SD.Landmarks3D.labels =  {'Nz'        
+                              'LPA'
+                              'RPA'};
+      
+         
+          
+
+            h = figure;subplot(2,1,1)
+            plot(t1(istart:istart+nsampleevent),d1(:,istart:istart+nsampleevent)')
+               title(job.c_HyperScan_SNIRFsave.b_HyperScanSNIRF.e_HyperSNIRFname1)
+            subplot(2,1,2)
+             plot(t2(istart:istart+nsampleevent),d2(:,istart:istart+nsampleevent)')
+             title(job.c_HyperScan_SNIRFsave.b_HyperScanSNIRF.e_HyperSNIRFname2)
+            saveas(h,fullfile(filepath,['Export',name,'.jpg']))
+
+            d = d1(:,istart:istart+nsampleevent)';
+            t=t1(1:nsampleevent)  ;         
+            s = zeros(numel(t), 1);
+            aux = zeros(numel(t), 1);
+            s(1,1)=1;
+            nirs= struct('d',d,'SD',SD,'t',t','s',s,'aux',aux);
+
+      
+         snirf_saved= SnirfClass(nirs);
+        for i=1:numel(NIRS.Dt.fir.pp)
+        if 1
+            %convert concentration in uM to be in mole                 
+            snirf_saved.data.dataTimeSeries = snirf_saved.data.dataTimeSeries * 1e-6 ;
+          for k=1:numel(snirf_saved.data.measurementList) 
+             if snirf_saved.data.measurementList(k).wavelengthIndex==1
+               %  SetDataType(snirf_saved.data.measurementList(k),1,'hbo');         
+                 SetDataType(snirf_saved.data.measurementList(k),99999,'HbO')
+             elseif snirf_saved.data.measurementList(k).wavelengthIndex==2
+                % SetDataType(snirf_saved.data.measurementList(k),1,'hbr');                
+                 SetDataType(snirf_saved.data.measurementList(k),99999,'HbR');
+             end
+          end
+       end
+        end
+
+
+        outfile =job.c_HyperScan_SNIRFsave.b_HyperScanSNIRF.e_HyperSNIRFname1;
+        %force trig one a the beginning of the good segment for both participant
+        tic; snirf_saved.Save(outfile); toc  
+        disp(['Save: ', outfile]);
+
+        % Diad sujet 2  
+         d =  d2(:,istart:istart+nsampleevent)';
+         nirs= struct('d',d,'SD',SD,'t',t','s',s,'aux',aux);
+   snirf_saved= SnirfClass(nirs);
+        for i=1:numel(NIRS.Dt.fir.pp)
+        if 1
+            %convert concentration in uM to be in mole                 
+            snirf_saved.data.dataTimeSeries = snirf_saved.data.dataTimeSeries * 1e-6 ;
+          for k=1:numel(snirf_saved.data.measurementList) 
+             if snirf_saved.data.measurementList(k).wavelengthIndex==1
+               %  SetDataType(snirf_saved.data.measurementList(k),1,'hbo');         
+                 SetDataType(snirf_saved.data.measurementList(k),99999,'HbO')
+             elseif snirf_saved.data.measurementList(k).wavelengthIndex==2
+                % SetDataType(snirf_saved.data.measurementList(k),1,'hbr');                
+                 SetDataType(snirf_saved.data.measurementList(k),99999,'HbR');
+             end
+          end
+       end
+        end
+        outfile =job.c_HyperScan_SNIRFsave.b_HyperScanSNIRF.e_HyperSNIRFname2;
+       fprintf('Saving %s ...\n', outfile);
+        tic; snirf_saved.Save(outfile); toc  
+        disp(['Save: ', outfile]);
+
+
+    end
+
+   
+   
+
+
 
        

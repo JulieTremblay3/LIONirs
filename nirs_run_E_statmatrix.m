@@ -4174,6 +4174,92 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
             writetxtfile_asxlswrite(fullfile(dir1,[name,labelnode,'MANCOVAN.txt']),infonew);
             disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'MANCOVAN.txt'])]);
         end   
+elseif isfield(job.c_statmatrix,'b_randompseudopair')
+    dir1 = job.e_statmatrixPath{1};
+    job.c_statmatrix.b_TtestOneSamplematrix.e_TtestOneSampleGR = 1;
+    job.c_statmatrix.b_TtestOneSamplematrix.e_TtestOneSample_meanvalue = 0;
+      AllC = [];
+    id =1;
+    %Use one or more specific groupe
+    GRname = ['GR',num2str(job.c_statmatrix.b_TtestOneSamplematrix.e_TtestOneSampleGR),' '];
+
+    idG1 = find(  sum(groupeall==job.c_statmatrix.b_TtestOneSamplematrix.e_TtestOneSampleGR,2));
+    MATallG1 = MATall( idG1,:,:);
+    meanall = squeeze(nanmean( MATallG1,1));
+    refval  = job.c_statmatrix.b_TtestOneSamplematrix.e_TtestOneSample_meanvalue;
+    tval = squeeze((nanmean(MATallG1(:,:,:),1)-refval)./(nanstd(MATallG1(:,:,:),1)./sqrt(sum(~isnan(MATallG1(:,:,:)),1)-1)  ));
+    dfall = squeeze(sum(~isnan(MATallG1(:,:,:)),1))-1;
+    
+    %RANDOM
+    numel(idG1)
+    idG2  =find(  sum(groupeall==2,2));
+    nrandom = 1000;
+    X = randi(numel(idG2),numel(idG1), nrandom);
+    for i=1:numel(idG2)
+        MATallG1 = MATall(idG2( X(:,i)),:,:);       
+        meanall = squeeze(nanmean( MATallG1,1));
+        tvalrandom(:,:,i) = squeeze((nanmean(MATallG1(:,:,:),1)-refval)./(nanstd(MATallG1(:,:,:),1)./sqrt(sum(~isnan(MATallG1(:,:,:)-1),1))  ));
+    end
+   
+    inter_t = abs(tval(1:size(MATall,2)/2,(size(MATall,2)/2+1):size(MATall,2)));
+    inter_tr = abs(tvalrandom(1:size(MATall,2)/2,(size(MATall,2)/2+1):size(MATall,2),:));
+    alpha_threshold= job.e_statcomponent_alpha;
+    for i=1:size( inter_t,1)
+        for j=1:size( inter_t,2)
+        [fecdf,xecdf] = ecdf(squeeze(inter_tr(i,j,:)));
+        nperm = numel(idG2);
+        disp( [num2str(nperm) ' Permutation p<',num2str(alpha_threshold), ' give a marginal T value=',num2str(xecdf(sum(fecdf<(1-alpha_threshold))))]);
+        T_marj(i,j) = xecdf(sum(fecdf<(1-alpha_threshold)));
+        end
+    end
+  
+       sigperm = double(T_marj<inter_t).*inter_t;
+
+
+  infonew= [{'Dir'},{'File'},{'Zone'},{'GR'}];
+    meancorr =  [zeros(size(MATall,2)/2,size(MATall,2)/2),sigperm; sigperm,zeros(size(MATall,2)/2,size(MATall,2)/2)]
+    totaltrialgood = mean(dfall(:));
+    file = [name,labelnode,GRname, 'TtestRand_perm',num2str(alpha_threshold),'.mat'];
+    save(fullfile(dir1,[file]),'ZoneList','meancorr');
+    disp(['Save: ', fullfile(dir1,[file])]);
+    new = [{dir1},{file}, {ZONEid},{0} ];
+    infonew = [infonew;new];
+
+
+
+
+    try
+        if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
+            copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
+        end
+    catch
+    end
+
+    try      
+            try
+                xlswrite(fullfile(dir1,[name,labelnode,GRname,'SimpleTtest.xlsx']),infonew);
+                disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,'SimpleTtest.xlsx'])]);
+            catch
+                writetxtfile_asxlswrite(fullfile(dir1,[name,labelnode,'SimpleTtest.txt']),infonew);
+                disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,GRname,'SimpleTtest.txt'])]);
+            end    
+    catch
+        disp(['Error could not save .xlsx file: ' fullfile(dir1,[name,labelnode,GRname 'SimpleTtest.xlsx'])]);
+    end
+
+    temp = MATall(:,1:size(MATall,2)/2,size(MATall,2)/2:size(MATall,2));
+    figure
+    hist(temp(:),100)
+   
+    title(['Mean= ', num2str( nanmean(temp))])
+% 
+%        temp = MATall(:,:,:);
+%     figure
+%     hist(temp(:),100)
+%     temp(temp==0)=[]
+%     figure
+%      hist(temp(:),100)
+%      nanmean(temp(:))
 end
 disp('Visualize the results using: GUI_LookMatrices')
 out='Stat tests';

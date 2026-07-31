@@ -1195,10 +1195,16 @@ if get(handles.radio_viewskin,'value')
 elseif get(handles.radio_viewcortex,'value')
     type = 1;
 end
+try
 if strcmp(get(handles.context_topo_radial,'checked'),'on')
     PrjStruct = display_MRIcolor(PrjStruct,PMI,d1, type);
 elseif strcmp(get(handles.context_topo_IWD,'checked'),'on')
     PrjStruct = display_MRIcolor_InverseWeightedDistance(PrjStruct,PMI,d1, type);
+end
+catch ME
+    msgText = getReport(ME);
+    disp(['Warning:' msgText]);
+    disp('could not make projection ');
 end
     
 setappdata(handles.IO_HelmetMTG,'PrjStruct',PrjStruct);
