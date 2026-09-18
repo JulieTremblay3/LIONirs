@@ -159,10 +159,12 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                    istop = indstim(istim)+posttime;
                 end
                                
+            
 %                 if (max(indstim)+posttime)>size(d,2)
 %                     disp('Warning out of range padding in the last bloc')
 %                     d = [d,fliplr(d)];
 %                 end
+                
                 %figure;imagesc(dnan)
                 if job.normtype.b_choicenormstim.m_NormType==0      %I/Io Io = pretime
                    for Idx = 1:NC
@@ -175,9 +177,19 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                         dnorm(Idx, istart:istop) = log10(d(Idx,istart:istop)./meansub);
                     end      
                 end               
-            end
+           
+                if isfield(job.normtype.b_choicenormstim,'m_BlocNormalizationAddDetrend')
+                    if job.normtype.b_choicenormstim.m_BlocNormalizationAddDetrend==1
+                         for Idx = 1:NC
+                             m = (dnorm(Idx,istop)-dnorm(Idx, istart))./ (numel(dnorm(Idx, istart:istop))*1/fs-(1/fs));
+                            trend = m* (1/fs:1/fs:numel(dnorm(Idx, istart:istop))*1/fs)+dnorm(Idx, istart);
+                             dnorm(Idx, istart:istop) =  dnorm(Idx, istart:istop) -trend;
+                         end                       
+                    end                 
+                end
+            end          
          end
-        
+       
         [dir1,fil1,ext1] = fileparts(rDtp{f});
         infilevmrk = fullfile(dir1,[fil1 '.vmrk']);
         infilevhdr = fullfile(dir1,[fil1 '.vhdr']);

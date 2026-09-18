@@ -9,8 +9,12 @@ xlsout{idrow,5}='Nb independent intervals rejected';
 xlsout{idrow,6}='Ratio time corrected/time total';
 xlsout{idrow,7}='Nb independant intervals corrected';
 xlsout{idrow,8}='Maximal duration interval corrected (s)';
+xlsout{idrow,9}='Nb PCA corrected';
+xlsout{idrow,10}='Nb PARAFAC corrected';
 for filenb=1:size(job.NIRSmat,1) 
     NIRS = [];
+    PCAtotal = 0;
+    PARAFACtotal = 0;
     load(job.NIRSmat{filenb,1});
     lst = length(NIRS.Dt.fir.pp);
     rDtp = NIRS.Dt.fir.pp(lst).p; % path for files to be processed
@@ -76,16 +80,27 @@ for filenb=1:size(job.NIRSmat,1)
                 indsizemax = (PARCORR(icorr).indt(end)-PARCORR(icorr).indt(1)+1) * 1/fs;
                 end
             end 
+            if strcmp(PARCORR(icorr).type,'PCA')
+                PCAtotal = PCAtotal + 1;
+            end
+            if strcmp(PARCORR(icorr).type,'PARAFAC')
+                 PARAFACtotal = PARAFACtotal + 1;
+            end
         end
   
      end
+    % figure;plot(corrindice) 
         xlsout{idrow,6}=(sum(  corrindice)/numel( corrindice));
         xlsout{idrow,7}=sum((corrindice(2:end)- corrindice(1:end-1))==1);
         xlsout{idrow,8}=indsizemax;
+        xlsout{idrow,9}= PCAtotal;
+         xlsout{idrow,10}= PARAFACtotal;
      catch
         xlsout{idrow,6}=0;
         xlsout{idrow,7}=0;
-        xlsout{idrow,8}=0; 
+        xlsout{idrow,8}=0;  
+         xlsout{idrow,9}=0; 
+         xlsout{idrow,10}=0;
      end
     end 
 end

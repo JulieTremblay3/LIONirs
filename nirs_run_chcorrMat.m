@@ -248,7 +248,9 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
             end
             elseif isfield(job.I_chcorrlist_type.b_Pearson.c_Pearson,'b_PearsonBootstrap') %by segment
                 if isfield( job.I_chcorrlist_type.b_Pearson.c_Pearson.b_PearsonBootstrap,'RespirationBBM')
-                  if job.I_chcorrlist_type.b_Pearson.c_Pearson.b_PearsonBootstrap.RespirationBBM                                
+                  if job.I_chcorrlist_type.b_Pearson.c_Pearson.b_PearsonBootstrap.RespirationBBM     
+                       
+                     
                   try                         
                    filename = NIRS.Dt.AUX.pp(end).p{1};
                    tstart=NIRS.Dt.AUX.pp(end).sync_timesec{1};
@@ -303,6 +305,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                   end
                 end
                 end
+                 isdetrend = 1; %ADD DETRENDING
                 fs = NIRS.Cf.dev.fs;                         % Sample frequency (Hz)
                 tseg = job.I_chcorrlist_type.b_Pearson.c_Pearson.b_PearsonBootstrap.i_TrialLenght_crossspectrum;
                 t = 0:1/fs:tseg;
@@ -333,6 +336,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
             else
                 totaltrialgood = size(Bloc,1);
             end
+            1
                  fprintf('%s ',['Run pearson correlation ', num2str(size(Bloc,1)), ' random blocs: '])   
          for ibloc = 1:size(Bloc,1)
                 fprintf('%d ',ibloc)    
@@ -354,10 +358,14 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
            for i=1:numel(listHBO)
                 if listHBO(i)
                     j = 1;
-                    while j<i %1:numel(listelectrode)
+                    while j<i %1:numel(listelectrode) 
                         if listHBO(j)
                             d1ok = dat(listHBO(i,1),:);
                             d2ok = dat(listHBO(j,1),:);
+                            if isdetrend == 1
+                            d1ok = detrend(d1ok);
+                            d2ok = detrend(d2ok);
+                            end
                             matcorr(i,j,ibloc)=corr(d1ok',d2ok');
                             matcorr(j,i,ibloc)= matcorr(i,j,ibloc);
                         end
@@ -373,6 +381,10 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                         if  listHBO(j)
                             d1ok = dat(listHBR(i,1),:);
                             d2ok = dat(listHBR(j,1),:);
+                             if isdetrend == 1
+                            d1ok = detrend(d1ok);
+                            d2ok = detrend(d2ok);
+                            end
                             matcorrHbR(i,j,ibloc)=corr(d1ok',d2ok');
                             matcorrHbR(j,i,ibloc)= matcorrHbR(i,j,ibloc);
                         end
@@ -382,7 +394,10 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
             end
          
          end
-         fprintf('\r')        
+         fprintf('\r')    
+         %
+
+         
             end
           if isfield(job.I_chcorrlist_type.b_Pearson.c_Pearson,'m_Pearson')
              totaltrialgood = size(matcorrHbR,3);

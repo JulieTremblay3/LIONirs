@@ -81,6 +81,12 @@ for isubject=2:size(info,1)
             elseif job.m_fishertransform==3
                 matcorr =  abs(1/2*log((1+matcorr)./(1-matcorr)));
                 DATA{id}.MAT = matcorr;
+            elseif job.m_fishertransform==4 %special option for paired ttest (apply the fisher transform first substract and set the absolute value after)
+                 matcorr =  1/2*log((1+matcorr)./(1-matcorr));
+                if ~isreal(matcorr)
+                    disp(['WARNING: Verify if you apply Fisher transform twice, the output matrix is complex.'])
+                end
+                DATA{id}.MAT = matcorr;
             end
         end
 
@@ -2112,7 +2118,7 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
             disp(['Result .xlsx file saved ' fullfile(dir1,['CLUSTER.xlsx'])]);
         end
     end
-    %
+    %MATallG1
 
 elseif isfield(job.c_statmatrix,'b_PairedTtest')
     AllC = [];
@@ -2147,7 +2153,11 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest')
     end
 
     try
-        matdiff = MATallG1 -  MATallG2;
+        if job.m_fishertransform==4
+            matdiff = abs(MATallG1 -  MATallG2);
+        else
+            matdiff = MATallG1 -  MATallG2;
+        end
     catch
         disp(['Error: Group ', num2str(job.c_statmatrix.b_PairedTtest.e_TtestOneSampleGR),...
             ' has ', num2str(size( MATallG1,1)), ' subjects that must be paired with Group ',...
@@ -2160,7 +2170,13 @@ elseif isfield(job.c_statmatrix,'b_PairedTtest')
     dir1 = job.e_statmatrixPath{1};
     for ifile=1:size(matdiff,1)
         file = ['Paired',sprintf('%03.0f',(ifile)),' ',    list_subject{idG1(ifile) } '-', list_subject{idG2(ifile)}];
-        tmp =squeeze(MATallG1(ifile,:) -  MATallG2(ifile,:));
+         if job.m_fishertransform==4
+            tmp =abs(squeeze(MATallG1(ifile,:) -  MATallG2(ifile,:)));
+         elseif job.m_fishertransform==3
+            tmp =abs(MATallG1(ifile,:)) -  abs(MATallG2(ifile,:));
+         else
+             tmp= MATallG1(ifile,:) -  MATallG2(ifile,:); 
+         end
         meancorr = halfmat2mat(tmp,idhalf, size(MATall,2));
         save(fullfile(dir1,[file]),'ZoneList','meancorr');
         disp(['Save: ', fullfile(dir1,[file])]);
@@ -4175,7 +4191,55 @@ elseif isfield(job.c_statmatrix,'b_fitMANCOVAN_Mat')
             disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'MANCOVAN.txt'])]);
         end   
 elseif isfield(job.c_statmatrix,'b_randompseudopair')
-    dir1 = job.e_statmatrixPath{1};
+
+    %Check suggestion Guillaume normalised by the random surrogate
+     id_Random  =find(  sum(groupeall==0,2));
+     id_Real = [find(  sum(groupeall==1,2));find(  sum(groupeall==2,2))];
+     for i=1:size(MATall,2)
+        for j =1:size(MATall,3)
+               Mr = nanmean(MATall(id_Random,i,j));
+               STDr = nanstd(MATall(id_Random,i,j));
+               for iNorm = 1:numel(id_Real)
+                    matNorm(iNorm,i,j) = (MATall(id_Real(iNorm),i,j)-Mr)./STDr;
+               end
+        end 
+     end
+
+     dir1 = job.e_statmatrixPath{1}; ;
+
+  infonew= [{'Dir'},{'File'},{'Zone'},{'GR'}];
+    for ifile=1:numel(id_Real)
+        file = [name,'Zscore_',sprintf('%03.0f',(ifile)),list_subject{id_Real(ifile)}  ,'.mat'];
+        meancorr =  squeeze(matNorm(ifile,:,:))
+        save(fullfile(dir1,[file]),'ZoneList','meancorr');
+        disp(['Save: ', fullfile(dir1,[file])]);
+        new = [{dir1},{file}, {ZONEid},{2} ];
+        infonew = [infonew;new];
+    end
+    if ~strcmp(fullfile(info{isubject,1}, ZONEid),fullfile(dir1,  ZONEid))
+        copyfile(fullfile(info{isubject,1}, ZONEid),  fullfile(dir1,  ZONEid));
+    end
+    %  dir1 = job.e_statmatrixPath{1};
+    try
+
+            try
+                xlswrite(fullfile(dir1,[name,labelnode,'zscoreRand.xlsx']),infonew);
+                disp(['Result .xlsx file saved: ' fullfile(dir1,[name,labelnode,'zscore.xlsx'])]);
+            catch
+                writetxtfile_asxlswrite(fullfile(dir1,[name,labelnode,'zscore.txt']),infonew);
+                disp(['Result .txt file saved: ' fullfile(dir1,[name,labelnode,'zscore.txt'])]);
+            end
+       
+    catch
+        disp(['Error could not save .xlsx file: ' fullfile(dir1,[name,labelnode,'zscore.xlsx'])]);
+    end
+
+
+
+     
+        figure;imagesc(squeeze(nanmean(matNorm,1)))
+
+  
     job.c_statmatrix.b_TtestOneSamplematrix.e_TtestOneSampleGR = 1;
     job.c_statmatrix.b_TtestOneSamplematrix.e_TtestOneSample_meanvalue = 0;
       AllC = [];
@@ -4183,8 +4247,10 @@ elseif isfield(job.c_statmatrix,'b_randompseudopair')
     %Use one or more specific groupe
     GRname = ['GR',num2str(job.c_statmatrix.b_TtestOneSamplematrix.e_TtestOneSampleGR),' '];
 
-    idG1 = find(  sum(groupeall==job.c_statmatrix.b_TtestOneSamplematrix.e_TtestOneSampleGR,2));
-    MATallG1 = MATall( idG1,:,:);
+    idG1 = [find(  sum(groupeall==1,2));find(  sum(groupeall==2,2))];
+
+   % idG2 = find(  sum(groupeall==2,2));
+    MATallG1 = MATall( [idG1],:,:);
     meanall = squeeze(nanmean( MATallG1,1));
     refval  = job.c_statmatrix.b_TtestOneSamplematrix.e_TtestOneSample_meanvalue;
     tval = squeeze((nanmean(MATallG1(:,:,:),1)-refval)./(nanstd(MATallG1(:,:,:),1)./sqrt(sum(~isnan(MATallG1(:,:,:)),1)-1)  ));
@@ -4192,7 +4258,7 @@ elseif isfield(job.c_statmatrix,'b_randompseudopair')
     
     %RANDOM
     numel(idG1)
-    idG2  =find(  sum(groupeall==2,2));
+    idG2  =find(  sum(groupeall==0,2));
     nrandom = 1000;
     X = randi(numel(idG2),numel(idG1), nrandom);
     for i=1:numel(idG2)
@@ -4211,12 +4277,11 @@ elseif isfield(job.c_statmatrix,'b_randompseudopair')
         disp( [num2str(nperm) ' Permutation p<',num2str(alpha_threshold), ' give a marginal T value=',num2str(xecdf(sum(fecdf<(1-alpha_threshold))))]);
         T_marj(i,j) = xecdf(sum(fecdf<(1-alpha_threshold)));
         end
-    end
+    end 
   
        sigperm = double(T_marj<inter_t).*inter_t;
 
 
-  infonew= [{'Dir'},{'File'},{'Zone'},{'GR'}];
     meancorr =  [zeros(size(MATall,2)/2,size(MATall,2)/2),sigperm; sigperm,zeros(size(MATall,2)/2,size(MATall,2)/2)]
     totaltrialgood = mean(dfall(:));
     file = [name,labelnode,GRname, 'TtestRand_perm',num2str(alpha_threshold),'.mat'];

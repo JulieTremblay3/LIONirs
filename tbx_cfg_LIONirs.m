@@ -1189,6 +1189,13 @@ m_choiceNan.values  = {1,0};
 m_choiceNan.val     = {1};
 m_choiceNan.help    = {'Io will exclude artifacts (yellow marking).'};
 
+m_BlocNormalizationAddDetrend        =  cfg_menu;
+m_BlocNormalizationAddDetrend.tag     =  'm_BlocNormalizationAddDetrend';
+m_BlocNormalizationAddDetrend.name    = 'Add detrending after pretime postime normalisation';       
+m_BlocNormalizationAddDetrend.labels  = {'Yes','No'};
+m_BlocNormalizationAddDetrend.values  = {1,0};
+m_BlocNormalizationAddDetrend.val     = {0};
+m_BlocNormalizationAddDetrend.help    = {'Detrending operation: Help to reduce drift effect before the filter'};
 
 
 b_choiceglobal         = cfg_branch;
@@ -1260,7 +1267,7 @@ m_NormType.help     = {'Choose one of the two definitions of Io'}';
 b_choicenormstim         = cfg_branch;
 b_choicenormstim.tag     = 'b_choicenormstim';
 b_choicenormstim.name    = 'Normalization around trigger';
-b_choicenormstim.val     = {trigger pretime posttime m_NormType m_choiceNan};
+b_choicenormstim.val     = {trigger pretime posttime m_NormType m_choiceNan m_BlocNormalizationAddDetrend};
 b_choicenormstim.help    = {'Normalization using pre and post time triggers.'}';
 
 c_normtype          = cfg_choice;
@@ -4220,11 +4227,21 @@ RespirationBBM.values    = {1, 0};
 RespirationBBM.val       = {1};
 RespirationBBM.help      = {'Mesure in the auxilairy (Resp) channel to save in the structure the rate of respiration by minute. It could be use later to help to determine the state of the participant. '};
          
-                     
+m_PearsonBootstrap_detrend           = cfg_menu;
+m_PearsonBootstrap_detrend.tag       = 'm_PearsonBootstrap_detrend';
+m_PearsonBootstrap_detrend.name      = 'Add detrending on random segment';
+m_PearsonBootstrap_detrend.labels    = {'Yes','No'};
+m_PearsonBootstrap_detrend.values    = {1, 0};
+m_PearsonBootstrap_detrend.val       = {1};
+m_PearsonBootstrap_detrend.help      = {'On each random segment apply detrending to limit slow drift impact.'};
+         
+            
+
+
 b_PearsonBootstrap         = cfg_branch;
 b_PearsonBootstrap.tag     = 'b_PearsonBootstrap';
 b_PearsonBootstrap.name    = 'Circular bootstrap';
-b_PearsonBootstrap.val     = {i_TrialLenght_crossspectrum,i_RandomSample_crossspectrum,i_OutlierControl_crossspectrum, RespirationBBM};
+b_PearsonBootstrap.val     = {i_TrialLenght_crossspectrum,i_RandomSample_crossspectrum,i_OutlierControl_crossspectrum, RespirationBBM, m_PearsonBootstrap_detrend };
 b_PearsonBootstrap.help    = {'Use circular bootstrap to compute cross-correlation analysis.'};
                 
 m_Pearson           = cfg_menu;
@@ -4495,10 +4512,13 @@ E_GUI_lookmatrices.help = {'Open a GUI to visualized fNIRS connectivity matrix.'
 m_fishertransform           = cfg_menu;
 m_fishertransform.tag       = 'm_fishertransform';
 m_fishertransform.name      = 'Fisher transform';
-m_fishertransform.labels    = {'Yes', 'No','Yes & valeur absolu'};
-m_fishertransform.values    = {1,2,3};
+m_fishertransform.labels    = {'Yes', 'No','Yes & valeur absolu','Yes & abs in paired ttest abs(Fisher(G1)-Fisher(G2))'};
+m_fishertransform.values    = {1,2,3,4};
 m_fishertransform.val       = {1};
-m_fishertransform.help      = {'Use the fisher transform 1/2 ln((1+p)/(1-p)), when the transformation is applied to the sample correlation coefficient, the sampling distribution of the resulting variable is approximately normal, with a variance that is stable over different values of the underlying true correlation.'};
+m_fishertransform.help      = {'Use the fisher transform 1/2 ln((1+p)/(1-p)),',...
+                              'when the transformation is applied to the sample correlation coefficient,',...
+                              'the sampling distribution of the resulting variable is approximately normal,',...
+                              'with a variance that is stable over different values of the underlying true correlation.'};
 
 
 
@@ -5068,11 +5088,24 @@ e_SegmentDURATION.num     = [1 Inf];
 e_SegmentDURATION.val     = {}; 
 e_SegmentDURATION.help    = {'Define a start time for a good segment for both diad'}; 
 
+%use10_10system
+m_DiadSNIRFpadding        = cfg_menu;
+m_DiadSNIRFpadding.tag      = 'm_DiadSNIRFpadding';
+m_DiadSNIRFpadding.name     = 'Padding option';
+m_DiadSNIRFpadding.labels   = {'No padding','Symmetric padding'};%,'Whole-sample anti-symmetric padding'};
+m_DiadSNIRFpadding.values   = {0,1};
+m_DiadSNIRFpadding.val      = {0};
+m_DiadSNIRFpadding.help     = {'Padding could be usufull when you perfom the wavelet transform on short segment as edge effect reduce the size of usable data.',...
+                                'No padding : use just the initial data',...
+                                'symmetric padding : mirrors data values across an edge'};
+                                %'Anti-symmetric padding : mirrors data values across an edge while flipping their signs (multiplying by -1)',...                                         
+                                %'Kharitonenko, I., Xing Zhang, and S. Twelves. “A Wavelet Transform with Point-Symmetric Extension at Tile Boundaries.” IEEE Transactions on Image Processing 11, no. 12 (2002): 1357–64. https://doi.org/10.1109/TIP.2002.806237.'};
+
 
 b_HyperScanSNIRF        = cfg_branch; 
 b_HyperScanSNIRF.tag     = 'b_HyperScanSNIRF';
 b_HyperScanSNIRF.name    = 'Yes';
-b_HyperScanSNIRF.val     = {e_HyperSNIRFname1 ,e_HyperSNIRFname2 ,e_SegmentTIME ,e_SegmentDURATION };
+b_HyperScanSNIRF.val     = {e_HyperSNIRFname1 ,e_HyperSNIRFname2 ,e_SegmentTIME ,e_SegmentDURATION,m_DiadSNIRFpadding };
 b_HyperScanSNIRF.help    = {'Define manualy the segment entry for the output snirf file. A trig of one will be add at the begining'};
 
 

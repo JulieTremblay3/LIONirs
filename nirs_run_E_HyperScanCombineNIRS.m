@@ -229,17 +229,70 @@ NIRS1 = NIRS;
       
          
           
-
-            h = figure;subplot(2,1,1)
-            plot(t1(istart:istart+nsampleevent),d1(:,istart:istart+nsampleevent)')
-               title(job.c_HyperScan_SNIRFsave.b_HyperScanSNIRF.e_HyperSNIRFname1)
-            subplot(2,1,2)
-             plot(t2(istart:istart+nsampleevent),d2(:,istart:istart+nsampleevent)')
-             title(job.c_HyperScan_SNIRFsave.b_HyperScanSNIRF.e_HyperSNIRFname2)
-            saveas(h,fullfile(filepath,['Export',name,'.jpg']))
+            %before detrend
+            % h = figure;subplot(2,1,1)
+            % plot(t1(istart:istart+nsampleevent),d1(:,istart:istart+nsampleevent)')
+            %    title(job.c_HyperScan_SNIRFsave.b_HyperScanSNIRF.e_HyperSNIRFname1)
+            % subplot(2,1,2)
+            %  plot(t2(istart:istart+nsampleevent),d2(:,istart:istart+nsampleevent)')
+            %  title(job.c_HyperScan_SNIRFsave.b_HyperScanSNIRF.e_HyperSNIRFname2)
+            % saveas(h,fullfile(filepath,['Export',name,'.jpg']))
 
             d = d1(:,istart:istart+nsampleevent)';
-            t=t1(1:nsampleevent)  ;         
+            if 1 % add detrend on segment 
+                d = detrend(d);
+            end
+            if 1 %add scalp couplin 
+                sc_trheshold = 0.7;
+                fs = NIRS.Cf.dev.fs;
+                [b,a] = butter(4, [0.7 2]/(fs/2));
+                for i=1:size(d,2)
+                    for j = 1:size(d,2)
+                        
+                filt_sig1 = filtfilt(b, a, d(:,i));
+                filt_sig2 = filtfilt(b, a, d(:,j));
+                c = corrcoef(filt_sig1, filt_sig2);
+                sci_value(i,j) = c(1, 2);
+                    if i==j
+                        sci_value(i,j)=0;
+                    end
+                    end
+                end
+                 isok = reshape(max(sci_value)< sc_trheshold,size(sci_value,1)/2,2);
+                 idbad  = find( [ sum(isok,2)==0;sum(isok,2)==0]);
+                    %               idbad  = find( [ sum(isok,2)~=2;sum(isok,2)~=2]);
+                 disp(['Scalp coupling ok channel diad1: ', num2str(numel(idbad))])
+                 d(:,idbad)=nan;
+            end
+            try
+            startvideotime = NIRS.Dt.Video.pp(end).sync_timesec{1} + t1(istart)
+            minute = floor( startvideotime/60);
+            seconde=round(mod(startvideotime,60));
+            infovideo =['time video: ' , num2str(minute),' min ',num2str(seconde),' sec '];
+            catch 
+            infovideo = 'nd'
+            end
+
+           
+             h = figure;subplot(2,1,1)
+            plot(t1(istart:istart+nsampleevent),d)
+            title([infovideo,' ' name,' detrend scalp coupling'] )
+              
+             %t=t1(1:nsampleevent)  [h,m,s] = hms(300)
+             ; 
+            if job.c_HyperScan_SNIRFsave.b_HyperScanSNIRF.m_DiadSNIRFpadding==0 %no padding
+                    disp('Diad 1 No padding')
+            elseif  job.c_HyperScan_SNIRFsave.b_HyperScanSNIRF.m_DiadSNIRFpadding==1 %'Symmetric padding',
+                    d =  [flipud(d); d; flipud(d)];
+                    disp('Diad 1 Symmetric padding')
+            % elseif  job.c_HyperScan_SNIRFsave.b_HyperScanSNIRF.m_DiadSNIRFpadding==2 %' anti-symmetric padding'
+            %         d =[-1*flipud(d); d; -1*flipud(d)]
+            %         disp('Diad 1 Anti Symmetric padding')
+            end            
+            
+
+            t = t1(1):t1(1):t1(1)*size(d,1)    
+            % figure;plot(t,d)
             s = zeros(numel(t), 1);
             aux = zeros(numel(t), 1);
             s(1,1)=1;
@@ -271,8 +324,52 @@ NIRS1 = NIRS;
 
         % Diad sujet 2  
          d =  d2(:,istart:istart+nsampleevent)';
-         nirs= struct('d',d,'SD',SD,'t',t','s',s,'aux',aux);
-   snirf_saved= SnirfClass(nirs);
+
+           if 1 % add detrend on segment 
+                d = detrend(d)
+            end
+            if 1 %add scalp couplin 
+                sc_trheshold = 0.7
+                fs = NIRS.Cf.dev.fs;
+                [b,a] = butter(4, [0.7 2]/(fs/2));
+                for i=1:size(d,2)
+                    for j = 1:size(d,2)
+                        
+                filt_sig1 = filtfilt(b, a, d(:,i));
+                filt_sig2 = filtfilt(b, a, d(:,j));
+                c = corrcoef(filt_sig1, filt_sig2);
+                sci_value(i,j) = c(1, 2);
+                    if i==j
+                        sci_value(i,j)=0;
+                    end
+                    end
+                end
+                 isok = reshape(max(sci_value)< sc_trheshold,size(sci_value,1)/2,2)
+                 idbad  = find( [ sum(isok,2)==0;sum(isok,2)==0])
+                 d(:,idbad)=nan
+                       disp(['Scalp coupling ok channel diad2: ', num2str(numel(idbad))])
+            end
+               
+            figure(h);subplot(2,1,2)
+            plot(t1(istart:istart+nsampleevent),d)
+            title(job.c_HyperScan_SNIRFsave.b_HyperScanSNIRF.e_HyperSNIRFname1,'detrend scalp coupling')
+            saveas(h,fullfile(filepath,['Export',name,'.jpg']))
+
+             %t=t1(1:nsampleevent)  ; 
+            if job.c_HyperScan_SNIRFsave.b_HyperScanSNIRF.m_DiadSNIRFpadding==0 %no padding
+                    disp('Diad 2 No padding')
+            elseif  job.c_HyperScan_SNIRFsave.b_HyperScanSNIRF.m_DiadSNIRFpadding==1 %'Symmetric padding',
+                    d =  [flipud(d); d; flipud(d)];
+                    disp('Diad 2 Symmetric padding')
+            elseif  job.c_HyperScan_SNIRFsave.b_HyperScanSNIRF.m_DiadSNIRFpadding==2 %' anti-symmetric padding'
+                    d =[-1*flipud(d); d; -1*flipud(d)];
+                    disp('Diad 2 Anti Symmetric padding')
+            end            
+             
+
+            t = t1(1):t1(1):t1(1)*size(d,1);  
+            nirs= struct('d',d,'SD',SD,'t',t','s',s,'aux',aux);
+            snirf_saved= SnirfClass(nirs);
         for i=1:numel(NIRS.Dt.fir.pp)
         if 1
             %convert concentration in uM to be in mole                 
