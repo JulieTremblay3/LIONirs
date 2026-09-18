@@ -305,7 +305,16 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                   end
                 end
                 end
-                 isdetrend = 1; %ADD DETRENDING
+                 if isfield(job.I_chcorrlist_type.b_Pearson.c_Pearson.b_PearsonBootstrap,'m_PearsonBootstrap_detrend') %option ajouté septembre 2026
+                     if job.I_chcorrlist_type.b_Pearson.c_Pearson.b_PearsonBootstrap.m_PearsonBootstrap_detrend %ADD DETRENDING
+                         isdetrend = 1;
+                     else
+                         isdetrend = 0;
+                     end
+                 else
+                     isdetrend = 0; 
+                 end
+                     
                 fs = NIRS.Cf.dev.fs;                         % Sample frequency (Hz)
                 tseg = job.I_chcorrlist_type.b_Pearson.c_Pearson.b_PearsonBootstrap.i_TrialLenght_crossspectrum;
                 t = 0:1/fs:tseg;
@@ -359,7 +368,7 @@ for filenb=1:size(job.NIRSmat,1) %do it one by one for the associate name
                 if listHBO(i)
                     j = 1;
                     while j<i %1:numel(listelectrode) 
-                        if listHBO(j)
+                        if listHBO(j) 
                             d1ok = dat(listHBO(i,1),:);
                             d2ok = dat(listHBO(j,1),:);
                             if isdetrend == 1
