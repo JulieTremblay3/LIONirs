@@ -15,8 +15,21 @@ end
 
  if isfield(job.c_statcomponent,'b_TtestOneSample')
     AllC = [];
+      [folder,file,~] = fileparts(job.c_statcomponent.b_TtestOneSample.f_component{1})
+         fileprevious = file(1:end-11);
+         idfile = 1;
     for i=1:numel(job.c_statcomponent.b_TtestOneSample.f_component)
         load(job.c_statcomponent.b_TtestOneSample.f_component{i},'-mat');
+         [folder,file,~] = fileparts(job.c_statcomponent.b_TtestOneSample.f_component{i})
+        
+        if strcmp(file(1:end-11),fileprevious)
+            idsubject(i,1) = idfile;
+        else
+            fileprevious =file(1:end-11);
+            idfile = idfile+1;
+             idsubject(i,1)  =  idfile;
+        end
+        disp([job.c_statcomponent.b_TtestOneSample.f_component{i}, numel(job.c_statcomponent.b_TtestOneSample.f_component)])
         if size(A,1)> size(A,2)
             AllC = [AllC,A];
         else
@@ -29,8 +42,23 @@ end
              info.zonelistG1{i} = [];
         end
     end  
-    save(fullfile(dir1,'MatricebyChannel.mat'), 'AllC','-mat')
+    save(fullfile(dir1,'MatricebyChannel.mat'), 'AllC','idsubject','-mat')
     disp(fullfile(dir1,'MatricebyChannel.mat'))
+    %Get by participant average based on name root
+    if job.c_statcomponent.b_TtestOneSample.m_TtestOneSample_bysubjectmean==1
+        
+        for idmean = 1:max(idsubject)
+            idsubject==idmean;
+            A= nanmean(AllC(:, idsubject==idmean),2);
+            save(fullfile(dir1,['Mean',sprintf('%03.0f',idmean),'.mat']),'A','zonelist')  
+            disp(['Save: ',fullfile(dir1,['Mean ',num2str(idmean),'.mat'])]);
+        end
+   
+
+    end
+
+
+
     info.AllG1 = AllC';
     info.G1 = job.c_statcomponent.b_TtestOneSample.f_component;
      for ich=1:size(AllC,1)       
@@ -616,19 +644,25 @@ elseif isfield(job.c_statcomponent,'c_ANOVAN')
           zone = load(raw{i,3},'-mat');
           catch              
           disp(['Zone expected, file ',fullfile(raw{i,1},raw{i,3}),' could not be load'])
-          return
-          end
+          return 
+          end 
       end
         labelzone = raw{i,4};
+        goodzone = [];
         for izone = 1:numel(zone.zone.label)
-            if strcmp(zone.zone.label{izone}, labelzone)
+            if strcmp(upper(zone.zone.label{izone}), upper(labelzone))
                 goodzone = izone;
-                %zoneidnum{i-1,1} = izone;
+                %zoneidnum{i-1,1} = izone; 
                 zoneid{i-1,1} = labelzone;
-            end
+            end 
         end
+        if isempty(goodzone)
+           plotLst = [];
+           AllCOM = [AllCOM,nan];
+        else
         plotLst = zone.zone.plotLst{goodzone};
-        AllCOM = [AllCOM,nanmax(tmp.A(plotLst))];
+        AllCOM = [AllCOM,nanmean(tmp.A(plotLst))];
+        end
      end
  
      info.AllCOMP = AllCOM; 

@@ -1,11 +1,15 @@
-function newPrj=Createproject_fromsnirf(FileName)
+function newPrj=Createproject_fromsnirf(FileName,vararging)
 %This function is to facilitate the project creation (.prj) file using file
 %data already contain coordinate and source and detector position
 %if the coordinate are in 2d visualisation will be over a flat 2d plane
 %geometrie. If coordinate contain fiducial and are in 3d 
 %FileName : .nirs with SD structure or snirf file 
 
-
+    if numel(vararging)>0
+        type = vararging(1);
+    else 
+        type=2; %polaris coordinate by defaults
+    end
 [filepath,name,ext] = fileparts(FileName);
 if strcmp(ext, '.nirs')
     NIRS= load(FileName,'-mat');
@@ -102,7 +106,8 @@ end
 %load NIRS get SD coordinate and montage information 
  newPrj = IO_Project_Data;
 %load coordinate from NIRS file using SD.SrcPos SD.DetPos
-handles.oDig_SubjectFiducials = Load_Digitization_SD(NIRS);
+
+handles.oDig_SubjectFiducials = Load_Digitization_SD(NIRS,type);
 newPrj = set_Dig_SubjectFids( newPrj, handles.oDig_SubjectFiducials );
 newPrj = set_Helmet( newPrj, FitHelmetOnSubject( get_Dig_SubjectFids(newPrj), get_Dig_CompleteHelmet(newPrj) ) );
 newPrj = set_Helmet( newPrj, calc_Center2d( get_Helmet(newPrj) ) );

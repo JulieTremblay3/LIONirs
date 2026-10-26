@@ -576,10 +576,22 @@ b_importProject.name    = 'Import .prj';
 b_importProject.val     = {prjfile};
 b_importProject.help    = {'Import an already existing project file.'};
 
+
+
+m_createProject_axiscoordinate         = cfg_menu; 
+m_createProject_axiscoordinate.name    = 'Components and corrections';
+m_createProject_axiscoordinate.tag     = 'm_createProject_axiscoordinate';      
+m_createProject_axiscoordinate.labels  = {'NIRSsport', 'Polaris',};
+m_createProject_axiscoordinate.values  = {1,2};
+m_createProject_axiscoordinate.val     = {1}; 
+m_createProject_axiscoordinate.help    = {['Original polaris coordinate use X+ as NASION X- as vertex, Y+ as Left , Y- as right, Z+ as top head, Z- as bottom head, 0 is the head center' ...
+                                           'NIRx  Coordinate Axis X+ Left X- right, Y+ Top, Y- bottom Z = vertex + Z- FRONT *for other reference flip in LOAD_Digitalisation_SD.m']};
+
+
 b_createProject         = cfg_branch; % Is an empty branch.
 b_createProject.tag     = 'b_createProject';
 b_createProject.name    = 'Create .prj';
-b_createProject.val     = {};
+b_createProject.val     = {m_createProject_axiscoordinate};
 b_createProject.help    = {'Create a new project file from the .snirf file.'};
 
 % Create an option on wether a project file should be created or imported.
@@ -1189,6 +1201,32 @@ m_choiceNan.values  = {1,0};
 m_choiceNan.val     = {1};
 m_choiceNan.help    = {'Io will exclude artifacts (yellow marking).'};
 
+
+e_BlocNormalizationSCALPCOUPLING            = cfg_entry;
+e_BlocNormalizationSCALPCOUPLING.tag        = 'e_BlocNormalizationSCALPCOUPLING';
+e_BlocNormalizationSCALPCOUPLING.name       = 'Scalp coupling value';
+e_BlocNormalizationSCALPCOUPLING.strtype    = 'r';
+e_BlocNormalizationSCALPCOUPLING.num        = [1 Inf];
+e_BlocNormalizationSCALPCOUPLING.val        = {[0.7]};
+e_BlocNormalizationSCALPCOUPLING.help       = {'Enter scalp couping index minimum to be consider as a good channel'};
+
+e_BlocNormalizationSCALPCOUPLINGNo            = cfg_entry;
+e_BlocNormalizationSCALPCOUPLINGNo.tag        = 'e_BlocNormalizationSCALPCOUPLINGNo';
+e_BlocNormalizationSCALPCOUPLINGNo.name       = 'No';
+e_BlocNormalizationSCALPCOUPLINGNo.strtype    = 's';
+e_BlocNormalizationSCALPCOUPLINGNo.num        = [1 Inf];
+e_BlocNormalizationSCALPCOUPLINGNo.val        = {'No'};
+e_BlocNormalizationSCALPCOUPLINGNo.help       = {'Do not apply scalp couling'};
+
+
+c_BlocNormalizationSCALPCOUPLING         =   cfg_choice;
+c_BlocNormalizationSCALPCOUPLING.tag     =  'c_BlocNormalizationSCALPCOUPLING';
+c_BlocNormalizationSCALPCOUPLING.name    = 'Calcul and reject scalp coupling index on block';
+c_BlocNormalizationSCALPCOUPLING.values   = {e_BlocNormalizationSCALPCOUPLING, e_BlocNormalizationSCALPCOUPLINGNo};
+c_BlocNormalizationSCALPCOUPLING.val     = {e_BlocNormalizationSCALPCOUPLINGNo };
+c_BlocNormalizationSCALPCOUPLING.help    = {'Calcul scalp coupling on normalised bloc if lower than 0.7 mark as rejected for the channel '};
+
+
 m_BlocNormalizationAddDetrend        =  cfg_menu;
 m_BlocNormalizationAddDetrend.tag     =  'm_BlocNormalizationAddDetrend';
 m_BlocNormalizationAddDetrend.name    = 'Add detrending after pretime postime normalisation';       
@@ -1267,7 +1305,7 @@ m_NormType.help     = {'Choose one of the two definitions of Io'}';
 b_choicenormstim         = cfg_branch;
 b_choicenormstim.tag     = 'b_choicenormstim';
 b_choicenormstim.name    = 'Normalization around trigger';
-b_choicenormstim.val     = {trigger pretime posttime m_NormType m_choiceNan m_BlocNormalizationAddDetrend};
+b_choicenormstim.val     = {trigger pretime posttime m_NormType m_choiceNan m_BlocNormalizationAddDetrend,c_BlocNormalizationSCALPCOUPLING};
 b_choicenormstim.help    = {'Normalization using pre and post time triggers.'}';
 
 c_normtype          = cfg_choice;
@@ -2561,6 +2599,10 @@ b_HMRdatad1manual.val     = {HMRdata HMR_cffile HMR_datatype HMR_datad1mat HMR_s
 b_HMRdatad1manual.help    = {''}';
 
 
+
+
+
+
 NIRS_datatype           = cfg_menu;
 NIRS_datatype.tag       = 'NIRS_datatype';
 NIRS_datatype.name      = 'Output type';
@@ -2580,9 +2622,26 @@ NIRS_dataHemo.help      = {'Display HbO and HbR or wavelength first and second i
 
 b_NIRSdata        = cfg_branch;
 b_NIRSdata.tag    = 'b_NIRSdata';
-b_NIRSdata.name   = 'NIRS epoch average data';
+b_NIRSdata.name   = 'NIRS.mat epoch average data';
 b_NIRSdata.val    = {NIRSmat NIRS_datatype HMR_savenormfig, NIRS_dataHemo};
 b_NIRSdata.help   = {''};
+
+
+f_NIRSdatatopoch             = cfg_files; %Select NIRS.mat for this subject 
+f_NIRSdatatopoch.name        = 'Channel projection '; % The displayed name
+f_NIRSdatatopoch.tag         = 'f_NIRSdatatopoch';       %file names
+f_NIRSdatatopoch.filter      = 'mat';
+f_NIRSdatatopoch.ufilter     = '.mat$';    
+f_NIRSdatatopoch.num         = [0 Inf];     % Number of inputs required 
+f_NIRSdatatopoch.help        = {'Select a matrix of data to display save format as the 3D MONTAGE topographic projection'}; 
+
+
+b_NIRSdatatopoch        = cfg_branch;
+b_NIRSdatatopoch.tag    = 'b_NIRSdatatopoch';
+b_NIRSdatatopoch.name   = 'NIRS.mat use channel file information';
+b_NIRSdatatopoch.val    = {NIRSmat,f_NIRSdatatopoch };
+b_NIRSdatatopoch.help   = {''};
+
 
 b_SPMdata        = cfg_branch;
 b_SPMdata.tag    = 'b_SPMdata';
@@ -2611,7 +2670,7 @@ typedata.tag     = 'typedata';
 typedata.name    = 'Design';
 typedata.val     = {b_NIRSdata};
 typedata.help    = {''};
-typedata.values  = {b_NIRSdata,b_HMRdata,b_HMRdatad1manual, b_SPMdata,b_vColordata};
+typedata.values  = {b_NIRSdata,b_NIRSdatatopoch, b_HMRdata,b_HMRdatad1manual, b_SPMdata,b_vColordata};
 
 %prjfile define above 
 m_prjfile_mode          = cfg_menu;
@@ -3417,6 +3476,15 @@ m_TtestOneSample.values = {1,2,3};
 m_TtestOneSample.val    = {1}; 
 m_TtestOneSample.help   = {'Use 2-tailed or one-tailed assumption.'};
 
+m_TtestOneSample_bysubjectmean        = cfg_menu;
+m_TtestOneSample_bysubjectmean.tag    = 'm_TtestOneSample_bysubjectmean';
+m_TtestOneSample_bysubjectmean.name   = 'Save subject mean';
+m_TtestOneSample_bysubjectmean.labels = {'Yes','No' };
+m_TtestOneSample_bysubjectmean.values = {1,2};
+m_TtestOneSample_bysubjectmean.val    = {2}; 
+m_TtestOneSample_bysubjectmean.help   = {'Save by subject component.'};
+
+
 
 f_component         = cfg_files;
 f_component.name    = 'Enter list of components'; 
@@ -3427,11 +3495,13 @@ f_component.num     = [1 Inf];     % Number of inputs required
 f_component.help    = {'Enter the list of components to test statistically.'}; 
 
 
+
+
 b_TtestOneSample        = cfg_branch;
 b_TtestOneSample.tag    = 'b_TtestOneSample';
 b_TtestOneSample.name   = 'One-sample t-test' ;
-b_TtestOneSample.val    = {f_component,m_TtestOneSample};
-b_TtestOneSample.help   = {'The one-sample t-test is a parametric test of the location parameter when the population standard deviation is unknown.',...
+b_TtestOneSample.val    = {f_component,m_TtestOneSample,m_TtestOneSample_bysubjectmean};
+b_TtestOneSample.help   = {'The one-sample t-test is a parametric test',...
     'T = mean(X)/(STD(x)*sqrt(n))'};
 
 
@@ -3517,21 +3587,22 @@ f_componentexportzone.tag     = 'f_componentexportzone';       %file names
 f_componentexportzone.filter  = {'xlsx','xls','txt'};
 f_componentexportzone.ufilter =  '.*';    
 f_componentexportzone.num     = [1 Inf];     % Number of inputs required 
-f_componentexportzone.help    = {'First row: dir',...
-    'Second row: component file name .mat file with each channel use for the topo',...
-    'Third row and following for factor identification for further stat'}; 
+f_componentexportzone.help    = {'First column: dir',...
+    'Second column: component file name .mat file with each channel use for the topo',...
+    'Third column: .zone file to identification the value to export', ...
+    'Fourth column: zone label in the export'}; 
 
 
 f_componentexportch         = cfg_files;
 f_componentexportch.name    = 'Component to export by channel'; 
-f_componentexportch.tag     = 'f_componentexportch';       %file names
+f_componentexportch.tag     = 'f_componentexportch';       %file names:
 f_componentexportch.filter  = {'xlsx','xls','txt'};
 f_componentexportch.ufilter =  '.*';    
 f_componentexportch.num     = [1 Inf];     % Number of inputs required 
-f_componentexportch.help    = {'First row: dir',...
-    'Second row: component file name .mat file with each channel use for the topo',...
-    'Third row channelList',...
-    'Additional rows factor of identification for further stat'}; 
+f_componentexportch.help    = {'First column: dir',...
+    'Second column: component file name .mat file with each channel use for the topo',...
+    'Third column: channelList',...
+    'Additional column: factor of identification for further stat'}; 
 
 c_StatcomponentExport        = cfg_choice;
 c_StatcomponentExport.tag     = 'c_StatcomponentExport';

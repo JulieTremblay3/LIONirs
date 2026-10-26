@@ -14,7 +14,7 @@ function out = nirs_run_writenirshomer(job)
 %NIRS_exportoption,NIRSname
 load(job.NIRSmat{1})     % Matrice NIRS
 %Big loop over all subjects
-
+ 
 for Idx=1:size(job.NIRSmat,1)
     nbch = numel(NIRS.Cf.H.C.n);
     dall = [];
@@ -128,7 +128,7 @@ for Idx=1:size(job.NIRSmat,1)
                   name=  job.c_NIRSname.b_NIRSnamespecific.e_NIRSnamespecific; 
                   outfile= [job.f_writeNIRSdir{1},filesep,name,sprintf('b%02.0f',f),'.nirs'];        
             else
-                 if ~isdir([job.f_writeNIRSdir{1},filesep,name])
+                 if ~isfolder([job.f_writeNIRSdir{1},filesep,name])
                      mkdir([job.f_writeNIRSdir{1},filesep,name]);
                  end 
                 outfile= [job.f_writeNIRSdir{1},filesep,name,filesep,name,'.nirs'];

@@ -21,39 +21,39 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
     if isfield(job.normtype,'b_choicenormstim')
         fprintf('%s\n', ['Define piecewise normalization around trigger: ',num2str(job.normtype.b_choicenormstim.trigger),', interval I include from PreTime= ', job.normtype.b_choicenormstim.pretime ,' sec to PostTime= ', job.normtype.b_choicenormstim.posttime,' sec'])
         if job.normtype.b_choicenormstim.m_choiceNan
-             fprintf('%s\n', ['Exclude artifacts in the Io definition']);
+            fprintf('%s\n', ['Exclude artifacts in the Io definition']);
         else
             fprintf('%s\n', ['Keep artifacts in the Io definition']);
         end
         if job.normtype.b_choicenormstim.m_NormType==0
-            fprintf('%s\n','Io define from trigger-Pretime to trigger onset'); 
+            fprintf('%s\n','Io define from trigger-Pretime to trigger onset');
         elseif job.normtype.b_choicenormstim.m_NormType==1
-             fprintf('%s\n','Io define from trigger-Pretime to trigger+Posttime onset');             
+            fprintf('%s\n','Io define from trigger-Pretime to trigger+Posttime onset');
         end
     end
     if  isfield(job.normtype,'b_choiceglobal')
         fprintf('%s\n', ['Define Io as the whole file average'])
     end
     if isfield(job.normtype,'b_choiceinternan')
-        fprintf('%s\n', 'Define Io as the clean period between 2 artifact identify in yellow')   
+        fprintf('%s\n', 'Define Io as the clean period between 2 artifact identify in yellow')
     end
     ifile = 1; %Utiliser si on remets chaque stim normaliser dans des fichier différent
-    for f=1:numel(rDtp) %Loop over all files of a NIRS.mat 
+    for f=1:numel(rDtp) %Loop over all files of a NIRS.mat
         d = fopen_NIR(rDtp{f},NC);
         dnorm = zeros(size(d));
-        % Check negative value (could be induce by the offset ajuste) 
-        % Add offset to avoid negative log ! 
-       [val,ind] =min(d');
-       idchneg = find(val<0);
-     %  figure;plot( d(idchneg,:)')
-       
-       if ~isempty(idchneg)        
-           valadjust = val(idchneg)';      
-           d(idchneg,:) =  d(idchneg,:) - valadjust*ones(1,size(d,2)) + 0.2; %(not zero add 0.2 usual smaller value NIRx)
-       end
+        % Check negative value (could be induce by the offset ajuste)
+        % Add offset to avoid negative log !
+        [val,ind] =min(d');
+        idchneg = find(val<0);
+        %  figure;plot( d(idchneg,:)')
 
-    % figure;imagesc(dnan)
-    if isfield(job.normtype,'b_choiceglobal'); %Global normalization       
+        if ~isempty(idchneg)
+            valadjust = val(idchneg)';
+            d(idchneg,:) =  d(idchneg,:) - valadjust*ones(1,size(d,2)) + 0.2; %(not zero add 0.2 usual smaller value NIRx)
+        end
+
+        % figure;imagesc(dnan)
+        if isfield(job.normtype,'b_choiceglobal'); %Global normalization
             if job.normtype.b_choiceglobal.m_choiceNan
                 [dir1,fil1,ext]=fileparts(rDtp{f});
                 vmrk_path = fullfile(dir1,[fil1 '.vmrk']);
@@ -68,17 +68,17 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 end
                 %figure;imagesc(dnan);
                 for Idx = 1:NC
-                    meansub = nanmean(dnan(Idx,:)); %Normalize whole blocks 
-                    dnorm(Idx,:) = log10(d(Idx,:)./meansub); %dOD
-                end                
-            else
-                for Idx = 1:NC
-                    meansub = nanmean(d(Idx,:)); %Normalize whole blocks 
+                    meansub = nanmean(dnan(Idx,:)); %Normalize whole blocks
                     dnorm(Idx,:) = log10(d(Idx,:)./meansub); %dOD
                 end
-            end           
+            else
+                for Idx = 1:NC
+                    meansub = nanmean(d(Idx,:)); %Normalize whole blocks
+                    dnorm(Idx,:) = log10(d(Idx,:)./meansub); %dOD
+                end
+            end
         elseif isfield(job.normtype,'b_choiceinternan') %Inter NAN normalization
-             [dir1,fil1,ext]=fileparts(rDtp{f});
+            [dir1,fil1,ext]=fileparts(rDtp{f});
             vmrk_path = fullfile(dir1,[fil1 '.vmrk']);
             [ind_dur_ch] = read_vmrk_find(vmrk_path,'bad_step');
             nch = size(d,1);
@@ -86,14 +86,14 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
             noise = ind_dur_ch2mat(ind_dur_ch, nsample,nch)';
             idnoise = find(double(noise));
             dnan = d;
-            if ~isempty(idnoise) 
+            if ~isempty(idnoise)
                 dnan(idnoise)=nan;
-            end                       
+            end
             for Idx = 1:NC
                 segnanid = isnan(dnan(Idx,1:end-1))-isnan(dnan(Idx,2:end));
                 idstartint = find( segnanid==+1);
-                idstopint = find( segnanid==-1);          
-                if numel(idstartint) == numel( idstopint) %start stop 
+                idstopint = find( segnanid==-1);
+                if numel(idstartint) == numel( idstopint) %start stop
                     segnan = [[1,find( segnanid==+1) ];[find( segnanid==-1),size(d,2)]];
                 elseif numel(idstartint) < numel(idstopint)
                     numel(segnanid);;
@@ -113,7 +113,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
             posttime = round(fs*str2num(job.normtype.b_choicenormstim.posttime));
             NIRS.Dt.fir.aux5bloc = NIRS.Dt.fir.aux5{f};
             aux5 = NIRS.Dt.fir.aux5{f};
-            if trigger == 0 %If 0, consider every trigger 
+            if trigger == 0 %If 0, consider every trigger
                 indstim = aux5(:,2);
                 ind = [indstim; size(d,2)];
                 itrigger = 1;
@@ -126,7 +126,7 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                     ind = [1; idstim; size(d,2)];
                     itrigger =[itrigger, ones(1,numel(idstim)).*trigger(itypestim)];
                 end
-                
+
             end
             if job.normtype.b_choicenormstim.m_choiceNan
                 [dir1,fil1,ext]=fileparts(rDtp{f});
@@ -139,57 +139,80 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
                 dnan = d;
                 if ~isempty(idnoise)
                     dnan(idnoise)=nan;
-                end  
+                end
             else
                 dnan = d;
-            end 
-            
-            for istim = 1:numel(indstim)                
-                
+            end
+
+            for istim = 1:numel(indstim)
+
                 if find((indstim(istim)-pretime) <= 0)
                     disp(['Pretime to short '])
                     istart = 1;
                 else
                     istart = indstim(istim)-pretime;
                 end
-               if find((indstim(istim)+posttime) > size(d,2))
+                if find((indstim(istim)+posttime) > size(d,2))
                     disp(['Prepostime to long '])
                     istop = size(d,2);
-               else
-                   istop = indstim(istim)+posttime;
+                else
+                    istop = indstim(istim)+posttime;
                 end
-                               
-            
-%                 if (max(indstim)+posttime)>size(d,2)
-%                     disp('Warning out of range padding in the last bloc')
-%                     d = [d,fliplr(d)];
-%                 end
-                
+
+
+                %                 if (max(indstim)+posttime)>size(d,2)
+                %                     disp('Warning out of range padding in the last bloc')
+                %                     d = [d,fliplr(d)];
+                %                 end
+
                 %figure;imagesc(dnan)
                 if job.normtype.b_choicenormstim.m_NormType==0      %I/Io Io = pretime
-                   for Idx = 1:NC
+                    for Idx = 1:NC
                         meansub= nanmean(dnan(Idx,istart:indstim(istim)),2);
                         dnorm(Idx, istart:istop) = log10(d(Idx,istart:istop)./meansub);
-                   end
+                    end
                 elseif job.normtype.b_choicenormstim.m_NormType==1  %I/Io Io = pretime to posttime
                     for Idx = 1:NC
                         meansub= nanmean(dnan(Idx,istart:istop),2);
                         dnorm(Idx, istart:istop) = log10(d(Idx,istart:istop)./meansub);
-                    end      
-                end               
-           
+                    end
+                end
+
                 if isfield(job.normtype.b_choicenormstim,'m_BlocNormalizationAddDetrend')
                     if job.normtype.b_choicenormstim.m_BlocNormalizationAddDetrend==1
-                         for Idx = 1:NC
-                             m = (dnorm(Idx,istop)-dnorm(Idx, istart))./ (numel(dnorm(Idx, istart:istop))*1/fs-(1/fs));
+                        for Idx = 1:NC
+                            m = (dnorm(Idx,istop)-dnorm(Idx, istart))./ (numel(dnorm(Idx, istart:istop))*1/fs-(1/fs));
                             trend = m* (1/fs:1/fs:numel(dnorm(Idx, istart:istop))*1/fs)+dnorm(Idx, istart);
-                             dnorm(Idx, istart:istop) =  dnorm(Idx, istart:istop) -trend;
-                         end                       
-                    end                 
+                            dnorm(Idx, istart:istop) =  dnorm(Idx, istart:istop) -trend;
+                        end
+                    end
                 end
-            end          
-         end
-       
+                if isfield(job.normtype.b_choicenormstim,'c_BlocNormalizationSCALPCOUPLING')
+                    if isfield(job.normtype.b_choicenormstim.c_BlocNormalizationSCALPCOUPLING,'e_BlocNormalizationSCALPCOUPLING')
+                        sc_trheshold = job.normtype.b_choicenormstim.c_BlocNormalizationSCALPCOUPLING.e_BlocNormalizationSCALPCOUPLING;
+                        fs = NIRS.Cf.dev.fs;
+                        [b,a] = butter(4, [0.7 2]/(fs/2));
+                        for i=1:size(dnorm,1)
+                            for j = 1:size(dnorm,1)
+
+                                filt_sig1 = filtfilt(b, a, dnorm(i, istart:istop) );
+                                filt_sig2 = filtfilt(b, a, dnorm(j, istart:istop));
+                                c = corrcoef(filt_sig1, filt_sig2);
+                                sci_value(i,j) = c(1, 2);
+                                if i==j
+                                    sci_value(i,j)=0;
+                                end
+                            end
+                        end
+                        isok = reshape(max(sci_value)< sc_trheshold,size(sci_value,1)/2,2);
+                        idbad  = find( [ sum(isok,2)==0;sum(isok,2)==0]);
+                        %               idbad  = find( [ sum(isok,2)~=2;sum(isok,2)~=2]);
+                        disp(['Scalp coupling reject 0.7: ', num2str(idbad(:)'), ' ch set as NAN'])
+                    end 
+                end
+            end
+        end
+
         [dir1,fil1,ext1] = fileparts(rDtp{f});
         infilevmrk = fullfile(dir1,[fil1 '.vmrk']);
         infilevhdr = fullfile(dir1,[fil1 '.vhdr']);
@@ -200,31 +223,31 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
         fwrite_NIR(outfile,dnorm);
         copyfile(infilevmrk,outfilevmrk);
 
-        
-      try 
-                 try
-                    info = read_vhdr_brainvision((fullfile(dir1,[fil1,'.vhdr'])));
-                    ChannelLabels = info.label;
-                catch
-                    ChannelLabels = ConvertmlIDsrs2label(NIRS);
-                end
-                    SamplingInterval =floor(1000000/NIRS.Cf.dev.fs);
-                    nirs_boxy_write_vhdr(outfilevhdr,... %Output file
-                        outfile,... %DataFile
-                        outfilevmrk,... %MarkerFile,...
-                        'nirs_run_normalize',... %Function that created the header
-                        '',... %Channel Resolution
-                        '',... %Channel Units
-                        ChannelLabels,... %names given as a column of cells
-                        SamplingInterval,...
-                        size(d,2)); %SamplingInterval in microseconds
-      catch
-      end
-      
+
+        try
+            try
+                info = read_vhdr_brainvision((fullfile(dir1,[fil1,'.vhdr'])));
+                ChannelLabels = info.label;
+            catch
+                ChannelLabels = ConvertmlIDsrs2label(NIRS);
+            end
+            SamplingInterval =floor(1000000/NIRS.Cf.dev.fs);
+            nirs_boxy_write_vhdr(outfilevhdr,... %Output file
+                outfile,... %DataFile
+                outfilevmrk,... %MarkerFile,...
+                'nirs_run_normalize',... %Function that created the header
+                '',... %Channel Resolution
+                '',... %Channel Units
+                ChannelLabels,... %names given as a column of cells
+                SamplingInterval,...
+                size(d,2)); %SamplingInterval in microseconds
+        catch
+        end
+
         NIRS.Dt.fir.pp(lst+1).p{f,1} = outfile;
         fprintf('%s\n',outfile);
-        
-        
+
+
         if DelPreviousData
             delete(rDtp{f,1});
             delete(infilevmrk);
@@ -241,10 +264,10 @@ for filenb=1:size(job.NIRSmat,1) %Loop over all subjects
         NIRS.Dt.fir.pp(lst+1).pre = 'Normalization';
         NIRS.Dt.fir.pp(lst+1).job = job;
     end
-    
+
     save(fullfile(dir2,'NIRS.mat'),'NIRS');
     job.NIRSmat{1} =fullfile(dir2,'NIRS.mat');
-    
+
 end
 
 

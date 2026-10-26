@@ -1368,7 +1368,7 @@ elseif isfield(job.c_extractcomponent,'b_extractcomponent_glm')
 
                             if find(iselected==Xiselected) %only beta 1
                                 A = nan(size(listHBOch,1),1);
-                                idok = find(listbad(listHBOch));
+                                idok = find(listbad(listHBOch)); 
                                 A(idok,1) = topo(listHBOch(idok));
                                 save(fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat']),'A' ,'zonelist','srsfile','pourcentagenoise', 'pourcentagenoisebychHbO' );
                                 disp(['Create export: load(''', fullfile(pathoutlist,['TopoHbO',PARCOMP(end).label,'event',sprintf('%03.0f',ievent),'.mat'')'])]);

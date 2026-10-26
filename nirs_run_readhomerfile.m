@@ -36,9 +36,15 @@ dirout = job.output_path ;
     else
         mkdir(dirout);
     end
-    
+    if isfield(job.c_createImportProjectSnirf,'b_createProject')
+        type=2 %polaris coordinate 
+        if isfield(job.c_createImportProjectSnirf.b_createProject,'m_createProject_axiscoordinate')
+            
+            type = job.c_createImportProjectSnirf.b_createProject.m_createProject_axiscoordinate
+        end
+    end
 if isfield(job.c_createImportProjectSnirf,'b_createProject')
-    LoadedStruct = Createproject_fromsnirf(job.inputrawhomer{1});
+    LoadedStruct = Createproject_fromsnirf(job.inputrawhomer{1},type);
     SaveStruct = Create_PrjStruct( LoadedStruct );
     [filepath,name,ext] =fileparts(job.inputrawhomer{1});
     save(fullfile(dirout,[name,'.prj']), 'SaveStruct');

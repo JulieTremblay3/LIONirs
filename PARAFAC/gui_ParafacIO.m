@@ -22,7 +22,7 @@ function varargout = gui_ParafacIO(varargin)
 
 % Edit the above text to modify the response to help gui_ParafacIO
 
-% Last Modified by GUIDE v2.5 12-Sep-2019 09:54:21
+% Last Modified by GUIDE v2.5 09-Oct-2026 09:25:24
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -100,7 +100,11 @@ t = PMI{currentsub}.data(cf).HRF.tHRF;
 spar = cat(3,spar(:,1:end/2),spar(:,end/2+1:end));
 spartmp = spar(:,listgood,:);
 PMI{1}.tmpPARAFAC.checksumd = sum(intensnorm(:)); 
-PMI{1}.tmpPARAFAC.selected =1;
+if get(handles.radioparafac_selectall,'value')
+    PMI{1}.tmpPARAFAC.selected =1:nbcomp;
+else
+    PMI{1}.tmpPARAFAC.selected =1;
+end
 PMI{currentsub}.tmpPARAFAC.spar = spartmp;                    %Data initial
 PMI{currentsub}.tmpPARAFAC.listgood = listgood ; 
 PMI{currentsub}.tmpPARAFAC.indt = [tstart(end),tstop(end)];%Time indice
@@ -265,7 +269,7 @@ PMI = get(guiHOMER,'UserData');
     t = PMI{currentsub}.data(cf).HRF.tHRF(PMI{currentsub}.tmpPARAFAC.indt(1):PMI{currentsub}.tmpPARAFAC.indt(2));
 
     for i=1:Nc
-         if PMI{1}.tmpPARAFAC.selected==i
+         if sum(PMI{1}.tmpPARAFAC.selected==i)
              
             hline = plot(t, FacTime(:,i),'color',colorlist(i,:),'linewidth',4 );
          else
@@ -389,3 +393,29 @@ function figure1_ResizeFcn(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in radioparafac_selectall.
+function radioparafac_selectall_Callback(hObject, eventdata, handles)
+% hObject    handle to radioparafac_selectall (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radioparafac_selectall
+
+guiHOMER = getappdata(0,'gui_SPMnirsHSJ');
+currentsub=1;
+PMI = get(guiHOMER,'UserData');
+if get(handles.radioparafac_selectall,'value')
+    PMI{1}.tmpPARAFAC.selected =1:str2num(get(handles.edit_nbComponent,'string'));
+else
+    PMI{1}.tmpPARAFAC.selected = get(handles.popupmenu_Factor,'value');
+end
+set(guiHOMER,'UserData',PMI);
+resetview(handles,0)
+
+% --- Executes during object creation, after setting all properties.
+function figure1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called

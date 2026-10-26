@@ -285,7 +285,7 @@ elseif  job.m_nodeunit==2 %use by zone
     end
 
 elseif  job.m_nodeunit==3 %use by zone
-
+ %NOT READY YET
 1
 end
 
@@ -589,7 +589,7 @@ elseif isfield(job.c_statmatrix,'b_UnpairedTtest')
             %  [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, 'distance',clustercritical, statobs, statrand );
             save(fullfile(dir1,'Unpairedttest_stat.mat'),'stat')
             disp(['Save cluster', fullfile(dir1,'Unpairedttest_stat.mat') ])
-
+ 
             % %View link for neighbor debug
             % if 0
             %     for ilink=1:300
@@ -1171,7 +1171,7 @@ elseif isfield(job.c_statmatrix,'b_GLM_Mat')
                     %R2 statistic, the F-statistic and its p-value, and an estimate of the error variance.
                     try
                         [b,bint,r,rint,stats] = regress(y,X);
-                        [bp,bintp,rp,rintp,statsp] = regress(y,X(:,[1,3:end]));
+                      %  [bp,bintp,rp,rintp,statsp] = regress(y,X(:,[1,3:end]));
                     catch
                         b(:) = nan;
                         stats(:) =  nan;
@@ -1817,7 +1817,7 @@ elseif isfield(job.c_statmatrix,'b_LM_Mat')
     %
 
 
-elseif isfield(job.c_statmatrix,'b_LME_Mat')
+elseif isfield(job.c_statmatrix,'b_LME_Mat') 
     disp('Warning function LME in developpement');
     dir1 = job.e_statmatrixPath{1};
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
@@ -1832,11 +1832,11 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
             filename = fullfile(dir1,file);
             eval(['load(''', filename,''')']);
             halfMATtemp = meancorr(idhalf);
-            eval(['TCOV',num2str(icov),' = halfMATtemp'])
+            eval(['TCOV',num2str(icov),' = halfMATtemp']);
         end
         disp('load precomputed tval')
     catch
-
+ 
 
 
         fprintf('%s',['RUN LME : ', LMEformula, ' link:'])
@@ -1924,7 +1924,7 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
             meancorr = zeros(size(MATall,2),size(MATall,2));
             eval(['tmp =','TCOV',num2str(icov),';']);
             eval(['matsig =','pCOV',num2str(icov),';']);
-            tmp=  tmp.* double(matsig<alpha_threshold);
+            tmp=  tmp(:).* double(matsig(:)<alpha_threshold);
             meancorr = halfmat2mat(tmp,idhalf, size(MATall,2));
             disp(['Save file: ', fullfile(dir1,[file])]);
             save(fullfile(dir1,[file]),'ZoneList','meancorr');
@@ -1939,7 +1939,7 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
 
             eval(['tmp =','ECOV',num2str(icov),';']);
             eval(['matsig =','pCOV',num2str(icov),';']);
-            tmp =  tmp.* double(matsig<alpha_threshold);
+            tmp =  tmp(:).* double(matsig(:)<alpha_threshold);
             meancorr = halfmat2mat(tmp,idhalf, size(MATall,2));
             disp(['Save file: ', fullfile(dir1,[file])]);
             save(fullfile(dir1,[file]),'ZoneList','meancorr');
@@ -1981,7 +1981,6 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
 
 
         try
-
             xlswrite(fullfile(dir1,['lme', 'model', '.xlsx']),infonew);
             disp(['Result .xlsx file saved ' fullfile(dir1,['lme', LMEformula, '.xlsx'])]);
         catch
@@ -1999,7 +1998,7 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
                 'were open successfully => delete the file if you wish to compute it again '])
         catch
             tic
-            for ilink =933:1500 %1:size(halfMAT,2) %PERMUTATION TEST 216
+            for ilink =1:size(halfMAT,2) %PERMUTATION TEST 216
                 for iperm=1:nperm
                     fprintf('%s ',num2str(ilink));
                     if mod(ilink,30)==0
@@ -2049,9 +2048,13 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
                 minnbchan = job.c_statmatrix.b_LME_Mat.c_statpermutation.b_permutation.c_statMultipleComparaisonTesting.b_MCT_ClusterBased.e_minnbchan;
                 disp(['critical for clustering p=', num2str(alpha_threshold),' T=',num2str(clustercritical)])
 
-                [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, neighbourdist,clustercritical, statobs(:), statrand,  minnbchan );
-                %  [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, 'distance',clustercritical, statobs, statrand );
-                save(fullfile(dir1,'FiedTrip_LMECluster_stat.mat'),'stat')
+                [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, neighbourdist,clustercritical, statobs(:), statrand,  minnbchan);
+               %
+                % onlymask =  statobs.*halfMASK
+                %   [stat, matneig] = FindClusterBasedPermutationInMatrix(chanpos, '10',clustercritical, onlymask, statrand,  minnbchan );
+                
+                
+                % save(fullfile(dir1,'FiedTrip_LMECluster_stat.mat'),'stat')
                 disp(['Save fieldtrip cluster stat ', fullfile(dir1,'FiedTrip_LMECluster_stat.mat') ])
 
                 %                  figure

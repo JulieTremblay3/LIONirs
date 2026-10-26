@@ -2363,6 +2363,7 @@ end
  
 linkijcluster = [];
 linkROIall = [];
+matmask = zeros(size(DATA{1}.MAT));
 linkobj = get(handles.axes_viewlink,'children');
 for iobj = 1:numel(linkobj) %RETROUVER JUSTE LES LIEN nommées (i,j)
     linkselected = get(linkobj(iobj),'DisplayName');
@@ -2371,6 +2372,7 @@ for iobj = 1:numel(linkobj) %RETROUVER JUSTE LES LIEN nommées (i,j)
 
            [tok,rem] = strtok(linkselected,'=');
             [linkij,rem] = strtok(rem,'=');
+            eval(['matmask',linkij,'=1;']);          
             [linkname,rem] = strtok(rem,'=');
             [linkval,rem] = strtok(rem,' ');
              linkROI = rem(2:end);
@@ -2383,9 +2385,12 @@ for iobj = 1:numel(linkobj) %RETROUVER JUSTE LES LIEN nommées (i,j)
       end
   end
 end
-
-
-% 
+ZoneList = DATA{1}.ZoneList;
+meancorr = matmask
+[file,location] = uiputfile('.mat','SaveMASK','Cluster')
+save([location,file],'meancorr','ZoneList')
+[~,namecluster,~] = fileparts([location,file])
+%% ~~
 % linkijcluster = [  14    14
 %     12    14
 %     11    14
@@ -2412,10 +2417,10 @@ end
 %     12     1];
 
 
-allG1 = [];
+allG1avg = [];
 
 [filepath,name,ext] =fileparts(get(handles.edit_subjetxls,'string'));
-copytxt = sprintf('%s\n', ['Cluster']);
+copytxt = sprintf('%s\n', [namecluster]);
 for   idsubjet   = 1:numel(DATA)
         try
         for ilink = 1:size(linkijcluster,1 )       
@@ -2428,16 +2433,19 @@ for   idsubjet   = 1:numel(DATA)
                % disp('Verify if the fisher transform is already done to your data before to perform statistic to normalized the distribution')
             end
         valG1 = [valG1,nanmean(new)];
-      %  allG1 = [allG1;new]
+        allG1avg = [allG1avg;nanmean(new)]
         copytxt = [copytxt,sprintf('%d\n',nanmean(new))];
         catch
           copytxt= [copytxt,sprintf('%s\n','Nan')];
         end
         
 end
+eval([namecluster '=allG1avg']);
+eval(['T = table(',namecluster,')']);
+writetable(T,fullfile(location,[namecluster,'.csv']));
 
-%writetable(T,'myData.xls')
-disp(valG1);
+
+disp(valG1); 
 disp('Cluster value ready to copy')
 clipboard('copy', copytxt)
 

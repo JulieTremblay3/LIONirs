@@ -275,8 +275,10 @@ if ~isdir([label.pathout])
                         end
                         if label.vcolortype == 0;                            
                             saveas(hfiguredisplay,[pathavi,labelangle,filesep,'HbO',filesep,labelangle,file, 'HbOTime', labeltime{itime},'(s)','.tif'],'tif');
+                            disp(['Save:',[pathavi,labelangle,filesep,'HbO',filesep,labelangle,file, 'HbOTime', labeltime{itime},'(s)','.tif'] ]);
                         else
                             saveas(hfiguredisplay,[pathavi,labelangle,filesep,labelangle,file, 'Time', labeltime{itime},'(s)','.tif'],'tif');
+                             disp(['Save:',[pathavi,labelangle,filesep,labelangle,file, 'Time', labeltime{itime},'(s)','.tif'] ]);
                         end
                         %Affichage retour à la vue film avec toute les images;
                         set(haxes(i),'position',oldpos)
@@ -358,6 +360,7 @@ if ~isdir([label.pathout])
             end
                 %%%%%%%%%Fin HbT%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                
                 %Début HbR
+                
                 if label.dataHemo==1 | label.dataHemo==3
                 if label.vcolortype == 0
                       if label.projectiontype==0

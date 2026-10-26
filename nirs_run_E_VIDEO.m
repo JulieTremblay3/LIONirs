@@ -259,6 +259,114 @@ if isfield(job.typedata,'b_HMRdata')
 %     end
 end
 
+if isfield(job.typedata,'b_NIRSdatatopoch') %NIRS.mat FILE !!!
+    if isfield(job.typedata.b_NIRSdatatopoch,'NIRSmat')
+        if m_prjfile_mode==0 %Paired
+            if numel(job.b_option.prjfile)~=numel(job.typedata.b_NIRSdatatopoch.NIRSmat)
+                msgbox('Please enter same number of .prj than .NIRS data file they should be corresponding if you used Option prj : paired mode');
+                return
+            end        
+        end
+
+        
+        for ifile=1:numel(job.typedata.b_NIRSdatatopoch.NIRSmat)
+            global currentsub;
+            currentsub = 1;
+            PMI{currentsub}.currentFile = 1;
+            cf = 1;
+            if m_prjfile_mode==0 %Paired
+                PMI{1}.prj_name = job.b_option.prjfile{ifile};
+            elseif m_prjfile_mode==1
+                PMI{1}.prj_name = job.b_option.prjfile{1};
+            end
+            [p,file_prj_name,ext]=fileparts(PMI{1}.prj_name);
+
+            load(job.typedata.b_NIRSdatatopoch.NIRSmat{ifile});
+            [~,file,~] = fileparts(job.typedata.b_NIRSdatatopoch.NIRSmat{ifile})
+             
+               
+       PMI{currentsub}.data(cf).MeasList = [NIRS.Cf.H.C.id(2:3,:)',...
+                ones(size(NIRS.Cf.H.C.id,2),1),...
+                [ones(size(NIRS.Cf.H.C.id,2)/2,1);ones(size(NIRS.Cf.H.C.id,2)./2,1).*2]];
+            PMI{currentsub}.color = lines(size(NIRS.Cf.H.C.id,2));
+            PMI{currentsub}.plotLst = [1];
+            PMI{currentsub}.plot = [1,1];
+            PMI{currentsub}.data(cf).MeasListAct = ones(size(PMI{currentsub}.data(cf).MeasList,1),1); %NIRS.Dt.fir.pp(imodule).chok;
+            %PRJ
+            hfig = figure;
+            set(hfig,'visible','off')
+            setappdata(0,'gui_SPMvideo',hfig);
+            guiHOMER = getappdata(0,'gui_SPMvideo');
+            set(guiHOMER,'UserData',PMI); %PMI de base
+            
+            %Ouverture de IO_Helmet pour affichage
+            handles = [];
+            option.conc = 1;
+            option.scalemin = job.b_option.v_cmin;
+            option.scalemax = job.b_option.v_cmax;
+            option.scaletr  = job.b_option.v_ctr;
+            option.skintype = job.b_option.v_skin;
+            option.cover = job.b_option.v_showcover;
+            step_time = job.b_option.v_step;
+            option.video = 1; % la fonction qui appelle le casque est le mode video
+
+
+              for i=1:numel(job.typedata.b_NIRSdatatopoch.f_NIRSdatatopoch)
+                load(job.typedata.b_NIRSdatatopoch.f_NIRSdatatopoch{i})
+                [filepath,file,ext] = fileparts(job.typedata.b_NIRSdatatopoch.f_NIRSdatatopoch{i})
+                d1(i,:,1) = A; %Need HbO
+                d1(i,:,2) = 0; %Need HbR
+                d1(i,:,3) = 0; %Need HbT
+                label.labeltime{i} = file ; 
+              end
+
+            hfighelmet=IO_HelmetMTG_Display(handles,option);
+            set(hfighelmet,'visible','off')
+
+
+
+
+            
+            
+            
+            [pathavi, name, ext] = fileparts(NIRS.Dt.fir.pp(end).p{1});
+            [tok,rem]=strtok(job.b_option.v_outpath,':');
+            if isempty(rem) %si le nom du repertoire est juste un nom à ajouter dans le fichier de donné
+                label.pathout = [pathavi,filesep,job.b_option.v_outpath,filesep];
+            else %si le nom du repertoire est un répertoire complet
+                try
+                    if ~isdir(job.b_option.v_outpath)
+                        mkdir(job.b_option.v_outpath)
+                    end
+                    label.pathout = [job.b_option.v_outpath,filesep];
+                catch
+                    msgbox(['The name of the output directory : ',job.b_option.v_outpath,' is invalid'])
+                end
+            end
+            
+          
+                 
+            label.file = file;
+            
+            label.skintype = job.b_option.v_skin;  %0 = SKIN 1=cortex
+            label.dataHemo =1 ; %only hbo
+            angle = job.b_option.v_view;
+            toponew = plot_video_HSJHelmet(angle,d1,label,PMI);
+            TOPOmat  = [TOPOmat,toponew];
+            for i=1:numel(toponew)
+                fprintf('%s\n',toponew{i});
+            end
+            fprintf('%s\n',file_prj_name);
+            
+      
+            close(hfig)   
+            close(hfighelmet)
+
+       
+        end %FIN  liste de FICHIER NIRS.mat
+    end
+end %Fin NIRS.mat (epoch average data)
+
 if isfield(job.typedata,'b_NIRSdata') %NIRS.mat FILE !!!
     if isfield(job.typedata.b_NIRSdata,'NIRSmat')
         if m_prjfile_mode==0 %Paired
@@ -290,6 +398,8 @@ if isfield(job.typedata,'b_NIRSdata') %NIRS.mat FILE !!!
                     break
                 end
             end
+
+
             PMI{currentsub}.data(cf).MeasList = [NIRS.Cf.H.C.id(2:3,:)',...
                 ones(size(NIRS.Cf.H.C.id,2),1),...
                 [ones(size(NIRS.Cf.H.C.id,2)/2,1);ones(size(NIRS.Cf.H.C.id,2)./2,1).*2]];
@@ -430,6 +540,8 @@ if isfield(job.typedata,'b_NIRSdata') %NIRS.mat FILE !!!
             label.labeltime = labeltime ;
             label.skintype = job.b_option.v_skin;  %0 = SKIN 1=cortex
             angle = job.b_option.v_view;
+            % d1 = load('D:\Projet_V21\AnalyseFE\NBACK\GLM_NBACK\AVGNback\Mean001.mat')
+            % d1=d1.A;
             toponew = plot_video_HSJHelmet(angle,d1,label,PMI);
             TOPOmat  = [TOPOmat,toponew];
             for i=1:numel(toponew)
@@ -474,6 +586,13 @@ if isfield(job.typedata,'b_NIRSdata') %NIRS.mat FILE !!!
         end %FIN  liste de FICHIER NIRS.mat
     end
 end %Fin NIRS.mat (epoch average data)
+
+
+
+
+
+
+
 if isfield(job.typedata,'b_SPMdata') %SPM analysis NIRS.mat FILE
     if isfield(job.typedata.b_SPMdata,'NIRSmat')
         if m_prjfile_mode==0 %Paired

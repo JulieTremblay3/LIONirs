@@ -1,4 +1,4 @@
-function [stat neiglinkmat]= FindClusterBasedPermutationInMatrix(chanpos,neighbourdist,clustercritval, statobs, statrand, minnbchan  )
+function [stat neiglinkmat]= FindClusterBasedPermutationInMatrix(chanpos,neighbourdist,clustercritval, statobs, statrand, minnbchan,halfMASK )
 % Description: FindClusterBasedPermutationInMatrix
 % define the neighboring rules to form a cluster in the case of a matrix 
 % use clusterstat function to correct from multiple comparaison in the
@@ -23,6 +23,7 @@ end
 if strcmp(neighbourdist,'all')
    neiglinkmat(:,:)=ones(numel(statobs));  
    disp(['Neighborgs use all link'])
+   
 elseif strcmp(neighbourdist,'link')
     id = 1;
     nele = numel(listelectrode);
@@ -264,10 +265,7 @@ idhalf = find(matid);
     for  ilink=1:length(neiglink)
         %commun link
         idfind = find([(idele1(ilink)==idele1)|(idele1(ilink)==idele2) ] & [(idele2(ilink)==idele1)|(idele2(ilink)==idele2) ] );
-       if ilink==3000
-       1
-       end
-         neiglinkmat( ilink,idfind)= true;
+        neiglinkmat( ilink,idfind)= true;
           for ineigh2 = 1:numel(neiglink(ilink).neighblabel2)
               if idele1(ilink)~=neiglink(ilink).ideleneigh2(ineigh2)
                idfind = find([(idele1(ilink)==idele1)|(idele1(ilink)==idele2) ] & [(neiglink(ilink).ideleneigh2(ineigh2)==idele1)|(neiglink(ilink).ideleneigh2(ineigh2)==idele2) ]); 
@@ -318,7 +316,11 @@ cfg.clusteralpha     = clustercritval;
 cfg.clustercritval   = clustercritval;
 cfg.minnbchan        = str2num(minnbchan);      %nb element significatif conjoints pour le cluster + haut car beaucoup de canaux
 try
+     
 [stat, cfg] = clusterstat(cfg,statrand, statobs); 
+
+
+
 %figure;hist(statrand(77,:))
 catch 
     stat = []; 
@@ -759,7 +761,7 @@ for i = 1:Nrand
       posclusrnd = posclusrnd(cfg.inside);
     else
       posclusrnd = posclusrnd(:);
-    end
+    end  
     Nrndpos = max(posclusrnd(:));  % number of clusters exceeding the threshold
     stat    = zeros(1,Nrndpos); % this will hold the statistic for each cluster
     % fprintf('found %d positive clusters in this randomization\n', Nrndpos);

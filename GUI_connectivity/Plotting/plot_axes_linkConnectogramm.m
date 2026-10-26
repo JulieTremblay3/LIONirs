@@ -82,7 +82,6 @@ if get(handles.radio_fisher,'value');
     MAT =1/2*(log((1+MAT )./(1-MAT )));
 end
 
-
 List=   strvcat(DATA{id}.ZoneList);
 ML =  DATA{id}.zone.ml;
 idzone = [];
@@ -193,7 +192,7 @@ if get(handles.popup_ConnectogramColor,'value')==1 %jet colormap list only no ma
     cstep = (cmax-cmin)/100;
     cf=cmin:cstep:cmax-cstep;
     for i=1:size(MAT,1)
-        for j = 1:size(MAT,2)
+        for j = 1:size(MAT,2) 
         colorMatrix(i,j) = sum(cf<MAT(i,j));
         end
     end
@@ -236,7 +235,7 @@ elseif get(handles.popup_ConnectogramColor,'value')==2 %jet colormap mask/color 
     end
      if get(handles.radio_negativemap,'value')
         colorMap = flipud(jet(100));
-    else
+     else
         colorMap = jet(100);
      end
     else
@@ -426,6 +425,7 @@ x(id0)=0;
 thresh = str2num(get(handles.edit_threshold,'string'));
 x(x < thresh) = 0;
 x(x >=  thresh) = 1;
+
 
 % %myconnectogram(x,myLabel,colorMatrix(idlist,idlist),colorMap,idlist);
 %  myconnectogram(adjacencyMatrix,label,colorMatrix,colorMap,idlist)

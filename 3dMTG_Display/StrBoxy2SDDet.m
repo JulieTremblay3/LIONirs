@@ -71,6 +71,88 @@ elseif strcmp(str, 'D34')
     num=34; 
 elseif strcmp(str, 'D35')
     num=35; 
+elseif strcmp(str, 'D36')
+    num=36; 
+elseif strcmp(str, 'D37')
+    num=37; 
+elseif strcmp(str, 'D38')
+    num=38; 
+elseif strcmp(str, 'D39')
+    num=39
+elseif strcmp(str, 'D40')
+    num=40; 
+elseif strcmp(str, 'D41')
+    num=41; 
+elseif strcmp(str, 'D42')
+    num=42; 
+elseif strcmp(str, 'D43')
+    num=43; 
+elseif strcmp(str, 'D44')
+    num=44; 
+elseif strcmp(str, 'D45')
+    num=45; 
+elseif strcmp(str, 'D46')
+    num=46; 
+elseif strcmp(str, 'D47')
+    num=47; 
+elseif strcmp(str, 'D48')
+    num=48; 
+elseif strcmp(str, 'D49')
+    num=49; 
+elseif strcmp(str, 'D50')
+    num=50; 
+elseif strcmp(str, 'D51')
+    num=51; 
+elseif strcmp(str, 'D52')
+    num=52; 
+elseif strcmp(str, 'D53')
+    num=53; 
+elseif strcmp(str, 'D54')
+    num=54;
+elseif strcmp(str, 'D55');
+    num = 55;
+elseif strcmp(str, 'D56');
+    num = 56;
+elseif strcmp(str, 'D57');
+    num = 57;
+elseif strcmp(str, 'D58');
+    num = 58;
+elseif strcmp(str, 'D59');
+    num = 59;
+elseif strcmp(str, 'D60');
+    num = 60;
+elseif strcmp(str, 'D61');
+   num = 61;
+elseif strcmp(str, 'D62');
+    num = 62;
+elseif strcmp(str, 'D63');
+    num = 63;
+elseif strcmp(str, 'D64');
+    num = 64;
+elseif strcmp(str, 'D65');
+    num = 65;
+elseif strcmp(str, 'D66');
+    num = 66;
+elseif strcmp(str, 'D67');
+    num = 67;
+elseif strcmp(str, 'D68');
+    num = 68;
+elseif strcmp(str, 'D69')
+    num = 69;
+elseif strcmp(str, 'D70')
+    num=70;
+elseif strcmp(str, 'D71')
+    num=71;
+elseif strcmp(str, 'D72')
+    num=72;   
+elseif strcmp(str, 'D73')
+    num=73;   
+elseif strcmp(str, 'D74') 
+    num=74; 
+elseif strcmp(str, 'D75') 
+    num=75;    
+elseif strcmp(str, 'D76') 
+    num=76;    
 else    
     num = 0; 
 end

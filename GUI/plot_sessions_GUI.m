@@ -5427,7 +5427,10 @@ if strcmp(listmethod{idval},'Parafac')  %substractPARAFAC
     B = PMI{currentsub}.tmpPARAFAC.Factors{2};
     C = PMI{currentsub}.tmpPARAFAC.Factors{3};
     listgood = PMI{currentsub}.tmpPARAFAC.listgood;
-    ComponentToKeep = PMI{1}.tmpPARAFAC.selected;
+    ComponentToKeep = PMI{1}.tmpPARAFAC.selected; 
+    disp(['Remove component', num2str(ComponentToKeep)])
+    %option apply all component [1:]
+   % ComponentToKeep = 1:size(A,2)
     PMI{1}.tmpPARAFAC.dotted(ComponentToKeep) = 1;
     Ac = A(:,ComponentToKeep); Bc = B(:,ComponentToKeep); Cc = C(:,ComponentToKeep);
     % figure;plot(reshape(Xm,[numel(indt),size(d,2)]))
