@@ -1823,6 +1823,9 @@ elseif isfield(job.c_statmatrix,'b_LME_Mat')
     infonew = [{'Dir'},{'File'},{'Zone'},{'GR'}];
     datatable= readtable(xlslistfile);
     halfMAT = MATall(:,idhalf);
+    % load('D:\NIRSport_Analysed\Synchro\FE_enfant\Matrices\Elisa_sep2026\C10_FrontalRESPTIME.mat')
+    % MASKCLUSTER = meancorr; 
+
     LMEformula = job.c_statmatrix.b_LME_Mat.b_LME_formula;
     try %load precomputed to speed up not keep as standard way of working
         datatable.MAT= halfMAT(:,1);
